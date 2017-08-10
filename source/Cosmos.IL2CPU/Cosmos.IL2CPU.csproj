@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.5</TargetFramework>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Cosmos.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>IL2CPU.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
