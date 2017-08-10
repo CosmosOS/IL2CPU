@@ -1,0 +1,7 @@
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\bin\Debug\netstandard1.5\Cosmos.IL2CPU.API.deps.json
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\bin\Debug\netstandard1.5\Cosmos.IL2CPU.API.dll
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\bin\Debug\netstandard1.5\Cosmos.IL2CPU.API.pdb
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\obj\Debug\netstandard1.5\Cosmos.IL2CPU.API.AssemblyInfo.cs
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\obj\Debug\netstandard1.5\Cosmos.IL2CPU.API.dll
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\obj\Debug\netstandard1.5\Cosmos.IL2CPU.API.pdb
+C:\source\Cosmos\Cosmos\source\Cosmos.IL2CPU.API\obj\Debug\netstandard1.5\Cosmos.IL2CPU.API.csprojResolveAssemblyReference.cache
