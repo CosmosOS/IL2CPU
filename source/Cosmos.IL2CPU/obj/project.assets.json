@@ -6071,23 +6071,23 @@
     },
     "Cosmos.Build.Common/1.0.0": {
       "type": "project",
-      "path": "../Cosmos.Build.Common/Cosmos.Build.Common.csproj",
-      "msbuildProject": "../Cosmos.Build.Common/Cosmos.Build.Common.csproj"
+      "path": "../../../Cosmos/source/Cosmos.Build.Common/Cosmos.Build.Common.csproj",
+      "msbuildProject": "../../../Cosmos/source/Cosmos.Build.Common/Cosmos.Build.Common.csproj"
     },
     "Cosmos.Core.DebugStub/1.0.0": {
       "type": "project",
-      "path": "../Cosmos.Core.DebugStub/Cosmos.Core.DebugStub.csproj",
-      "msbuildProject": "../Cosmos.Core.DebugStub/Cosmos.Core.DebugStub.csproj"
+      "path": "../../../Cosmos/source/Cosmos.Core.DebugStub/Cosmos.Core.DebugStub.csproj",
+      "msbuildProject": "../../../Cosmos/source/Cosmos.Core.DebugStub/Cosmos.Core.DebugStub.csproj"
     },
     "Cosmos.Debug.Kernel/1.0.0": {
       "type": "project",
-      "path": "../Cosmos.Debug.Kernel/Cosmos.Debug.Kernel.csproj",
-      "msbuildProject": "../Cosmos.Debug.Kernel/Cosmos.Debug.Kernel.csproj"
+      "path": "../../../Cosmos/source/Cosmos.Debug.Kernel/Cosmos.Debug.Kernel.csproj",
+      "msbuildProject": "../../../Cosmos/source/Cosmos.Debug.Kernel/Cosmos.Debug.Kernel.csproj"
     },
     "Cosmos.Debug.Symbols/1.0.0": {
       "type": "project",
-      "path": "../Cosmos.Debug.Symbols/Cosmos.Debug.Symbols.csproj",
-      "msbuildProject": "../Cosmos.Debug.Symbols/Cosmos.Debug.Symbols.csproj"
+      "path": "../../../Cosmos/source/Cosmos.Debug.Symbols/Cosmos.Debug.Symbols.csproj",
+      "msbuildProject": "../../../Cosmos/source/Cosmos.Debug.Symbols/Cosmos.Debug.Symbols.csproj"
     },
     "Cosmos.IL2CPU.API/1.0.0": {
       "type": "project",
@@ -6120,10 +6120,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU\\Cosmos.IL2CPU.csproj",
+      "projectUniqueName": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU\\Cosmos.IL2CPU.csproj",
       "projectName": "Cosmos.IL2CPU",
-      "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU\\Cosmos.IL2CPU.csproj",
-      "outputPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU\\obj\\",
+      "projectPath": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU\\Cosmos.IL2CPU.csproj",
+      "outputPath": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netstandard1.5"
@@ -6131,14 +6131,14 @@
       "frameworks": {
         "netstandard1.5": {
           "projectReferences": {
-            "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Kernel\\Cosmos.Debug.Kernel.csproj": {
-              "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Kernel\\Cosmos.Debug.Kernel.csproj"
-            },
             "C:\\source\\Cosmos\\XSharp\\source\\Cosmos.Assembler\\Cosmos.Assembler.csproj": {
               "projectPath": "C:\\source\\Cosmos\\XSharp\\source\\Cosmos.Assembler\\Cosmos.Assembler.csproj"
             },
-            "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj": {
-              "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj"
+            "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj": {
+              "projectPath": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj"
+            },
+            "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Symbols\\Cosmos.Debug.Symbols.csproj": {
+              "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Symbols\\Cosmos.Debug.Symbols.csproj"
             },
             "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Core.DebugStub\\Cosmos.Core.DebugStub.csproj": {
               "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Core.DebugStub\\Cosmos.Core.DebugStub.csproj"
@@ -6146,11 +6146,11 @@
             "C:\\source\\Cosmos\\XSharp\\source\\XSharp.Common\\XSharp.Common.csproj": {
               "projectPath": "C:\\source\\Cosmos\\XSharp\\source\\XSharp.Common\\XSharp.Common.csproj"
             },
-            "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Symbols\\Cosmos.Debug.Symbols.csproj": {
-              "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Symbols\\Cosmos.Debug.Symbols.csproj"
-            },
             "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Build.Common\\Cosmos.Build.Common.csproj": {
               "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Build.Common\\Cosmos.Build.Common.csproj"
+            },
+            "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Kernel\\Cosmos.Debug.Kernel.csproj": {
+              "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.Debug.Kernel\\Cosmos.Debug.Kernel.csproj"
             }
           }
         }

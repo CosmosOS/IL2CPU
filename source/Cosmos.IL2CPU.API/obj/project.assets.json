@@ -3708,10 +3708,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj",
+      "projectUniqueName": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj",
       "projectName": "Cosmos.IL2CPU.API",
-      "projectPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj",
-      "outputPath": "C:\\source\\Cosmos\\Cosmos\\source\\Cosmos.IL2CPU.API\\obj\\",
+      "projectPath": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU.API\\Cosmos.IL2CPU.API.csproj",
+      "outputPath": "C:\\source\\Cosmos\\IL2CPU\\source\\Cosmos.IL2CPU.API\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netstandard1.5"

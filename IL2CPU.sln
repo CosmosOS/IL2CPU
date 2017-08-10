@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Compiler", "Compiler", "{C2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Assembler", "..\XSharp\source\Cosmos.Assembler\Cosmos.Assembler.csproj", "{0CDB3F6E-7971-426B-81F8-38B966A54C2B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.IL2CPU", "..\Cosmos\source\Cosmos.IL2CPU\Cosmos.IL2CPU.csproj", "{4F903492-CCA6-4FD9-A1B6-5E4CC0CE7767}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.IL2CPU", "source\Cosmos.IL2CPU\Cosmos.IL2CPU.csproj", "{4F903492-CCA6-4FD9-A1B6-5E4CC0CE7767}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.IL2CPU.API", "..\Cosmos\source\Cosmos.IL2CPU.API\Cosmos.IL2CPU.API.csproj", "{34AEEB7C-FD5D-4B15-A830-B429681844BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.IL2CPU.API", "source\Cosmos.IL2CPU.API\Cosmos.IL2CPU.API.csproj", "{34AEEB7C-FD5D-4B15-A830-B429681844BD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XSharp", "XSharp", "{E9CD521E-C386-466D-B5F7-A5EB19A61625}"
 EndProject
@@ -31,8 +31,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Core.DebugStub", "..\Cosmos\source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj", "{D8E80776-2800-469B-AE31-D1C016D5E8D3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Debug.Kernel", "..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj", "{EDE13333-B2E6-4E04-B995-209B8BDFA9D4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheRingMaster", "..\Cosmos\source\TheRingMaster\TheRingMaster.csproj", "{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,14 +120,6 @@ Global
 		{EDE13333-B2E6-4E04-B995-209B8BDFA9D4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EDE13333-B2E6-4E04-B995-209B8BDFA9D4}.Release|x86.ActiveCfg = Release|Any CPU
 		{EDE13333-B2E6-4E04-B995-209B8BDFA9D4}.Release|x86.Build.0 = Release|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Debug|x86.Build.0 = Debug|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Release|x86.ActiveCfg = Release|Any CPU
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,7 +135,6 @@ Global
 		{8037EF30-3CC2-4555-ACF0-8392250FAE2C} = {46490D36-261E-4D53-85BA-D4F71F09373C}
 		{D8E80776-2800-469B-AE31-D1C016D5E8D3} = {D232F471-5A59-438F-87EA-E1809E3BEDB4}
 		{EDE13333-B2E6-4E04-B995-209B8BDFA9D4} = {46490D36-261E-4D53-85BA-D4F71F09373C}
-		{CCC115FA-1E7E-4013-95C2-B43FCCF27DFF} = {C286932C-3F6D-47F0-BEEF-26843D1BB11B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B900D20-A763-44BD-BCD1-A61B32E80D94}
