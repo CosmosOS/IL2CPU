@@ -3,8 +3,8 @@ using CPUx86 = XSharp.Assembler.x86;
 using XSharp.Assembler.x86;
 using XSharp.Assembler;
 using XSharp.Assembler.x86.SSE;
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 
 /* Add.Ovf is signed integer addition with check for overflow */
 namespace Cosmos.IL2CPU.X86.IL

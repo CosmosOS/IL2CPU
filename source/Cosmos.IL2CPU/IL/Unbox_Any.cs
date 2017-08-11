@@ -3,7 +3,7 @@ using System.Reflection;
 using CPU = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
 using Cosmos.IL2CPU.API;
-using XSharp.Common;
+using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

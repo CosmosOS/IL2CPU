@@ -18,8 +18,8 @@ using Cosmos.IL2CPU.API.Attribs;
 using Cosmos.IL2CPU.X86.IL;
 using Cosmos.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 using Call = XSharp.Assembler.x86.Call;
 using Label = XSharp.Assembler.Label;
 

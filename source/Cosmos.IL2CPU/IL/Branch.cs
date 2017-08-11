@@ -4,7 +4,7 @@ using CPU = XSharp.Assembler.x86;
 using XSharp.Assembler.x86;
 
 using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Common;
+using XSharp;
 using Label = XSharp.Assembler.Label;
 
 namespace Cosmos.IL2CPU.X86.IL

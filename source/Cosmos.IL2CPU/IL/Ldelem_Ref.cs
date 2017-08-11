@@ -2,9 +2,9 @@ using System;
 
 using CPUx86 = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.API;
-using XSharp.Common;
+using XSharp;
 using XSharp.Assembler;
-using static XSharp.Common.XSRegisters;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

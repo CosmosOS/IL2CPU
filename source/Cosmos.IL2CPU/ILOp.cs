@@ -13,7 +13,7 @@ using Cosmos.Debug.Symbols;
 
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.X86.IL;
-using XSharp.Common;
+using XSharp;
 
 namespace Cosmos.IL2CPU {
   public abstract class ILOp {

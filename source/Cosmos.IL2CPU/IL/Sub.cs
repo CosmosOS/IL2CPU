@@ -3,8 +3,8 @@ using CPUx86 = XSharp.Assembler.x86;
 using XSharp.Assembler.x86;
 using XSharp.Assembler.x86.x87;
 
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

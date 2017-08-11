@@ -1,8 +1,8 @@
 using System;
 using XSharp.Assembler.x86.x87;
 using XSharp.Assembler;
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL

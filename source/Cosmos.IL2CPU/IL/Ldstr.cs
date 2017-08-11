@@ -5,7 +5,7 @@ using CPU = XSharp.Assembler;
 using System.Text;
 using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Common;
+using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

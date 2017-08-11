@@ -5,7 +5,7 @@ using XSharp.Assembler;
 using System.Reflection;
 using System.Linq;
 
-using XSharp.Common;
+using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

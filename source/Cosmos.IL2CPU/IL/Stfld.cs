@@ -5,7 +5,7 @@ using CPUx86 = XSharp.Assembler.x86;
 using XSharp.Assembler;
 
 using Cosmos.IL2CPU.Extensions;
-using XSharp.Common;
+using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL {
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stfld)]

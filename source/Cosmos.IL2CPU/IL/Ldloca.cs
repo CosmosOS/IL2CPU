@@ -2,8 +2,8 @@ using Cosmos.Debug.Symbols;
 using XSharp.Assembler;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

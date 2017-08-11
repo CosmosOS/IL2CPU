@@ -2,9 +2,9 @@ using CPU = XSharp.Assembler.x86;
 using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Common;
+using XSharp;
 using XSharp.Assembler;
-using static XSharp.Common.XSRegisters;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

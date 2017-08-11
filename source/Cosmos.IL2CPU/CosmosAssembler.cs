@@ -8,8 +8,8 @@ using XSharp.Assembler.x86;
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
 using Cosmos.IL2CPU.API.Attribs;
-using XSharp.Common;
-using static XSharp.Common.XSRegisters;
+using XSharp;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU {
     public class CosmosAssembler : Assembler {
