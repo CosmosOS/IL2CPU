@@ -1,21 +1,21 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using CPU = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86.SSE;
-using Cosmos.Assembler.x86.x87;
+using CPUx86 = XSharp.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
+using XSharp.Assembler.x86.SSE;
+using XSharp.Assembler.x86.x87;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using static Cosmos.Assembler.x86.SSE.ComparePseudoOpcodes;
+using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Cgt_Un )]
     public class Cgt_Un : ILOp
     {
-        public Cgt_Un( Cosmos.Assembler.Assembler aAsmblr )
+        public Cgt_Un( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -119,13 +119,13 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // using System;
         //
-        // using CPUx86 = Cosmos.Assembler.x86;
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPUx86 = XSharp.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // using Cosmos.IL2CPU.X86;
         // using Cosmos.IL2CPU.X86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Cgt_Un)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Cgt_Un)]
         // 	public class Cgt_Un: Op {
         // 		private readonly string NextInstructionLabel;
         //         private readonly string CurInstructionLabel;

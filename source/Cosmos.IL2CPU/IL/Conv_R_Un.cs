@@ -1,10 +1,10 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using static Cosmos.Assembler.x86.SSE.ComparePseudoOpcodes;
+using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -17,7 +17,7 @@ namespace Cosmos.IL2CPU.X86.IL
     public class Conv_R_Un : ILOp
     {
 
-        public Conv_R_Un(Cosmos.Assembler.Assembler aAsmblr)
+        public Conv_R_Un(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

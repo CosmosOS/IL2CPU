@@ -2,13 +2,13 @@ using System;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Initobj )]
     public class Initobj : ILOp
     {
-        public Initobj( Cosmos.Assembler.Assembler aAsmblr )
+        public Initobj( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -56,11 +56,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // using System;
         // using System.Collections.Generic;
-        // using CPUx86 = Cosmos.Assembler.x86;
+        // using CPUx86 = XSharp.Assembler.x86;
         // using Cosmos.IL2CPU.Compiler;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Initobj)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Initobj)]
         // 	public class Initobj: Op {
         // 		private uint mObjSize;
         //

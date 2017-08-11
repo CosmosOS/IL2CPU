@@ -2,7 +2,7 @@ using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Castclass)]
     public class Castclass : ILOp
     {
-        public Castclass(Cosmos.Assembler.Assembler aAsmblr)
+        public Castclass(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

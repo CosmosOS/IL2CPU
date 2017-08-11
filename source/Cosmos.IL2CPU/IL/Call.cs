@@ -6,10 +6,10 @@ using Cosmos.IL2CPU.ILOpCodes;
 // using System.Linq;
 //
 // using IL2CPU=Cosmos.IL2CPU;
-using CPU = Cosmos.Assembler.x86;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using System.Reflection;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 
 using XSharp.Common;
 
@@ -18,7 +18,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Call)]
     public class Call : ILOp
     {
-        public Call(Cosmos.Assembler.Assembler aAsmblr)
+        public Call(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -91,12 +91,12 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpMethod.Value, aOpCode, LabelName.Get(aMethod.MethodBase), DebugEnabled);
         }
 
-        public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
         {
             DoExecute(Assembler, aCurrentMethod, aTargetMethod, aCurrent, currentLabel, ILOp.GetLabel(aCurrentMethod, aCurrent.NextPosition), debugEnabled);
         }
 
-        public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
         {
             var xMethodInfo = aTargetMethod as MethodInfo;
             string xNormalAddress = LabelName.Get(aTargetMethod);

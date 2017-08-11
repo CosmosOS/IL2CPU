@@ -1,6 +1,6 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Shl )]
     public class Shl : ILOp
     {
-        public Shl( Cosmos.Assembler.Assembler aAsmblr )
+        public Shl( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

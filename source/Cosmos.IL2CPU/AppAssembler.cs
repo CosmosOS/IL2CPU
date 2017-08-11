@@ -9,8 +9,8 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
 using Cosmos.Build.Common;
 using Cosmos.IL2CPU.ILOpCodes;
 using Cosmos.IL2CPU.API;
@@ -20,8 +20,8 @@ using Cosmos.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using Call = Cosmos.Assembler.x86.Call;
-using Label = Cosmos.Assembler.Label;
+using Call = XSharp.Assembler.x86.Call;
+using Label = XSharp.Assembler.Label;
 
 namespace Cosmos.IL2CPU
 {
@@ -766,7 +766,7 @@ namespace Cosmos.IL2CPU
                     foreach (var xAttrib in xAttribs)
                     {
                         var xOpCode = (ushort)xAttrib.OpCode;
-                        var xCtor = xTypeInfo.GetConstructor(new Type[] { typeof(Assembler.Assembler) });
+                        var xCtor = xTypeInfo.GetConstructor(new Type[] { typeof(Assembler) });
                         var xILOp = (ILOp)xCtor.Invoke(new object[] { Assembler });
                         if (xOpCode <= 0xFF)
                         {
@@ -874,12 +874,12 @@ namespace Cosmos.IL2CPU
             var xTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mTypes",
                                                                          BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xTheName = DataMember.GetStaticFieldName(xTypesFieldRef);
-            DataMember xDataMember = (from item in Cosmos.Assembler.Assembler.CurrentInstance.DataMembers
+            DataMember xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
                                       where item.Name == xTheName
                                       select item).FirstOrDefault();
             if (xDataMember != null)
             {
-                Cosmos.Assembler.Assembler.CurrentInstance.DataMembers.Remove((from item in Cosmos.Assembler.Assembler.CurrentInstance.DataMembers
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Remove((from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
                                                                                where item == xDataMember
                                                                                select item).First());
             }
@@ -1026,11 +1026,11 @@ namespace Cosmos.IL2CPU
                     xTemp = BitConverter.GetBytes(4); // embedded array
                     Array.Copy(xTemp, 0, xData, 12, 4);
                     string xDataName = "____SYSTEM____TYPE___" + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xType) + " ASM_IS__" + xType.Assembly.GetName().Name) + "__MethodIndexesArray";
-                    Cosmos.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
                     Push(xDataName);
                     Push(0);
                     xDataName = "____SYSTEM____TYPE___" + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xType) + " ASM_IS__" + xType.Assembly.GetName().Name) + "__MethodAddressesArray";
-                    Cosmos.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
                     Push(xDataName);
                     Push(0);
                     xData = new byte[16 + Encoding.Unicode.GetByteCount(xType.FullName + ", " + xType.Module.Assembly.GetName().FullName)];
@@ -1043,7 +1043,7 @@ namespace Cosmos.IL2CPU
                     xTemp = BitConverter.GetBytes(2); // embedded array
                     Array.Copy(xTemp, 0, xData, 12, 4);
                     xDataName = "____SYSTEM____TYPE___" + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xType) + " ASM_IS__" + xType.Assembly.GetName().Name);
-                    Cosmos.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
                     Push("0" + xEmittedMethods.Count.ToString("X") + "h");
                     Call(VTablesImplRefs.SetTypeInfoRef);
                 }
@@ -1127,7 +1127,7 @@ namespace Cosmos.IL2CPU
         public void ProcessField(FieldInfo aField)
         {
             string xFieldName = DataMember.GetStaticFieldName(aField);
-            if (Cosmos.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
+            if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
                 var xItemList = (from item in aField.GetCustomAttributes(false)
                                  where item.GetType().FullName == "ManifestResourceStreamAttribute"
@@ -1367,7 +1367,7 @@ namespace Cosmos.IL2CPU
             Assembler.WriteDebugVideo("Now create the kernel class");
             if (!CompilerEngine.UseGen3Kernel)
             {
-                Newobj.Assemble(Cosmos.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint);
+                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint);
                 Assembler.WriteDebugVideo("Kernel class created");
             }
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";

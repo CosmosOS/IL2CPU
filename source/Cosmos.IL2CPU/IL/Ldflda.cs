@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldflda)]
     public class Ldflda : ILOp
     {
-        public Ldflda(Cosmos.Assembler.Assembler aAsmblr)
+        public Ldflda(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -21,13 +21,13 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpCode.Value.DeclaringType, xOpCode.Value.GetFullName(), true, DebugEnabled, aOpCode.StackPopTypes[0]);
         }
 
-        public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aMethod, Type aDeclaringType, string aField, bool aDerefValue, bool aDebugEnabled, Type aTypeOnStack)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, Type aDeclaringType, string aField, bool aDerefValue, bool aDebugEnabled, Type aTypeOnStack)
         {
           var xFieldInfo = ResolveField(aDeclaringType, aField, true);
           DoExecute(Assembler, aMethod, aDeclaringType, xFieldInfo, aDerefValue, aDebugEnabled, aTypeOnStack);
         }
 
-        public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aMethod, Type aDeclaringType, _FieldInfo aField, bool aDerefValue, bool aDebugEnabled, Type aTypeOnStack)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, Type aDeclaringType, _FieldInfo aField, bool aDerefValue, bool aDebugEnabled, Type aTypeOnStack)
         {
             XS.Comment("Field: " + aField.Id);
             int xExtraOffset = 0;

@@ -1,9 +1,9 @@
 using System;
-using Cosmos.Assembler.x86.x87;
-
+using XSharp.Assembler.x86.x87;
+using XSharp.Assembler;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
   {
     static bool varDone = false;
 
-    public Neg(Assembler.Assembler aAsmblr)
+    public Neg(Assembler aAsmblr)
   : base(aAsmblr)
     {
     }

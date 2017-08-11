@@ -1,7 +1,7 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86.SSE;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86.SSE;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -11,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Rem)]
   public class Rem : ILOp
   {
-    public Rem(Assembler.Assembler aAsmblr)
+    public Rem(Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

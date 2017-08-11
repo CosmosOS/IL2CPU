@@ -1,21 +1,21 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using CPU = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86.SSE;
-using Cosmos.Assembler.x86.x87;
+using CPUx86 = XSharp.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86.SSE;
+using XSharp.Assembler.x86.x87;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using static Cosmos.Assembler.x86.SSE.ComparePseudoOpcodes;
+using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
 	[Cosmos.IL2CPU.OpCode( ILOpCode.Code.Cgt )]
 	public class Cgt : ILOp
 	{
-		public Cgt( Cosmos.Assembler.Assembler aAsmblr )
+		public Cgt( XSharp.Assembler.Assembler aAsmblr )
 			: base( aAsmblr )
 		{
 		}

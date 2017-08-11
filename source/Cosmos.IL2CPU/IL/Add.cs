@@ -1,8 +1,8 @@
 using System;
 using System.Reflection;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86.SSE;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
+using XSharp.Assembler.x86.SSE;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
 
@@ -11,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Add )]
     public class Add : ILOp
     {
-        public Add( Cosmos.Assembler.Assembler aAsmblr )
+        public Add( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

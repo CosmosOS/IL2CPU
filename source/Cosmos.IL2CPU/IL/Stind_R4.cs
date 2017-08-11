@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Stind_R4 )]
     public class Stind_R4 : ILOp
     {
-        public Stind_R4( Cosmos.Assembler.Assembler aAsmblr )
+        public Stind_R4( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -21,10 +21,10 @@ namespace Cosmos.IL2CPU.X86.IL
         // using System.IO;
         // 
         // 
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // 
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Stind_R4)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Stind_R4)]
         // 	public class Stind_R4: Op {
         // 		public Stind_R4(ILReader aReader, MethodInformation aMethodInfo)
         // 			: base(aReader, aMethodInfo) {

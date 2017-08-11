@@ -2,13 +2,13 @@ using System;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldind_R4 )]
     public class Ldind_R4 : ILOp
     {
-        public Ldind_R4( Cosmos.Assembler.Assembler aAsmblr )
+        public Ldind_R4( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -23,11 +23,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // using System;
         //
-        // using CPUx86 = Cosmos.Assembler.x86;
+        // using CPUx86 = XSharp.Assembler.x86;
         // using Cosmos.IL2CPU.X86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Ldind_R4)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldind_R4)]
         // 	public class Ldind_R4: Op {
         // 		public Ldind_R4(ILReader aReader, MethodInformation aMethodInfo)
         // 			: base(aReader, aMethodInfo) {

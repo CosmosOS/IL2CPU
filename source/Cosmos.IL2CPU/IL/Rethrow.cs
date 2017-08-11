@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
 	[OpCode(ILOpCode.Code.Rethrow)]
 	public class Rethrow: ILOp
 	{
-		public Rethrow(Cosmos.Assembler.Assembler aAsmblr):base(aAsmblr)
+		public Rethrow(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
 		{
 		}
 
@@ -19,10 +19,10 @@ namespace Cosmos.IL2CPU.X86.IL
 		// using System.IO;
 		//
 		//
-		// using CPU = Cosmos.Assembler.x86;
+		// using CPU = XSharp.Assembler.x86;
 		//
 		// namespace Cosmos.IL2CPU.IL.X86 {
-		// 	[Cosmos.Assembler.OpCode(OpCodeEnum.Rethrow)]
+		// 	[XSharp.Assembler.OpCode(OpCodeEnum.Rethrow)]
 		// 	public class Rethrow: Op {
 		//         private string mNextLabel;
 		// 	    private string mCurLabel;

@@ -1,8 +1,8 @@
 using System;
 using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = Cosmos.Assembler.x86;
-using CPU = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler;
 
 using XSharp.Common;
 
@@ -11,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldtoken )]
     public class Ldtoken : ILOp
     {
-        public Ldtoken( Cosmos.Assembler.Assembler aAsmblr )
+        public Ldtoken( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -51,12 +51,12 @@ namespace Cosmos.IL2CPU.X86.IL
         // using Cosmos.IL2CPU.X86;
         //
         //
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // using System.Reflection;
         // using Cosmos.IL2CPU.Compiler;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Ldtoken)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldtoken)]
         // 	public class Ldtoken: Op {
         // 		private string mTokenAddress;
         //
@@ -105,7 +105,7 @@ namespace Cosmos.IL2CPU.X86.IL
         //             {
         //                 mTokenAddress = GetService<IMetaDataInfoService>().GetTypeIdLabel(mType);
         //             }
-        //             XS.Push(Cosmos.Assembler.ElementReference.New(mTokenAddress));
+        //             XS.Push(XSharp.Assembler.ElementReference.New(mTokenAddress));
         // 			Assembler.Stack.Push(new StackContent(4, typeof(uint)));
         // 		}
         // 	}

@@ -1,14 +1,14 @@
 using System;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 namespace Cosmos.IL2CPU.X86.IL
 {
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldind_I)]
   public class Ldind_I : ILOp
   {
-    public Ldind_I(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldind_I(XSharp.Assembler.Assembler aAsmblr)
         : base(aAsmblr)
     {
     }
@@ -18,7 +18,7 @@ namespace Cosmos.IL2CPU.X86.IL
       Assemble(Assembler, 4, DebugEnabled);
     }
 
-    public static void Assemble(Cosmos.Assembler.Assembler aAssembler, int aSize, bool debugEnabled)
+    public static void Assemble(XSharp.Assembler.Assembler aAssembler, int aSize, bool debugEnabled)
     {
       int xAlignedSize = (int)Align((uint)aSize, 4);
 

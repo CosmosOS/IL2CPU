@@ -1,15 +1,15 @@
 using System;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = Cosmos.Assembler.x86;
-using CPU = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86.SSE;
-using Cosmos.Assembler.x86.x87;
+using CPUx86 = XSharp.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
+using XSharp.Assembler.x86.SSE;
+using XSharp.Assembler.x86.x87;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using static Cosmos.Assembler.x86.SSE.ComparePseudoOpcodes;
+using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -20,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Clt )]
     public class Clt : ILOp
     {
-        public Clt( Cosmos.Assembler.Assembler aAsmblr )
+        public Clt( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -120,13 +120,13 @@ namespace Cosmos.IL2CPU.X86.IL
         // using System.IO;
         //
         //
-        // using CPUx86 = Cosmos.Assembler.x86;
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPUx86 = XSharp.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // using Cosmos.IL2CPU.X86;
         // using Cosmos.IL2CPU.X86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Clt)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Clt)]
         // 	public class Clt: Op {
         // 		private readonly string NextInstructionLabel;
         // 		private readonly string CurInstructionLabel;

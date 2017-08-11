@@ -1423,15 +1423,6 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
-      "cosmos.assembler/1.0.0": {
-        "dependencies": {
-          "NETStandard.Library": "1.6.1",
-          "System.Threading.Thread": "4.3.0"
-        },
-        "runtime": {
-          "Cosmos.Assembler.dll": {}
-        }
-      },
       "cosmos.build.common/1.0.0": {
         "dependencies": {
           "Microsoft.Win32.Registry": "4.3.0",
@@ -1479,7 +1470,6 @@
       },
       "cosmos.il2cpu/1.0.0": {
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
           "Cosmos.Build.Common": "1.0.0",
           "Cosmos.Core.DebugStub": "1.0.0",
           "Cosmos.Debug.Kernel": "1.0.0",
@@ -1488,6 +1478,7 @@
           "NETStandard.Library": "1.6.1",
           "System.Reflection": "4.3.0",
           "System.Runtime.Loader": "4.3.0",
+          "XSharp.Assembler": "1.0.0",
           "XSharp.Common": "1.0.0"
         },
         "runtime": {
@@ -1502,10 +1493,19 @@
           "Cosmos.IL2CPU.API.dll": {}
         }
       },
+      "xsharp.assembler/1.0.0": {
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.Threading.Thread": "4.3.0"
+        },
+        "runtime": {
+          "XSharp.Assembler.dll": {}
+        }
+      },
       "xsharp.common/1.0.0": {
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
-          "NETStandard.Library": "1.6.1"
+          "NETStandard.Library": "1.6.1",
+          "XSharp.Assembler": "1.0.0"
         },
         "runtime": {
           "XSharp.Common.dll": {}
@@ -2233,11 +2233,6 @@
       "path": "system.xml.xdocument/4.3.0",
       "hashPath": "system.xml.xdocument.4.3.0.nupkg.sha512"
     },
-    "cosmos.assembler/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
     "cosmos.build.common/1.0.0": {
       "type": "project",
       "serviceable": false,
@@ -2264,6 +2259,11 @@
       "sha512": ""
     },
     "cosmos.il2cpu.api/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "xsharp.assembler/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

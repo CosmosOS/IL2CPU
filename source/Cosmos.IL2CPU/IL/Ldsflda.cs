@@ -1,7 +1,7 @@
 using System;
 using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
 using System.Reflection;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldsflda)]
   public class Ldsflda : ILOp
   {
-    public Ldsflda(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldsflda(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }
@@ -24,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, xFieldName, xOpCode.Value.DeclaringType, aOpCode);
     }
 
-    public static void DoExecute(Cosmos.Assembler.Assembler assembler, _MethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
+    public static void DoExecute(XSharp.Assembler.Assembler assembler, _MethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
     {
       // call cctor:
       var xCctor = (declaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? new ConstructorInfo[0]).SingleOrDefault();

@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Leave)]
     public class Leave : ILOp
     {
-        public Leave(Cosmos.Assembler.Assembler aAsmblr)
+        public Leave(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -34,10 +34,10 @@ namespace Cosmos.IL2CPU.X86.IL
         // using System.IO;
         //
         //
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Leave)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Leave)]
         // 	public class Leave: Op {public readonly string TargetLabel;
         // 	public Leave(ILReader aReader, MethodInformation aMethodInfo)
         // 			: base(aReader, aMethodInfo) {

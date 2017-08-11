@@ -1,8 +1,8 @@
 using Cosmos.IL2CPU.API;
 using System;
 using System.Linq;
-using Cosmos.Assembler;
-using CPUx86 = Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
 using System.Reflection;
 using XSharp.Common;
@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Newobj)]
     public class Newobj : ILOp
     {
-        public Newobj(Assembler.Assembler aAsmblr)
+        public Newobj(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value);
         }
 
-        public static void Assemble(Assembler.Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor)
+        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor)
         {
             // call cctor:
             if (aMethod != null)

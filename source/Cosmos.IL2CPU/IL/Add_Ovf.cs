@@ -1,8 +1,8 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86.SSE;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86.SSE;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
 
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Add_Ovf )]
     public class Add_Ovf : ILOp
     {
-		public Add_Ovf(Cosmos.Assembler.Assembler aAsmblr)
+		public Add_Ovf(XSharp.Assembler.Assembler aAsmblr)
             : base( aAsmblr )
         {
         }

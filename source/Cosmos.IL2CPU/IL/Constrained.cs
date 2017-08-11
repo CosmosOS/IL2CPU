@@ -3,13 +3,14 @@ using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
   [OpCode(ILOpCode.Code.Constrained)]
   public class Constrained : ILOp
   {
-    public Constrained(Assembler.Assembler aAsmblr) : base(aAsmblr)
+    public Constrained(Assembler aAsmblr) : base(aAsmblr)
     {
     }
 
@@ -19,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, aOpCode, xOpType, DebugEnabled);
     }
 
-    private void DoExecute(Assembler.Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode, OpType aTargetType, bool debugEnabled)
+    private void DoExecute(Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode, OpType aTargetType, bool debugEnabled)
     {
       var xType = aTargetType.Value;
 

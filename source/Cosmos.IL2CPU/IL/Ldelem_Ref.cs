@@ -1,8 +1,9 @@
 using System;
 
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.API;
 using XSharp.Common;
+using XSharp.Assembler;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -10,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Ldelem_Ref)]
   public class Ldelem_Ref : ILOp
   {
-    public Ldelem_Ref(Assembler.Assembler aAsmblr)
+    public Ldelem_Ref(Assembler aAsmblr)
         : base(aAsmblr)
     {
     }
@@ -20,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
       Assemble(Assembler, 8, false, aMethod, aOpCode, DebugEnabled);
     }
 
-    public static void Assemble(Assembler.Assembler aAssembler, uint aElementSize, bool isSigned, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
+    public static void Assemble(Assembler aAssembler, uint aElementSize, bool isSigned, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
     {
       //  stack     = index
       //  stack + 2 = array

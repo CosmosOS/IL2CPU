@@ -1,7 +1,7 @@
 using System;
 
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -11,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Mul_Ovf)]
   public class Mul_Ovf : ILOp
   {
-    public Mul_Ovf(Cosmos.Assembler.Assembler aAsmblr)
+    public Mul_Ovf(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

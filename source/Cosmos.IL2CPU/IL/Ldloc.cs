@@ -1,9 +1,9 @@
 using Cosmos.Debug.Symbols;
-
+using XSharp.Assembler;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.Common.XSRegisters;
 
 
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Ldloc)]
   public class Ldloc : ILOp
   {
-    public Ldloc(Assembler.Assembler aAsmblr)
+    public Ldloc(Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

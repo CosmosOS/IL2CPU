@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 
 using Cosmos.IL2CPU.API;
 using Cosmos.IL2CPU.API.Attribs;
-using Cosmos.Assembler;
-using CPU = Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using CPU = XSharp.Assembler.x86;
 using Cosmos.Debug.Symbols;
 
 using Cosmos.IL2CPU.Extensions;
@@ -18,9 +18,9 @@ using XSharp.Common;
 namespace Cosmos.IL2CPU {
   public abstract class ILOp {
     public static PlugManager mPlugManager;
-    protected readonly Assembler.Assembler Assembler;
+    protected readonly Assembler Assembler;
 
-    protected ILOp(Assembler.Assembler aAsmblr) {
+    protected ILOp(Assembler aAsmblr) {
       Assembler = aAsmblr;
     }
 
@@ -245,7 +245,7 @@ namespace Cosmos.IL2CPU {
     /// <summary>
     /// Emits cleanup code for when an exception occurred inside a method call.
     /// </summary>
-    public static void EmitExceptionCleanupAfterCall(Assembler.Assembler aAssembler, uint aReturnSize, uint aStackSizeBeforeCall, uint aTotalArgumentSizeOfMethod) {
+    public static void EmitExceptionCleanupAfterCall(Assembler aAssembler, uint aReturnSize, uint aStackSizeBeforeCall, uint aTotalArgumentSizeOfMethod) {
       XS.Comment("aStackSizeBeforeCall = " + aStackSizeBeforeCall);
       XS.Comment("aTotalArgumentSizeOfMethod = " + aTotalArgumentSizeOfMethod);
       XS.Comment("aReturnSize = " + aReturnSize);
@@ -273,7 +273,7 @@ namespace Cosmos.IL2CPU {
       }
     }
 
-    public static void EmitExceptionLogic(Assembler.Assembler aAssembler, _MethodInfo aMethodInfo, ILOpCode aCurrentOpCode, bool aDoTest, Action aCleanup, string aJumpTargetNoException = null) {
+    public static void EmitExceptionLogic(Assembler aAssembler, _MethodInfo aMethodInfo, ILOpCode aCurrentOpCode, bool aDoTest, Action aCleanup, string aJumpTargetNoException = null) {
       if (aJumpTargetNoException == null) {
         aJumpTargetNoException = GetLabel(aMethodInfo, aCurrentOpCode.NextPosition);
       }
@@ -331,7 +331,7 @@ namespace Cosmos.IL2CPU {
     }
 
 
-    protected static void DoNullReferenceCheck(Assembler.Assembler assembler, bool debugEnabled, int stackOffsetToCheck) {
+    protected static void DoNullReferenceCheck(Assembler assembler, bool debugEnabled, int stackOffsetToCheck) {
       if (stackOffsetToCheck != SignedAlign(stackOffsetToCheck, 4)) {
         throw new Exception("Stack offset not aligned!");
       }

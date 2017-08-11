@@ -1,14 +1,14 @@
 using System;
 
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Switch )]
     public class Switch : ILOp
     {
-        public Switch( Cosmos.Assembler.Assembler aAsmblr )
+        public Switch( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -29,10 +29,10 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // using System;
         //
-        // using CPUx86 = Cosmos.Assembler.x86;
+        // using CPUx86 = XSharp.Assembler.x86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Switch)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Switch)]
         // 	public class Switch: Op {
         // 		private string[] Labels;
         // 		public Switch(ILReader aReader, MethodInformation aMethodInfo)

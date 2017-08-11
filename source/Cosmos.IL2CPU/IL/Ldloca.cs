@@ -1,5 +1,5 @@
 using Cosmos.Debug.Symbols;
-
+using XSharp.Assembler;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Ldloca)]
   public class Ldloca : ILOp
   {
-    public Ldloca(Assembler.Assembler aAsmblr)
+    public Ldloca(Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

@@ -1,6 +1,7 @@
 using Cosmos.IL2CPU.API;
+using XSharp.Assembler;
 using System;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using System.Reflection;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -13,7 +14,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Newarr)]
   public class Newarr : ILOp
   {
-    public Newarr(Assembler.Assembler aAsmblr)
+    public Newarr(Assembler aAsmblr)
         : base(aAsmblr)
     {
     }

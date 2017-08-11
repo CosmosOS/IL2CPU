@@ -1,7 +1,7 @@
 
 using Cosmos.IL2CPU.Extensions;
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Endfinally)]
     public class Endfinally : ILOp
     {
-        public Endfinally(Cosmos.Assembler.Assembler aAsmblr) : base(aAsmblr)
+        public Endfinally(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
         {
         }
 

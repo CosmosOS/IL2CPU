@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-using Cosmos.Assembler;
-using Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
 using Cosmos.IL2CPU.API.Attribs;
@@ -12,7 +12,7 @@ using XSharp.Common;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU {
-    public class CosmosAssembler : Assembler.Assembler {
+    public class CosmosAssembler : Assembler {
         public CosmosAssembler(int comPort) {
             mComPort = comPort;
         }
@@ -311,13 +311,13 @@ namespace Cosmos.IL2CPU {
             CreateIDT();
 #if LFB_1024_8
             new Comment("Set graphics fields");
-            XS.Mov(XSRegisters.EBX, Cosmos.Assembler.ElementReference.New("MultiBootInfo_Structure"), sourceIsIndirect: true);
+            XS.Mov(XSRegisters.EBX, XSharp.Assembler.ElementReference.New("MultiBootInfo_Structure"), sourceIsIndirect: true);
             XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 72);
-            new Move { DestinationRef = Cosmos.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeControlInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
+            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeControlInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
             XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 76);
-            new Move { DestinationRef = Cosmos.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeModeInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
+            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeModeInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
             XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 80);
-            new Move { DestinationRef = Cosmos.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeMode"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
+            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeMode"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
 #endif
 
             //WriteDebugVideo("Initializing SSE.");

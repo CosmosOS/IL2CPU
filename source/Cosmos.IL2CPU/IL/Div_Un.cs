@@ -1,10 +1,10 @@
 using System;
-using Cosmos.Assembler.x86.SSE;
+using XSharp.Assembler.x86.SSE;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using CPUx86 = Cosmos.Assembler.x86;
-using Label = Cosmos.Assembler.Label;
+using CPUx86 = XSharp.Assembler.x86;
+using Label = XSharp.Assembler.Label;
 
 /* Div.Un is unsigned integer division so the valid input values are uint / ulong and the result is always expressed as unsigned */
 namespace Cosmos.IL2CPU.X86.IL
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Div_Un )]
     public class Div_Un : ILOp
     {
-        public Div_Un( Cosmos.Assembler.Assembler aAsmblr )
+        public Div_Un( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

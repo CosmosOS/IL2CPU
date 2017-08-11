@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Starg)]
   public class Starg : ILOp
   {
-    public Starg(Cosmos.Assembler.Assembler aAsmblr)
+    public Starg(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }
@@ -21,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, xOpVar.Value);
     }
 
-    public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
+    public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
     {
       var xDisplacement = Ldarg.GetArgumentDisplacement(aMethod, aParam);
       Type xArgType;

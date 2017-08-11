@@ -1,6 +1,6 @@
 using System;
 
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.X86;
 using XSharp.Common;
 
@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Xor )]
     public class Xor : ILOp
     {
-        public Xor( Cosmos.Assembler.Assembler aAsmblr )
+        public Xor( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

@@ -10,12 +10,12 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelema)]
   public class Ldelema : ILOp
   {
-    public Ldelema(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldelema(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }
 
-    public static void Assemble(Cosmos.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled)
+    public static void Assemble(XSharp.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled)
     {
       XS.Comment("Arraytype: " + aOpType.StackPopTypes.Last().FullName);
       XS.Comment("Size: " + aElementSize);
@@ -47,13 +47,13 @@ namespace Cosmos.IL2CPU.X86.IL
     // using System.IO;
     //
     //
-    // using CPU = Cosmos.Assembler.x86;
-    // using CPUx86 = Cosmos.Assembler.x86;
+    // using CPU = XSharp.Assembler.x86;
+    // using CPUx86 = XSharp.Assembler.x86;
     // using Cosmos.IL2CPU.X86;
     // using Cosmos.IL2CPU.Compiler;
     //
     // namespace Cosmos.IL2CPU.IL.X86 {
-    // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Ldelema)]
+    // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldelema)]
     // 	public class Ldelema: Op {
     //         private Type mType;
     // 		public Ldelema(ILReader aReader, MethodInformation aMethodInfo)

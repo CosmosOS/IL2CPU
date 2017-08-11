@@ -1,6 +1,6 @@
 using System;
-
-using CPUx86 = Cosmos.Assembler.x86;
+using XSharp.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -8,7 +8,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Ldind_Ref)]
   public class Ldind_Ref : ILOp
   {
-    public Ldind_Ref(Assembler.Assembler aAsmblr)
+    public Ldind_Ref(Assembler aAsmblr)
         : base(aAsmblr)
     {
     }

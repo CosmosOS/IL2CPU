@@ -1,14 +1,14 @@
 using System;
 
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldind_I4 )]
     public class Ldind_I4 : ILOp
     {
-        public Ldind_I4( Cosmos.Assembler.Assembler aAsmblr )
+        public Ldind_I4( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

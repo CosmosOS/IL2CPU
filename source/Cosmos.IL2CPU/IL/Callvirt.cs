@@ -1,9 +1,9 @@
 using Cosmos.IL2CPU.API;
 using System;
 using System.Linq;
-using CPU = Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using System.Reflection;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Callvirt)]
     public class Callvirt : ILOp
     {
-        public Callvirt(Assembler.Assembler aAsmblr)
+        public Callvirt(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -24,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpMethod.Value, xOpMethod.ValueUID, aOpCode, DebugEnabled);
         }
 
-        public static void DoExecute(Assembler.Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool debugEnabled)
+        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool debugEnabled)
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
             Type xPopType = aOp.StackPopTypes.Last();

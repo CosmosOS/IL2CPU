@@ -1,6 +1,6 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
 
 using Cosmos.IL2CPU.API;
 using XSharp.Common;
@@ -10,12 +10,12 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stelem_Ref)]
   public class Stelem_Ref : ILOp
   {
-    public Stelem_Ref(Cosmos.Assembler.Assembler aAsmblr)
+    public Stelem_Ref(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }
 
-    public static void Assemble(Assembler.Assembler aAssembler, uint aElementSize, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
+    public static void Assemble(Assembler aAssembler, uint aElementSize, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
     {
       // stack     == the new value
       // stack + 1 == the index

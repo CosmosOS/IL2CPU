@@ -1,8 +1,9 @@
-using CPU = Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
 using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
+using XSharp.Assembler;
 using static XSharp.Common.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -13,7 +14,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Isinst)]
     public class Isinst : ILOp
     {
-        public Isinst(Assembler.Assembler aAsmblr)
+        public Isinst(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

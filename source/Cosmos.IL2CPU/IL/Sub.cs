@@ -1,7 +1,7 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86.x87;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
+using XSharp.Assembler.x86.x87;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -11,7 +11,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Sub)]
     public class Sub: ILOp
     {
-        public Sub(Cosmos.Assembler.Assembler aAsmblr)
+        public Sub(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

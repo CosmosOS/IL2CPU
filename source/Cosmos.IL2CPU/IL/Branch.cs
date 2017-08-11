@@ -1,11 +1,11 @@
 using System;
 using Cosmos.IL2CPU.X86;
-using CPU = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
 
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
-using Label = Cosmos.Assembler.Label;
+using Label = XSharp.Assembler.Label;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -24,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
   public class Branch : ILOp
   {
 
-    public Branch(Cosmos.Assembler.Assembler aAsmblr)
+    public Branch(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

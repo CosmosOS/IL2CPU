@@ -1,5 +1,5 @@
 using Cosmos.Debug.Symbols;
-
+using XSharp.Assembler;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Stloc)]
   public class Stloc : ILOp
   {
-    public Stloc(Assembler.Assembler aAsmblr)
+    public Stloc(Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

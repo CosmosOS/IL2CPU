@@ -2574,14 +2574,6 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Cosmos.Assembler/1.0.0": {
-        "type": "project",
-        "framework": ".NETStandard,Version=v1.5",
-        "dependencies": {
-          "NETStandard.Library": "1.6.1",
-          "System.Threading.Thread": "4.3.0"
-        }
-      },
       "Cosmos.Build.Common/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
@@ -2627,7 +2619,6 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
           "Cosmos.Build.Common": "1.0.0",
           "Cosmos.Core.DebugStub": "1.0.0",
           "Cosmos.Debug.Kernel": "1.0.0",
@@ -2636,6 +2627,7 @@
           "NETStandard.Library": "1.6.1",
           "System.Reflection": "4.3.0",
           "System.Runtime.Loader": "4.3.0",
+          "XSharp.Assembler": "1.0.0",
           "XSharp.Common": "1.0.0"
         }
       },
@@ -2646,12 +2638,20 @@
           "NETStandard.Library": "1.6.1"
         }
       },
+      "XSharp.Assembler/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v1.5",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.Threading.Thread": "4.3.0"
+        }
+      },
       "XSharp.Common/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
-          "NETStandard.Library": "1.6.1"
+          "NETStandard.Library": "1.6.1",
+          "XSharp.Assembler": "1.0.0"
         }
       }
     },
@@ -5464,14 +5464,6 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Cosmos.Assembler/1.0.0": {
-        "type": "project",
-        "framework": ".NETStandard,Version=v1.5",
-        "dependencies": {
-          "NETStandard.Library": "1.6.1",
-          "System.Threading.Thread": "4.3.0"
-        }
-      },
       "Cosmos.Build.Common/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
@@ -5517,7 +5509,6 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
           "Cosmos.Build.Common": "1.0.0",
           "Cosmos.Core.DebugStub": "1.0.0",
           "Cosmos.Debug.Kernel": "1.0.0",
@@ -5526,6 +5517,7 @@
           "NETStandard.Library": "1.6.1",
           "System.Reflection": "4.3.0",
           "System.Runtime.Loader": "4.3.0",
+          "XSharp.Assembler": "1.0.0",
           "XSharp.Common": "1.0.0"
         }
       },
@@ -5536,12 +5528,20 @@
           "NETStandard.Library": "1.6.1"
         }
       },
+      "XSharp.Assembler/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v1.5",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.Threading.Thread": "4.3.0"
+        }
+      },
       "XSharp.Common/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
         "dependencies": {
-          "Cosmos.Assembler": "1.0.0",
-          "NETStandard.Library": "1.6.1"
+          "NETStandard.Library": "1.6.1",
+          "XSharp.Assembler": "1.0.0"
         }
       }
     }
@@ -11716,11 +11716,6 @@
         "system.xml.xpath.xdocument.nuspec"
       ]
     },
-    "Cosmos.Assembler/1.0.0": {
-      "type": "project",
-      "path": "../../../XSharp/source/Cosmos.Assembler/Cosmos.Assembler.csproj",
-      "msbuildProject": "../../../XSharp/source/Cosmos.Assembler/Cosmos.Assembler.csproj"
-    },
     "Cosmos.Build.Common/1.0.0": {
       "type": "project",
       "path": "../../../Cosmos/source/Cosmos.Build.Common/Cosmos.Build.Common.csproj",
@@ -11750,6 +11745,11 @@
       "type": "project",
       "path": "../Cosmos.IL2CPU.API/Cosmos.IL2CPU.API.csproj",
       "msbuildProject": "../Cosmos.IL2CPU.API/Cosmos.IL2CPU.API.csproj"
+    },
+    "XSharp.Assembler/1.0.0": {
+      "type": "project",
+      "path": "../../../XSharp/source/XSharp.Assembler/XSharp.Assembler.csproj",
+      "msbuildProject": "../../../XSharp/source/XSharp.Assembler/XSharp.Assembler.csproj"
     },
     "XSharp.Common/1.0.0": {
       "type": "project",

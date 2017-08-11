@@ -1,12 +1,12 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     //[Cosmos.IL2CPU.OpCode( ILOpCode.Code.Conv_I )]
     //public class Conv_I : ILOp
     //{
-    //    public Conv_I( Cosmos.Assembler.Assembler aAsmblr )
+    //    public Conv_I( XSharp.Assembler.Assembler aAsmblr )
     //        : base( aAsmblr )
     //    {
     //    }

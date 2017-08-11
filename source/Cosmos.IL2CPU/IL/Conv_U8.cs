@@ -1,6 +1,6 @@
 using System;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_U8)]
     public class Conv_U8 : ILOp
     {
-        public Conv_U8(Cosmos.Assembler.Assembler aAsmblr)
+        public Conv_U8(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

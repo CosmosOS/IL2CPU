@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldarg)]
   public class Ldarg : ILOp
   {
-    public Ldarg(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldarg(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }
@@ -118,7 +118,7 @@ namespace Cosmos.IL2CPU.X86.IL
       }
     }
 
-    public static void DoExecute(Cosmos.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
+    public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
     {
       var xDisplacement = GetArgumentDisplacement(aMethod, aParam);
       var xType = GetArgumentType(aMethod, aParam);

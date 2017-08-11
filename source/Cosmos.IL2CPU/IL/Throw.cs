@@ -1,7 +1,7 @@
 using System;
-using CPU = Cosmos.Assembler.x86;
-using CPUx86 = Cosmos.Assembler.x86;
-using Cosmos.Assembler;
+using CPU = XSharp.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
 
 using XSharp.Common;
 
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Throw )]
     public class Throw : ILOp
     {
-        public Throw( Cosmos.Assembler.Assembler aAsmblr )
+        public Throw( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -21,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoNullReferenceCheck(Assembler, DebugEnabled, 4);
             XS.Add(XSRegisters.ESP, 4);
             XS.Pop(XSRegisters.EAX);
-            new CPUx86.Mov { DestinationRef = Cosmos.Assembler.ElementReference.New( DataMember.GetStaticFieldName( ExceptionHelperRefs.CurrentExceptionRef ) ), DestinationIsIndirect = true, SourceReg = CPUx86.RegistersEnum.EAX };
+            new CPUx86.Mov { DestinationRef = XSharp.Assembler.ElementReference.New( DataMember.GetStaticFieldName( ExceptionHelperRefs.CurrentExceptionRef ) ), DestinationIsIndirect = true, SourceReg = CPUx86.RegistersEnum.EAX };
             XS.Call("SystemExceptionOccurred");
             XS.Set(XSRegisters.ECX, 3);
             Call.EmitExceptionLogic( Assembler,aMethod, aOpCode, false, null );
@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU.X86.IL
         }
 
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Throw)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Throw)]
         // 	public class Throw: Op {
         // 		private MethodInformation mMethodInfo;
         // 		private int mCurrentILOffset;

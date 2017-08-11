@@ -1,9 +1,9 @@
 using Cosmos.IL2CPU.API;
 using System;
 using System.Linq;
-using CPU = Cosmos.Assembler;
+using CPU = XSharp.Assembler;
 using System.Text;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp.Common;
 
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldstr)]
   public class LdStr : ILOp
   {
-    public LdStr(Cosmos.Assembler.Assembler aAsmblr) : base(aAsmblr)
+    public LdStr(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
     {
     }
 
@@ -63,12 +63,12 @@ namespace Cosmos.IL2CPU.X86.IL
     // using System.Text;
     // using Cosmos.IL2CPU.X86;
     // using Cosmos.IL2CPU.X86.X;
-    // using CPUx86 = Cosmos.Assembler.x86;
+    // using CPUx86 = XSharp.Assembler.x86;
     // using Asm = Assembler;
     // using System.Collections.Generic;
     //
     // namespace Cosmos.IL2CPU.IL.X86 {
-    //     [Cosmos.Assembler.OpCode(OpCodeEnum.Ldstr)]
+    //     [XSharp.Assembler.OpCode(OpCodeEnum.Ldstr)]
     //     public class LdStr : Op {
     //         //private static Dictionary<string, DataMember> mDataMemberMap = new Dictionary<string, DataMember>();
     //         public readonly string LiteralStr;

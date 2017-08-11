@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using Cosmos.Build.Common;
 using Cosmos.Debug.Symbols;
 using Cosmos.IL2CPU.API.Attribs;
@@ -49,7 +49,7 @@ namespace Cosmos.IL2CPU {
         protected Dictionary<MethodBase, int?> mBootEntries;
         protected List<MemberInfo> mForceIncludes;
 
-        public string AssemblerLog = "Cosmos.Assembler.log";
+        public string AssemblerLog = "XSharp.Assembler.log";
 
         protected void LogTime(string message) {
         }

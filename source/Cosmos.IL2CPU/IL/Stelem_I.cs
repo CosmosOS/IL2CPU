@@ -1,13 +1,13 @@
 using System;
 
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Stelem_I )]
     public class Stelem_I : ILOp
     {
-        public Stelem_I( Cosmos.Assembler.Assembler aAsmblr )
+        public Stelem_I( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -22,10 +22,10 @@ namespace Cosmos.IL2CPU.X86.IL
         // using System.IO;
         // 
         // 
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // 
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Stelem_I)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Stelem_I)]
         // 	public class Stelem_I: Op {
         // 		private string mNextLabel;
         // 	    private string mCurLabel;

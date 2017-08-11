@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.API;

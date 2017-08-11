@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CPU = Cosmos.Assembler.x86;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using System.Reflection;
 using Cosmos.IL2CPU.X86;
 using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 
 
 
@@ -15,7 +15,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Localloc)]
   public class Localloc : ILOp
   {
-    public Localloc(Cosmos.Assembler.Assembler aAsmblr)
+    public Localloc(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

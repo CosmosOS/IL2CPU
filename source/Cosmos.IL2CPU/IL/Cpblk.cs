@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
 	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Cpblk)]
 	public class Cpblk: ILOp
 	{
-		public Cpblk(Cosmos.Assembler.Assembler aAsmblr):base(aAsmblr)
+		public Cpblk(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
 		{
 		}
 
@@ -19,10 +19,10 @@ namespace Cosmos.IL2CPU.X86.IL
 		// using System.IO;
 		// 
 		// 
-		// using CPU = Cosmos.Assembler.x86;
+		// using CPU = XSharp.Assembler.x86;
 		// 
 		// namespace Cosmos.IL2CPU.IL.X86 {
-		// 	[Cosmos.Assembler.OpCode(OpCodeEnum.Cpblk)]
+		// 	[XSharp.Assembler.OpCode(OpCodeEnum.Cpblk)]
 		// 	public class Cpblk: Op {
 		// 		public Cpblk(ILReader aReader, MethodInformation aMethodInfo)
 		// 			: base(aReader, aMethodInfo) {

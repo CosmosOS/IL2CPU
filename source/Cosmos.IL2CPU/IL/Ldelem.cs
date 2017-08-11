@@ -7,7 +7,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelem)]
   public class Ldelem : ILOp
   {
-    public Ldelem(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldelem(XSharp.Assembler.Assembler aAsmblr)
       : base(aAsmblr)
     {
     }

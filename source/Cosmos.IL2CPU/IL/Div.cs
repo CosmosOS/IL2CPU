@@ -1,17 +1,17 @@
 using System;
-using Cosmos.Assembler.x86.SSE;
+using XSharp.Assembler.x86.SSE;
 
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
-using CPUx86 = Cosmos.Assembler.x86;
-using Label = Cosmos.Assembler.Label;
+using CPUx86 = XSharp.Assembler.x86;
+using Label = XSharp.Assembler.Label;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Div )]
     public class Div : ILOp
     {
-        public Div( Cosmos.Assembler.Assembler aAsmblr )
+        public Div( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }

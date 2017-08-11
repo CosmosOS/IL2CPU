@@ -1,7 +1,7 @@
 using System;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 using System.Reflection;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldsfld)]
   public class Ldsfld : ILOp
   {
-    public Ldsfld(Cosmos.Assembler.Assembler aAsmblr)
+    public Ldsfld(XSharp.Assembler.Assembler aAsmblr)
         : base(aAsmblr)
     {
     }
@@ -59,7 +59,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
           //	Pop("eax");
           //	Move(Assembler, "dword [" + mDataName + " + 0x" + (i * 4).ToString("X") + "]", "eax");
-          new CPUx86.Push { DestinationRef = Cosmos.Assembler.ElementReference.New(xDataName), DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize - (i * 4)) };
+          new CPUx86.Push { DestinationRef = XSharp.Assembler.ElementReference.New(xDataName), DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize - (i * 4)) };
         }
         switch (xSize % 4)
         {

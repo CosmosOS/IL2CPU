@@ -79,7 +79,7 @@ namespace Cosmos.IL2CPU {
                 xEngine.OnLogWarning = m => logMessage(String.Format("Warning: {0}", m));
                 xEngine.OnLogMessage = logMessage;
                 xEngine.OnLogException = (m) => logError(String.Format("Exception: {0}", m.ToString()));
-                xEngine.AssemblerLog = "Cosmos.Assembler.log";
+                xEngine.AssemblerLog = "XSharp.Assembler.log";
                 if (xEngine.Execute()) {
                     logMessage("Executed OK");
                     //          File.WriteAllText(@"e:\compiler.log", "OK");

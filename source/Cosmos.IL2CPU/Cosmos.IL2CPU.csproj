@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\XSharp\source\Cosmos.Assembler\Cosmos.Assembler.csproj" />
+    <ProjectReference Include="..\..\..\XSharp\source\XSharp.Assembler\XSharp.Assembler.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />

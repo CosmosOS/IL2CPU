@@ -1,13 +1,13 @@
 using System;
 
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 namespace Cosmos.IL2CPU.X86.IL
 {
     [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldnull )]
     public class Ldnull : ILOp
     {
-        public Ldnull( Cosmos.Assembler.Assembler aAsmblr )
+        public Ldnull( XSharp.Assembler.Assembler aAsmblr )
             : base( aAsmblr )
         {
         }
@@ -23,11 +23,11 @@ namespace Cosmos.IL2CPU.X86.IL
         // using System.IO;
         //
         //
-        // using CPU = Cosmos.Assembler.x86;
+        // using CPU = XSharp.Assembler.x86;
         // using Cosmos.IL2CPU.X86;
         //
         // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[Cosmos.Assembler.OpCode(OpCodeEnum.Ldnull)]
+        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldnull)]
         // 	public class Ldnull: Op {
         // 		public Ldnull(ILReader aReader, MethodInformation aMethodInfo)
         // 			: base(aReader, aMethodInfo) {

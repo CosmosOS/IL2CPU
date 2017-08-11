@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
 	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Mkrefany)]
 	public class Mkrefany: ILOp
 	{
-		public Mkrefany(Cosmos.Assembler.Assembler aAsmblr):base(aAsmblr)
+		public Mkrefany(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
 		{
 		}
 
@@ -19,10 +19,10 @@ namespace Cosmos.IL2CPU.X86.IL
 		// using System.IO;
 		// 
 		// 
-		// using CPU = Cosmos.Assembler.x86;
+		// using CPU = XSharp.Assembler.x86;
 		// 
 		// namespace Cosmos.IL2CPU.IL.X86 {
-		// 	[Cosmos.Assembler.OpCode(OpCodeEnum.Mkrefany)]
+		// 	[XSharp.Assembler.OpCode(OpCodeEnum.Mkrefany)]
 		// 	public class Mkrefany: Op {
 		// 		public Mkrefany(ILReader aReader, MethodInformation aMethodInfo)
 		// 			: base(aReader, aMethodInfo) {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using Cosmos.Debug.Symbols;
 using Cosmos.Debug.Symbols.Pdb;
 

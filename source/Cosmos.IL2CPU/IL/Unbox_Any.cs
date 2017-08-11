@@ -1,6 +1,6 @@
 using System.Reflection;
 
-using CPU = Cosmos.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
 using Cosmos.IL2CPU.API;
 using XSharp.Common;
@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Unbox_Any)]
   public class Unbox_Any : ILOp
   {
-    public Unbox_Any(Cosmos.Assembler.Assembler aAsmblr)
+    public Unbox_Any(XSharp.Assembler.Assembler aAsmblr)
         : base(aAsmblr)
     {
     }

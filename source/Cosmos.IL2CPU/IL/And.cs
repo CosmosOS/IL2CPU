@@ -1,14 +1,14 @@
 using System;
 using Cosmos.IL2CPU.X86;
 using XSharp.Common;
-using CPUx86 = Cosmos.Assembler.x86;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
 	[Cosmos.IL2CPU.OpCode( ILOpCode.Code.And )]
 	public class And : ILOp
 	{
-		public And( Cosmos.Assembler.Assembler aAsmblr )
+		public And( XSharp.Assembler.Assembler aAsmblr )
 			: base( aAsmblr )
 		{
 		}

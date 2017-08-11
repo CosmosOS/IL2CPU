@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stind_I4)]
   public class Stind_I4 : ILOp
   {
-    public Stind_I4(Cosmos.Assembler.Assembler aAsmblr)
+    public Stind_I4(XSharp.Assembler.Assembler aAsmblr)
         : base(aAsmblr)
     {
     }

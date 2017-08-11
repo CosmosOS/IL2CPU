@@ -36,7 +36,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldfld)]
     public class Ldfld : ILOp
     {
-        public Ldfld(Cosmos.Assembler.Assembler aAsmblr)
+        public Ldfld(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -59,7 +59,7 @@ namespace Cosmos.IL2CPU.X86.IL
             return (int)(xExtraOffset + xFieldInfo.Offset);
         }
 
-        public static void DoExecute(Cosmos.Assembler.Assembler Assembler, Type aDeclaringType, string xFieldId, bool aDerefExternalField, bool debugEnabled, Type aTypeOnStack)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, Type aDeclaringType, string xFieldId, bool aDerefExternalField, bool debugEnabled, Type aTypeOnStack)
         {
             var xOffset = GetFieldOffset(aDeclaringType, xFieldId);
             var xFields = GetFieldsInfo(aDeclaringType, false);

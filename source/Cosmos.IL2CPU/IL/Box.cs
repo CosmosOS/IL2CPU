@@ -1,5 +1,5 @@
 using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.Assembler;
+using XSharp.Assembler;
 using XSharp.Common;
 using static XSharp.Common.XSRegisters;
 using Cosmos.IL2CPU.API;
@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU.X86.IL
   [OpCode(ILOpCode.Code.Box)]
   public class Box : ILOp
   {
-    public Box(Assembler.Assembler aAsmblr)
+    public Box(Assembler aAsmblr)
         : base(aAsmblr)
     {
     }

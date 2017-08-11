@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Br)]
     public class Br : ILOp
     {
-        public Br(Cosmos.Assembler.Assembler aAsmblr)
+        public Br(XSharp.Assembler.Assembler aAsmblr)
             : base(aAsmblr)
         {
         }

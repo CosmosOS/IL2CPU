@@ -1,8 +1,10 @@
-﻿namespace Cosmos.IL2CPU
+﻿using XSharp.Assembler;
+
+namespace Cosmos.IL2CPU
 {
     internal static class Optimizer
     {
-        public static Assembler.Assembler Optimize(Assembler.Assembler asmb)
+        public static Assembler Optimize(Assembler asmb)
         {
             return asmb;
             //Assembler asmblr = asmb;
