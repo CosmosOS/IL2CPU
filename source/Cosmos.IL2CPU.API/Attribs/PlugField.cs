@@ -21,7 +21,5 @@ namespace Cosmos.IL2CPU.API.Attribs {
 			set;
 		}
 
-        public bool IsMonoOnly = false;
-        public bool IsMicrosoftdotNETOnly = false;
 	}
 }
