@@ -116,8 +116,7 @@ namespace Cosmos.IL2CPU
                         }
                         // Only keep this plug if its for MS.NET.
                         // TODO: Integrate with builder options to allow Mono support again.
-                        if (!xAttrib.IsMonoOnly)
-                        {
+
                             Dictionary<Type, List<Type>> mPlugs;
                             if (xTargetType.GetTypeInfo().ContainsGenericParameters)
                             {
@@ -138,7 +137,7 @@ namespace Cosmos.IL2CPU
                                 xImpls.Add(xPlugType);
                                 mPlugs.Add(xTargetType, xImpls);
                             }
-                        }
+                        
                     }
                 }
             }
@@ -627,15 +626,7 @@ namespace Cosmos.IL2CPU
                     //xResult = null;
                     return null;
                 }
-                else if (xAttrib.IsMonoOnly)
-                {
-                    //TODO: Check this against build options
-                    //TODO: Two exclusive IsOnly's dont make sense
-                    // refactor these as a positive rather than negative
-                    // Same thing at type plug level
-                    //xResult = null;
-                    return null;
-                }
+
                 //else if (xAttrib.Signature != null) {
                 //  var xName = DataMember.FilterStringForIncorrectChars(MethodInfoLabelGenerator.GetFullName(xResult));
                 //  if (string.Compare(xName, xAttrib.Signature, true) != 0) {
