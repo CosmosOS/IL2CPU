@@ -1,0 +1,27 @@
+version: 0.20150918.{build}
+image: Visual Studio 2017
+configuration: Debug
+platform: AnyCPU
+shallow_clone: true
+clone_folder: c:\IL2CPU
+
+init:
+# This option breaks the github link to the build until the build completes.
+#  - ps: Update-AppveyorBuild -Version "$(Get-Date -Format yyyy.MM.dd).$env:appveyor_build_number"
+    - cmd: git clone https://github.com/CosmosOS/XSharp c:\XSharp
+
+# Disabled for now
+#nuget:
+#  account_feed: false
+#  project_feed: true
+#  disable_publish_on_pr: true
+
+build_script:
+  - cmd: |
+      nuget restore "..\XSharp\XSharp.sln"
+      nuget restore "IL2CPU.sln"
+      msbuild "IL2CPU.sln" /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Platform="Any CPU" /p:Configuration=Debug /p:DeployExtension=false
+
+# Disabled for now
+#artifacts:
+#  - path: 'source\**\*.nupkg'
