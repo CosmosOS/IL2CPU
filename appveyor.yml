@@ -8,7 +8,9 @@ clone_folder: c:\IL2CPU
 init:
 # This option breaks the github link to the build until the build completes.
 #  - ps: Update-AppveyorBuild -Version "$(Get-Date -Format yyyy.MM.dd).$env:appveyor_build_number"
-    - cmd: git clone https://github.com/CosmosOS/XSharp c:\XSharp
+    - cmd: git clone https://github.com/CosmosOS/XSharp.git c:\XSharp
+# This dependency shouldn't exist, but while it exists, we need to clone the Cosmos repo
+    - cmd: git clone https://github.com/CosmosOS/Cosmos.git c:\Cosmos
 
 # Disabled for now
 #nuget:
