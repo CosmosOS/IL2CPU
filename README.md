@@ -1,4 +1,7 @@
 # IL2CPU
+
+[![Build status](https://ci.appveyor.com/api/projects/status/budqdarf5cj67lp7/branch/master?svg=true)](https://ci.appveyor.com/project/CosmosOS/il2cpu/branch/master)
+
 IL2CPU is a compiler for .NET IL code to compile to assembly language for direct booting. IL2CPU creates NASM style assembly ready to assemble with [NASM](http://www.nasm.us/).
 
 # Status
