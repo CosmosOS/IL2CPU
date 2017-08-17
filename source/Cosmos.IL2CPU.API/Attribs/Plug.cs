@@ -3,7 +3,7 @@ using System;
 namespace Cosmos.IL2CPU.API.Attribs
 {
   [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-  public sealed class Plug : Attribute 
+  public sealed class Plug : Attribute
   {
       public Plug()
       {
@@ -31,13 +31,11 @@ namespace Cosmos.IL2CPU.API.Attribs
           get;
           set;
       }
-      
+
       public bool Inheritable = false;
-      public bool IsMonoOnly = false;
-      public bool IsMicrosoftdotNETOnly = false;
       public FrameworkVersion TargetFramework = FrameworkVersion.v4_0;
   }
-  
+
   [Flags]
   public enum FrameworkVersion
   {
