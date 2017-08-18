@@ -576,77 +576,31 @@ namespace Cosmos.IL2CPU
                 XS.Comment(xILOp.ToString());
                 var xNextPosition = xOpCode.Position + 1;
 
-                #region Exception handling support code
+                var xCurrentExceptionRegion = xOpCode.CurrentExceptionRegion;
+                var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
+                    (
+                        (
+                            (
+                                xCurrentExceptionRegion.HandlerOffset > 0
+                                && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position
+                            )
+                            ||
+                            (
+                                xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter)
+                                && xCurrentExceptionRegion.FilterOffset > 0
+                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position
+                            )
+                        )
+                        &&
+                        xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch
+                     );
 
-                _ExceptionRegionInfo xCurrentRegion = null;
-                var xBody = aMethod.MethodBase.GetMethodBody();
-                // todo: add support for nested handlers using a stack or so..
-                foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.MethodBase.DeclaringType.GetTypeInfo().Module))
-                {
-                    if (xHandler.TryOffset > 0)
-                    {
-                        if (xHandler.TryOffset <= xNextPosition && (xHandler.TryLength + xHandler.TryOffset) > xNextPosition)
-                        {
-                            if (xCurrentRegion == null)
-                            {
-                                xCurrentRegion = xHandler;
-                                continue;
-                            }
-                            else if (xHandler.TryOffset > xCurrentRegion.TryOffset && (xHandler.TryLength + xHandler.TryOffset) < (xCurrentRegion.TryLength + xCurrentRegion.TryOffset))
-                            {
-                                // only replace if the current found handler is narrower
-                                xCurrentRegion = xHandler;
-                                continue;
-                            }
-                        }
-                    }
-                    if (xHandler.HandlerOffset > 0)
-                    {
-                        if (xHandler.HandlerOffset <= xNextPosition && (xHandler.HandlerOffset + xHandler.HandlerLength) > xNextPosition)
-                        {
-                            if (xCurrentRegion == null)
-                            {
-                                xCurrentRegion = xHandler;
-                                continue;
-                            }
-                            else if (xHandler.HandlerOffset > xCurrentRegion.HandlerOffset && (xHandler.HandlerOffset + xHandler.HandlerLength) < (xCurrentRegion.HandlerOffset + xCurrentRegion.HandlerLength))
-                            {
-                                // only replace if the current found handler is narrower
-                                xCurrentRegion = xHandler;
-                                continue;
-                            }
-                        }
-                    }
-                    if (xHandler.Kind.HasFlag(ExceptionRegionKind.Filter))
-                    {
-                        if (xHandler.FilterOffset > 0)
-                        {
-                            if (xHandler.FilterOffset <= xNextPosition)
-                            {
-                                if (xCurrentRegion == null)
-                                {
-                                    xCurrentRegion = xHandler;
-                                    continue;
-                                }
-                                else if (xHandler.FilterOffset > xCurrentRegion.FilterOffset)
-                                {
-                                    // only replace if the current found handler is narrower
-                                    xCurrentRegion = xHandler;
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                #endregion
-
-                var xNeedsExceptionPush = (xCurrentRegion != null) && (((xCurrentRegion.HandlerOffset > 0 && xCurrentRegion.HandlerOffset == xOpCode.Position) || (xCurrentRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentRegion.FilterOffset > 0 && xCurrentRegion.FilterOffset == xOpCode.Position)) && (xCurrentRegion.Kind == ExceptionRegionKind.Catch));
                 if (xNeedsExceptionPush)
                 {
                     Push(DataMember.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
                     XS.Push(0);
                 }
+
                 xILOp.DebugEnabled = DebugEnabled;
                 xILOp.Execute(aMethod, xOpCode);
 
