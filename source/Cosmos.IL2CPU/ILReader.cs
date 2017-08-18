@@ -68,7 +68,7 @@ namespace Cosmos.IL2CPU {
           // todo: add support for nested handlers using a stack or so..
           foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.DeclaringType.GetTypeInfo().Module))
           {
-              if (xHandler.TryOffset > 0)
+              if (xHandler.TryOffset >= 0)
               {
                   if (xHandler.TryOffset <= xPos && (xHandler.TryLength + xHandler.TryOffset ) > xPos)
                   {
@@ -85,6 +85,7 @@ namespace Cosmos.IL2CPU {
                       }
                   }
               }
+              // todo: handler offset can be 0 like try offset?
               if (xHandler.HandlerOffset > 0)
               {
                   if (xHandler.HandlerOffset <= xPos && (xHandler.HandlerOffset + xHandler.HandlerLength) > xPos)
