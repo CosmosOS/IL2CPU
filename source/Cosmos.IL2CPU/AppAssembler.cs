@@ -578,7 +578,7 @@ namespace Cosmos.IL2CPU
 
                 #region Exception handling support code 
 
-                _ExceptionRegionInfo xCurrentRegion = null;
+                _ExceptionRegionInfo xCurrentExceptionRegion = null;
                 var xBody = aMethod.MethodBase.GetMethodBody();
                 // todo: add support for nested handlers using a stack or so..
                 foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.MethodBase.DeclaringType.GetTypeInfo().Module))
@@ -587,15 +587,15 @@ namespace Cosmos.IL2CPU
                     {
                         if (xHandler.TryOffset <= xNextPosition && (xHandler.TryLength + xHandler.TryOffset) > xNextPosition)
                         {
-                            if (xCurrentRegion == null)
+                            if (xCurrentExceptionRegion == null)
                             {
-                                xCurrentRegion = xHandler;
+                                xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.TryOffset > xCurrentRegion.TryOffset && (xHandler.TryLength + xHandler.TryOffset) < (xCurrentRegion.TryLength + xCurrentRegion.TryOffset))
+                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && (xHandler.TryLength + xHandler.TryOffset) < (xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset))
                             {
                                 // only replace if the current found handler is narrower
-                                xCurrentRegion = xHandler;
+                                xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
                         }
@@ -604,15 +604,15 @@ namespace Cosmos.IL2CPU
                     {
                         if (xHandler.HandlerOffset <= xNextPosition && (xHandler.HandlerOffset + xHandler.HandlerLength) > xNextPosition)
                         {
-                            if (xCurrentRegion == null)
+                            if (xCurrentExceptionRegion == null)
                             {
-                                xCurrentRegion = xHandler;
+                                xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.HandlerOffset > xCurrentRegion.HandlerOffset && (xHandler.HandlerOffset + xHandler.HandlerLength) < (xCurrentRegion.HandlerOffset + xCurrentRegion.HandlerLength))
+                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && (xHandler.HandlerOffset + xHandler.HandlerLength) < (xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength))
                             {
                                 // only replace if the current found handler is narrower
-                                xCurrentRegion = xHandler;
+                                xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
                         }
@@ -623,15 +623,15 @@ namespace Cosmos.IL2CPU
                         {
                             if (xHandler.FilterOffset <= xNextPosition)
                             {
-                                if (xCurrentRegion == null)
+                                if (xCurrentExceptionRegion == null)
                                 {
-                                    xCurrentRegion = xHandler;
+                                    xCurrentExceptionRegion = xHandler;
                                     continue;
                                 }
-                                else if (xHandler.FilterOffset > xCurrentRegion.FilterOffset)
+                                else if (xHandler.FilterOffset > xCurrentExceptionRegion.FilterOffset)
                                 {
                                     // only replace if the current found handler is narrower
-                                    xCurrentRegion = xHandler;
+                                    xCurrentExceptionRegion = xHandler;
                                     continue;
                                 }
                             }
