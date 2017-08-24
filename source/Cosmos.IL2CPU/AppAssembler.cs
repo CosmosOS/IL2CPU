@@ -579,7 +579,7 @@ namespace Cosmos.IL2CPU
                 #region Exception handling support code 
 
                 _ExceptionRegionInfo xCurrentExceptionRegion = null;
-                var xBody = aMethod.MethodBase.GetMethodBody();
+                var xBody = aMethod.MethodBase.GetMethodBodyBlock();
                 // todo: add support for nested handlers using a stack or so..
                 foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.MethodBase.DeclaringType.GetTypeInfo().Module))
                 {

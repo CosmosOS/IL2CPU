@@ -95,6 +95,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Stind_I2:
         case Code.Stind_I4:
         case Code.Stind_I8:
+        case Code.Stind_R4:
+        case Code.Stind_R8:
         case Code.Stind_Ref:
           return 2;
         case Code.Clt:
@@ -232,6 +234,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Stind_I2:
         case Code.Stind_I4:
         case Code.Stind_I8:
+        case Code.Stind_R4:
+        case Code.Stind_R8:
         case Code.Stind_Ref:
           return 0;
         case Code.Clt:

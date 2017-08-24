@@ -22,7 +22,7 @@ namespace Cosmos.IL2CPU.Extensions
             return DebugSymbolReader.GetLocalVariableInfos(aThis);
         }
 
-        public static MethodBodyBlock GetMethodBody(this MethodBase aThis)
+        public static MethodBodyBlock GetMethodBodyBlock(this MethodBase aThis)
         {
             return DebugSymbolReader.GetMethodBodyBlock(aThis.Module, aThis.MetadataToken);
         }

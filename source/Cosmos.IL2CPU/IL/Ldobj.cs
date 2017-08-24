@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 throw new ArgumentNullException("type");
             }
             XS.Pop(XSRegisters.EAX);
-            var xObjSize = GetStorageSize(type);
+            var xObjSize = SizeOfType(type);
 
             switch (xObjSize % 4)
             {

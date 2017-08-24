@@ -43,7 +43,7 @@ namespace Cosmos.IL2CPU {
 
     public List<ILOpCode> ProcessMethod(MethodBase aMethod) {
       var xResult = new List<ILOpCode>();
-      var xBody = aMethod.GetMethodBody();
+      var xBody = aMethod.GetMethodBodyBlock();
       // Cache for use in field and method resolution
       Type[] xTypeGenArgs = Type.EmptyTypes;
       Type[] xMethodGenArgs = Type.EmptyTypes;

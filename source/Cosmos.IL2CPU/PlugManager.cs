@@ -388,19 +388,18 @@ namespace Cosmos.IL2CPU
                 }
                 // Plugs methods must be static, and public
                 // Search for non signature matches first since signature searches are slower
-                xResult = xImpl.GetTypeInfo().GetMethods()
-                                             .Where(method => method.Name == aMethod.Name
-                                                              && method.GetParameters().Select(param => param.ParameterType)
-                                                                                       .SequenceEqual(xParamTypes))
-                                             .SingleOrDefault();
+                xResult = xImpl.GetMethod(aMethod.Name, BindingFlags.Static | BindingFlags.Public,
+                    null, xParamTypes, null);
 
                 if (xResult == null && aMethod.Name == ".ctor")
                 {
-                    xResult = xImpl.GetTypeInfo().GetMethod("Ctor", xParamTypes, null);
+                    xResult = xImpl.GetMethod("Ctor", BindingFlags.Static | BindingFlags.Public,
+                        null, xParamTypes, null);
                 }
                 if (xResult == null && aMethod.Name == ".cctor")
                 {
-                    xResult = xImpl.GetTypeInfo().GetMethod("CCtor", xParamTypes, null);
+                    xResult = xImpl.GetMethod("CCtor", BindingFlags.Static | BindingFlags.Public,
+                        null, xParamTypes, null);
                 }
 
                 if (xResult == null)
@@ -422,7 +421,7 @@ namespace Cosmos.IL2CPU
                             if (String.Compare(xSigMethod.Name, "Ctor", true) == 0 ||
                                 String.Compare(xSigMethod.Name, "Cctor", true) == 0)
                             {
-                                xTargetMethod = aTargetType.GetTypeInfo().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).SingleOrDefault();
+                                xTargetMethod = aTargetType.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).SingleOrDefault();
                             }
                             else
                             {
@@ -524,32 +523,25 @@ namespace Cosmos.IL2CPU
                             {
                                 if (string.Compare(xSigMethod.Name, "ctor", StringComparison.OrdinalIgnoreCase) == 0)
                                 {
-                                    xTargetMethod = aTargetType.GetTypeInfo().GetConstructor(xTypesInst);
+                                    xTargetMethod = aTargetType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, xTypesInst, null);
                                 }
                                 else
                                 {
-                                    xTargetMethod = aTargetType.GetTypeInfo().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                                                                             .Where(method => method.Name == xSigMethod.Name
-                                                                                    && method.GetParameters().Select(param => param.ParameterType)
-                                                                                                             .SequenceEqual(xTypesInst))
-                                                                             .SingleOrDefault();
+                                    xTargetMethod = aTargetType.GetMethod(xSigMethod.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, xTypesInst, null);
                                 }
                             }
                             // Not an instance method, try static
                             if (xTargetMethod == null)
                             {
-                                if (string.Compare(xSigMethod.Name, "cctor", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(xSigMethod.Name, "ctor", StringComparison.OrdinalIgnoreCase) == 0)
+                                if (string.Compare(xSigMethod.Name, "cctor", StringComparison.OrdinalIgnoreCase) == 0
+                                    || string.Compare(xSigMethod.Name, "ctor", StringComparison.OrdinalIgnoreCase) == 0)
                                 {
-                                    xTargetMethod = aTargetType.GetTypeInfo().GetConstructor(xTypesStatic);
+                                    xTargetMethod = aTargetType.GetConstructor(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, xTypesStatic, null);
                                 }
                                 else
                                 {
 
-                                    xTargetMethod = aTargetType.GetTypeInfo().GetMethods()
-                                                                             .Where(method => method.Name == xSigMethod.Name
-                                                                                    && method.GetParameters().Select(param => param.ParameterType)
-                                                                                                             .SequenceEqual(xTypesStatic))
-                                                                             .SingleOrDefault();
+                                    xTargetMethod = aTargetType.GetMethod(xSigMethod.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, xTypesStatic, null);
                                 }
                             }
                             if (xTargetMethod == aMethod)
