@@ -12,11 +12,18 @@ init:
 # This dependency shouldn't exist, but while it exists, we need to clone the Cosmos repo
     - cmd: git clone https://github.com/CosmosOS/Cosmos.git c:\Cosmos --depth 1
 
-# Disabled for now
-#nuget:
-#  account_feed: false
-#  project_feed: true
-#  disable_publish_on_pr: true
+install:
+- ps: |
+    $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
+    mkdir $env:DOTNET_INSTALL_DIR -Force | Out-Null
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/dotnet/cli/release/2.0.0/scripts/obtain/dotnet-install.ps1" -OutFile "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1"
+    '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 2.0.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
+
+nuget:
+  account_feed: false
+  project_feed: true
+  disable_publish_on_pr: true
 
 build_script:
   - cmd: |
