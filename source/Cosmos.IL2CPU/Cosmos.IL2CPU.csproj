@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>IL2CPU.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,13 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\XSharp\source\XSharp.Assembler\XSharp.Assembler.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
     <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
-    <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Debug.Symbols\Cosmos.Debug.Symbols.csproj" />
-    <ProjectReference Include="..\Cosmos.IL2CPU.API\Cosmos.IL2CPU.API.csproj" />
+    <ProjectReference Include="..\..\..\XSharp\source\XSharp.Assembler\XSharp.Assembler.csproj" />
     <ProjectReference Include="..\..\..\XSharp\source\XSharp\XSharp.csproj" />
+    <ProjectReference Include="..\Cosmos.Debug.Symbols\Cosmos.Debug.Symbols.csproj" />
+    <ProjectReference Include="..\Cosmos.IL2CPU.API\Cosmos.IL2CPU.API.csproj" />
   </ItemGroup>
 
 </Project>

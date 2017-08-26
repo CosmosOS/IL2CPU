@@ -5,7 +5,7 @@
         <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
         <DebugType>Full</DebugType>
         <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>IL2CPU.snk</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 

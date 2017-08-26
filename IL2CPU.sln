@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{D2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Build.Common", "..\Cosmos\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj", "{8F02A68D-1C14-4665-A41E-076252F2055E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Debug.Symbols", "..\Cosmos\source\Cosmos.Debug.Symbols\Cosmos.Debug.Symbols.csproj", "{8037EF30-3CC2-4555-ACF0-8392250FAE2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Debug.Symbols", "source\Cosmos.Debug.Symbols\Cosmos.Debug.Symbols.csproj", "{8037EF30-3CC2-4555-ACF0-8392250FAE2C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{46490D36-261E-4D53-85BA-D4F71F09373C}"
 EndProject
