@@ -28,13 +28,11 @@ namespace Cosmos.IL2CPU.X86.IL
             switch (xSourceSize)
             {
                 case 1:
-                    throw new Exception("Cosmos.IL2CPU.x86->IL->Conv_I4.cs->The size 1 could not exist, because always is pushed Int32 or Int64!");
                 case 2:
-                    //throw new Exception("Cosmos.IL2CPU.x86->IL->Conv_I4.cs->The size 2 could not exist, because always is pushed Int32 or Int64!");
                 case 4:
                     {
-						if (xSourceIsFloat)
-						{
+						            if (xSourceIsFloat)
+						            {
                             XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
                             XS.SSE.ConvertSS2SIAndTruncate(EAX, XMM0);
                             XS.Set(ESP, EAX, destinationIsIndirect: true);
@@ -43,18 +41,25 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                 case 8:
                     {
-						if (xSourceIsFloat)
-						{
+						            if (xSourceIsFloat)
+						            {
                             XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
                             XS.SSE2.ConvertSD2SIAndTruncate(EAX, XMM0);
                             XS.Set(ESP, EAX, destinationIsIndirect: true);
                         }
 
-                        XS.Pop(XSRegisters.EAX);
-                        XS.Add(XSRegisters.ESP, 4);
-                        XS.Push(XSRegisters.EAX);
+                        if (TypeIsReferenceType(xSource))
+                        {
+                            XS.Add(ESP, 4);
+                        }
+                        else
+                        {
+                            XS.Pop(EAX);
+                            XS.Add(ESP, 4);
+                            XS.Push(EAX);
+                        }
+                        
                         break;
-
                     }
                 default:
                     //EmitNotImplementedException( Assembler, GetServiceProvider(), "Conv_I4: SourceSize " + xSource + " not yet supported!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel );
