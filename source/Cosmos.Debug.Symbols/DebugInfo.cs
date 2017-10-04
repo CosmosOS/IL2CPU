@@ -769,6 +769,11 @@ namespace Cosmos.Debug.Symbols
 
             return address;
         }
+        
+        public Document GetDocumentById(long aDocumentId)
+        {
+            return mConnection.Get<Document>(aDocumentId);
+        }
 
         public MethodIlOp GetFirstMethodIlOpByMethodIdAndILOffset(long aMethodId, long aILOffset)
         {
