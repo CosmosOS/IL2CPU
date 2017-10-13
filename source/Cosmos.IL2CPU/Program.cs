@@ -14,15 +14,15 @@ namespace Cosmos.IL2CPU
         {
             if (args == null)
             {
-                throw new ArgumentNullException("args");
+                throw new ArgumentNullException(nameof(args));
             }
             if (logMessage == null)
             {
-                throw new ArgumentNullException("logMessage");
+                throw new ArgumentNullException(nameof(logMessage));
             }
             if (logError == null)
             {
-                throw new ArgumentNullException("logError");
+                throw new ArgumentNullException(nameof(logError));
             }
 
             try

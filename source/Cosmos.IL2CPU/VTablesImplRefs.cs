@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Cosmos.IL2CPU {
 	public static class VTablesImplRefs {
-		public static readonly Assembly RuntimeAssemblyDef;
 		public static readonly Type VTablesImplDef;
 		public static readonly MethodBase SetTypeInfoRef;
 		public static readonly MethodBase SetMethodInfoRef;
