@@ -10,7 +10,7 @@
         <Authors>Cosmos</Authors>
         <Company>Cosmos</Company>
         <Copyright>Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
-        <!--<PackageIconUrl></PackageIconUrl>-->
+        <PackageIconUrl>https://github.com/CosmosOS/IL2CPU/raw/master/IL2CPU_128x128.png</PackageIconUrl>
         <PackageProjectUrl>http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
