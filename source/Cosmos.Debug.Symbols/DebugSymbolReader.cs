@@ -187,7 +187,10 @@ namespace Cosmos.Debug.Symbols
             List<ILLocalVariable> xLocalVariablesFromPdb = null;
             try
             {
-                xLocalVariablesFromPdb = mCurrentDebugSymbolReader.mSymbolReader.GetLocalVariableNamesForMethod(aMethodBase.MetadataToken).ToList();
+                if (mCurrentDebugSymbolReader?.mSymbolReader != null)
+                {
+                    xLocalVariablesFromPdb = mCurrentDebugSymbolReader.mSymbolReader.GetLocalVariableNamesForMethod(aMethodBase.MetadataToken).ToList();
+                }
             }
             catch (Exception)
             {

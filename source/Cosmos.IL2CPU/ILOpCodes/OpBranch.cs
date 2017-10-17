@@ -7,12 +7,15 @@ using System.Reflection.Metadata;
 using System.Text;
 
 
-namespace Cosmos.IL2CPU.ILOpCodes {
-  public class OpBranch : ILOpCode {
+namespace Cosmos.IL2CPU.ILOpCodes
+{
+  public class OpBranch : ILOpCode
+  {
     public readonly int Value;
 
     public OpBranch(Code aOpCode, int aPos, int aNextPos, int aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
-      : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
+      : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
+    {
       Value = aValue;
     }
 
@@ -109,7 +112,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
             return;
           }
           // ECMA apparently sees a boolean on the stack as a native int. We push as boolean, so acccept that as well
-          if (xPopType == typeof (bool))
+          if (xPopType == typeof(bool))
           {
             return;
           }
@@ -151,7 +154,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
             return;
           }
           if ((xValue1 == typeof(int) && xValue2 == typeof(IntPtr))
-            ||(xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
+              || (xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
           {
             return;
           }
@@ -162,19 +165,25 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           }
 
           if ((xValue1 == typeof(long) && xValue2 == typeof(ulong))
-            || (xValue1 == typeof(ulong) && xValue2 == typeof(long)))
+              || (xValue1 == typeof(ulong) && xValue2 == typeof(long)))
           {
             return;
           }
 
           if ((xValue1 == typeof(int) && xValue2 == typeof(bool))
-            || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
+              || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
           {
             return;
           }
-          
+
           if (xValue1.GetTypeInfo().IsClass &&
               xValue2.GetTypeInfo().IsClass)
+          {
+            return;
+          }
+
+          if (xValue1.IsInterface && xValue1.IsAssignableFrom(xValue2) ||
+              xValue2.IsInterface && xValue2.IsAssignableFrom(xValue1))
           {
             return;
           }
