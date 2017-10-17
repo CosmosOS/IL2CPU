@@ -1,5 +1,3 @@
-using System.Reflection;
-
 using CPU = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
 using Cosmos.IL2CPU.API;
@@ -29,8 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Set(XSRegisters.EAX, XSRegisters.EAX, sourceIsIndirect: true);
       XS.Push(XSRegisters.EAX, isIndirect: true);
       XS.Push(xTypeID, isIndirect: true);
-      MethodBase xMethodIsInstance = ReflectionUtilities.GetMethodBase(typeof(VTablesImpl), "IsInstance", "System.UInt32", "System.UInt32");
-      Call.DoExecute(Assembler, aMethod, xMethodIsInstance, aOpCode, GetLabel(aMethod, aOpCode), xBaseLabel + "_After_IsInstance_Call", DebugEnabled);
+      Call.DoExecute(Assembler, aMethod, VTablesImplRefs.IsInstanceRef, aOpCode, GetLabel(aMethod, aOpCode), xBaseLabel + "_After_IsInstance_Call", DebugEnabled);
       XS.Label(xBaseLabel + "_After_IsInstance_Call");
       XS.Pop(XSRegisters.EAX);
       XS.Compare(XSRegisters.EAX, 0);

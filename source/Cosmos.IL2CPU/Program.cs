@@ -5,9 +5,6 @@ namespace Cosmos.IL2CPU
 {
     public class Program
     {
-        public const string CosmosRoot = "";
-        private const string KernelFile = CosmosRoot + "";
-        private const string OutputFile = CosmosRoot + "";
         private static Dictionary<string, string> CmdOptions = new Dictionary<string, string>();
         private static List<string> References = new List<string>();
         private static List<string> AdditionalReferences = new List<string>();
@@ -17,15 +14,15 @@ namespace Cosmos.IL2CPU
         {
             if (args == null)
             {
-                throw new ArgumentNullException("args");
+                throw new ArgumentNullException(nameof(args));
             }
             if (logMessage == null)
             {
-                throw new ArgumentNullException("logMessage");
+                throw new ArgumentNullException(nameof(logMessage));
             }
             if (logError == null)
             {
-                throw new ArgumentNullException("logError");
+                throw new ArgumentNullException(nameof(logError));
             }
 
             try
@@ -96,13 +93,11 @@ namespace Cosmos.IL2CPU
                 if (xEngine.Execute())
                 {
                     logMessage("Executed OK");
-                    //          File.WriteAllText(@"e:\compiler.log", "OK");
                     return 0;
                 }
                 else
                 {
                     logMessage("Errored");
-                    //          File.WriteAllText(@"e:\compiler.log", "Errored");
                     return 2;
                 }
             }

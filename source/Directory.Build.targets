@@ -11,7 +11,7 @@
         <Company>Cosmos</Company>
         <Copyright>Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
         <!--<PackageIconUrl></PackageIconUrl>-->
-        <PackageProjectUrl>http://www.gocosmos.org/il2cpu/</PackageProjectUrl>
+        <PackageProjectUrl>http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
         <RepositoryUrl>https://github.com/CosmosOS/IL2CPU</RepositoryUrl>

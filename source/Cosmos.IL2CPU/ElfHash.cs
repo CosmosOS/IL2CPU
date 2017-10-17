@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Security.Cryptography;
 
 namespace Cosmos.IL2CPU
 {
     public class Elf32 : HashAlgorithm
     {
-        // TODO: Review this when we start using .NET Standard 2.0
-        protected byte[] HashValue;
-
         private UInt32 hash;
 
         public Elf32()
@@ -63,20 +57,18 @@ namespace Cosmos.IL2CPU
 
         private byte[] UInt32ToBigEndianBytes(UInt32 x)
         {
-            return new byte[] {
-			(byte)((x >> 24) & 0xff),
-			(byte)((x >> 16) & 0xff),
-			(byte)((x >> 8) & 0xff),
-			(byte)(x & 0xff)
-		};
+            return new byte[]
+            {
+			    (byte)((x >> 24) & 0xff),
+			    (byte)((x >> 16) & 0xff),
+			    (byte)((x >> 8) & 0xff),
+			    (byte)(x & 0xff)
+		    };
         }
     }
 
     public class Elf64 : HashAlgorithm
     {
-        // TODO: Review this when we start using .NET Standard 2.0
-        protected byte[] HashValue;
-
         private UInt64 hash;
 
         public Elf64()
@@ -132,16 +124,15 @@ namespace Cosmos.IL2CPU
         {
             return new byte[]
             {
-            (byte)((x >> 56) & 0xff),
-            (byte)((x >> 48) & 0xff),
-            (byte)((x >> 40) & 0xff),
-            (byte)((x >> 32) & 0xff),
-            (byte)((x >> 24) & 0xff),
-			(byte)((x >> 16) & 0xff),
-			(byte)((x >> 8) & 0xff),
-			(byte)(x & 0xff)
-		};
+                (byte)((x >> 56) & 0xff),
+                (byte)((x >> 48) & 0xff),
+                (byte)((x >> 40) & 0xff),
+                (byte)((x >> 32) & 0xff),
+                (byte)((x >> 24) & 0xff),
+			    (byte)((x >> 16) & 0xff),
+			    (byte)((x >> 8) & 0xff),
+			    (byte)(x & 0xff)
+		    };
         }
     }
-
 }
