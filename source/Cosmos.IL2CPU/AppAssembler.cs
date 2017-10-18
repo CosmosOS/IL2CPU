@@ -303,11 +303,11 @@ namespace Cosmos.IL2CPU
             }
             var xMethodLabel = ILOp.GetLabel(aMethod);
             //if (aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
-            //{
-            //    XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
-            //    XS.Comment("Following code is for debugging. Adjust accordingly!");
-            //    XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
-            //}
+            {
+                XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
+                XS.Comment("Following code is for debugging. Adjust accordingly!");
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
+            }
 
             XS.Set(ECX, 0);
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
