@@ -1,17 +1,13 @@
-using System;
-using System.Linq;
 using Cosmos.IL2CPU.ILOpCodes;
+using System;
 // using System.Collections.Generic;
 // using System.IO;
 // using System.Linq;
 //
 // using IL2CPU=Cosmos.IL2CPU;
-using CPU = XSharp.Assembler.x86;
-using CPUx86 = XSharp.Assembler.x86;
 using System.Reflection;
-using XSharp.Assembler;
-
 using XSharp;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -48,7 +44,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (aType != null)
                 {
-                    if (TypeIsReferenceType(aType))
+                    if (IsReferenceType(aType))
                     {
                         xExtraStackSize -= GetObjectReferenceSize();
                     }
@@ -59,7 +55,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    if (TypeIsReferenceType(aMethod.DeclaringType))
+                    if (IsReferenceType(aMethod.DeclaringType))
                     {
                         xExtraStackSize -= GetObjectReferenceSize();
                     }
@@ -112,7 +108,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     xThisOffset += Align(SizeOfType(xItem.ParameterType), 4);
                 }
                 var stackOffsetToCheck = xThisOffset;
-                if (TypeIsReferenceType(aTargetMethod.DeclaringType))
+                if (IsReferenceType(aTargetMethod.DeclaringType))
                 {
                     DoNullReferenceCheck(Assembler, debugEnabled, (int)stackOffsetToCheck + 4);
                 }

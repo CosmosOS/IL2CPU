@@ -206,11 +206,11 @@ namespace Cosmos.IL2CPU
                             }
                             else
                             {
-                                xScanner.QueueMethod(xKernelCtor.DeclaringType.GetTypeInfo().BaseType.GetTypeInfo().GetMethod(UseGen3Kernel ? "EntryPoint" : "Start"));
+                                xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod(UseGen3Kernel ? "EntryPoint" : "Start"));
                                 xScanner.Execute(xKernelCtor);
                             }
 
-                            //AppAssemblerRingsCheck.Execute(xScanner, xKernelCtor.DeclaringType.GetTypeInfo().Assembly);
+                            //AppAssemblerRingsCheck.Execute(xScanner, xKernelCtor.DeclaringType.Assembly);
 
                             using (var xOut = new StreamWriter(File.Create(OutputFilename), Encoding.ASCII, 128 * 1024))
                             {
@@ -357,20 +357,18 @@ namespace Cosmos.IL2CPU
 
                     foreach (var xType in xAssembly.ExportedTypes)
                     {
-                        var xTypeInfo = xType.GetTypeInfo();
-
-                        if (!xTypeInfo.IsGenericTypeDefinition && !xTypeInfo.IsAbstract)
+                        if (!xType.IsGenericTypeDefinition && !xType.IsAbstract)
                         {
                             CompilerHelpers.Debug($"Checking type {xType.FullName}");
 
                             // We used to resolve with this:
-                            //   if (xType.GetTypeInfo().IsSubclassOf(typeof(Cosmos.System.Kernel))) {
+                            //   if (xType.IsSubclassOf(typeof(Cosmos.System.Kernel))) {
                             // But this caused a single dependency on Cosmos.System which is bad.
                             // We could use an attribute, or maybe an interface would be better in this limited case. Interface
                             // will force user to implement what is needed if replacing our core. But in the end this is a "not needed" feature
                             // and would only complicate things.
                             // So for now at least, we look by name so we dont have a dependency since the method returns a MethodBase and not a Kernel instance anyway.
-                            if (xTypeInfo.BaseType.FullName == xKernelBaseName)
+                            if (xType.BaseType.FullName == xKernelBaseName)
                             {
                                 if (xKernelType != null)
                                 {
@@ -389,7 +387,7 @@ namespace Cosmos.IL2CPU
                 LogError("No kernel found.");
                 return null;
             }
-            var xCtor = xKernelType.GetTypeInfo().GetConstructor(Type.EmptyTypes);
+            var xCtor = xKernelType.GetConstructor(Type.EmptyTypes);
             if (xCtor == null)
             {
                 LogError("Kernel has no public parameterless constructor.");
@@ -427,11 +425,11 @@ namespace Cosmos.IL2CPU
 
                 foreach (var xType in aAssembly.GetTypes())
                 {
-                    var xForceIncludeAttribute = xType.GetTypeInfo().GetCustomAttribute<ForceInclude>();
+                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceInclude>();
 
                     if (xForceIncludeAttribute != null)
                     {
-                        ForceInclude(xType.GetTypeInfo(), xForceIncludeAttribute);
+                        ForceInclude(xType, xForceIncludeAttribute);
                     }
 
                     foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
@@ -534,20 +532,18 @@ namespace Cosmos.IL2CPU
 
         private void ForceInclude(MemberInfo aMemberInfo, ForceInclude aForceIncludeAttribute)
         {
-            if (aMemberInfo is TypeInfo)
+            if (aMemberInfo is Type)
             {
                 mForceIncludes.Add(aMemberInfo);
 
-                var xTypeInfo = (TypeInfo)aMemberInfo;
+                var xType = (Type)aMemberInfo;
 
-                foreach (var xMethod in xTypeInfo.GetMethods(
-                            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                foreach (var xMethod in xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
                     mForceIncludes.Add(xMethod);
                 }
 
-                foreach (var xMethod in xTypeInfo.GetMethods(
-                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
                     if (!xMethod.IsSpecialName)
                     {

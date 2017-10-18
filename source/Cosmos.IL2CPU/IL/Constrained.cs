@@ -1,6 +1,5 @@
 using Cosmos.IL2CPU.ILOpCodes;
 using System;
-using System.Reflection;
 using XSharp;
 using XSharp.Assembler;
 
@@ -24,12 +23,12 @@ namespace Cosmos.IL2CPU.X86.IL
       var xType = aTargetType.Value;
 
       XS.Comment($"Type = {aTargetType.Value}");
-      if (xType.GetTypeInfo().BaseType == typeof(ValueType) || xType.GetTypeInfo().IsValueType || xType == typeof(string))
+      if (xType.BaseType == typeof(ValueType) || xType.IsValueType || xType == typeof(string))
       {
         return;
       }
 
-      if (xType.GetTypeInfo().BaseType == typeof(object))
+      if (xType.BaseType == typeof(object))
       {
         throw new NotImplementedException($"Constrained not implemented for {aTargetType.Value}");
       }

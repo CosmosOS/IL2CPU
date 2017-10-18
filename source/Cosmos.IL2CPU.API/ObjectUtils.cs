@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 
 namespace Cosmos.IL2CPU.API
 {
@@ -39,15 +38,15 @@ namespace Cosmos.IL2CPU.API
       {
         return false;
       }
-      if (aType.GetTypeInfo().BaseType.FullName == "System.Delegate")
+      if (aType.BaseType.FullName == "System.Delegate")
       {
         return true;
       }
-      if (aType.GetTypeInfo().BaseType.FullName == "System.Object")
+      if (aType.BaseType.FullName == "System.Object")
       {
         return false;
       }
-      return IsDelegate(aType.GetTypeInfo().BaseType);
+      return IsDelegate(aType.BaseType);
     }
 
     public static bool IsArray(Type aType)
@@ -56,15 +55,15 @@ namespace Cosmos.IL2CPU.API
       {
         return false;
       }
-      if (aType.GetTypeInfo().BaseType.FullName == "System.Array")
+      if (aType.BaseType.FullName == "System.Array")
       {
         return true;
       }
-      if (aType.GetTypeInfo().BaseType.FullName == "System.Object")
+      if (aType.BaseType.FullName == "System.Object")
       {
         return false;
       }
-      return IsArray(aType.GetTypeInfo().BaseType);
+      return IsArray(aType.BaseType);
     }
   }
 }

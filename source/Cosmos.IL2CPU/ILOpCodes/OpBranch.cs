@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text;
 
 
 namespace Cosmos.IL2CPU.ILOpCodes
@@ -103,11 +101,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xPopType.GetTypeInfo().IsClass)
+          if (xPopType.IsClass)
           {
             return;
           }
-          if (xPopType.GetTypeInfo().IsInterface)
+          if (xPopType.IsInterface)
           {
             return;
           }
@@ -176,8 +174,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
 
-          if (xValue1.GetTypeInfo().IsClass &&
-              xValue2.GetTypeInfo().IsClass)
+          if (xValue1.IsClass &&
+              xValue2.IsClass)
           {
             return;
           }

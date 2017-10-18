@@ -1,12 +1,12 @@
 using Cosmos.IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
-using XSharp.Assembler;
-using CPUx86 = XSharp.Assembler.x86;
-using Cosmos.IL2CPU.ILOpCodes;
 using System.Reflection;
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -41,7 +41,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
             }
 
-            if (objectType.GetTypeInfo().IsValueType)
+            if (objectType.IsValueType)
             {
                 #region Valuetypes
 
@@ -71,8 +71,6 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     throw new Exception("ValueType storage size cannot be 0.");
                 }
-
-                //var xStorageSize = aCtorDeclTypeInfo.StorageSize;
 
                 uint xArgSize = 0;
                 var xParameterList = constructor.GetParameters();

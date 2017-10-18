@@ -120,8 +120,6 @@ namespace Cosmos.IL2CPU
           ;
       }
       var xCurrentType = aType;
-      DebugHex("Type", xCurrentType);
-      DebugHex("MethodId", aMethodId);
       do
       {
         DebugHex("Now checking type", xCurrentType);

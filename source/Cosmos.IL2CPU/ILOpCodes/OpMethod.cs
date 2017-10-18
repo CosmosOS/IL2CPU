@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text;
 
 
-namespace Cosmos.IL2CPU.ILOpCodes {
-  public class OpMethod: ILOpCode {
+namespace Cosmos.IL2CPU.ILOpCodes
+{
+  public class OpMethod : ILOpCode
+  {
     public MethodBase Value;
     public uint ValueUID;
     public MethodBase BaseMethod;
     public uint BaseMethodUID;
 
     public OpMethod(Code aOpCode, int aPos, int aNextPos, MethodBase aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
-      : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
+      : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
+    {
       Value = aValue;
     }
 
@@ -50,7 +49,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         case Code.Call:
         case Code.Callvirt:
           var methodInfo = Value as MethodInfo;
-          if (methodInfo != null && methodInfo.ReturnType != typeof (void))
+          if (methodInfo != null && methodInfo.ReturnType != typeof(void))
           {
             return 1;
           }
@@ -79,9 +78,9 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           if (xMethodInfo != null && xMethodInfo.ReturnType != typeof(void))
           {
             StackPushTypes[0] = xMethodInfo.ReturnType;
-            if (StackPushTypes[0].GetTypeInfo().IsEnum)
+            if (StackPushTypes[0].IsEnum)
             {
-              StackPushTypes[0] = StackPushTypes[0].GetTypeInfo().GetEnumUnderlyingType();
+              StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
             }
           }
           break;
@@ -99,14 +98,14 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         //  break;
         case Code.Newobj:
           StackPushTypes[0] = Value.DeclaringType;
-        //  xParams = Value.GetParameters();
-        //  for (int i = 0; i < xParams.Length; i++)
-        //  {
-        //    StackPopTypes[i] = xParams[i].ParameterType;
-        //  }
+          //  xParams = Value.GetParameters();
+          //  for (int i = 0; i < xParams.Length; i++)
+          //  {
+          //    StackPopTypes[i] = xParams[i].ParameterType;
+          //  }
           break;
         case Code.Ldftn:
-          StackPushTypes[0] = typeof (IntPtr);
+          StackPushTypes[0] = typeof(IntPtr);
           return;
 
         default:

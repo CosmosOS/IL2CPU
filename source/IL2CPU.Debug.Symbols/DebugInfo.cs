@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Dapper;
+using DapperExtensions;
+using DapperExtensions.Mapper;
+using DapperExtensions.Sql;
+using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Data.Sqlite;
-
-using Dapper;
-using DapperExtensions;
-using DapperExtensions.Mapper;
-using DapperExtensions.Sql;
 
 namespace Cosmos.Debug.Symbols
 {
@@ -244,7 +243,7 @@ namespace Cosmos.Debug.Symbols
         protected List<string> local_MappingTypeNames = new List<string>();
         public void WriteFieldMappingToFile(IEnumerable<Field_Map> aMapping)
         {
-            var xMaps = aMapping.Where(delegate(Field_Map mp)
+            var xMaps = aMapping.Where(delegate (Field_Map mp)
             {
                 if (local_MappingTypeNames.Contains(mp.TypeName))
                 {
@@ -352,7 +351,7 @@ namespace Cosmos.Debug.Symbols
         // that a breakpoint can occur one. Essentially, an atomic source line in C#
         public SequencePoint[] GetSequencePoints(MethodBase aMethod, bool aFilterHiddenLines = false)
         {
-            return GetSequencePoints(aMethod.DeclaringType.GetTypeInfo().Assembly.Location, aMethod.MetadataToken, aFilterHiddenLines);
+            return GetSequencePoints(aMethod.DeclaringType.Assembly.Location, aMethod.MetadataToken, aFilterHiddenLines);
         }
 
         public SequencePoint[] GetSequencePoints(string aAsmPathname, int aMethodToken, bool aFilterHiddenLines = false)
@@ -461,7 +460,7 @@ namespace Cosmos.Debug.Symbols
                     using (var xBulkCopy = new SqliteBulkCopy(mConnection))
                     {
                         xBulkCopy.DestinationTableName = aTableName;
-#region debug
+                        #region debug
                         // for now dump to disk:
                         //using (var reader = new ObjectReader<T>(aList.ToArray()))
                         //{
@@ -498,7 +497,7 @@ namespace Cosmos.Debug.Symbols
                         //    }
                         //  }
                         //}
-#endregion region debug
+                        #endregion region debug
                         //using (var db = DB())
                         //{
                         //    db.Set(typeof(T)).AddRange(aList);
@@ -582,14 +581,14 @@ namespace Cosmos.Debug.Symbols
             var xFirst = mConnection.Get<Label>(xMethod.LabelStartID);
             var xLast = mConnection.Get<Label>(xMethod.LabelEndID);
             var xTemp = mConnection.GetList<Label>(new PredicateGroup()
-                                                   {
-                                                       Operator = GroupOperator.And,
-                                                       Predicates = new List<IPredicate>()
+            {
+                Operator = GroupOperator.And,
+                Predicates = new List<IPredicate>()
                                                        {
                                                            Predicates.Field<Label>(q => q.Address, Operator.Ge, xFirst.Address),
                                                            Predicates.Field<Label>(q => q.Address, Operator.Le, xLast.Address)
                                                        }
-                                                   }).ToArray();
+            }).ToArray();
             var xResult = new List<Label>(xTemp.Length);
 
             //There are always two END__OF__METHOD_EXCEPTION__2 labels at the end of the method footer.
@@ -687,7 +686,7 @@ namespace Cosmos.Debug.Symbols
 
                             if (xRow != null)
                             {
-                                uint xAddress = (uint) xRow.Address;
+                                uint xAddress = (uint)xRow.Address;
                                 // Each address could have mult labels, but this wont matter for SourceInfo, its not tied to label.
                                 // So we just ignore duplicate addresses.
                                 if (!xResult.ContainsKey(xAddress))
@@ -769,7 +768,7 @@ namespace Cosmos.Debug.Symbols
 
             return address;
         }
-        
+
         public Document GetDocumentById(long aDocumentId)
         {
             return mConnection.Get<Document>(aDocumentId);
@@ -779,14 +778,14 @@ namespace Cosmos.Debug.Symbols
         {
             //Debug("GetFirstMethodIlOpByMethodIdAndILOffset. MethodID = {0}, ILOffset = 0x{1}", aMethodId, aILOffset.ToString("X4"));
             var xResult = mConnection.GetList<MethodIlOp>(new PredicateGroup
-                                                          {
-                                                              Operator = GroupOperator.And,
-                                                              Predicates = new List<IPredicate>()
+            {
+                Operator = GroupOperator.And,
+                Predicates = new List<IPredicate>()
                                                               {
                                                                   Predicates.Field<MethodIlOp>(q => q.MethodID, Operator.Eq, aMethodId),
                                                                   Predicates.Field<MethodIlOp>(q => q.IlOffset, Operator.Eq, aILOffset)
                                                               }
-                                                          }).First();
+            }).First();
             //Debug("Result.LabelName = '{0}'", xResult.LabelName);
             return xResult;
         }
@@ -795,15 +794,15 @@ namespace Cosmos.Debug.Symbols
         {
             //Debug("GetMethodByDocumentIDAndLinePosition. DocID = {0}, StartPos = {1}, EndPos = {2}", aDocID, aStartPos, aEndPos);
             var xResult = mConnection.GetList<Method>(new PredicateGroup
-                                                      {
-                                                        Operator = GroupOperator.And,
-                                                        Predicates = new List<IPredicate>()
+            {
+                Operator = GroupOperator.And,
+                Predicates = new List<IPredicate>()
                                                                      {
                                                                         Predicates.Field<Method>(q => q.DocumentID, Operator.Eq, aDocID),
                                                                         Predicates.Field<Method>(q => q.LineColStart, Operator.Le, aStartPos),
                                                                         Predicates.Field<Method>(q => q.LineColEnd, Operator.Ge, aEndPos)
                                                                      }
-                                                      }).Single();
+            }).Single();
             //Debug("Result.LabelCall = '{0}'", xResult.LabelCall);
             return xResult;
         }

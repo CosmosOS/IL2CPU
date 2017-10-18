@@ -1,7 +1,6 @@
+using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Reflection;
-
-using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using static XSharp.XSRegisters;
 
@@ -17,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      var xOpVar = (OpVar) aOpCode;
+      var xOpVar = (OpVar)aOpCode;
       DoExecute(Assembler, aMethod, xOpVar.Value);
     }
 
@@ -61,7 +60,7 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         // return the this parameter, which is not in .GetParameters()
         uint xCurArgSize;
-        if (xMethodBase.DeclaringType.GetTypeInfo().IsValueType)
+        if (xMethodBase.DeclaringType.IsValueType)
         {
           // value types get a reference passed to the actual value, so pointer:
           xCurArgSize = 4;
@@ -90,7 +89,7 @@ namespace Cosmos.IL2CPU.X86.IL
           xOffset += xExtraSize;
         }
 
-        return (int) (xOffset + xCurArgSize - 4);
+        return (int)(xOffset + xCurArgSize - 4);
       }
       else
       {
@@ -114,7 +113,7 @@ namespace Cosmos.IL2CPU.X86.IL
           uint xExtraSize = xReturnSize - xArgSize;
           xOffset += xExtraSize;
         }
-        return (int) (xOffset + xCurArgSize - 4);
+        return (int)(xOffset + xCurArgSize - 4);
       }
     }
 
@@ -161,7 +160,7 @@ namespace Cosmos.IL2CPU.X86.IL
         if (aParam == 0u)
         {
           xArgType = aMethod.MethodBase.DeclaringType;
-          if (xArgType.GetTypeInfo().IsValueType)
+          if (xArgType.IsValueType)
           {
             xArgType = xArgType.MakeByRefType();
           }

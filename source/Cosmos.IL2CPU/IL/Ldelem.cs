@@ -1,4 +1,3 @@
-using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
 
@@ -14,9 +13,9 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      var xOpType = (OpType) aOpCode;
+      var xOpType = (OpType)aOpCode;
       var xSize = SizeOfType(xOpType.Value);
-      if (xOpType.Value.GetTypeInfo().IsValueType && !xOpType.Value.GetTypeInfo().IsPrimitive)
+      if (xOpType.Value.IsValueType && !xOpType.Value.IsPrimitive)
       {
         Ldelema.Assemble(Assembler, xOpType, xSize, DebugEnabled);
         Ldobj.DoAssemble(xOpType.Value);

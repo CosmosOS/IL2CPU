@@ -49,7 +49,7 @@ namespace Cosmos.IL2CPU
         protected HashSet<MethodBase> mVirtuals = new HashSet<MethodBase>();
 
         protected IDictionary<MethodBase, uint> mMethodUIDs = new Dictionary<MethodBase, uint>();
-        protected IDictionary<TypeInfo, uint> mTypeUIDs = new Dictionary<TypeInfo, uint>();
+        protected IDictionary<Type, uint> mTypeUIDs = new Dictionary<Type, uint>();
 
         protected PlugManager mPlugManager = null;
 
@@ -105,7 +105,7 @@ namespace Cosmos.IL2CPU
 
             //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
             //    && (xMemInfo.DeclaringType.FullName == "System.ThrowHelper")
-            //    && (xMemInfo.DeclaringType.GetTypeInfo().Assembly.GetName().Name != "mscorlib"))
+            //    && (xMemInfo.DeclaringType.Assembly.GetName().Name != "mscorlib"))
             //{
             // System.ThrowHelper exists in MS .NET twice...
             // Its an internal class that exists in both mscorlib and system assemblies.
@@ -213,7 +213,7 @@ namespace Cosmos.IL2CPU
             mPlugManager.ScanFoundPlugs();
             foreach (var xPlug in mPlugManager.PlugImpls)
             {
-                CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.GetTypeInfo().Assembly.FullName}'");
+                CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
             ILOp.mPlugManager = mPlugManager;
@@ -230,15 +230,15 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
-            Queue(typeof(ExceptionHelper).GetTypeInfo().GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetTypeInfo().GetMethod("ThrowOverflow", new Type[] { }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetTypeInfo().GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetTypeInfo().GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
+            Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
+            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", new Type[] { }, null), null, "Explicit Entry");
+            Queue(typeof(ExceptionHelper).GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
+            Queue(typeof(ExceptionHelper).GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
 
             // register system types:
-            Queue(typeof(Array).GetTypeInfo(), null, "Explicit Entry");
-            Queue(typeof(Array).GetTypeInfo().GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
-            Queue(typeof(MulticastDelegate).GetTypeInfo().GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(typeof(Array), null, "Explicit Entry");
+            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
@@ -261,7 +261,7 @@ namespace Cosmos.IL2CPU
         {
             foreach (var xBootEntry in aBootEntries)
             {
-                Queue(xBootEntry.DeclaringType.GetTypeInfo(), null, "Boot Entry Declaring Type");
+                Queue(xBootEntry.DeclaringType, null, "Boot Entry Declaring Type");
                 Queue(xBootEntry, null, "Boot Entry");
             }
 
@@ -277,7 +277,7 @@ namespace Cosmos.IL2CPU
             mPlugManager.ScanFoundPlugs();
             foreach (var xPlug in mPlugManager.PlugImpls)
             {
-                CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.GetTypeInfo().Assembly.FullName}'");
+                CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
             ILOp.mPlugManager = mPlugManager;
@@ -293,9 +293,9 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
-            Queue(typeof(Array).GetTypeInfo().GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
-            Queue(typeof(MulticastDelegate).GetTypeInfo().GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             // Exception support
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
 
@@ -445,7 +445,7 @@ namespace Cosmos.IL2CPU
             for (int i = 0; i < xParams.Length; i++)
             {
                 xParamTypes[i] = xParams[i].ParameterType;
-                Queue(xParamTypes[i].GetTypeInfo(), aMethod, "Parameter");
+                Queue(xParamTypes[i], aMethod, "Parameter");
             }
             var xIsDynamicMethod = aMethod.DeclaringType == null;
             // Queue Types directly related to method
@@ -455,12 +455,12 @@ namespace Cosmos.IL2CPU
                 if (!xIsDynamicMethod)
                 {
                     // dont queue declaring types of dynamic methods either, those dont have a declaring type
-                    Queue(aMethod.DeclaringType.GetTypeInfo(), aMethod, "Declaring Type");
+                    Queue(aMethod.DeclaringType, aMethod, "Declaring Type");
                 }
             }
             if (aMethod is MethodInfo)
             {
-                Queue(((MethodInfo)aMethod).ReturnType.GetTypeInfo(), aMethod, "Return Type");
+                Queue(((MethodInfo)aMethod).ReturnType, aMethod, "Return Type");
             }
             if (aMethod.GetFullName().IndexOf("Run", StringComparison.OrdinalIgnoreCase) != -1)
             {
@@ -483,7 +483,7 @@ namespace Cosmos.IL2CPU
                 MethodBase xNewVirtMethod;
                 while (true)
                 {
-                    xVirtType = xVirtType.GetTypeInfo().BaseType;
+                    xVirtType = xVirtType.BaseType;
                     if (xVirtType == null)
                     {
                         // We've reached object, can't go farther
@@ -535,7 +535,7 @@ namespace Cosmos.IL2CPU
                         if (mItemsList[i] is Type)
                         {
                             var xType = (Type)mItemsList[i];
-                            if (xType.GetTypeInfo().IsSubclassOf(xVirtMethod.DeclaringType) || (xVirtMethod.DeclaringType.GetTypeInfo().IsInterface && xVirtMethod.DeclaringType.GetTypeInfo().IsAssignableFrom(xType)))
+                            if (xType.IsSubclassOf(xVirtMethod.DeclaringType) || (xVirtMethod.DeclaringType.IsInterface && xVirtMethod.DeclaringType.IsAssignableFrom(xType)))
                             {
                                 var xNewMethod = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                                                       .Where(method => method.Name == aMethod.Name
@@ -630,13 +630,13 @@ namespace Cosmos.IL2CPU
                         }
                         else if (xOpCode is ILOpCodes.OpType)
                         {
-                            Queue(((ILOpCodes.OpType)xOpCode).Value.GetTypeInfo(), aMethod, "OpCode Value");
+                            Queue(((ILOpCodes.OpType)xOpCode).Value, aMethod, "OpCode Value");
                         }
                         else if (xOpCode is ILOpCodes.OpField)
                         {
                             var xOpField = (ILOpCodes.OpField)xOpCode;
                             //TODO: Need to do this? Will we get a ILOpCodes.OpType as well?
-                            Queue(xOpField.Value.DeclaringType.GetTypeInfo(), aMethod, "OpCode Value");
+                            Queue(xOpField.Value.DeclaringType, aMethod, "OpCode Value");
                             if (xOpField.Value.IsStatic)
                             {
                                 //TODO: Why do we add static fields, but not instance?
@@ -649,11 +649,11 @@ namespace Cosmos.IL2CPU
                             var xTokenOp = (ILOpCodes.OpToken)xOpCode;
                             if (xTokenOp.ValueIsType)
                             {
-                                Queue(xTokenOp.ValueType.GetTypeInfo(), aMethod, "OpCode Value");
+                                Queue(xTokenOp.ValueType, aMethod, "OpCode Value");
                             }
                             if (xTokenOp.ValueIsField)
                             {
-                                Queue(xTokenOp.ValueField.DeclaringType.GetTypeInfo(), aMethod, "OpCode Value");
+                                Queue(xTokenOp.ValueField.DeclaringType, aMethod, "OpCode Value");
                                 if (xTokenOp.ValueField.IsStatic)
                                 {
                                     //TODO: Why do we add static fields, but not instance?
@@ -667,7 +667,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        protected void ScanType(TypeInfo aType)
+        protected void ScanType(Type aType)
         {
             CompilerHelpers.Debug($"ILScanner: ScanType");
             CompilerHelpers.Debug($"Type = '{aType}'");
@@ -677,14 +677,14 @@ namespace Cosmos.IL2CPU
             // it will add its BaseType, and so on.
             if (aType.BaseType != null)
             {
-                Queue(aType.BaseType.GetTypeInfo(), aType, "Base Type");
+                Queue(aType.BaseType, aType, "Base Type");
             }
             // Queue static ctors
             // We always need static ctors, else the type cannot
             // be created.
             foreach (var xCctor in aType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
             {
-                if (xCctor.DeclaringType.GetTypeInfo() == aType)
+                if (xCctor.DeclaringType == aType)
                 {
                     Queue(xCctor, aType, "Static Constructor");
                 }
@@ -735,7 +735,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            foreach (var xInterface in aType.ImplementedInterfaces)
+            foreach (var xInterface in aType.GetInterfaces())
             {
                 Queue(xInterface, aType, "Implemented Interface");
             }
@@ -754,9 +754,9 @@ namespace Cosmos.IL2CPU
                     var xMethod = (MethodBase)xItem.Item;
                     ScanMethod(xMethod, false, xItem.SourceItem);
                 }
-                else if (xItem.Item is TypeInfo)
+                else if (xItem.Item is Type)
                 {
-                    var xType = (TypeInfo)xItem.Item;
+                    var xType = (Type)xItem.Item;
                     ScanType(xType);
 
                     // Methods and fields cant exist without types, so we only update
@@ -805,12 +805,12 @@ namespace Cosmos.IL2CPU
             //try {
             while (true)
             {
-                if (aCurrentInspectedType.GetTypeInfo().BaseType == null)
+                if (aCurrentInspectedType.BaseType == null)
                 {
                     break;
                 }
-                aCurrentInspectedType = aCurrentInspectedType.GetTypeInfo().BaseType;
-                MethodBase xFoundMethod = aCurrentInspectedType.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                aCurrentInspectedType = aCurrentInspectedType.BaseType;
+                MethodBase xFoundMethod = aCurrentInspectedType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                                                                              .Where(method => method.Name == aMethod.Name
                                                                                               && method.GetParameters().Select(param => param.ParameterType)
                                                                                                                        .SequenceEqual(aMethodParams))
@@ -891,7 +891,7 @@ namespace Cosmos.IL2CPU
             return mMethodUIDs[aMethod];
         }
 
-        protected uint GetTypeUID(TypeInfo aType)
+        protected uint GetTypeUID(Type aType)
         {
             if (!mItems.Contains(aType))
             {
@@ -1032,7 +1032,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            var xTypes = new HashSet<TypeInfo>();
+            var xTypes = new HashSet<Type>();
             var xMethods = new HashSet<MethodBase>();
             foreach (var xItem in mItems)
             {
@@ -1040,9 +1040,9 @@ namespace Cosmos.IL2CPU
                 {
                     xMethods.Add((MethodBase)xItem);
                 }
-                else if (xItem is TypeInfo)
+                else if (xItem is Type)
                 {
-                    xTypes.Add((TypeInfo)xItem);
+                    xTypes.Add((Type)xItem);
                 }
             }
 

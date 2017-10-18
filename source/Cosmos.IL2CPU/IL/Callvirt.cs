@@ -1,12 +1,12 @@
 using Cosmos.IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
-using CPU = XSharp.Assembler.x86;
-using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Assembler;
 using System.Reflection;
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
+using CPU = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -58,7 +58,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Comment("ThisOffset = " + xThisOffset);
 
-            if (TypeIsReferenceType(xPopType))
+            if (IsReferenceType(xPopType))
             {
                 DoNullReferenceCheck(Assembler, debugEnabled, (int)xThisOffset + 4);
             }
@@ -109,7 +109,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 XS.Label(xCurrentMethodLabel + ".AfterAddressCheck");
 
-                if (TypeIsReferenceType(xPopType))
+                if (IsReferenceType(xPopType))
                 {
                     /*
                     * On the stack now:

@@ -2,12 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Reflection;
 using System.Reflection.Emit;
 
 namespace Cosmos.Debug.Symbols
 {
-    public class ObjectReader<T>: IDataReader
+    public class ObjectReader<T> : IDataReader
     {
         private static readonly ConcurrentDictionary<string, Tuple<string[], Func<object, object>[]>> mInfo = new ConcurrentDictionary<string, Tuple<string[], Func<object, object>[]>>();
 
@@ -35,7 +34,7 @@ namespace Cosmos.Debug.Symbols
             else
             {
                 Console.WriteLine("Detecting fields for type '{0}'", typeof(T).FullName);
-                var props = typeof(T).GetTypeInfo().GetProperties();
+                var props = typeof(T).GetProperties();
                 var xGetters = new List<Func<object, object>>();
                 var xNames = new List<string>();
                 foreach (var prop in props)
@@ -47,7 +46,7 @@ namespace Cosmos.Debug.Symbols
                     gen.Emit(OpCodes.Ldarg_0);
                     gen.Emit(OpCodes.Castclass, typeof(T));
                     gen.Emit(OpCodes.Call, prop.GetGetMethod());
-                    if (prop.PropertyType.GetTypeInfo().IsPrimitive || prop.PropertyType.GetTypeInfo().IsValueType)
+                    if (prop.PropertyType.IsPrimitive || prop.PropertyType.IsValueType)
                     {
                         gen.Emit(OpCodes.Box, prop.PropertyType);
                     }
