@@ -39,7 +39,7 @@ namespace Cosmos.IL2CPU
 
         static ExceptionHelperRefs()
         {
-            CurrentExceptionRef = typeof(ExceptionHelper).GetTypeInfo().GetField("CurrentException");
+            CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
         }
     }
 }

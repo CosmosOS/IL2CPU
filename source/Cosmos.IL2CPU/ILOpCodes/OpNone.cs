@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 
 namespace Cosmos.IL2CPU.ILOpCodes
@@ -284,7 +283,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Ldelem_U4:
         case Code.Ldelem_R4:
         case Code.Ldelem_R8:
-            return 1;
+          return 1;
         case Code.Ldnull:
           return 1;
         case Code.Dup:
@@ -479,11 +478,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           StackPushTypes[0] = typeof(uint);
           return;
         case Code.Ldelem_R4:
-            StackPushTypes[0] = typeof(float);
-            return;
+          StackPushTypes[0] = typeof(float);
+          return;
         case Code.Ldelem_R8:
-            StackPushTypes[0] = typeof(double);
-            return;
+          StackPushTypes[0] = typeof(double);
+          return;
         case Code.Ldnull:
           StackPushTypes[0] = typeof(NullRef);
           return;
@@ -592,6 +591,20 @@ namespace Cosmos.IL2CPU.ILOpCodes
               || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(IntPtr)))
             {
               StackPushTypes[0] = typeof(byte*);
+              aSituationChanged = true;
+              return;
+            }
+            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(char*))
+                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(IntPtr)))
+            {
+              StackPushTypes[0] = typeof(char*);
+              aSituationChanged = true;
+              return;
+            }
+            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(char*))
+                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(UIntPtr)))
+            {
+              StackPushTypes[0] = typeof(char*);
               aSituationChanged = true;
               return;
             }

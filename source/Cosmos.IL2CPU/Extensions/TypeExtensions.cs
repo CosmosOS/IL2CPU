@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Cosmos.IL2CPU.Extensions
 {
@@ -33,7 +30,7 @@ namespace Cosmos.IL2CPU.Extensions
             {
                 return "&" + aType.GetElementType().GetFullName();
             }
-            if (aType.GetTypeInfo().IsGenericType)
+            if (aType.IsGenericType)
             {
                 xSB.Append(aType.GetGenericTypeDefinition().FullName);
             }
@@ -41,10 +38,10 @@ namespace Cosmos.IL2CPU.Extensions
             {
                 xSB.Append(aType.FullName);
             }
-            if (aType.GetTypeInfo().ContainsGenericParameters)
+            if (aType.ContainsGenericParameters)
             {
                 xSB.Append("<");
-                var xArgs = aType.GetTypeInfo().GetGenericArguments();
+                var xArgs = aType.GetGenericArguments();
                 for (int i = 0; i < xArgs.Length - 1; i++)
                 {
                     xSB.Append(GetFullName(xArgs[i]));

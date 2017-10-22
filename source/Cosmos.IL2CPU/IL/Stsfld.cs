@@ -1,12 +1,9 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler;
-using System.Reflection;
 using System.Linq;
-using System.Xml.Linq;
-
-using Cosmos.IL2CPU.ILOpCodes;
+using System.Reflection;
 using XSharp;
+using XSharp.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -23,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
       var xType = aMethod.MethodBase.DeclaringType;
       var xOpCode = (ILOpCodes.OpField)aOpCode;
       FieldInfo xField = xOpCode.Value;
-      var xIsReferenceType = TypeIsReferenceType(xField.FieldType);
+      var xIsReferenceType = IsReferenceType(xField.FieldType);
 
       // call cctor:
       var xCctor = (xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic)).SingleOrDefault();

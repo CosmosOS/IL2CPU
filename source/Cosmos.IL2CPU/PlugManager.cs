@@ -1,12 +1,12 @@
+using Cosmos.IL2CPU.API;
+using Cosmos.IL2CPU.API.Attribs;
+using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using XSharp.Assembler;
-using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.API;
-using Cosmos.IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
 {
@@ -93,7 +93,7 @@ namespace Cosmos.IL2CPU
                 foreach (var xPlugType in xAsm.GetTypes())
                 {
                     // Foreach, it is possible there could be one plug class with mult plug targets
-                    foreach (var xAttrib in xPlugType.GetTypeInfo().GetCustomAttributes<Plug>(false))
+                    foreach (var xAttrib in xPlugType.GetCustomAttributes<Plug>(false))
                     {
                         var xTargetType = xAttrib.Target;
                         // If no type is specified, try to find by a specified name.
@@ -117,27 +117,27 @@ namespace Cosmos.IL2CPU
                         // Only keep this plug if its for MS.NET.
                         // TODO: Integrate with builder options to allow Mono support again.
 
-                            Dictionary<Type, List<Type>> mPlugs;
-                            if (xTargetType.GetTypeInfo().ContainsGenericParameters)
-                            {
-                                mPlugs = xAttrib.Inheritable ? mGenericPlugImplsInhrt : mGenericPlugImpls;
-                            }
-                            else
-                            {
-                                mPlugs = xAttrib.Inheritable ? mPlugImplsInhrt : mPlugImpls;
-                            }
-                            List<Type> xImpls;
-                            if (mPlugs.TryGetValue(xTargetType, out xImpls))
-                            {
-                                xImpls.Add(xPlugType);
-                            }
-                            else
-                            {
-                                xImpls = new List<Type>();
-                                xImpls.Add(xPlugType);
-                                mPlugs.Add(xTargetType, xImpls);
-                            }
-                        
+                        Dictionary<Type, List<Type>> mPlugs;
+                        if (xTargetType.ContainsGenericParameters)
+                        {
+                            mPlugs = xAttrib.Inheritable ? mGenericPlugImplsInhrt : mGenericPlugImpls;
+                        }
+                        else
+                        {
+                            mPlugs = xAttrib.Inheritable ? mPlugImplsInhrt : mPlugImpls;
+                        }
+                        List<Type> xImpls;
+                        if (mPlugs.TryGetValue(xTargetType, out xImpls))
+                        {
+                            xImpls.Add(xPlugType);
+                        }
+                        else
+                        {
+                            xImpls = new List<Type>();
+                            xImpls.Add(xPlugType);
+                            mPlugs.Add(xTargetType, xImpls);
+                        }
+
                     }
                 }
             }
@@ -158,7 +158,7 @@ namespace Cosmos.IL2CPU
                 {
                     #region PlugMethods scan
 
-                    foreach (var xMethod in xImpl.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.Static))
+                    foreach (var xMethod in xImpl.GetMethods(BindingFlags.Public | BindingFlags.Static))
                     {
                         PlugMethod xAttrib = null;
                         foreach (PlugMethod x in xMethod.GetCustomAttributes(typeof(PlugMethod), false))
@@ -194,7 +194,7 @@ namespace Cosmos.IL2CPU
                                 }
                                 else
                                 {
-                                    var xParamTypes = xMethod.GetParameters().Select(delegate(ParameterInfo x)
+                                    var xParamTypes = xMethod.GetParameters().Select(delegate (ParameterInfo x)
                                     {
                                         var result = x.ParameterType;
                                         if (result.IsByRef)
@@ -208,14 +208,14 @@ namespace Cosmos.IL2CPU
                                         return result;
                                     }).ToArray();
 
-                                    var posMethods = xPlug.Key.GetTypeInfo().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+                                    var posMethods = xPlug.Key.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
                                                                             .Where(x => x.Name == xMethod.Name);
                                     foreach (MethodInfo posInf in posMethods)
                                     {
                                         // If static, no this param
                                         // Otherwise, take into account first param is this param
                                         //This param is either of declaring type, or ref to declaring type or pointer
-                                        var posMethParamTypes = posInf.GetParameters().Select(delegate(ParameterInfo x)
+                                        var posMethParamTypes = posInf.GetParameters().Select(delegate (ParameterInfo x)
                                         {
                                             var result = x.ParameterType;
                                             if (result.IsByRef)
@@ -289,7 +289,7 @@ namespace Cosmos.IL2CPU
                                             {
                                                 //We use IsAssignableFrom here because _some_ plugs decide to use more generic types for the
                                                 //this parameter
-                                                OK = xParamTypes[0] == null || xParamTypes[0].GetTypeInfo().IsAssignableFrom(posInf.DeclaringType);
+                                                OK = xParamTypes[0] == null || xParamTypes[0].IsAssignableFrom(posInf.DeclaringType);
                                             }
 
                                             if (!OK)
@@ -334,7 +334,7 @@ namespace Cosmos.IL2CPU
 
                     #region PlugFields scan
 
-                    foreach (var xField in xImpl.GetTypeInfo().GetCustomAttributes(typeof(PlugField), true).Cast<PlugField>())
+                    foreach (var xField in xImpl.GetCustomAttributes(typeof(PlugField), true).Cast<PlugField>())
                     {
                         IDictionary<string, PlugField> xFields = null;
                         if (!mPlugFields.TryGetValue(xPlug.Key, out xFields))
@@ -405,7 +405,7 @@ namespace Cosmos.IL2CPU
                 if (xResult == null)
                 {
                     // Search by signature
-                    foreach (var xSigMethod in xImpl.GetTypeInfo().GetMethods(BindingFlags.Static | BindingFlags.Public))
+                    foreach (var xSigMethod in xImpl.GetMethods(BindingFlags.Static | BindingFlags.Public))
                     {
                         // TODO: Only allow one, but this code for now takes the last one
                         // if there is more than one
@@ -425,9 +425,9 @@ namespace Cosmos.IL2CPU
                             }
                             else
                             {
-                                xTargetMethod = (from item in aTargetType.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-                                    where item.Name == xSigMethod.Name
-                                    select item).SingleOrDefault();
+                                xTargetMethod = (from item in aTargetType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+                                                 where item.Name == xSigMethod.Name
+                                                 select item).SingleOrDefault();
                             }
                             if (xTargetMethod == aMethod)
                             {
@@ -467,7 +467,7 @@ namespace Cosmos.IL2CPU
                                 var xReplaceType = xParams[0].GetCustomAttributes(typeof(FieldType), false).ToList();
                                 if (xReplaceType.Any())
                                 {
-                                    xTypesStatic[0] = Type.GetType(((FieldType) xReplaceType[0]).Name, true);
+                                    xTypesStatic[0] = Type.GetType(((FieldType)xReplaceType[0]).Name, true);
                                 }
                                 else
                                 {
@@ -488,7 +488,7 @@ namespace Cosmos.IL2CPU
                                     var xReplaceType = xParam.GetCustomAttributes(typeof(FieldType), false).ToList();
                                     if (xReplaceType.Any())
                                     {
-                                        xTypesInst[xCurIdx] = Type.GetType(((FieldType) xReplaceType[0]).Name, true);
+                                        xTypesInst[xCurIdx] = Type.GetType(((FieldType)xReplaceType[0]).Name, true);
                                     }
                                     else
                                         xTypesInst[xCurIdx] = xParam.ParameterType;
@@ -688,7 +688,7 @@ namespace Cosmos.IL2CPU
                 {
                     foreach (var xInheritable in mPlugImplsInhrt)
                     {
-                        if (aMethod.DeclaringType.GetTypeInfo().IsSubclassOf(xInheritable.Key))
+                        if (aMethod.DeclaringType.IsSubclassOf(xInheritable.Key))
                         {
                             xResult = ResolvePlug(aMethod.DeclaringType /*xInheritable.Key*/, xInheritable.Value, aMethod, aParamTypes);
                             if (xResult != null)
@@ -702,7 +702,7 @@ namespace Cosmos.IL2CPU
                 if (xResult == null)
                 {
                     xImpls = null;
-                    if (aMethod.DeclaringType.GetTypeInfo().IsGenericType)
+                    if (aMethod.DeclaringType.IsGenericType)
                     {
                         var xMethodDeclaringTypeDef = aMethod.DeclaringType.GetGenericTypeDefinition();
                         if (mGenericPlugImpls.TryGetValue(xMethodDeclaringTypeDef, out xImpls))
@@ -725,21 +725,21 @@ namespace Cosmos.IL2CPU
                             {
                                 xBindingFlagsToFindMethod |= BindingFlags.Instance;
                             }
-                            var xGenericMethod = (from item in xMethodDeclaringTypeDef.GetTypeInfo().GetMethods(xBindingFlagsToFindMethod)
-                                where item.Name == aMethod.Name && item.GetParameters().Length == aParamTypes.Length
-                                select item).SingleOrDefault();
+                            var xGenericMethod = (from item in xMethodDeclaringTypeDef.GetMethods(xBindingFlagsToFindMethod)
+                                                  where item.Name == aMethod.Name && item.GetParameters().Length == aParamTypes.Length
+                                                  select item).SingleOrDefault();
                             if (xGenericMethod != null)
                             {
                                 var xTempResult = ResolvePlug(xMethodDeclaringTypeDef, xImpls, xGenericMethod, aParamTypes);
 
                                 if (xTempResult != null)
                                 {
-                                    if (xTempResult.DeclaringType.GetTypeInfo().IsGenericTypeDefinition)
+                                    if (xTempResult.DeclaringType.IsGenericTypeDefinition)
                                     {
-                                        var xConcreteTempResultType = xTempResult.DeclaringType.MakeGenericType(aMethod.DeclaringType.GetTypeInfo().GetGenericArguments());
-                                        xResult = (from item in xConcreteTempResultType.GetTypeInfo().GetMethods(BindingFlags.Static | BindingFlags.Public)
-                                            where item.Name == aMethod.Name && item.GetParameters().Length == aParamTypes.Length
-                                            select item).SingleOrDefault();
+                                        var xConcreteTempResultType = xTempResult.DeclaringType.MakeGenericType(aMethod.DeclaringType.GetGenericArguments());
+                                        xResult = (from item in xConcreteTempResultType.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                                                   where item.Name == aMethod.Name && item.GetParameters().Length == aParamTypes.Length
+                                                   select item).SingleOrDefault();
                                     }
                                 }
                             }

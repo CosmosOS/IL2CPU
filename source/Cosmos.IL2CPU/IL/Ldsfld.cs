@@ -1,11 +1,10 @@
-using System;
-using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = XSharp.Assembler.x86;
-using System.Reflection;
+using System;
 using System.Linq;
-
+using System.Reflection;
 using XSharp;
+using XSharp.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -44,7 +43,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
       string xDataName = DataMember.GetStaticFieldName(xField);
 
-      var xTypeNeedsGC = TypeIsReferenceType(xField.FieldType);
+      var xTypeNeedsGC = IsReferenceType(xField.FieldType);
       if (xTypeNeedsGC)
       {
         XS.Push(xDataName, isIndirect: true, displacement: 4);

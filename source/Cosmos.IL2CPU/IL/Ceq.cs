@@ -1,15 +1,9 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using CPU = XSharp.Assembler.x86;
+using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
-using XSharp.Assembler.x86.SSE;
-using XSharp.Assembler.x86.x87;
-
-using Cosmos.IL2CPU.ILOpCodes;
-using XSharp;
-using static XSharp.XSRegisters;
 using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -69,21 +63,21 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         if (xStackItemIsFloat)
         {
-           // Please note that SSE supports double operations only from version 2
-           XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
-           // Increment ESP to get the value of the next double
-           XS.Add(ESP, 8);
-           XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
-           XS.SSE2.CompareSD(XMM1, XMM0, comparision: Equal);
-           XS.SSE2.MoveD(EBX, XMM1);
-           XS.And(EBX, 1);
-           // We need to move the stack pointer of 4 Byte to "eat" the second double that is yet in the stack or we get a corrupted stack!
-           XS.Add(ESP, 4);
-           XS.Set(ESP, EBX, destinationIsIndirect: true);
+          // Please note that SSE supports double operations only from version 2
+          XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
+          // Increment ESP to get the value of the next double
+          XS.Add(ESP, 8);
+          XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+          XS.SSE2.CompareSD(XMM1, XMM0, comparision: Equal);
+          XS.SSE2.MoveD(EBX, XMM1);
+          XS.And(EBX, 1);
+          // We need to move the stack pointer of 4 Byte to "eat" the second double that is yet in the stack or we get a corrupted stack!
+          XS.Add(ESP, 4);
+          XS.Set(ESP, EBX, destinationIsIndirect: true);
         }
         else
         {
-          if (TypeIsReferenceType(xStackItem) && TypeIsReferenceType(xStackItem2))
+          if (IsReferenceType(xStackItem) && IsReferenceType(xStackItem2))
           {
             XS.Comment(xStackItem.Name);
             XS.Add(ESP, 4);

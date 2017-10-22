@@ -1,26 +1,29 @@
+using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Linq;
 using System.Reflection;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler;
-
-using Cosmos.IL2CPU.Extensions;
 using XSharp;
+using CPUx86 = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL {
+namespace Cosmos.IL2CPU.X86.IL
+{
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stfld)]
-  public class Stfld : ILOp {
-    public Stfld(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr) {
+  public class Stfld : ILOp
+  {
+    public Stfld(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
+    {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
+    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    {
       var xOpCode = (ILOpCodes.OpField)aOpCode;
       var xField = xOpCode.Value;
       XS.Comment("Operand type: " + aOpCode.StackPopTypes[1].ToString());
-      DoExecute(Assembler, aMethod, xField, DebugEnabled, TypeIsReferenceType(aOpCode.StackPopTypes[1]));
+      DoExecute(Assembler, aMethod, xField, DebugEnabled, IsReferenceType(aOpCode.StackPopTypes[1]));
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, string aFieldId, Type aDeclaringObject, bool aNeedsGC, bool debugEnabled) {
+    public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, string aFieldId, Type aDeclaringObject, bool aNeedsGC, bool debugEnabled)
+    {
       var xType = aMethod.MethodBase.DeclaringType;
 
       var xFields = GetFieldsInfo(aDeclaringObject, false);
@@ -61,32 +64,38 @@ namespace Cosmos.IL2CPU.X86.IL {
       }
 
       //TODO: Can't we use an x86 op to do a byte copy instead and be faster?
-      for (int i = 0; i < (xSize / 4); i++) {
+      for (int i = 0; i < (xSize / 4); i++)
+      {
         XS.Pop(XSRegisters.EAX);
         XS.Set(XSRegisters.ECX, XSRegisters.EAX, destinationDisplacement: (int)((i * 4)));
       }
 
-      switch (xSize % 4) {
-        case 1: {
+      switch (xSize % 4)
+      {
+        case 1:
+          {
             XS.Pop(XSRegisters.EAX);
             new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4), SourceReg = CPUx86.RegistersEnum.AL };
             break;
           }
-        case 2: {
+        case 2:
+          {
             XS.Pop(XSRegisters.EAX);
             new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4), SourceReg = CPUx86.RegistersEnum.AX };
             break;
           }
-		    case 3: {
-				    XS.Pop(XSRegisters.EAX);
-				    // move 2 lower bytes
-				    new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4), SourceReg = CPUx86.RegistersEnum.AX };
-				    // shift third byte to lowest
-				    XS.ShiftRight(XSRegisters.EAX, 16);
-				    new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4) + 2, SourceReg = CPUx86.RegistersEnum.AL };
-				    break;
-			    }
-        case 0: {
+        case 3:
+          {
+            XS.Pop(XSRegisters.EAX);
+            // move 2 lower bytes
+            new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4), SourceReg = CPUx86.RegistersEnum.AX };
+            // shift third byte to lowest
+            XS.ShiftRight(XSRegisters.EAX, 16);
+            new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)((xSize / 4) * 4) + 2, SourceReg = CPUx86.RegistersEnum.AL };
+            break;
+          }
+        case 0:
+          {
             break;
           }
         default:
