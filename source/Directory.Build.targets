@@ -15,7 +15,6 @@
         <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
         <RepositoryUrl>https://github.com/CosmosOS/IL2CPU</RepositoryUrl>
-        <IL2CPUDescription>IL2CPU is a compiler for .NET IL code to compile to assembly language for direct booting.</IL2CPUDescription>
     </PropertyGroup>
 
 </Project>
