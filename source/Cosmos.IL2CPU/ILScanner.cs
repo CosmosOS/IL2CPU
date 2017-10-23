@@ -805,16 +805,34 @@ namespace Cosmos.IL2CPU
             //try {
             while (true)
             {
+                if (aMethod.IsAbstract)
+                {
+                    
+                }
+                else if (aCurrentInspectedType.GetInterfaces().Any())
+                {
+                    foreach (var xInterface in aCurrentInspectedType.GetInterfaces())
+                    {
+                        var xMap = aCurrentInspectedType.GetInterfaceMap(xInterface);
+                        for (int i = 0; i < xMap.TargetMethods.Length; i++)
+                        {
+                            if (xMap.TargetMethods[i] == aMethod)
+                            {
+                                return xMap.InterfaceMethods[i];
+                            }
+                        }
+                    }
+                }
                 if (aCurrentInspectedType.BaseType == null)
                 {
                     break;
                 }
                 aCurrentInspectedType = aCurrentInspectedType.BaseType;
-                MethodBase xFoundMethod = aCurrentInspectedType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                                                             .Where(method => method.Name == aMethod.Name
-                                                                                              && method.GetParameters().Select(param => param.ParameterType)
-                                                                                                                       .SequenceEqual(aMethodParams))
-                                                                             .SingleOrDefault();
+                MethodBase xFoundMethod = aCurrentInspectedType
+                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .SingleOrDefault(method => method.Name == aMethod.Name
+                                               && method.GetParameters().Select(param => param.ParameterType)
+                                                   .SequenceEqual(aMethodParams));
                 if (xFoundMethod == null)
                 {
                     break;
