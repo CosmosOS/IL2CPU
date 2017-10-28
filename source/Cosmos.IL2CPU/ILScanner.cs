@@ -801,28 +801,25 @@ namespace Cosmos.IL2CPU
 
         private MethodBase GetUltimateBaseMethod(MethodBase aMethod, Type[] aMethodParams, Type aCurrentInspectedType)
         {
-            MethodBase xBaseMethod = null;
-            //try {
+            MethodBase xInstanceBaseMethod = null;
+            MethodBase xInterfaceBaseMethod = null;
+
+            foreach (var xInterface in aCurrentInspectedType.GetInterfaces())
+            {
+                xInterfaceBaseMethod = xInterface
+                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .SingleOrDefault(method => method.Name == aMethod.Name && method.GetParameters()
+                                                   .Select(param => param.ParameterType)
+                                                   .SequenceEqual(aMethodParams));
+                if (xInterfaceBaseMethod != null)
+                {
+                    break;
+                }
+
+            }
+
             while (true)
             {
-                if (aMethod.IsAbstract)
-                {
-                    
-                }
-                else if (aCurrentInspectedType.GetInterfaces().Any())
-                {
-                    foreach (var xInterface in aCurrentInspectedType.GetInterfaces())
-                    {
-                        var xMap = aCurrentInspectedType.GetInterfaceMap(xInterface);
-                        for (int i = 0; i < xMap.TargetMethods.Length; i++)
-                        {
-                            if (xMap.TargetMethods[i] == aMethod)
-                            {
-                                return xMap.InterfaceMethods[i];
-                            }
-                        }
-                    }
-                }
                 if (aCurrentInspectedType.BaseType == null)
                 {
                     break;
@@ -850,37 +847,20 @@ namespace Cosmos.IL2CPU
                 {
                     continue;
                 }
-                if (xFoundMethod != null)
-                {
-                    xBaseMethod = xFoundMethod;
+                xInstanceBaseMethod = xFoundMethod;
 
-                    if ((xFoundMethod.IsVirtual == aMethod.IsVirtual) && (xFoundMethod.IsPrivate == false) && (xFoundMethod.IsPublic == aMethod.IsPublic) && (xFoundMethod.IsFamily == aMethod.IsFamily) && (xFoundMethod.IsFamilyAndAssembly == aMethod.IsFamilyAndAssembly) && (xFoundMethod.IsFamilyOrAssembly == aMethod.IsFamilyOrAssembly) && (xFoundMethod.IsFinal == false))
+                if ((xFoundMethod.IsVirtual == aMethod.IsVirtual) && (xFoundMethod.IsPrivate == false) && (xFoundMethod.IsPublic == aMethod.IsPublic) && (xFoundMethod.IsFamily == aMethod.IsFamily) && (xFoundMethod.IsFamilyAndAssembly == aMethod.IsFamilyAndAssembly) && (xFoundMethod.IsFamilyOrAssembly == aMethod.IsFamilyOrAssembly) && (xFoundMethod.IsFinal == false))
+                {
+                    var xFoundMethInfo = (MethodInfo)xFoundMethod;
+                    var xBaseMethInfo = (MethodInfo)xInstanceBaseMethod;
+                    if (xFoundMethInfo.ReturnType.AssemblyQualifiedName.Equals(xBaseMethInfo.ReturnType.AssemblyQualifiedName))
                     {
-                        var xFoundMethInfo = xFoundMethod as MethodInfo;
-                        var xBaseMethInfo = xBaseMethod as MethodInfo;
-                        if ((xFoundMethInfo == null) && (xBaseMethInfo == null))
-                        {
-                            xBaseMethod = xFoundMethod;
-                        }
-                        if ((xFoundMethInfo != null) && (xBaseMethInfo != null))
-                        {
-                            if (xFoundMethInfo.ReturnType.AssemblyQualifiedName.Equals(xBaseMethInfo.ReturnType.AssemblyQualifiedName))
-                            {
-                                xBaseMethod = xFoundMethod;
-                            }
-                        }
-                        //xBaseMethod = xFoundMethod;
+                        xInstanceBaseMethod = xFoundMethod;
                     }
                 }
-                //else
-                //{
-                //    xBaseMethod = xFoundMethod;
-                //}
             }
-            //} catch (Exception) {
-            // todo: try to get rid of the try..catch
-            //}
-            return xBaseMethod ?? aMethod;
+
+            return (xInstanceBaseMethod ?? xInterfaceBaseMethod) ?? aMethod;
         }
 
         protected uint GetMethodUID(MethodBase aMethod, bool aExact)
