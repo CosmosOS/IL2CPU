@@ -1,6 +1,4 @@
-﻿using Cosmos.Debug.Symbols.Metadata;
-using Cosmos.Debug.Symbols.Pdb;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -9,6 +7,9 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
+
+using Cosmos.Debug.Symbols.Metadata;
+using Cosmos.Debug.Symbols.Pdb;
 
 namespace Cosmos.Debug.Symbols
 {
@@ -136,9 +137,8 @@ namespace Cosmos.Debug.Symbols
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
             }
 
             return xSequencePoints.ToArray();

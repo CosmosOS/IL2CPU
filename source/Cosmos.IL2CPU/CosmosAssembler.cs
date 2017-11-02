@@ -442,6 +442,9 @@ namespace Cosmos.IL2CPU
 
         private void ConfigurePIC()
         {
+
+#pragma warning disable CS0219
+
             // initial configuration of PIC
             const byte PIC1 = 0x20; /* IO base address for master PIC */
             const byte PIC2 = 0xA0; /* IO base address for slave PIC */
@@ -461,6 +464,8 @@ namespace Cosmos.IL2CPU
             const byte ICW4_BUF_SLAVE = 0x08; /* Buffered mode/slave */
             const byte ICW4_BUF_MASTER = 0x0C; /* Buffered mode/master */
             const byte ICW4_SFNM = 0x10; /* Special fully nested (not) */
+
+#pragma warning restore CS0219
 
             // emit helper functions:
             Action<byte, byte> xOutBytes = (port, value) =>
