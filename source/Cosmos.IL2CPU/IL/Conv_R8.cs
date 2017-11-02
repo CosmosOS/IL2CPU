@@ -1,51 +1,69 @@
 using System;
 
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
-using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_R8)]
-	public class Conv_R8: ILOp
-	{
-		public Conv_R8(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
-		{
-		}
-
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
-        var xSource = aOpCode.StackPopTypes[0];
-        var xSourceSize = SizeOfType(xSource);
-        switch (xSourceSize)
+    /// <summary>
+    /// Convert to float64, pushing F on stack.
+    /// </summary>
+    [OpCode(ILOpCode.Code.Conv_R8)]
+    public class Conv_R8 : ILOp
+    {
+        public Conv_R8(Assembler aAsmblr)
+            : base(aAsmblr)
         {
-            case 1:
-            case 2:
-            case 4:
-				if (TypeIsFloat(xSource))
-				{
-					XS.SSE.ConvertSS2SD(XMM0, ESP, sourceIsIndirect: true);
-				}
-				else
-				{
-					XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
-				}
-				// expand stack, that moved data is valid stack
-				XS.Sub(XSRegisters.ESP, 4);
-				XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
-				break;
-            case 8:
+        }
+
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
+            var xSource = aOpCode.StackPopTypes[0];
+            var xSourceSize = SizeOfType(xSource);
+            var xSourceIsFloat = TypeIsFloat(xSource);
+
+            if (xSourceSize <= 4)
+            {
+                if (xSourceIsFloat)
                 {
-					if (!TypeIsFloat(xSource))
-					{
-						XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
-						XS.FPU.FloatStoreAndPop(ESP, isIndirect: true, size: RegisterSize.Long64);
-					}
-                    break;
+                    XS.SSE.ConvertSS2SD(XMM0, ESP, sourceIsIndirect: true);
+                    XS.Sub(ESP, 4);
+                    XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
                 }
-            default:
-                //EmitNotImplementedException( Assembler, GetServiceProvider(), "Conv_U8: SourceSize " + xSource + " not supported!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel );
-                throw new NotImplementedException();
-		}
+                else
+                {
+                    if (IsIntegerSigned(xSource))
+                    {
+                        XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
+                        XS.Sub(ESP, 4);
+                        XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+            else if (xSourceSize <= 8)
+            {
+                if (!xSourceIsFloat)
+                {
+                    if (IsIntegerSigned(xSource))
+                    {
+                        XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
+                        XS.FPU.FloatStoreAndPop(ESP, isIndirect: true, size: RegisterSize.Long64);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Conv_R8.cs->Error: StackSize > 8 not supported");
+            }
+        }
     }
-	}
 }
