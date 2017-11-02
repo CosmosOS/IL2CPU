@@ -1,9 +1,10 @@
-using Cosmos.IL2CPU.API;
-using XSharp.Assembler;
 using System;
-using XSharp.Assembler;
 using System.Reflection;
+
+using Cosmos.IL2CPU.API;
+
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
