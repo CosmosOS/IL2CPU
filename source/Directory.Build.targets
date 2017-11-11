@@ -13,6 +13,7 @@
         <!--<PackageIconUrl></PackageIconUrl>-->
         <PackageProjectUrl>http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/blob/master/LICENSE.txt</PackageLicenseUrl>
+        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
         <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
         <RepositoryUrl>https://github.com/CosmosOS/IL2CPU</RepositoryUrl>
     </PropertyGroup>
