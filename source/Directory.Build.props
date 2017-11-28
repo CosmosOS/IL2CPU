@@ -1,7 +1,26 @@
 <Project>
 
     <PropertyGroup>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\tools\IL2CPU.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <IL2CPUDescription>IL2CPU is a compiler for .NET IL code to compile to assembly language for direct booting.</IL2CPUDescription>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <Authors Condition="'$(Authors)' == ''">Cosmos</Authors>
+        <Company Condition="'$(Company)' == ''">Cosmos</Company>
+        <Copyright Condition="'$(Copyright)' == ''">Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
+        <PackageDescription Condition="'$(PackageDescription)' == ''">$(IL2CPUDescription)</PackageDescription>
+        <!--<PackageIconUrl Condition="'$(PackageIconUrl)' == ''"></PackageIconUrl>-->
+        <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
+        <PackageLicenseUrl Condition="'$(PackageLicenseUrl)' == ''">https://github.com/CosmosOS/IL2CPU/raw/master/LICENSE.txt</PackageLicenseUrl>
+        <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)' == ''">True</PackageRequireLicenseAcceptance>
+        <PackageTags Condition="'$(PackageTags)' == ''">IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
+        <RepositoryType Condition="'$(RepositoryType)' == ''">git</RepositoryType>
+        <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/CosmosOS/IL2CPU</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
