@@ -27,10 +27,8 @@ namespace Cosmos.IL2CPU
 
             try
             {
-                var tmp = "";
                 foreach (var s in args)
                 {
-                    tmp += s;
                     string[] s1 = s.Split(':');
                     string argID = s1[0].ToLower();
                     if (argID == "References".ToLower())
