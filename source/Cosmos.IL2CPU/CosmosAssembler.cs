@@ -1,6 +1,6 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
-using Cosmos.IL2CPU.API.Attribs;
+using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.IO;

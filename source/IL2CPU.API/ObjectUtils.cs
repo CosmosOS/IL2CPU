@@ -1,6 +1,6 @@
 using System;
 
-namespace Cosmos.IL2CPU.API
+namespace IL2CPU.API
 {
   public static class ObjectUtils
   {

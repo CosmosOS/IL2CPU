@@ -2,7 +2,7 @@
 
 using Cosmos.Build.Common;
 using Cosmos.Debug.Symbols;
-using Cosmos.IL2CPU.API.Attribs;
+using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -1,5 +1,5 @@
 using Cosmos.Debug.Symbols;
-using Cosmos.IL2CPU.API.Attribs;
+using IL2CPU.API.Attribs;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.X86.IL;
 using System;

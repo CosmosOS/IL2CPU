@@ -1,7 +1,7 @@
 using System.Linq;
 
 using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.IL2CPU.API;
+using IL2CPU.API;
 using XSharp;
 using static XSharp.XSRegisters;
 
