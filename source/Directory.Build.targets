@@ -5,16 +5,8 @@
             This property should exist, according to the docs, but it has no effect on pack.
         -->
         <PackageVersionPrefix>$([System.DateTime]::Now.ToString("yyyy.MM.dd"))</PackageVersionPrefix>
-        <PackageVersion Condition="$(PackageVersionPrefix) != '' and $(VersionSuffix) != ''">$(PackageVersionPrefix)-$(VersionSuffix)</PackageVersion>
-        <PackageVersion Condition="$(PackageVersionPrefix) != '' and $(VersionSuffix) == ''">$(PackageVersionPrefix)</PackageVersion>
-        <Authors>Cosmos</Authors>
-        <Company>Cosmos</Company>
-        <Copyright>Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
-        <!--<PackageIconUrl></PackageIconUrl>-->
-        <PackageProjectUrl>http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/blob/master/LICENSE.txt</PackageLicenseUrl>
-        <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
-        <RepositoryUrl>https://github.com/CosmosOS/IL2CPU</RepositoryUrl>
+        <PackageVersion Condition="'$(PackageVersionPrefix)' != '' AND '$(VersionSuffix)' != ''">$(PackageVersionPrefix)-$(VersionSuffix)</PackageVersion>
+        <PackageVersion Condition="'$(PackageVersionPrefix)' != '' AND '$(VersionSuffix)' == ''">$(PackageVersionPrefix)</PackageVersion>
     </PropertyGroup>
 
 </Project>

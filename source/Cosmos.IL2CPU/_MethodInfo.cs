@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using Cosmos.IL2CPU.API;
-using Cosmos.IL2CPU.API.Attribs;
+using IL2CPU.API;
+using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
 {

@@ -1,4 +1,4 @@
-using Cosmos.IL2CPU.API;
+using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;

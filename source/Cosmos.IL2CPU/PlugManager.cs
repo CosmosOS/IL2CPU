@@ -1,5 +1,5 @@
-using Cosmos.IL2CPU.API;
-using Cosmos.IL2CPU.API.Attribs;
+using IL2CPU.API;
+using IL2CPU.API.Attribs;
 using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Collections.Generic;

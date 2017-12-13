@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cosmos.IL2CPU.API.Attribs
+namespace IL2CPU.API.Attribs
 {
     /// <summary>
     /// Use this attribute to force the inclusion of a class, struct or a method in the compiled code.
