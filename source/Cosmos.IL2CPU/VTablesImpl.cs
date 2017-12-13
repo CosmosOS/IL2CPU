@@ -174,11 +174,12 @@ namespace Cosmos.IL2CPU
         xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
       }
       while (true);
-      //}
+
       EnableDebug = true;
       DebugHex("Type", aType);
       DebugHex("MethodId", aMethodId);
       Debug("Not FOUND!");
+
       Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
       while (true)
         ;
