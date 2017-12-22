@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class SQL
     {

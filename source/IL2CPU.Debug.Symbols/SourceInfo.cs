@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Cosmos.Debug.Symbols {
+namespace IL2CPU.Debug.Symbols {
   //public class SourceInfos : SortedList<uint, SourceInfo> {
   //}
 

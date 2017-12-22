@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cosmos.Debug.Symbols.Pdb
+namespace IL2CPU.Debug.Symbols.Pdb
 {
     /// <summary>
     /// Abstraction for reading Pdb files

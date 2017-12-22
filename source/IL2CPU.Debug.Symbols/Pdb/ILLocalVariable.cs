@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Cosmos.Debug.Symbols.Pdb
+namespace IL2CPU.Debug.Symbols.Pdb
 {
     /// <summary>
     /// Represents information about a local variable within a method body.

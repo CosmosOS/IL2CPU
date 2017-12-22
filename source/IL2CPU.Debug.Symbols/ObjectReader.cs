@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection.Emit;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class ObjectReader<T> : IDataReader
     {

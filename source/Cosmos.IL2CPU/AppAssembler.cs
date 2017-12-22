@@ -2,7 +2,7 @@
 //#define COSMOSDEBUG
 
 using Cosmos.Build.Common;
-using Cosmos.Debug.Symbols;
+using IL2CPU.Debug.Symbols;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using Cosmos.IL2CPU.Extensions;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class LocalTypeGenericContext
     {

@@ -2,7 +2,7 @@
 using System;
 using System.Data;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class SqliteBulkCopy : IDisposable
     {

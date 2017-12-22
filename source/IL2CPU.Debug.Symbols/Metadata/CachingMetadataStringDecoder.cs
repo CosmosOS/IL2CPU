@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection.Metadata;
-using Cosmos.Debug.Symbols.Hashing;
+using IL2CPU.Debug.Symbols.Hashing;
 
-namespace Cosmos.Debug.Symbols.Metadata
+namespace IL2CPU.Debug.Symbols.Metadata
 {
     /// <summary>
     /// MetadataReader string decoder that caches and reuses strings rather than allocating

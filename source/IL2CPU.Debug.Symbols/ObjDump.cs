@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.IO;
+using System.Linq;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class ObjDump
     {

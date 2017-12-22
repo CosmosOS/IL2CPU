@@ -1,13 +1,16 @@
-using Cosmos.Debug.Symbols;
-using IL2CPU.API.Attribs;
-using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.X86.IL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+
+using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.X86.IL;
+
+using IL2CPU.Debug.Symbols;
+using IL2CPU.API.Attribs;
+
 using XSharp;
 using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;

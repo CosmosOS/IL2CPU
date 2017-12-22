@@ -8,7 +8,7 @@ using System.IO.MemoryMappedFiles;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 
-namespace Cosmos.Debug.Symbols.Pdb
+namespace IL2CPU.Debug.Symbols.Pdb
 {
 
     /// <summary>

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace Cosmos.Debug.Symbols.Pdb
+namespace IL2CPU.Debug.Symbols.Pdb
 {
     /// <summary>
     /// Represents a sequence point within an IL method body.

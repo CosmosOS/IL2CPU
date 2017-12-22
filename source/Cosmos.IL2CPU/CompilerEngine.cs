@@ -1,8 +1,5 @@
 ﻿//#define COSMOSDEBUG
 
-using Cosmos.Build.Common;
-using Cosmos.Debug.Symbols;
-using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +7,12 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+
+using Cosmos.Build.Common;
+
+using IL2CPU.Debug.Symbols;
+using IL2CPU.API.Attribs;
+
 using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
@@ -532,11 +535,9 @@ namespace Cosmos.IL2CPU
 
         private void ForceInclude(MemberInfo aMemberInfo, ForceInclude aForceIncludeAttribute)
         {
-            if (aMemberInfo is Type)
+            if (aMemberInfo is Type xType)
             {
-                mForceIncludes.Add(aMemberInfo);
-
-                var xType = (Type)aMemberInfo;
+                mForceIncludes.Add(xType);
 
                 foreach (var xMethod in xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
@@ -551,9 +552,9 @@ namespace Cosmos.IL2CPU
                     }
                 }
             }
-            else if (aMemberInfo is MethodInfo)
+            else if (aMemberInfo is MethodInfo xMethod)
             {
-                mForceIncludes.Add(aMemberInfo);
+                mForceIncludes.Add(xMethod);
             }
             else
             {

@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 
-namespace Cosmos.Debug.Symbols.Metadata
+namespace IL2CPU.Debug.Symbols.Metadata
 {
     internal static class MetadataHelper
     {

@@ -9,7 +9,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Cosmos.Debug.Symbols.Hashing
+namespace IL2CPU.Debug.Symbols.Hashing
 {
     public static class TypeHashingAlgorithms
     {

@@ -8,10 +8,10 @@ using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 
-using Cosmos.Debug.Symbols.Metadata;
-using Cosmos.Debug.Symbols.Pdb;
+using IL2CPU.Debug.Symbols.Metadata;
+using IL2CPU.Debug.Symbols.Pdb;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class DebugSymbolReader
     {
