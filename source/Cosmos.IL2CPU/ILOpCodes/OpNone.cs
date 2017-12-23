@@ -123,6 +123,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Stelem_I2:
         case Code.Stelem_I4:
         case Code.Stelem_I8:
+        case Code.Stelem_R4:
+        case Code.Stelem_R8:
           return 3;
         case Code.Shr:
         case Code.Shr_Un:
@@ -259,6 +261,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Stelem_I2:
         case Code.Stelem_I4:
         case Code.Stelem_I8:
+        case Code.Stelem_R4:
+        case Code.Stelem_R8:
         case Code.Stelem_Ref:
           return 0;
         case Code.Shr:
