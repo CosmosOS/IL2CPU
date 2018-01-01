@@ -33,9 +33,10 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(0);
                 XS.Push(EAX);
             }
-            else if (IsPointer(xSource))
+            else if (IsByRef(xSource))
             {
                 // todo: Stop GC tracking
+                throw new NotImplementedException($"Error compiling '{GetLabel(aMethod)}': conv.i8 not implemented for byref types!");
             }
             else if (xSourceSize <= 4)
             {

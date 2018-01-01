@@ -514,6 +514,10 @@ namespace Cosmos.IL2CPU
       return aPointer.IsPointer || aPointer.IsByRef || aPointer == typeof(IntPtr) || aPointer == typeof(UIntPtr);
     }
 
+    public static bool IsByRef(Type aType) => aType.IsByRef;
+
+    public static bool IsNativeInt(Type aType) => aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
+
     public static uint SizeOfType(Type aType)
     {
       if (aType == null)
