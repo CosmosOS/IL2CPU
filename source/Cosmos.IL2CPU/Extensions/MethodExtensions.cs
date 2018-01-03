@@ -9,7 +9,7 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.Extensions
 {
-    public static class MethodExtensions
+    internal static class MethodExtensions
     {
         public static string GetFullName(this MethodBase aMethod)
         {
