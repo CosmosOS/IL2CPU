@@ -558,7 +558,15 @@ namespace Cosmos.IL2CPU
                                 var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
 
-                                Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod, "Virtual Downscan");
+                                if (xMethodIndex != -1)
+                                {
+                                    var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
+
+                                    if (xMethod.DeclaringType == xType)
+                                    {
+                                        Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod, "Virtual Downscan");
+                                    }
+                                }
                             }
                         }
                     }
@@ -818,15 +826,19 @@ namespace Cosmos.IL2CPU
                 foreach (var xInterface in xCurrentType.GetInterfaces())
                 {
                     var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
-                    var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods,
-                        xInterfaceMap.TargetMethods.SingleOrDefault(
+                    var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
                             m => m.Name == aMethod.Name
                               && m.GetParameters().Select(
-                                p => p.ParameterType).SequenceEqual(aMethodParams)));
+                                p => p.ParameterType).SequenceEqual(aMethodParams));
 
-                    if (xMethodIndex != -1)
+                    if (xMethod != null && xMethod.DeclaringType == xCurrentType)
                     {
-                        return xInterfaceMap.InterfaceMethods[xMethodIndex];
+                        var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
+
+                        if (xMethodIndex != -1)
+                        {
+                            return xInterfaceMap.InterfaceMethods[xMethodIndex];
+                        }
                     }
                 }
                 xCurrentType = xCurrentType.BaseType;
