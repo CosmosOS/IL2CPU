@@ -20,12 +20,12 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (xSize <= 4)
             {
-                XS.Not(ESP, isIndirect: true);
+                XS.Not(ESP, isIndirect: true, size: RegisterSize.Int32);
             }
             else if (xSize <= 8)
             {
-                XS.Not(ESP, isIndirect: true);
-                XS.Not(ESP, displacement: 4);
+                XS.Not(ESP, isIndirect: true, size: RegisterSize.Int32);
+                XS.Not(ESP, displacement: 4, size: RegisterSize.Int32);
             }
             else
             {
