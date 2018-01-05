@@ -1,13 +1,16 @@
 //#define COSMOSDEBUG
 
-using IL2CPU.API;
-using IL2CPU.API.Attribs;
-using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
+using Cosmos.IL2CPU.Extensions;
+
+using IL2CPU.API;
+using IL2CPU.API.Attribs;
+
 using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
@@ -136,10 +139,9 @@ namespace Cosmos.IL2CPU
                 mItems.Add(aItem);
                 mItemsList.Add(aItem);
 
-                MethodBase methodBaseSource = aSrc as MethodBase;
-                if (methodBaseSource != null)
+                if (aSrc is MethodBase xMethodBaseSrc)
                 {
-                    aSrc = methodBaseSource.DeclaringType + "::" + aSrc;
+                    aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
                 }
 
                 mQueue.Enqueue(new ScannerQueueItem { Item = aItem, QueueReason = aSrcType, SourceItem = aSrc + Environment.NewLine + sourceItem });
@@ -325,7 +327,7 @@ namespace Cosmos.IL2CPU
                 if (xOpMethod != null)
                 {
                     xOpMethod.Value = (MethodBase)mItems.GetItemInList(xOpMethod.Value);
-                    xOpMethod.ValueUID = (uint)GetMethodUID(xOpMethod.Value, true);
+                    xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value, true);
                     xOpMethod.BaseMethodUID = GetMethodUID(xOpMethod.Value, false);
                 }
             }
@@ -532,10 +534,9 @@ namespace Cosmos.IL2CPU
                     // List changes as we go, cant be foreach
                     for (int i = 0; i < mItemsList.Count; i++)
                     {
-                        if (mItemsList[i] is Type)
+                        if (mItemsList[i] is Type xType && xType != xVirtMethod.DeclaringType && !xType.IsInterface)
                         {
-                            var xType = (Type)mItemsList[i];
-                            if (xType.IsSubclassOf(xVirtMethod.DeclaringType) || (xVirtMethod.DeclaringType.IsInterface && xVirtMethod.DeclaringType.IsAssignableFrom(xType)))
+                            if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
                             {
                                 var xNewMethod = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                                                       .Where(method => method.Name == aMethod.Name
@@ -548,6 +549,22 @@ namespace Cosmos.IL2CPU
                                     if (xNewMethod.IsVirtual)
                                     {
                                         Queue(xNewMethod, aMethod, "Virtual Downscan");
+                                    }
+                                }
+                            }
+                            else if (xVirtMethod.DeclaringType.IsInterface
+                                  && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
+                            {
+                                var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
+                                var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
+
+                                if (xMethodIndex != -1)
+                                {
+                                    var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
+
+                                    if (xMethod.DeclaringType == xType)
+                                    {
+                                        Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod, "Virtual Downscan");
                                     }
                                 }
                             }
@@ -802,21 +819,26 @@ namespace Cosmos.IL2CPU
         private MethodBase GetUltimateBaseMethod(MethodBase aMethod, Type[] aMethodParams, Type aCurrentInspectedType)
         {
             MethodBase xInstanceBaseMethod = null;
-            MethodBase xInterfaceBaseMethod = null;
 
             Type xCurrentType = aCurrentInspectedType;
             while (xCurrentType != null)
             {
                 foreach (var xInterface in xCurrentType.GetInterfaces())
                 {
-                    xInterfaceBaseMethod = xInterface
-                        .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                        .SingleOrDefault(method => method.Name == aMethod.Name && method.GetParameters()
-                                                       .Select(param => param.ParameterType)
-                                                       .SequenceEqual(aMethodParams));
-                    if (xInterfaceBaseMethod != null)
+                    var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
+                    var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
+                            m => m.Name == aMethod.Name
+                              && m.GetParameters().Select(
+                                p => p.ParameterType).SequenceEqual(aMethodParams));
+
+                    if (xMethod != null && xMethod.DeclaringType == xCurrentType)
                     {
-                        return xInterfaceBaseMethod;
+                        var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
+
+                        if (xMethodIndex != -1)
+                        {
+                            return xInterfaceMap.InterfaceMethods[xMethodIndex];
+                        }
                     }
                 }
                 xCurrentType = xCurrentType.BaseType;
@@ -871,18 +893,15 @@ namespace Cosmos.IL2CPU
         {
             if (!aExact)
             {
-                ParameterInfo[] xParams = aMethod.GetParameters();
-                Type[] xParamTypes = new Type[xParams.Length];
-                for (int i = 0; i < xParams.Length; i++)
-                {
-                    xParamTypes[i] = xParams[i].ParameterType;
-                }
+                var xParamTypes = aMethod.GetParameters().Select(p => p.ParameterType).ToArray();
                 var xBaseMethod = GetUltimateBaseMethod(aMethod, xParamTypes, aMethod.DeclaringType);
+
                 if (!mMethodUIDs.ContainsKey(xBaseMethod))
                 {
                     var xId = (uint)mMethodUIDs.Count;
                     mMethodUIDs.Add(xBaseMethod, xId);
                 }
+
                 return mMethodUIDs[xBaseMethod];
             }
             if (!mMethodUIDs.ContainsKey(aMethod))
@@ -1014,7 +1033,7 @@ namespace Cosmos.IL2CPU
                             }
                             if (xPlugAttrib.PlugRequired)
                             {
-                                throw new Exception(string.Format("Method {0} requires a plug, but none is implemented", xMethod.Name));
+                                throw new Exception(String.Format("Method {0} requires a plug, but none is implemented", xMethod.Name));
                             }
                             xPlugAssembler = xPlugAttrib.Assembler;
                         }
