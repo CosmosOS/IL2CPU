@@ -147,6 +147,20 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.ShiftLeft(EAX, 1);
                         XS.Push(EAX);
                     }
+                    /*
+                     * TODO see if something is needed in stack / register to make them really work
+                     */
+                    else if (xParams.Length == 3
+                             && (xParams[0].ParameterType == typeof(sbyte*)
+                             && xParams[1].ParameterType == typeof(int)
+                             && xParams[2].ParameterType == typeof(int)))
+                    {
+                        xHasCalcSize = true;
+                    }
+                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
+                    {
+                        xHasCalcSize = true;
+                    }
                     else
                     {
                         throw new NotImplementedException("In NewObj, a string ctor implementation is missing!");
