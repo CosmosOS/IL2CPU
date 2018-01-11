@@ -163,17 +163,17 @@ namespace IL2CPU.Debug.Symbols
 
         public static List<ILLocalVariable> GetLocalVariableInfos(MethodBase aMethodBase)
         {
-            string xMenthodId = $"{aMethodBase.MetadataToken}_{aMethodBase.DeclaringType?.FullName}_{aMethodBase.Name}";
+            var xMethodId = $"{aMethodBase.MetadataToken}_{aMethodBase.DeclaringType?.FullName}_{aMethodBase.Name}";
 
-            if (xLocalVariableInfosCache.ContainsKey(xMenthodId))
+            if (xLocalVariableInfosCache.ContainsKey(xMethodId))
             {
-                return xLocalVariableInfosCache[xMenthodId];
+                return xLocalVariableInfosCache[xMethodId];
             }
             var xLocalVariables = new List<ILLocalVariable>();
 
             string xLocation = aMethodBase.Module.Assembly.Location;
-            var xGenericMethodParameters = new Type[0];
-            var xGenericTypeParameters = new Type[0];
+            var xGenericMethodParameters = Array.Empty<Type>();
+            var xGenericTypeParameters = Array.Empty<Type>();
             if (aMethodBase.IsGenericMethod)
             {
                 xGenericMethodParameters = aMethodBase.GetGenericArguments();
@@ -212,7 +212,8 @@ namespace IL2CPU.Debug.Symbols
                 xLocalVariables.Add(new ILLocalVariable(xSlot, xName, xCompilerGenerated, xTypes[i]));
             }
 
-            xLocalVariableInfosCache.Add(xMenthodId, xLocalVariables);
+            xLocalVariableInfosCache.Add(xMethodId, xLocalVariables);
+
             return xLocalVariables;
         }
 
