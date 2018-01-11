@@ -31,7 +31,7 @@ namespace Cosmos.IL2CPU
         {
             get
             {
-                return string.Equals(KernelPkg, "X86", StringComparison.CurrentCultureIgnoreCase);
+                return String.Equals(KernelPkg, "X86", StringComparison.OrdinalIgnoreCase);
             }
         }
         public string DebugMode { get; set; }
@@ -88,7 +88,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                StringBuilder builder = new StringBuilder();
+                var builder = new StringBuilder();
                 builder.Append("Error while initializing Cosmos paths");
                 for (Exception scannedException = e; null != scannedException; scannedException = scannedException.InnerException)
                 {
@@ -107,7 +107,7 @@ namespace Cosmos.IL2CPU
             }
 
             mDebugMode = (DebugMode)Enum.Parse(typeof(DebugMode), DebugMode);
-            if (string.IsNullOrEmpty(TraceAssemblies))
+            if (String.IsNullOrEmpty(TraceAssemblies))
             {
                 mTraceAssemblies = Cosmos.Build.Common.TraceAssemblies.User;
             }
@@ -121,7 +121,7 @@ namespace Cosmos.IL2CPU
                 mTraceAssemblies = (TraceAssemblies)Enum.Parse(typeof(TraceAssemblies), TraceAssemblies);
             }
 
-            if (string.IsNullOrEmpty(StackCorruptionDetectionLevel))
+            if (String.IsNullOrEmpty(StackCorruptionDetectionLevel))
             {
                 mStackCorruptionDetectionLevel = Cosmos.Build.Common.StackCorruptionDetectionLevel.MethodFooters;
             }
@@ -276,7 +276,7 @@ namespace Cosmos.IL2CPU
 
         private AppAssembler GetAppAssembler()
         {
-            return new AppAssembler(DebugCom, AssemblerLog);
+            return new AppAssembler(DebugCom, Path.Combine(Path.GetDirectoryName(OutputFilename), AssemblerLog));
         }
 
         private Assembly Default_Resolving(AssemblyLoadContext aContext, AssemblyName aName)
