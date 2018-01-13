@@ -1,109 +1,63 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Cosmos.IL2CPU
 {
     public class Program
     {
-        private static Dictionary<string, string> CmdOptions = new Dictionary<string, string>();
-        private static List<string> References = new List<string>();
-        private static List<string> AdditionalReferences = new List<string>();
-        private static List<string> AssemblySearchDirs = new List<string>();
+        private const int Succeeded = 0;
+        private const int Failed = 1;
 
-        public static int Run(string[] args, Action<string> logMessage, Action<string> logError)
+        public static int Run(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
-            if (args == null)
+            #region Null Checks
+
+            if (aArgs == null)
             {
-                throw new ArgumentNullException(nameof(args));
+                throw new ArgumentNullException(nameof(aArgs));
             }
-            if (logMessage == null)
+
+            if (aLogMessage == null)
             {
-                throw new ArgumentNullException(nameof(logMessage));
+                throw new ArgumentNullException(nameof(aLogMessage));
             }
-            if (logError == null)
+
+            if (aLogError == null)
             {
-                throw new ArgumentNullException(nameof(logError));
+                throw new ArgumentNullException(nameof(aLogError));
             }
+
+            #endregion
 
             try
             {
-                foreach (var s in args)
+                if (RunCompilerEngine(aArgs, aLogMessage, aLogError))
                 {
-                    string[] s1 = s.Split(':');
-                    string argID = s1[0].ToLower();
-                    if (argID == "References".ToLower())
-                    {
-                        References.Add(s.Replace(s1[0] + ":", ""));
-                    }
-                    else if (argID == "AdditionalReferences".ToLower())
-                    {
-                        AdditionalReferences.Add(s.Replace(s1[0] + ":", ""));
-                    }
-                    else if (argID == "AssemblySearchDirs".ToLower())
-                    {
-                        AssemblySearchDirs.Add(s.Replace(s1[0] + ":", ""));
-                    }
-                    else
-                    {
-                        CmdOptions.Add(argID, s.Replace(s1[0] + ":", ""));
-                    }
-                }
-
-                var xEngine = new CompilerEngine();
-
-                CompilerEngine.KernelPkg = "";
-                if (CmdOptions.ContainsKey("KernelPkg".ToLower()))
-                {
-                    CompilerEngine.KernelPkg = Convert.ToString(CmdOptions["KernelPkg".ToLower()]);
-                }
-
-                xEngine.DebugEnabled = Convert.ToBoolean(CmdOptions["DebugEnabled".ToLower()]);
-                logMessage("Loaded : DebugEnabled");
-                xEngine.StackCorruptionDetectionEnabled =
-                    Convert.ToBoolean(CmdOptions["StackCorruptionDetectionEnabled".ToLower()]);
-                logMessage("Loaded : StackCorruptionDetectionEnabled");
-                xEngine.DebugMode = CmdOptions["DebugMode".ToLower()];
-                logMessage("Loaded : DebugMode");
-                xEngine.StackCorruptionDetectionLevel = CmdOptions["StackCorruptionDetectionLevel".ToLower()];
-                logMessage("Loaded : StackCorruptionDetectionLevel");
-                xEngine.TraceAssemblies = CmdOptions["TraceAssemblies".ToLower()];
-                logMessage("Loaded : TraceAssemblies");
-                xEngine.DebugCom = Convert.ToByte(CmdOptions["DebugCom".ToLower()]);
-                logMessage("Loaded : DebugCom");
-                xEngine.OutputFilename = CmdOptions["OutputFilename".ToLower()];
-                logMessage("Loaded : OutputFilename");
-                xEngine.EnableLogging = Convert.ToBoolean(CmdOptions["EnableLogging".ToLower()]);
-                logMessage("Loaded : EnableLogging");
-                xEngine.EmitDebugSymbols = Convert.ToBoolean(CmdOptions["EmitDebugSymbols".ToLower()]);
-                logMessage("Loaded : EmitDebugSymbols");
-                xEngine.IgnoreDebugStubAttribute = Convert.ToBoolean(CmdOptions["IgnoreDebugStubAttribute".ToLower()]);
-                logMessage("Loaded : IgnoreDebugStubAttribute");
-                xEngine.References = References.ToArray();
-                logMessage("Loaded : References");
-                xEngine.AssemblySearchDirs = AssemblySearchDirs.ToArray();
-                logMessage("Loaded : AssemblySearchDirs");
-
-                xEngine.OnLogError = logError;
-                xEngine.OnLogWarning = m => logMessage(String.Format("Warning: {0}", m));
-                xEngine.OnLogMessage = logMessage;
-                xEngine.OnLogException = (m) => logError(String.Format("Exception: {0}", m.ToString()));
-                xEngine.AssemblerLog = "XSharp.Assembler.log";
-                if (xEngine.Execute())
-                {
-                    logMessage("Executed OK");
-                    return 0;
-                }
-                else
-                {
-                    logMessage("Errored");
-                    return 2;
+                    return Succeeded;
                 }
             }
             catch (Exception E)
             {
-                logError(String.Format("Error occurred: " + E.ToString()));
-                return 1;
+                aLogError(String.Format("Error occurred: " + E.ToString()));
             }
+
+            return Failed;
+        }
+
+        private static bool RunCompilerEngine(string [] aaArgs, Action<string> aaLogMessage, Action<string> aaLogError)
+        {
+            var xSettings = new ConsoleCompilerEngineSettings(aaArgs, aaLogMessage, aaLogError);
+
+            var xEngine = new CompilerEngine(xSettings)
+            {
+                OnaLogError = aaLogError,
+                OnLogWarning = m => aaLogMessage(String.Format("Warning: {0}", m)),
+                OnaLogMessage = aaLogMessage,
+                OnLogException = (m) => aaLogError(String.Format("Exception: {0}", m.ToString()))
+            };
+
+            CompilerEngine.KernelPkg = xSettings.KernelPkg;
+
+            return xEngine.Execute();
         }
     }
 }
