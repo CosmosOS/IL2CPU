@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IL2CPU.Compiler
+namespace IL2CPU
 {
     public class Program
     {
