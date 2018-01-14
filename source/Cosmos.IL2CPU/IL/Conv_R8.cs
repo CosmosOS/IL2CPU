@@ -33,7 +33,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    if (IsIntegerSigned(xSource))
+                    if (xSourceSize <= 2 || IsIntegerSigned(xSource))
                     {
                         XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
                         XS.Sub(ESP, 4);
