@@ -43,16 +43,16 @@ namespace Cosmos.IL2CPU
             return Failed;
         }
 
-        private static bool RunCompilerEngine(string [] aaArgs, Action<string> aaLogMessage, Action<string> aaLogError)
+        private static bool RunCompilerEngine(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
-            var xSettings = new ConsoleCompilerEngineSettings(aaArgs, aaLogMessage, aaLogError);
+            var xSettings = new ConsoleCompilerEngineSettings(aArgs, aLogMessage, aLogError);
 
             var xEngine = new CompilerEngine(xSettings)
             {
-                OnaLogError = aaLogError,
-                OnLogWarning = m => aaLogMessage(String.Format("Warning: {0}", m)),
-                OnaLogMessage = aaLogMessage,
-                OnLogException = (m) => aaLogError(String.Format("Exception: {0}", m.ToString()))
+                OnLogError = aLogError,
+                OnLogWarning = m => aLogMessage(String.Format("Warning: {0}", m)),
+                OnLogMessage = aLogMessage,
+                OnLogException = (m) => aLogError(String.Format("Exception: {0}", m.ToString()))
             };
 
             CompilerEngine.KernelPkg = xSettings.KernelPkg;
