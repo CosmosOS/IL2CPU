@@ -51,7 +51,7 @@ namespace Cosmos.IL2CPU
         }
 
         public bool EnableDebug => GetOption<bool>(nameof(EnableDebug));
-        public DebugMode DebugMode => GetOption<DebugMode>(nameof(DebugMode));
+        public DebugMode DebugMode => GetEnumOption<DebugMode>(nameof(DebugMode));
         public byte DebugCom
         {
             get => GetOption<byte>(nameof(DebugCom));
@@ -60,10 +60,10 @@ namespace Cosmos.IL2CPU
         public bool EmitDebugSymbols => GetOption<bool>(nameof(EmitDebugSymbols));
         public bool IgnoreDebugStubAttribute => GetOption<bool>(nameof(IgnoreDebugStubAttribute));
 
-        public TraceAssemblies TraceAssemblies => GetOption<TraceAssemblies>(nameof(TraceAssemblies));
+        public TraceAssemblies TraceAssemblies => GetEnumOption<TraceAssemblies>(nameof(TraceAssemblies));
         public bool EnableStackCorruptionDetection => GetOption<bool>(nameof(EnableStackCorruptionDetection));
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
-            GetOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
+            GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
 
         public IEnumerable<string> References => mReferences;
         public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
@@ -71,6 +71,40 @@ namespace Cosmos.IL2CPU
         public string OutputFilename => GetOption<string>(nameof(OutputFilename));
 
         public string KernelPkg => GetOption<string>(nameof(KernelPkg));
+
+        private T GetEnumOption<T>(string aOptionName)
+            where T : struct
+        {
+            var xValue = GetOption<string>(aOptionName);
+
+            if (String.IsNullOrEmpty(xValue))
+            {
+                if (typeof(T) == typeof(TraceAssemblies))
+                {
+                    return (T)(object)TraceAssemblies.User;
+                }
+                else if (typeof(T) == typeof(StackCorruptionDetectionLevel))
+                {
+                    return (T)(object)StackCorruptionDetectionLevel.MethodFooters;
+                }
+
+                return default(T);
+            }
+
+            try
+            {
+                if (Enum.TryParse<T>(xValue, out var xEnumValue))
+                {
+                    return xEnumValue;
+                }
+            }
+            catch (Exception e)
+            {
+                mLogError(e.ToString());
+            }
+
+            return default(T);
+        }
 
         private T GetOption<T>(string aOptionName)
         {
@@ -80,11 +114,6 @@ namespace Cosmos.IL2CPU
             {
                 try
                 {
-                    if (typeof(T).IsEnum)
-                    {
-                        return (T)Enum.Parse(typeof(T), xValue, true);
-                    }
-
                     return (T)Convert.ChangeType(xValue, typeof(T));
                 }
                 catch (Exception e)
