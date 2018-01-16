@@ -1,4 +1,4 @@
-#define VMT_DEBUG
+//#define VMT_DEBUG
 //#define COSMOSDEBUG
 
 using Cosmos.Build.Common;
@@ -573,7 +573,7 @@ namespace Cosmos.IL2CPU
                 XS.Comment(xILOp.ToString());
                 var xNextPosition = xOpCode.Position + 1;
 
-                #region Exception handling support code 
+                #region Exception handling support code
 
                 _ExceptionRegionInfo xCurrentExceptionRegion = null;
                 var xBody = aMethod.MethodBase.GetMethodBodyBlock();
