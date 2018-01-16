@@ -120,7 +120,7 @@ namespace Cosmos.IL2CPU
           break;
         }
         var xField = xLocalInfos[i];
-        xOffset += GetStackCountForLocal(aMethod, xField.Type) * 4;
+        xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4;
       }
       return xOffset;
     }
@@ -131,7 +131,7 @@ namespace Cosmos.IL2CPU
       uint xOffset = GetEBPOffsetForLocal(aMethod, localIndex);
       var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
       var xField = xLocalInfos[localIndex];
-      xOffset += GetStackCountForLocal(aMethod, xField.Type) * 4 - 4;
+      xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4 - 4;
       return xOffset;
     }
 

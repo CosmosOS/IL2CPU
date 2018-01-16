@@ -20,9 +20,9 @@ namespace Cosmos.IL2CPU.X86.IL
       var xOpVar = (OpVar)aOpCode;
       var xVar = aMethod.MethodBase.GetLocalVariables()[xOpVar.Value];
       var xEBPOffset = GetEBPOffsetForLocal(aMethod, xOpVar.Value);
-      xEBPOffset += (uint)(((int)GetStackCountForLocal(aMethod, xVar.Type) - 1) * 4);
+      xEBPOffset += (uint)(((int)GetStackCountForLocal(aMethod, xVar.LocalType) - 1) * 4);
 
-      XS.Comment("Local type = " + xVar.Type);
+      XS.Comment("Local type = " + xVar.LocalType);
       XS.Comment("Local EBP offset = " + xEBPOffset);
 
       XS.Set(EAX, EBP);

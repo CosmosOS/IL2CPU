@@ -472,105 +472,123 @@ namespace Cosmos.IL2CPU
 
             #region Virtuals scan
 
-            if (!xIsDynamicMethod && aMethod.IsVirtual)
+            try
             {
-                // For virtuals we need to climb up the type tree
-                // and find the top base method. We then add that top
-                // node to the mVirtuals list. We don't need to add the
-                // types becuase adding DeclaringType will already cause
-                // all ancestor types to be added.
-
-                var xVirtMethod = aMethod;
-                var xVirtType = aMethod.DeclaringType;
-                MethodBase xNewVirtMethod;
-                while (true)
+                if (!xIsDynamicMethod && aMethod.IsVirtual)
                 {
-                    xVirtType = xVirtType.BaseType;
-                    if (xVirtType == null)
+                    // For virtuals we need to climb up the type tree
+                    // and find the top base method. We then add that top
+                    // node to the mVirtuals list. We don't need to add the
+                    // types becuase adding DeclaringType will already cause
+                    // all ancestor types to be added.
+
+                    var xVirtMethod = aMethod;
+                    var xVirtType = aMethod.DeclaringType;
+                    MethodBase xNewVirtMethod;
+                    while (true)
                     {
-                        // We've reached object, can't go farther
-                        xNewVirtMethod = null;
-                    }
-                    else
-                    {
-                        xNewVirtMethod = xVirtType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                                  .Where(method => method.Name == aMethod.Name
-                                                                   && method.GetParameters().Select(param => param.ParameterType)
-                                                                                            .SequenceEqual(xParamTypes))
-                                                  .SingleOrDefault();
-                        if (xNewVirtMethod != null)
+                        xVirtType = xVirtType.BaseType;
+                        if (xVirtType == null)
                         {
-                            if (!xNewVirtMethod.IsVirtual)
-                            {
-                                // This can happen if a virtual "replaces" a non virtual
-                                // above it that is not virtual.
-                                xNewVirtMethod = null;
-                            }
+                            // We've reached object, can't go farther
+                            xNewVirtMethod = null;
                         }
-                    }
-                    // We dont bother to add these to Queue, because we have to do a
-                    // full downlevel scan if its a new base virtual anyways.
-                    if (xNewVirtMethod == null)
-                    {
-                        // If its already in the list, we mark it null
-                        // so we dont do a full downlevel scan.
-                        if (mVirtuals.Contains(xVirtMethod))
+                        else
                         {
-                            xVirtMethod = null;
-                        }
-                        break;
-                    }
-                    xVirtMethod = xNewVirtMethod;
-                }
-
-                // New virtual base found, we need to downscan it
-                // If it was already in mVirtuals, then ScanType will take
-                // care of new additions.
-                if (xVirtMethod != null)
-                {
-                    Queue(xVirtMethod, aMethod, "Virtual Base");
-                    mVirtuals.Add(xVirtMethod);
-
-                    // List changes as we go, cant be foreach
-                    for (int i = 0; i < mItemsList.Count; i++)
-                    {
-                        if (mItemsList[i] is Type xType && xType != xVirtMethod.DeclaringType && !xType.IsInterface)
-                        {
-                            if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
+                            xNewVirtMethod = xVirtType
+                                .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                .Where(method => method.Name == aMethod.Name
+                                                 && method.GetParameters().Select(param => param.ParameterType)
+                                                     .SequenceEqual(xParamTypes))
+                                .SingleOrDefault();
+                            if (xNewVirtMethod != null)
                             {
-                                var xNewMethod = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                                      .Where(method => method.Name == aMethod.Name
-                                                                       && method.GetParameters().Select(param => param.ParameterType).SequenceEqual(xParamTypes))
-                                                      .SingleOrDefault();
-                                if (xNewMethod != null)
+                                if (!xNewVirtMethod.IsVirtual)
                                 {
-                                    // We need to check IsVirtual, a non virtual could
-                                    // "replace" a virtual above it?
-                                    if (xNewMethod.IsVirtual)
-                                    {
-                                        Queue(xNewMethod, aMethod, "Virtual Downscan");
-                                    }
-                                }
-                            }
-                            else if (xVirtMethod.DeclaringType.IsInterface
-                                  && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
-                            {
-                                var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
-                                var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
-
-                                if (xMethodIndex != -1)
-                                {
-                                    var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
-
-                                    if (xMethod.DeclaringType == xType)
-                                    {
-                                        Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod, "Virtual Downscan");
-                                    }
+                                    // This can happen if a virtual "replaces" a non virtual
+                                    // above it that is not virtual.
+                                    xNewVirtMethod = null;
                                 }
                             }
                         }
+
+                        // We dont bother to add these to Queue, because we have to do a
+                        // full downlevel scan if its a new base virtual anyways.
+                        if (xNewVirtMethod == null)
+                        {
+                            // If its already in the list, we mark it null
+                            // so we dont do a full downlevel scan.
+                            if (mVirtuals.Contains(xVirtMethod))
+                            {
+                                xVirtMethod = null;
+                            }
+
+                            break;
+                        }
+
+                        xVirtMethod = xNewVirtMethod;
+                    }
+
+                    // New virtual base found, we need to downscan it
+                    // If it was already in mVirtuals, then ScanType will take
+                    // care of new additions.
+                    if (xVirtMethod != null)
+                    {
+                        Queue(xVirtMethod, aMethod, "Virtual Base");
+                        mVirtuals.Add(xVirtMethod);
+
+                        // List changes as we go, cant be foreach
+                        for (int i = 0; i < mItemsList.Count; i++)
+                        {
+                            if (mItemsList[i] is Type xType && xType != xVirtMethod.DeclaringType && !xType.IsInterface)
+                            {
+                                if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
+                                {
+                                    var xNewMethod = xType
+                                        .GetMethods(
+                                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                        .Where(method => method.Name == aMethod.Name
+                                                         && method.GetParameters().Select(param => param.ParameterType)
+                                                             .SequenceEqual(xParamTypes))
+                                        .SingleOrDefault();
+                                    if (xNewMethod != null)
+                                    {
+                                        // We need to check IsVirtual, a non virtual could
+                                        // "replace" a virtual above it?
+                                        if (xNewMethod.IsVirtual)
+                                        {
+                                            Queue(xNewMethod, aMethod, "Virtual Downscan");
+                                        }
+                                    }
+                                }
+                                else if (xVirtMethod.DeclaringType.IsInterface &&
+                                         xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
+                                {
+                                    var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
+                                    var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
+
+                                    if (xMethodIndex != -1)
+                                    {
+                                        var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
+
+                                        if (xMethod.DeclaringType == xType)
+                                        {
+                                            Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod,
+                                                "Virtual Downscan");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(Environment.NewLine
+                                    + "Error processing virtuals." + Environment.NewLine
+                                    + "  Method: " + LabelName.GetFullName(aMethod) + "." + Environment.NewLine
+                                    + "  Called from :" + Environment.NewLine + sourceItem + Environment.NewLine);
             }
 
             #endregion
@@ -823,24 +841,28 @@ namespace Cosmos.IL2CPU
             Type xCurrentType = aCurrentInspectedType;
             while (xCurrentType != null)
             {
-                foreach (var xInterface in xCurrentType.GetInterfaces())
+                if (!xCurrentType.IsInterface)
                 {
-                    var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
-                    var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
-                            m => m.Name == aMethod.Name
-                              && m.GetParameters().Select(
-                                p => p.ParameterType).SequenceEqual(aMethodParams));
-
-                    if (xMethod != null && xMethod.DeclaringType == xCurrentType)
+                    foreach (var xInterface in xCurrentType.GetInterfaces())
                     {
-                        var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
+                        var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
+                        var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
+                            m => m.Name == aMethod.Name
+                                 && m.GetParameters().Select(
+                                     p => p.ParameterType).SequenceEqual(aMethodParams));
 
-                        if (xMethodIndex != -1)
+                        if (xMethod != null && xMethod.DeclaringType == xCurrentType)
                         {
-                            return xInterfaceMap.InterfaceMethods[xMethodIndex];
+                            var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
+
+                            if (xMethodIndex != -1)
+                            {
+                                return xInterfaceMap.InterfaceMethods[xMethodIndex];
+                            }
                         }
                     }
                 }
+
                 xCurrentType = xCurrentType.BaseType;
             }
 
