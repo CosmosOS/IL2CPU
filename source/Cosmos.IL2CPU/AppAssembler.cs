@@ -919,7 +919,8 @@ namespace Cosmos.IL2CPU
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
 #if VMT_DEBUG
-            using (var xVmtDebugOutput = XmlWriter.Create(File.OpenWrite(@"vmt_debug.xml")))
+            using (var xVmtDebugOutput = XmlWriter.Create(
+                File.Create(@"vmt_debug.xml"), new XmlWriterSettings() { Indent = true }))
             {
                 xVmtDebugOutput.WriteStartDocument();
                 xVmtDebugOutput.WriteStartElement("VMT");
@@ -938,10 +939,8 @@ namespace Cosmos.IL2CPU
                     xVmtDebugOutput.WriteAttributeString("Name", xType.FullName);
 #endif
 
-                    var xEmittedMethods = new SortedList<MethodBase, bool>(new MethodBaseComparer());
-                    GetEmittedMethods(xType, aMethodsSet, ref xEmittedMethods);
-                    GetEmittedConstructors(xType, aMethodsSet, ref xEmittedMethods);
-                    GetEmittedInterfaceImplementations(xType, aMethodsSet, ref xEmittedMethods);
+                    var xEmittedMethods = GetEmittedMethods(xType, aMethodsSet);
+                    var xEmittedInterfaceMethods = GetEmittedInterfaceMethods(xType, aMethodsSet);
 
                     int? xBaseIndex = null;
                     if (xType.BaseType == null)
@@ -965,13 +964,6 @@ namespace Cosmos.IL2CPU
                     {
                         throw new Exception("Base type not found!");
                     }
-                    for (int x = xEmittedMethods.Count - 1; x >= 0; x--)
-                    {
-                        if (!aMethodsSet.Contains(xEmittedMethods.Keys[x]))
-                        {
-                            xEmittedMethods.RemoveAt(x);
-                        }
-                    }
 
                     // Set type info
                     string xTypeName = $"{LabelName.GetFullName(xType)} ASM_IS__{xType.Assembly.GetName().Name}";
@@ -986,10 +978,12 @@ namespace Cosmos.IL2CPU
                     // Base Type ID
                     Push((uint)xBaseIndex.Value);
 
+                    var xMethodCount = xEmittedMethods.Count + xEmittedInterfaceMethods.Count;
+
                     // Method array
-                    xData = AllocateEmptyVMTArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyVMTArray(xMethodCount, sizeof(uint), xArrayTypeID);
                     // Method Count
-                    Push((uint)xEmittedMethods.Count);
+                    Push((uint)xMethodCount);
                     // Method Indexes Array
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
@@ -1021,8 +1015,8 @@ namespace Cosmos.IL2CPU
 
                     for (int j = 0; j < xEmittedMethods.Count; j++)
                     {
-                        MethodBase xMethod = xEmittedMethods.Keys[j];
-                        uint xMethodUID = aGetMethodUID(xMethod);
+                        var xMethod = xEmittedMethods[j];
+                        var xMethodUID = aGetMethodUID(xMethod);
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Method");
                         xVmtDebugOutput.WriteAttributeString("Id", xMethodUID.ToString());
@@ -1031,12 +1025,6 @@ namespace Cosmos.IL2CPU
 #endif
                         if (!xType.IsInterface)
                         {
-                            // Emitted interface implementation
-                            if (xEmittedMethods.Values[j])
-                            {
-                                xMethod = GetInterfaceImplementation(xType, xMethod);
-                            }
-
                             Push(xTypeID);
                             Push((uint)j);
                             Push(xMethodUID);
@@ -1049,6 +1037,27 @@ namespace Cosmos.IL2CPU
                             {
                                 Push(ILOp.GetLabel(xMethod));
                             }
+
+                            Call(VTablesImplRefs.SetMethodInfoRef);
+                        }
+                    }
+
+                    for (int j = 0; j < xEmittedInterfaceMethods.Count; j++)
+                    {
+                        var xMethod = xEmittedInterfaceMethods.ElementAt(j);
+                        var xMethodUID = aGetMethodUID(xMethod.Key);
+#if VMT_DEBUG
+                        xVmtDebugOutput.WriteStartElement("Method");
+                        xVmtDebugOutput.WriteAttributeString("Id", xMethodUID.ToString());
+                        xVmtDebugOutput.WriteAttributeString("Name", xMethod.Value.GetFullName());
+                        xVmtDebugOutput.WriteEndElement();
+#endif
+                        if (!xType.IsInterface)
+                        {
+                            Push(xTypeID);
+                            Push((uint)(xEmittedMethods.Count + j));
+                            Push(xMethodUID);
+                            Push(ILOp.GetLabel(xMethod.Value));
 
                             Call(VTablesImplRefs.SetMethodInfoRef);
                         }
@@ -1085,73 +1094,54 @@ namespace Cosmos.IL2CPU
             XS.Return();
         }
 
-        private void GetEmittedMethods(Type aType, HashSet<MethodBase> aMethodSet, ref SortedList<MethodBase, bool> aEmittedMethods)
+        private IList<MethodBase> GetEmittedMethods(Type aType, HashSet<MethodBase> aMethodSet)
         {
-            foreach (var xMethod in aType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            var xList = new List<MethodBase>();
+
+            foreach (var xMethod in aMethodSet.Where(m => !m.IsStatic && !m.IsAbstract))
             {
-                if (aMethodSet.Contains(xMethod))
+                if (MemberInfoComparer.Instance.Equals(aType, xMethod.DeclaringType))
                 {
-                    if (!aEmittedMethods.ContainsKey(xMethod))
-                    {
-                        aEmittedMethods.Add(xMethod, false);
-                    }
+                    xList.Add(xMethod);
                 }
             }
+
+            return xList;
         }
 
-        private void GetEmittedConstructors(Type aType, HashSet<MethodBase> aMethodSet, ref SortedList<MethodBase, bool> aEmittedMethods)
+        private static Dictionary<MethodBase, MethodBase> EmptyEmittedInterfaceMethodsDictionary = new Dictionary<MethodBase, MethodBase>(0);
+
+        private IDictionary<MethodBase, MethodBase> GetEmittedInterfaceMethods(Type aType, HashSet<MethodBase> aMethodSet)
         {
-            foreach (var xCtor in aType.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            if (aType.IsInterface || aType.IsArray)
             {
-                if (aMethodSet.Contains(xCtor))
-                {
-                    if (!aEmittedMethods.ContainsKey(xCtor))
-                    {
-                        aEmittedMethods.Add(xCtor, false);
-                    }
-                }
+                return EmptyEmittedInterfaceMethodsDictionary;
             }
-        }
 
-        private void GetEmittedInterfaceImplementations(Type aType, HashSet<MethodBase> aMethodSet, ref SortedList<MethodBase, bool> aEmittedMethods)
-        {
-            foreach (var xIntf in aType.GetInterfaces())
+            var xEmittedInterfaceMethods = new Dictionary<MethodBase, MethodBase>();
+
+            foreach (var xInterface in aType.GetInterfaces())
             {
-                foreach (var xMethodIntf in xIntf.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                var xInterfaceMap = aType.GetInterfaceMap(xInterface);
+
+                foreach (var xMethod in aMethodSet.Where(m => !m.IsAbstract))
                 {
-                    var xParams = xMethodIntf.GetParameters().Select(xParam => xParam.ParameterType).ToArray();
-
-                    var xActualMethod = aType.GetMethod($"{xIntf.FullName}.{xMethodIntf.Name}", xParams);
-                    if (xActualMethod == null)
+                    if (MemberInfoComparer.Instance.Equals(xMethod.DeclaringType, aType))
                     {
-                        // get private implemenation
-                        xActualMethod = aType.GetMethod(xMethodIntf.Name, xParams);
-                    }
+                        var xTargetMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
+                            m => MemberInfoComparer.Instance.Equals(m, xMethod) == true);
 
-                    if (xActualMethod == null)
-                    {
-                        try
+                        if (xTargetMethod != null)
                         {
-                            if (!xIntf.IsGenericType)
-                            {
-                                xActualMethod = aType.GetInterfaceMap(xIntf).InterfaceMethods
-                                    .FirstOrDefault(m => m == xMethodIntf);
-                            }
-                        }
-                        catch
-                        {
-                        }
-
-                        if (xActualMethod != null && aMethodSet.Contains(xActualMethod))
-                        {
-                            if (!aEmittedMethods.ContainsKey(xActualMethod))
-                            {
-                                aEmittedMethods.Add(xActualMethod, true);
-                            }
+                            xEmittedInterfaceMethods.Add(
+                                xInterfaceMap.InterfaceMethods[Array.IndexOf(xInterfaceMap.TargetMethods, xTargetMethod)],
+                                xMethod);
                         }
                     }
                 }
             }
+
+            return xEmittedInterfaceMethods;
         }
 
         public MethodBase GetInterfaceImplementation(Type aType, MethodBase aMethod)
