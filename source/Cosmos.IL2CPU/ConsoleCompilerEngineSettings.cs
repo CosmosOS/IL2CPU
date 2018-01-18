@@ -42,6 +42,11 @@ namespace Cosmos.IL2CPU
                     mCmdOptions.Add(argID, s.Replace(s1[0] + ":", ""));
                 }
             }
+
+            if (mCmdOptions.TryGetValue("KernelPkg", out var xKernelPkg))
+            {
+                CompilerEngine.KernelPkg = xKernelPkg;
+            }
         }
 
         public bool EnableLogging
@@ -69,8 +74,6 @@ namespace Cosmos.IL2CPU
         public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
 
         public string OutputFilename => GetOption<string>(nameof(OutputFilename));
-
-        public string KernelPkg => GetOption<string>(nameof(KernelPkg));
 
         private T GetEnumOption<T>(string aOptionName)
             where T : struct
