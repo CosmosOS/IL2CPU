@@ -52,10 +52,8 @@ namespace Cosmos.IL2CPU
                 OnLogError = aLogError,
                 OnLogWarning = m => aLogMessage(String.Format("Warning: {0}", m)),
                 OnLogMessage = aLogMessage,
-                OnLogException = (m) => aLogError(String.Format("Exception: {0}", m.ToString()))
+                OnLogException = m => aLogError(String.Format("Exception: {0}", m.ToString()))
             };
-
-            CompilerEngine.KernelPkg = xSettings.KernelPkg;
 
             return xEngine.Execute();
         }
