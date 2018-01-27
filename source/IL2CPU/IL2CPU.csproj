@@ -4,7 +4,6 @@
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
-        <AssemblyName>IL2CPU</AssemblyName>
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
         <Description>IL2CPU compiler.
