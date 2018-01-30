@@ -146,14 +146,22 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Add(EAX, ObjectUtils.FieldDataOffset);
                     XS.Set(ESP, EAX, destinationDisplacement: (int)xThisOffset + 4);
 
-                    XS.Add(ESP, xThisOffset + 4);
+                    var xHasParams = xThisOffset != 0;
+                    var xNeedsExtraStackSize = xReturnSize >= xThisOffset + 8;
+
+                    if (xHasParams
+                        || !xNeedsExtraStackSize)
+                    {
+                        XS.Add(ESP, xThisOffset + 4);
+                    }
 
                     for (int i = 0; i < xThisOffset / 4; i++)
                     {
                         XS.Push(ESP, displacement: -4);
                     }
 
-                    if (xReturnSize >= xThisOffset + 8)
+                    if (xHasParams
+                        && xNeedsExtraStackSize)
                     {
                         XS.Sub(ESP, 4);
                     }
