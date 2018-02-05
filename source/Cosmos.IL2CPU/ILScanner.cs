@@ -1014,8 +1014,7 @@ namespace Cosmos.IL2CPU
             }
 
             var xTypes = new HashSet<Type>();
-            var xMethods = new HashSet<MethodBase>();
-
+            var xMethods = new HashSet<MethodBase>(new MethodBaseComparer());
             foreach (var xItem in mItems)
             {
                 if (xItem is MethodBase)

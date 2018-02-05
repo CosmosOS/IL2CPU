@@ -575,7 +575,7 @@ namespace Cosmos.IL2CPU
                 XS.Comment(xILOp.ToString());
                 var xNextPosition = xOpCode.Position + 1;
 
-                #region Exception handling support code 
+                #region Exception handling support code
 
                 _ExceptionRegionInfo xCurrentExceptionRegion = null;
                 var xBody = aMethod.MethodBase.GetMethodBodyBlock();
@@ -1193,13 +1193,12 @@ namespace Cosmos.IL2CPU
             string xFieldName = DataMember.GetStaticFieldName(aField);
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
-                var xItemList = (from item in aField.GetCustomAttributes(false)
-                                 where item.GetType().FullName == "ManifestResourceStreamAttribute"
-                                 select item).ToList();
-
+                var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
                 object xItem = null;
-                if (xItemList.Count > 0)
-                    xItem = xItemList[0];
+                if (xItemList.Any())
+                {
+                    xItem = xItemList.First();
+                }
                 string xManifestResourceName = null;
                 if (xItem != null)
                 {
