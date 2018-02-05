@@ -223,11 +223,13 @@ namespace Cosmos.IL2CPU
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");
             Queue(RuntimeEngineRefs.FinalizeApplicationRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -290,7 +292,10 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");

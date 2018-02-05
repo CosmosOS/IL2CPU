@@ -93,8 +93,18 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Set(EAX, ESP, sourceDisplacement: (int)xThisOffset + 4);
                     XS.Push(EAX, isIndirect: true);
                 }
+
                 XS.Push(aTargetMethodUID);
-                XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForTypeRef));
+
+                if (aTargetMethod.DeclaringType.IsInterface)
+                {
+                    XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef));
+                }
+                else
+                {
+                    XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForTypeRef));
+                }
+
                 if (xExtraStackSize > 0)
                 {
                     xThisOffset -= xExtraStackSize;
