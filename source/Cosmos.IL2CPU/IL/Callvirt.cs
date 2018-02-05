@@ -1,8 +1,11 @@
-using IL2CPU.API;
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
 using System.Reflection;
+
+using Cosmos.IL2CPU.ILOpCodes;
+
+using IL2CPU.API;
+
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -42,7 +45,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 xReturnSize = Align(SizeOfType(xMethodInfo.ReturnType), 4);
             }
 
-            uint xExtraStackSize = Call.GetStackSizeToReservate(aTargetMethod, xPopType);
+            var xExtraStackSize = Call.GetStackSizeToReservate(aTargetMethod, xPopType);
             uint xThisOffset = 0;
             var xParameters = aTargetMethod.GetParameters();
             foreach (var xItem in xParameters)
@@ -73,6 +76,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     XS.Sub(ESP, xExtraStackSize);
                 }
+
                 XS.Call(xNormalAddress);
             }
             else
@@ -95,6 +99,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 XS.Push(aTargetMethodUID);
                 XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForTypeRef));
+
                 if (xExtraStackSize > 0)
                 {
                     xThisOffset -= xExtraStackSize;
@@ -116,7 +121,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     * $esp + 0              Params
                     * $esp + mThisOffset    This
                     */
-                    // we need to see if $this is a boxed object, and if so, we need to box it
+                    // we need to see if $this is a boxed object, and if so, we need to unbox it
                     XS.Set(EAX, ESP, sourceDisplacement: (int)xThisOffset + 4);
                     XS.Compare(EAX, (int)ObjectUtils.InstanceTypeEnum.BoxedValueType, destinationIsIndirect: true, destinationDisplacement: 4, size: RegisterSize.Int32);
 
@@ -138,8 +143,28 @@ namespace Cosmos.IL2CPU.X86.IL
                     * ECX contains the method to call
                     * EAX contains the type pointer (not the handle!!)
                     */
-                    XS.Add(EAX, (uint)ObjectUtils.FieldDataOffset);
+                    XS.Add(EAX, ObjectUtils.FieldDataOffset);
                     XS.Set(ESP, EAX, destinationDisplacement: (int)xThisOffset + 4);
+
+                    var xHasParams = xThisOffset != 0;
+                    var xNeedsExtraStackSize = xReturnSize >= xThisOffset + 8;
+
+                    if (xHasParams
+                        || !xNeedsExtraStackSize)
+                    {
+                        XS.Add(ESP, xThisOffset + 4);
+                    }
+
+                    for (int i = 0; i < xThisOffset / 4; i++)
+                    {
+                        XS.Push(ESP, displacement: -4);
+                    }
+
+                    if (xHasParams
+                        && xNeedsExtraStackSize)
+                    {
+                        XS.Sub(ESP, 4);
+                    }
 
                     /*
                     * On the stack now:
@@ -149,11 +174,14 @@ namespace Cosmos.IL2CPU.X86.IL
                     * ECX contains the method to call
                     */
                 }
+
                 XS.Label(xCurrentMethodLabel + ".NotBoxedThis");
+
                 if (xExtraStackSize > 0)
                 {
                     XS.Sub(ESP, xExtraStackSize);
                 }
+
                 XS.Call(ECX);
                 XS.Label(xCurrentMethodLabel + ".AfterNotBoxedThis");
             }
