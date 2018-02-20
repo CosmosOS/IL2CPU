@@ -23,7 +23,7 @@ namespace Cosmos.IL2CPU
             mReferences = new List<string>();
             mAssemblySearchDirs = new List<string>();
 
-            mCmdOptions = new Dictionary<string, string>();
+            mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var s in aArgs)
             {
