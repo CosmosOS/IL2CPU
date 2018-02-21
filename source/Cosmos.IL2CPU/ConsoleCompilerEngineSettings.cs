@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 using Cosmos.Build.Common;
 
@@ -25,22 +26,11 @@ namespace Cosmos.IL2CPU
 
             mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var s in aArgs)
+            ParseArgs(aArgs);
+
+            if (File.Exists(ResponseFile))
             {
-                string[] s1 = s.Split(':');
-                string argID = s1[0].ToLower();
-                if (argID == "References".ToLower())
-                {
-                    mReferences.Add(s.Replace(s1[0] + ":", ""));
-                }
-                else if (argID == "AssemblySearchDirs".ToLower())
-                {
-                    mAssemblySearchDirs.Add(s.Replace(s1[0] + ":", ""));
-                }
-                else
-                {
-                    mCmdOptions.Add(argID, s.Replace(s1[0] + ":", ""));
-                }
+                ParseArgs(File.ReadAllLines(ResponseFile));
             }
 
             if (mCmdOptions.TryGetValue("KernelPkg", out var xKernelPkg))
@@ -74,6 +64,8 @@ namespace Cosmos.IL2CPU
         public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
 
         public string OutputFilename => GetOption<string>(nameof(OutputFilename));
+
+        public string ResponseFile => GetOption<string>(nameof(ResponseFile));
 
         private T GetEnumOption<T>(string aOptionName)
             where T : struct
@@ -126,6 +118,27 @@ namespace Cosmos.IL2CPU
             }
 
             return typeof(T) == typeof(string) ? (T)(object)String.Empty : default(T);
+        }
+
+        private void ParseArgs(string[] args)
+        {
+            foreach (var s in args)
+            {
+                string[] s1 = s.Split(':');
+                string argID = s1[0].ToLower();
+                if (argID == "References".ToLower())
+                {
+                    mReferences.Add(s.Replace(s1[0] + ":", ""));
+                }
+                else if (argID == "AssemblySearchDirs".ToLower())
+                {
+                    mAssemblySearchDirs.Add(s.Replace(s1[0] + ":", ""));
+                }
+                else
+                {
+                    mCmdOptions[argID] = s.Replace(s1[0] + ":", "");
+                }
+            }
         }
     }
 }
