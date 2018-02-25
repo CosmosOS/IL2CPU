@@ -69,45 +69,7 @@ namespace IL2CPU.Debug.Symbols
 
         public Type GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind)
         {
-            TypeDefinition xDefinition = reader.GetTypeDefinition(handle);
-
-            string xName = xDefinition.Namespace.IsNil
-                               ? reader.GetString(xDefinition.Name)
-                               : reader.GetString(xDefinition.Namespace) + "." + reader.GetString(xDefinition.Name);
-
-            if (xDefinition.Attributes.HasFlag(TypeAttributes.NestedPublic | TypeAttributes.NestedPrivate))
-            {
-                TypeDefinitionHandle xDeclaringTypeHandle;
-                TypeDefinition xDeclaringTypeDefinition;
-
-                do
-                {
-                    xDeclaringTypeHandle = xDefinition.GetDeclaringType();
-                    xDeclaringTypeDefinition = reader.GetTypeDefinition(xDeclaringTypeHandle);
-
-                    string xDeclaringTypeName = xDeclaringTypeDefinition.Namespace.IsNil
-                                                ? reader.GetString(xDeclaringTypeDefinition.Name)
-                                                : reader.GetString(xDeclaringTypeDefinition.Namespace) + "." + reader.GetString(xDeclaringTypeDefinition.Name);
-
-                    xName = xDeclaringTypeName + "+" + xName;
-                } while (xDeclaringTypeDefinition.Attributes.HasFlag(TypeAttributes.NestedPublic | TypeAttributes.NestedPrivate));
-            }
-
-            var xType = Type.GetType(xName);
-            if (xType != null)
-            {
-                return xType;
-            }
-
-            try
-            {
-                xType = mModule.ResolveType(MetadataTokens.GetToken(handle), null, null);
-                return xType;
-            }
-            catch
-            {
-                return null;
-            }
+            return mModule.ResolveType(MetadataTokens.GetToken(handle), null, null);
         }
 
         public Type GetSZArrayType(Type elementType)
