@@ -1,7 +1,8 @@
 using System;
-using XSharp.Assembler;
 
 using XSharp;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -34,28 +35,82 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    XS.FPU.IntLoad(ESP, displacement: 8, size: RegisterSize.Long64);
-                    XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
-                    XS.Sub(ESP, 8);
+                    string BaseLabel = GetLabel(aMethod, aOpCode) + ".";
+                    string LabelShiftRight = BaseLabel + "ShiftRightLoop";
+                    string LabelNoLoop = BaseLabel + "NoLoop";
+                    string LabelEnd = BaseLabel + "End";
 
-                    XS.LiteralCode("fdivp st1, st0");
+                    // divisor
+                    //low
+                    XS.Set(ESI, ESP, sourceIsIndirect: true);
+                    //high
+                    XS.Set(EDI, ESP, sourceDisplacement: 4);
 
-                    XS.FPU.IntStoreWithTruncate(ESP, true, RegisterSize.Long64);
+                    //dividend
+                    // low
+                    XS.Set(EAX, ESP, sourceDisplacement: 8);
+                    //high
+                    XS.Set(EDX, ESP, sourceDisplacement: 12);
 
-                    XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
-                    XS.Add(ESP, 8);
-                    XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
+                    // pop both 8 byte values
+                    XS.Add(ESP, 16);
 
-                    XS.LiteralCode("fmulp st1, st0");
+                    // set flags
+                    XS.Or(EDI, EDI);
 
-                    XS.FPU.IntStoreWithTruncate(ESP, true, RegisterSize.Long64);
-                    XS.FPU.IntLoad(ESP, displacement: 8, size: RegisterSize.Long64);
-                    XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
-                    XS.Add(ESP, 8);
+                    // if high dword of divisor is already zero, we dont need the loop
+                    XS.Jump(ConditionalTestEnum.Zero, LabelNoLoop);
 
-                    XS.LiteralCode("fsubp st1, st0");
+                    // set ecx to zero for counting the shift operations
+                    XS.Xor(ECX, ECX);
 
-                    XS.FPU.IntStoreWithTruncate(ESP, true, RegisterSize.Long64);
+                    XS.Label(LabelShiftRight);
+
+                    // shift divisor 1 bit right
+                    XS.ShiftRightDouble(ESI, EDI, 1);
+                    XS.ShiftRight(EDI, 1);
+
+                    // increment shift counter
+                    XS.Increment(ECX);
+
+                    // set flags
+                    XS.Or(EDI, EDI);
+                    // loop while high dword of divisor till it is zero
+                    XS.Jump(ConditionalTestEnum.NotZero, LabelShiftRight);
+
+                    // shift the divident now in one step
+                    // shift divident CL bits right
+                    XS.ShiftRightDouble(EAX, EDX, CL);
+                    XS.ShiftRight(EDX, CL);
+
+                    // so we shifted both, so we have near the same relation as original values
+                    // divide this
+                    XS.IntegerDivide(ESI);
+
+                    // save result to stack
+                    XS.Push(0);
+                    XS.Push(EDX);
+
+                    //TODO: implement proper derivation correction and overflow detection
+
+                    XS.Jump(LabelEnd);
+
+                    XS.Label(LabelNoLoop);
+                    //save high dividend
+                    XS.Set(ECX, EAX);
+                    XS.Set(EAX, EDX);
+                    // extend that sign is in edx
+                    XS.SignExtendAX(RegisterSize.Int32);
+                    // divide high part
+                    XS.IntegerDivide(ESI);
+                    XS.Set(EAX, ECX);
+                    // divide low part
+                    XS.Divide(ESI);
+                    // save low result
+                    XS.Push(0);
+                    XS.Push(EDX);
+
+                    XS.Label(LabelEnd);
                 }
             }
             else
