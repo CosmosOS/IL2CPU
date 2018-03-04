@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
-using Cosmos.Debug.Symbols.Metadata;
+using IL2CPU.Debug.Symbols.Metadata;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class LocalTypeProvider : ISignatureTypeProvider<Type, LocalTypeGenericContext>
     {

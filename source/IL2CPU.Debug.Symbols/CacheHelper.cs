@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class CacheHelper<TKey, TValue>
         where TKey: IEquatable<TKey>

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Reflection;
-using System.Reflection.Metadata;
-using Cosmos.Debug.Symbols;
+
+using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
 {

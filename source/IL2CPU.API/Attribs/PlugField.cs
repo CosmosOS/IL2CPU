@@ -1,6 +1,6 @@
 using System;
 
-namespace Cosmos.IL2CPU.API.Attribs {
+namespace IL2CPU.API.Attribs {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple=true)]
 	public sealed class PlugField: Attribute {
 		public PlugField() {

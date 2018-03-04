@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Threading.Tasks;
+
+using IL2CPU.Debug.Symbols;
+using IL2CPU.Debug.Symbols.Pdb;
+
 using XSharp.Assembler;
-using Cosmos.Debug.Symbols;
-using Cosmos.Debug.Symbols.Pdb;
 
 namespace Cosmos.IL2CPU.Extensions
 {
-    public static class MethodExtensions
+    internal static class MethodExtensions
     {
         public static string GetFullName(this MethodBase aMethod)
         {

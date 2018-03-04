@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Cosmos.Debug.Kernel;
+using System;
 using System.Runtime.InteropServices;
-using Cosmos.Debug.Kernel;
 
 namespace Cosmos.IL2CPU
 {
@@ -51,22 +51,60 @@ namespace Cosmos.IL2CPU
       return false;
     }
 
-    public static void SetTypeInfo(int aType, uint aBaseType, uint[] aMethodIndexes, uint[] aMethodAddresses, uint aMethodCount)
+    public static void SetTypeInfo(int aType, uint aBaseType, uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses, uint aInterfaceCount, uint[] aInterfaceIndexes)
     {
+      //DebugHex("SetTypeInfo - Type", (uint)aType);
+      //DebugHex("SetTypeInfo - BaseType", aBaseType);
+      //DebugHex("SetTypeInfo - MethodCount", aMethodCount);
+      //foreach (uint t in aMethodIndexes)
+      //{
+      //  DebugHex("SetTypeInfo - Method Indexes", t);
+      //}
+      //foreach (uint t in aMethodAddresses)
+      //{
+      //  DebugHex("SetTypeInfo - Method Addresses", t);
+      //}
+      //DebugHex("SetTypeInfo - InterfaceCount", aInterfaceCount);
+      //foreach (uint t in aInterfaceIndexes)
+      //{
+      //  DebugHex("SetTypeInfo - Interface Indexes", t);
+      //}
+
       mTypes[aType].BaseTypeIdentifier = aBaseType;
+      mTypes[aType].MethodCount = (int)aMethodCount;
       mTypes[aType].MethodIndexes = aMethodIndexes;
       mTypes[aType].MethodAddresses = aMethodAddresses;
-      mTypes[aType].MethodCount = (int) aMethodCount;
+      mTypes[aType].InterfaceCount = (int)aInterfaceCount;
+      mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
     }
 
     public static void SetMethodInfo(int aType, int aMethodIndex, uint aMethodIdentifier, uint aMethodAddress)
     {
+      //DebugHex("SetMethodInfo - Type", (uint)aType);
+      //DebugHex("SetMethodInfo - MethodIndex", (uint)aMethodIndex);
+      //DebugHex("SetMethodInfo - MethodId", aMethodIdentifier);
+      //DebugHex("SetMethodInfo - MethodAddress", aMethodAddress);
+
       mTypes[aType].MethodIndexes[aMethodIndex] = aMethodIdentifier;
       mTypes[aType].MethodAddresses[aMethodIndex] = aMethodAddress;
 
       if (mTypes[aType].MethodIndexes[aMethodIndex] != aMethodIdentifier)
       {
-        DebugAndHalt("Setting went wrong! (1)");
+        DebugAndHalt("Setting method info failed! (1)");
+      }
+    }
+
+    public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
+    {
+      //DebugHex("SetInterfaceInfo - Type", (uint)aType);
+      //DebugHex("SetInterfaceInfo - InterfaceIndex", (uint)aInterfaceIndex);
+      //DebugHex("SetInterfaceInfo - InterfaceIdentifier", aInterfaceIdentifier);
+
+      mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
+
+      if (mTypes[aType].InterfaceIndexes[aInterfaceIndex] != aInterfaceIdentifier)
+      {
+        DebugAndHalt("Setting interface info failed!");
       }
     }
 
@@ -79,11 +117,9 @@ namespace Cosmos.IL2CPU
         DebugHex("MethodId", aMethodId);
         Debugger.SendKernelPanic(KernelPanics.VMT_TypeIdInvalid);
         while (true)
-        ;
+          ;
       }
       var xCurrentType = aType;
-      DebugHex("Type", xCurrentType);
-      DebugHex("MethodId", aMethodId);
       do
       {
         DebugHex("Now checking type", xCurrentType);
@@ -115,6 +151,8 @@ namespace Cosmos.IL2CPU
             if (xResult < 1048576) // if pointer is under 1MB, some issue exists!
             {
               EnableDebug = true;
+              DebugHex("Type", xCurrentType);
+              DebugHex("MethodId", aMethodId);
               DebugHex("Result", (uint)xResult);
               DebugHex("i", (uint)i);
               DebugHex("MethodCount", (uint)xCurrentTypeInfo.MethodCount);
@@ -136,11 +174,12 @@ namespace Cosmos.IL2CPU
         xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
       }
       while (true);
-      //}
+
       EnableDebug = true;
       DebugHex("Type", aType);
       DebugHex("MethodId", aMethodId);
       Debug("Not FOUND!");
+
       Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
       while (true)
         ;
@@ -148,7 +187,7 @@ namespace Cosmos.IL2CPU
     }
   }
 
-  [StructLayout(LayoutKind.Explicit, Size = 24)]
+  [StructLayout(LayoutKind.Explicit, Size = 36)]
   public struct VTable
   {
     [FieldOffset(0)]
@@ -162,5 +201,11 @@ namespace Cosmos.IL2CPU
 
     [FieldOffset(16)]
     public uint[] MethodAddresses;
+
+    [FieldOffset(24)]
+    public int InterfaceCount;
+
+    [FieldOffset(28)]
+    public uint[] InterfaceIndexes;
   }
 }

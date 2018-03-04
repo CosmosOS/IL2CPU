@@ -3,12 +3,12 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <OutputType>Exe</OutputType>
-        <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
-        <DebugType>Full</DebugType>
+        <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
         <Description>IL2CPU compiler.
 $(IL2CPUDescription)</Description>
+        <DevelopmentDependency>True</DevelopmentDependency>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,9 +1,6 @@
-﻿using System;
+﻿using Cosmos.IL2CPU.Extensions;
+using System;
 using System.Reflection;
-using System.Reflection.Metadata;
-using Cosmos.Debug.Symbols;
-
-using Cosmos.IL2CPU.Extensions;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -61,14 +58,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
       switch (OpCode)
       {
         case Code.Ldloc:
-            StackPushTypes[0] = xLocals[Value].Type;
-            if (StackPushTypes[0].GetTypeInfo().IsEnum)
-            {
-              StackPushTypes[0] = StackPushTypes[0].GetTypeInfo().GetEnumUnderlyingType();
-            }
+          StackPushTypes[0] = xLocals[Value].Type;
+          if (StackPushTypes[0].IsEnum)
+          {
+            StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
+          }
           return;
         case Code.Ldloca:
-            StackPushTypes[0] = xLocals[Value].Type.MakeByRefType();
+          StackPushTypes[0] = xLocals[Value].Type.MakeByRefType();
           return;
         case Code.Ldarg:
           if (!aMethod.IsStatic)
@@ -76,11 +73,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
             if (Value == 0)
             {
               StackPushTypes[0] = aMethod.DeclaringType;
-              if (StackPushTypes[0].GetTypeInfo().IsEnum)
+              if (StackPushTypes[0].IsEnum)
               {
-                StackPushTypes[0] = StackPushTypes[0].GetTypeInfo().GetEnumUnderlyingType();
+                StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
               }
-              else if (StackPushTypes[0].GetTypeInfo().IsValueType)
+              else if (StackPushTypes[0].IsValueType)
               {
                 StackPushTypes[0] = StackPushTypes[0].MakeByRefType();
               }
@@ -89,9 +86,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
             xArgIndexCorrection = -1;
           }
           StackPushTypes[0] = xParams[Value + xArgIndexCorrection].ParameterType;
-          if (StackPushTypes[0].GetTypeInfo().IsEnum)
+          if (StackPushTypes[0].IsEnum)
           {
-            StackPushTypes[0] = StackPushTypes[0].GetTypeInfo().GetEnumUnderlyingType();
+            StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
           }
           return;
         case Code.Ldarga:
@@ -99,7 +96,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             if (Value == 0)
             {
-              if (StackPushTypes[0].GetTypeInfo().IsValueType)
+              if (StackPushTypes[0].IsValueType)
               {
                 StackPushTypes[0] = StackPushTypes[0].MakeByRefType();
               }

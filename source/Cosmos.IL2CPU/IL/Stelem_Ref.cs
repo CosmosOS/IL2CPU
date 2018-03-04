@@ -2,7 +2,7 @@ using System;
 using CPUx86 = XSharp.Assembler.x86;
 using XSharp.Assembler;
 
-using Cosmos.IL2CPU.API;
+using IL2CPU.API;
 using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL

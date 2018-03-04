@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 
-namespace Cosmos.IL2CPU.ILOpCodes {
-  public class OpType: ILOpCode
+namespace Cosmos.IL2CPU.ILOpCodes
+{
+  public class OpType : ILOpCode
   {
     public readonly Type Value;
 
@@ -108,7 +108,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           StackPushTypes[0] = typeof(void*);
           return;
         case Code.Box:
-          if (Value.GetTypeInfo().IsPrimitive)
+          if (Value.IsPrimitive)
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
           }
@@ -136,11 +136,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           return;
         case Code.Isinst:
           StackPopTypes[0] = typeof(object);
-          if (Value.GetTypeInfo().IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
+          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
           }
-          else if (Value.GetTypeInfo().IsValueType)
+          else if (Value.IsValueType)
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
           }
@@ -150,11 +150,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           }
           return;
         case Code.Castclass:
-          if (Value.GetTypeInfo().IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
+          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
           }
-          else if (Value.GetTypeInfo().IsValueType)
+          else if (Value.IsValueType)
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
           }

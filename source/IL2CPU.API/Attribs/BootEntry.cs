@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cosmos.IL2CPU.API.Attribs {
+namespace IL2CPU.API.Attribs {
   [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
   public sealed class BootEntry : Attribute {
     public int? EntryIndex { get; }

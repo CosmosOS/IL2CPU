@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.IO;
-using System.Reflection;
-using Microsoft.Data.Sqlite;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     public class SQL
     {
@@ -75,9 +74,9 @@ namespace Cosmos.Debug.Symbols
         /// <param name="resourceName">Name of the assembly resource to execute.</param>
         internal void ExecuteAssemblyResource(string resourceName)
         {
-            resourceName = GetType().GetTypeInfo().Assembly.GetName().Name + "." + resourceName;
+            resourceName = GetType().Assembly.GetName().Name + "." + resourceName;
 
-            using (var strm = typeof(SQL).GetTypeInfo().Assembly.GetManifestResourceStream(resourceName))
+            using (var strm = typeof(SQL).Assembly.GetManifestResourceStream(resourceName))
             {
                 if (strm == null)
                 {

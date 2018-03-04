@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+        <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     </ItemGroup>
@@ -20,8 +20,8 @@
         <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
         <ProjectReference Include="..\..\..\XSharp\source\XSharp.Assembler\XSharp.Assembler.csproj" />
         <ProjectReference Include="..\..\..\XSharp\source\XSharp\XSharp.csproj" />
+        <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
-        <ProjectReference Include="..\Cosmos.IL2CPU.API\Cosmos.IL2CPU.API.csproj" />
     </ItemGroup>
 
 </Project>

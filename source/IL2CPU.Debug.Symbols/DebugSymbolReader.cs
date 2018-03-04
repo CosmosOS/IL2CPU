@@ -7,10 +7,11 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
-using Cosmos.Debug.Symbols.Metadata;
-using Cosmos.Debug.Symbols.Pdb;
 
-namespace Cosmos.Debug.Symbols
+using IL2CPU.Debug.Symbols.Metadata;
+using IL2CPU.Debug.Symbols.Pdb;
+
+namespace IL2CPU.Debug.Symbols
 {
     public class DebugSymbolReader
     {
@@ -136,9 +137,8 @@ namespace Cosmos.Debug.Symbols
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
             }
 
             return xSequencePoints.ToArray();
@@ -178,16 +178,19 @@ namespace Cosmos.Debug.Symbols
             {
                 xGenericMethodParameters = aMethodBase.GetGenericArguments();
             }
-            if (aMethodBase.DeclaringType.GetTypeInfo().IsGenericType)
+            if (aMethodBase.DeclaringType != null && aMethodBase.DeclaringType.IsGenericType)
             {
-                xGenericTypeParameters = aMethodBase.DeclaringType.GetTypeInfo().GetGenericArguments();
+                xGenericTypeParameters = aMethodBase.DeclaringType.GetGenericArguments();
             }
 
             var xReader = GetReader(xLocation).mMetadataReader;
             List<ILLocalVariable> xLocalVariablesFromPdb = null;
             try
             {
-                xLocalVariablesFromPdb = mCurrentDebugSymbolReader.mSymbolReader.GetLocalVariableNamesForMethod(aMethodBase.MetadataToken).ToList();
+                if (mCurrentDebugSymbolReader?.mSymbolReader != null)
+                {
+                    xLocalVariablesFromPdb = mCurrentDebugSymbolReader.mSymbolReader.GetLocalVariableNamesForMethod(aMethodBase.MetadataToken).ToList();
+                }
             }
             catch (Exception)
             {

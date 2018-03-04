@@ -1,8 +1,6 @@
+using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Linq;
-using System.Reflection;
-
-using Cosmos.IL2CPU.Extensions;
 using XSharp;
 using static XSharp.XSRegisters;
 
@@ -51,7 +49,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             int xExtraOffset = 0;
             var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);
-            bool xNeedsGC = TypeIsReferenceType(aDeclaringType);
+            bool xNeedsGC = IsReferenceType(aDeclaringType);
             if (xNeedsGC)
             {
                 xExtraOffset = 12;
@@ -73,7 +71,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Comment("TypeOnStack: " + aTypeOnStack.FullName);
             XS.Comment("Offset: " + xOffset + " (includes object header)");
 
-            if (aDeclaringType.GetTypeInfo().IsValueType && aTypeOnStack == aDeclaringType)
+            if (aDeclaringType.IsValueType && aTypeOnStack == aDeclaringType)
             {
                 #region Read struct value from stack
 
@@ -103,7 +101,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             // pushed size is always 4 or 8
             var xSize = xFieldInfo.Size;
-            if (TypeIsReferenceType(aTypeOnStack))
+            if (IsReferenceType(aTypeOnStack))
             {
                 DoNullReferenceCheck(Assembler, debugEnabled, 4);
                 XS.Add(ESP, 4);

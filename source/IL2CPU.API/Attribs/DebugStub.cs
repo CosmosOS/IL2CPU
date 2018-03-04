@@ -1,6 +1,6 @@
 using System;
 
-namespace Cosmos.IL2CPU.API.Attribs
+namespace IL2CPU.API.Attribs
 {
     /// <summary>
     /// Method Attribute used to disable the outputing of the call to the DebugStub in that method

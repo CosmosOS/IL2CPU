@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using System.ComponentModel.DataAnnotations;
 
-namespace Cosmos.Debug.Symbols
+namespace IL2CPU.Debug.Symbols
 {
     [DataContract(IsReference = true)]
     public partial class AssemblyFile

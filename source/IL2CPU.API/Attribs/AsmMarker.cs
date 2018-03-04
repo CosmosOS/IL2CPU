@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cosmos.IL2CPU.API.Attribs {
+namespace IL2CPU.API.Attribs {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Field, AllowMultiple = true)]
     public sealed class AsmMarker : AsmLabel {
         public enum Type {

@@ -1,12 +1,12 @@
-using Cosmos.IL2CPU.API;
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
-using XSharp.Assembler;
-using CPUx86 = XSharp.Assembler.x86;
-using Cosmos.IL2CPU.ILOpCodes;
 using System.Reflection;
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
+using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -41,7 +41,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
             }
 
-            if (objectType.GetTypeInfo().IsValueType)
+            if (objectType.IsValueType)
             {
                 #region Valuetypes
 
@@ -72,8 +72,6 @@ namespace Cosmos.IL2CPU.X86.IL
                     throw new Exception("ValueType storage size cannot be 0.");
                 }
 
-                //var xStorageSize = aCtorDeclTypeInfo.StorageSize;
-
                 uint xArgSize = 0;
                 var xParameterList = constructor.GetParameters();
                 foreach (var xParam in xParameterList)
@@ -82,30 +80,23 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 XS.Comment("ArgSize: " + xArgSize);
 
-                // Set ESP so we can push the struct ptr
-                int xShift = (int)(xArgSize - xStorageSize);
-                XS.Comment("Shift: " + xShift);
-                if (xShift < 0)
-                {
-                    XS.Sub(ESP, (uint)Math.Abs(xShift));
-                }
-                else if (xShift > 0)
-                {
-                    XS.Add(ESP, (uint)xShift);
-                }
+                // set source of args copy
+                XS.Set(ESI, ESP);
 
-                // push struct ptr
-                XS.Push(ESP);
+                // allocate space for struct
+                XS.Sub(ESP, xStorageSize + 4);
 
-                // Shift args
-                foreach (var xParam in xParameterList)
-                {
-                    uint xArgSizeForThis = Align(SizeOfType(xParam.ParameterType), 4);
-                    for (int i = 1; i <= xArgSizeForThis / 4; i++)
-                    {
-                        new CPUx86.Push { DestinationReg = CPUx86.RegistersEnum.ESP, DestinationIsIndirect = true, DestinationDisplacement = (int)xStorageSize };
-                    }
-                }
+                // set destination and count of args copy
+                XS.Set(EDI, ESP);
+                XS.Set(ECX, xArgSize / 4);
+
+                // move the args to their new location
+                new CPUx86.Movs { Size = 32, Prefixes = CPUx86.InstructionPrefixes.Repeat };
+
+                // set struct ptr
+                XS.Set(EAX, ESP);
+                XS.Add(EAX, xArgSize + 4);
+                XS.Set(ESP, EAX, destinationDisplacement: (int)xArgSize);
 
                 new Call(aAssembler).Execute(aMethod, xMethod);
 
@@ -155,6 +146,36 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
                         XS.ShiftLeft(EAX, 1);
                         XS.Push(EAX);
+                    }
+                    /*
+                     * TODO see if something is needed in stack / register to make them really work
+                     */
+                    else if (xParams.Length == 3
+                             && (xParams[0].ParameterType == typeof(sbyte*)
+                             && xParams[1].ParameterType == typeof(int)
+                             && xParams[2].ParameterType == typeof(int)))
+                    {
+                        xHasCalcSize = true;
+                        XS.Push(ESP, isIndirect: true);
+                    }
+                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
+                    {
+                        xHasCalcSize = true;
+                        /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
+                        var xSByteCountLabel = currentLabel + ".SByteCount";
+
+                        XS.Set(EAX, ESP, sourceIsIndirect: true);
+                        XS.Or(ECX, 0xFFFFFFFF);
+
+                        XS.Label(xSByteCountLabel);
+
+                        XS.Increment(EAX);
+                        XS.Increment(ECX);
+
+                        XS.Compare(EAX, 0, destinationIsIndirect: true);
+                        XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
+
+                        XS.Push(ECX);
                     }
                     else
                     {

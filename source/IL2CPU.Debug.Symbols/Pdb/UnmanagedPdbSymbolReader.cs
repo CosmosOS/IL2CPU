@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.DiaSymReader;
 
-namespace Cosmos.Debug.Symbols.Pdb
+namespace IL2CPU.Debug.Symbols.Pdb
 {
     /// <summary>
     ///  Provides PdbSymbolReader via unmanaged SymBinder from full .NET Framework

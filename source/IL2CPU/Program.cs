@@ -6,15 +6,7 @@ namespace IL2CPU
     {
         public static int Main(string[] args) =>
             Cosmos.IL2CPU.Program.Run(args,
-            w =>
-            {
-                Console.Write("Warning: ");
-                Console.WriteLine(w);
-            },
-            e =>
-            {
-                Console.Write("Error: ");
-                Console.WriteLine(e);
-            });
+                m => Console.WriteLine($"Message: {m}"),
+                e => Console.Error.WriteLine($"Error: {e}"));
     }
 }

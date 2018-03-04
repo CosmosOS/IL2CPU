@@ -16,13 +16,12 @@
         <PackageReference Include="Dapper.StrongName" Version="1.50.2" />
         <PackageReference Include="DapperExtensions.StrongName" Version="1.50.2" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
-        <PackageReference Include="Microsoft.DiaSymReader" Version="1.1.0" />
-        <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" Version="1.2.0" />
-        <PackageReference Include="SQLitePCLRaw.bundle_green" Version="1.1.8" />
-        <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
-        <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+        <PackageReference Include="Microsoft.DiaSymReader" Version="1.2.0" />
+        <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" Version="1.4.0" />
+        <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
-        <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+        <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
         <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     </ItemGroup>
 

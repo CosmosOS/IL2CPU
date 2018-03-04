@@ -1,10 +1,9 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
 
 using XSharp;
+using XSharp.Assembler;
+using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
-using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -12,12 +11,10 @@ namespace Cosmos.IL2CPU.X86.IL
     /// Converts the unsigned integer value on top of the evaluation stack to F (native float) it can be double or some FPU extended precision Floating Point
     /// type as the weird 80 bit float of x87). For now we assume it to be always equal to double.
     /// </summary>
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_R_Un)]
-
+    [OpCode(ILOpCode.Code.Conv_R_Un)]
     public class Conv_R_Un : ILOp
     {
-
-        public Conv_R_Un(XSharp.Assembler.Assembler aAsmblr)
+        public Conv_R_Un(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -28,12 +25,6 @@ namespace Cosmos.IL2CPU.X86.IL
             var xValueIsFloat = TypeIsFloat(xValue);
             var xValueSize = SizeOfType(xValue);
 
-            if (xValueSize > 8)
-            {
-                //EmitNotImplementedException( Assembler, aServiceProvider, "Size '" + xSize.Size + "' not supported (add)", aCurrentLabel, aCurrentMethodInfo, aCurrentOffset, aNextLabel );
-                throw new NotImplementedException();
-            }
-            //TODO if on stack a float it is first truncated, http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.conv_r_un.aspx
             if (!xValueIsFloat)
             {
                 switch (xValueSize)
@@ -102,9 +93,9 @@ namespace Cosmos.IL2CPU.X86.IL
                         break;
 
                     default:
-                       //EmitNotImplementedException( Assembler, GetServiceProvider(), "Conv_I: SourceSize " + xSource + " not supported!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel );
-                       throw new NotImplementedException("Conv_R_Un with type " + xValue + " not supported!");
-                   }
+                        //EmitNotImplementedException( Assembler, GetServiceProvider(), "Conv_I: SourceSize " + xSource + " not supported!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel );
+                        throw new NotImplementedException("Conv_R_Un with type " + xValue + " not supported!");
+                }
             }
             else
             {
@@ -113,4 +104,3 @@ namespace Cosmos.IL2CPU.X86.IL
         }
     }
 }
- 

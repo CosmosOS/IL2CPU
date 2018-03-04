@@ -1,11 +1,7 @@
 using System;
-using Cosmos.IL2CPU.X86;
-using CPU = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
-
-using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
-using Label = XSharp.Assembler.Label;
+using XSharp.Assembler.x86;
+using CPU = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -112,7 +108,7 @@ namespace Cosmos.IL2CPU.X86.IL
           XS.Pop(XSRegisters.EAX);
           XS.Pop(XSRegisters.EBX);
           XS.Compare(XSRegisters.EBX, XSRegisters.EAX);
-          new ConditionalJump {Condition = xTestOp, DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode)};
+          new ConditionalJump { Condition = xTestOp, DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode) };
           //}
         }
         else
@@ -231,7 +227,7 @@ namespace Cosmos.IL2CPU.X86.IL
         }
         else
         {
-          if (TypeIsReferenceType(xStackContent))
+          if (IsReferenceType(xStackContent))
           {
             XS.Add(XSRegisters.ESP, 4);
             XS.Pop(XSRegisters.EAX);
@@ -246,17 +242,17 @@ namespace Cosmos.IL2CPU.X86.IL
           {
             case ConditionalTestEnum.Zero: // Equal
             case ConditionalTestEnum.NotZero: // NotEqual
-              if (TypeIsReferenceType(xStackContent))
+              if (IsReferenceType(xStackContent))
               {
                 XS.Xor(XSRegisters.EAX, 0);
-                new ConditionalJump {Condition = xTestOp,DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode)};
+                new ConditionalJump { Condition = xTestOp, DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode) };
               }
               else
               {
                 XS.Xor(XSRegisters.EAX, 0);
-                new ConditionalJump {Condition = xTestOp,DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode)};
+                new ConditionalJump { Condition = xTestOp, DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode) };
                 XS.Xor(XSRegisters.EBX, 0);
-                new ConditionalJump {Condition = xTestOp,DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode)};
+                new ConditionalJump { Condition = xTestOp, DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode) };
               }
               break;
 
