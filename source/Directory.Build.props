@@ -14,7 +14,7 @@
         <Company Condition="'$(Company)' == ''">Cosmos</Company>
         <Copyright Condition="'$(Copyright)' == ''">Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
         <PackageDescription Condition="'$(PackageDescription)' == ''">$(IL2CPUDescription)</PackageDescription>
-        <!--<PackageIconUrl Condition="'$(PackageIconUrl)' == ''"></PackageIconUrl>-->
+        <PackageIconUrl>https://github.com/CosmosOS/IL2CPU/raw/master/IL2CPU_128x128.png</PackageIconUrl>
         <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">http://www.gocosmos.org/IL2CPU/</PackageProjectUrl>
         <PackageLicenseUrl Condition="'$(PackageLicenseUrl)' == ''">https://github.com/CosmosOS/IL2CPU/raw/master/LICENSE.txt</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance Condition="'$(PackageRequireLicenseAcceptance)' == ''">True</PackageRequireLicenseAcceptance>
