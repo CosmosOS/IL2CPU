@@ -15,14 +15,29 @@ namespace Cosmos.IL2CPU
 
     }
 
-    public static bool IsInstance(uint aObjectType, uint aDesiredObjectType)
+    public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
     {
-      var xCurrentType = aObjectType;
-
       if (aObjectType == 0)
       {
         return true;
       }
+
+      if (aIsInterface)
+      {
+        var xType = mTypes[aObjectType];
+
+        for (int i = 0; i < xType.InterfaceCount; i++)
+        {
+          if (xType.InterfaceIndexes[i] == aDesiredObjectType)
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      var xCurrentType = aObjectType;
 
       do
       {
