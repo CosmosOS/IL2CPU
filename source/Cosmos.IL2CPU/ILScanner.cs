@@ -223,11 +223,13 @@ namespace Cosmos.IL2CPU
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");
             Queue(RuntimeEngineRefs.FinalizeApplicationRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -290,7 +292,10 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -323,12 +328,10 @@ namespace Cosmos.IL2CPU
         {
             foreach (var xOpCode in aOpCodes)
             {
-                var xOpMethod = xOpCode as ILOpCodes.OpMethod;
-                if (xOpMethod != null)
+                if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
                     xOpMethod.Value = (MethodBase)mItems.GetItemInList(xOpMethod.Value);
-                    xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value, true);
-                    xOpMethod.BaseMethodUID = GetMethodUID(xOpMethod.Value, false);
+                    xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }
             }
         }
@@ -816,100 +819,57 @@ namespace Cosmos.IL2CPU
             xList.Add(xLogItem);
         }
 
-        private MethodBase GetUltimateBaseMethod(MethodBase aMethod, Type[] aMethodParams, Type aCurrentInspectedType)
+        private MethodInfo GetUltimateBaseMethod(MethodInfo aMethod)
         {
-            MethodBase xInstanceBaseMethod = null;
-
-            Type xCurrentType = aCurrentInspectedType;
-            while (xCurrentType != null)
-            {
-                foreach (var xInterface in xCurrentType.GetInterfaces())
-                {
-                    var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
-                    var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
-                            m => m.Name == aMethod.Name
-                              && m.GetParameters().Select(
-                                p => p.ParameterType).SequenceEqual(aMethodParams));
-
-                    if (xMethod != null && xMethod.DeclaringType == xCurrentType)
-                    {
-                        var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
-
-                        if (xMethodIndex != -1)
-                        {
-                            return xInterfaceMap.InterfaceMethods[xMethodIndex];
-                        }
-                    }
-                }
-                xCurrentType = xCurrentType.BaseType;
-            }
+            var xBaseMethod = aMethod;
 
             while (true)
             {
-                if (aCurrentInspectedType.BaseType == null)
-                {
-                    break;
-                }
-                aCurrentInspectedType = aCurrentInspectedType.BaseType;
-                MethodBase xFoundMethod = aCurrentInspectedType
-                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .SingleOrDefault(method => method.Name == aMethod.Name
-                                               && method.GetParameters().Select(param => param.ParameterType)
-                                                   .SequenceEqual(aMethodParams));
-                if (xFoundMethod == null)
-                {
-                    break;
-                }
-                ParameterInfo[] xParams = xFoundMethod.GetParameters();
-                bool xContinue = true;
-                for (int i = 0; i < xParams.Length; i++)
-                {
-                    if (xParams[i].ParameterType != aMethodParams[i])
-                    {
-                        xContinue = false;
-                    }
-                }
-                if (!xContinue)
-                {
-                    continue;
-                }
-                xInstanceBaseMethod = xFoundMethod;
+                var xBaseDefinition = xBaseMethod.GetBaseDefinition();
 
-                if ((xFoundMethod.IsVirtual == aMethod.IsVirtual) && (xFoundMethod.IsPrivate == false) && (xFoundMethod.IsPublic == aMethod.IsPublic) && (xFoundMethod.IsFamily == aMethod.IsFamily) && (xFoundMethod.IsFamilyAndAssembly == aMethod.IsFamilyAndAssembly) && (xFoundMethod.IsFamilyOrAssembly == aMethod.IsFamilyOrAssembly) && (xFoundMethod.IsFinal == false))
+                if (xBaseDefinition == xBaseMethod)
                 {
-                    var xFoundMethInfo = (MethodInfo)xFoundMethod;
-                    var xBaseMethInfo = (MethodInfo)xInstanceBaseMethod;
-                    if (xFoundMethInfo.ReturnType.AssemblyQualifiedName.Equals(xBaseMethInfo.ReturnType.AssemblyQualifiedName))
-                    {
-                        xInstanceBaseMethod = xFoundMethod;
-                    }
+                    return xBaseMethod;
                 }
+
+                xBaseMethod = xBaseDefinition;
             }
-
-            return xInstanceBaseMethod ?? aMethod;
         }
 
-        protected uint GetMethodUID(MethodBase aMethod, bool aExact)
+        protected uint GetMethodUID(MethodBase aMethod)
         {
-            if (!aExact)
+            if (mMethodUIDs.TryGetValue(aMethod, out var xMethodUID))
             {
-                var xParamTypes = aMethod.GetParameters().Select(p => p.ParameterType).ToArray();
-                var xBaseMethod = GetUltimateBaseMethod(aMethod, xParamTypes, aMethod.DeclaringType);
-
-                if (!mMethodUIDs.ContainsKey(xBaseMethod))
+                return xMethodUID;
+            }
+            else
+            {
+                if (!aMethod.DeclaringType.IsInterface)
                 {
-                    var xId = (uint)mMethodUIDs.Count;
-                    mMethodUIDs.Add(xBaseMethod, xId);
+                    if (aMethod is MethodInfo xMethodInfo)
+                    {
+                        var xBaseMethod = GetUltimateBaseMethod(xMethodInfo);
+
+                        if (!mMethodUIDs.TryGetValue(xBaseMethod, out xMethodUID))
+                        {
+                            xMethodUID = (uint)mMethodUIDs.Count;
+                            mMethodUIDs.Add(xBaseMethod, xMethodUID);
+                        }
+
+                        if (!new MethodBaseComparer().Equals(aMethod, xBaseMethod))
+                        {
+                            mMethodUIDs.Add(aMethod, xMethodUID);
+                        }
+
+                        return xMethodUID;
+                    }
                 }
 
-                return mMethodUIDs[xBaseMethod];
+                xMethodUID = (uint)mMethodUIDs.Count;
+                mMethodUIDs.Add(aMethod, xMethodUID);
+
+                return xMethodUID;
             }
-            if (!mMethodUIDs.ContainsKey(aMethod))
-            {
-                var xId = (uint)mMethodUIDs.Count;
-                mMethodUIDs.Add(aMethod, xId);
-            }
-            return mMethodUIDs[aMethod];
         }
 
         protected uint GetTypeUID(Type aType)
@@ -1067,7 +1027,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, x => GetMethodUID(x, false));
+            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, GetMethodUID);
         }
     }
 }

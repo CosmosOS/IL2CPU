@@ -51,10 +51,18 @@ namespace Cosmos.IL2CPU
       return false;
     }
 
-    public static void SetTypeInfo(int aType, uint aBaseType, uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses, uint aInterfaceCount, uint[] aInterfaceIndexes)
+    public static void SetTypeInfo(
+      int aType, uint aBaseType, uint aInterfaceCount, uint[] aInterfaceIndexes,
+      uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
+      uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes)
     {
       //DebugHex("SetTypeInfo - Type", (uint)aType);
       //DebugHex("SetTypeInfo - BaseType", aBaseType);
+      //DebugHex("SetTypeInfo - InterfaceCount", aInterfaceCount);
+      //foreach (uint t in aInterfaceIndexes)
+      //{
+      //  DebugHex("SetTypeInfo - Interface Indexes", t);
+      //}
       //DebugHex("SetTypeInfo - MethodCount", aMethodCount);
       //foreach (uint t in aMethodIndexes)
       //{
@@ -64,18 +72,39 @@ namespace Cosmos.IL2CPU
       //{
       //  DebugHex("SetTypeInfo - Method Addresses", t);
       //}
-      //DebugHex("SetTypeInfo - InterfaceCount", aInterfaceCount);
-      //foreach (uint t in aInterfaceIndexes)
+      //DebugHex("SetTypeInfo - Interface Method Count", aInterfaceMethodCount);
+      //foreach (uint t in aMethodIndexes)
       //{
-      //  DebugHex("SetTypeInfo - Interface Indexes", t);
+      //  DebugHex("SetTypeInfo - Interface Method IDs", t);
+      //}
+      //foreach (uint t in aMethodAddresses)
+      //{
+      //  DebugHex("SetTypeInfo - Target Method IDs", t);
       //}
 
       mTypes[aType].BaseTypeIdentifier = aBaseType;
-      mTypes[aType].MethodCount = (int)aMethodCount;
+      mTypes[aType].InterfaceCount = aInterfaceCount;
+      mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
+      mTypes[aType].MethodCount = aMethodCount;
       mTypes[aType].MethodIndexes = aMethodIndexes;
       mTypes[aType].MethodAddresses = aMethodAddresses;
-      mTypes[aType].InterfaceCount = (int)aInterfaceCount;
-      mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
+      mTypes[aType].InterfaceMethodCount = aInterfaceMethodCount;
+      mTypes[aType].InterfaceMethodIndexes = aInterfaceMethodIndexes;
+      mTypes[aType].TargetMethodIndexes = aTargetMethodIndexes;
+    }
+
+    public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
+    {
+      //DebugHex("SetInterfaceInfo - Type", (uint)aType);
+      //DebugHex("SetInterfaceInfo - InterfaceIndex", (uint)aInterfaceIndex);
+      //DebugHex("SetInterfaceInfo - InterfaceIdentifier", aInterfaceIdentifier);
+
+      mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
+
+      if (mTypes[aType].InterfaceIndexes[aInterfaceIndex] != aInterfaceIdentifier)
+      {
+        DebugAndHalt("Setting interface info failed!");
+      }
     }
 
     public static void SetMethodInfo(int aType, int aMethodIndex, uint aMethodIdentifier, uint aMethodAddress)
@@ -94,18 +123,15 @@ namespace Cosmos.IL2CPU
       }
     }
 
-    public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
+    public static void SetInterfaceMethodInfo(int aType, int aMethodIndex, uint aInterfaceMethodId, uint aTargetMethodId)
     {
-      //DebugHex("SetInterfaceInfo - Type", (uint)aType);
-      //DebugHex("SetInterfaceInfo - InterfaceIndex", (uint)aInterfaceIndex);
-      //DebugHex("SetInterfaceInfo - InterfaceIdentifier", aInterfaceIdentifier);
+      //DebugHex("SetInterfaceMethodInfo - Type", (uint)aType);
+      //DebugHex("SetInterfaceMethodInfo - MethodIndex", (uint)aMethodIndex);
+      //DebugHex("SetInterfaceMethodInfo - InterfaceMethodId", aInterfaceMethodId);
+      //DebugHex("SetInterfaceMethodInfo - TargetMethodId", aTargetMethodId);
 
-      mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
-
-      if (mTypes[aType].InterfaceIndexes[aInterfaceIndex] != aInterfaceIdentifier)
-      {
-        DebugAndHalt("Setting interface info failed!");
-      }
+      mTypes[aType].InterfaceMethodIndexes[aMethodIndex] = aInterfaceMethodId;
+      mTypes[aType].TargetMethodIndexes[aMethodIndex] = aTargetMethodId;
     }
 
     public static uint GetMethodAddressForType(uint aType, uint aMethodId)
@@ -185,27 +211,83 @@ namespace Cosmos.IL2CPU
         ;
       throw new Exception("Cannot find virtual method!");
     }
+
+    public static uint GetMethodAddressForInterfaceType(uint aType, uint aInterfaceMethodId)
+    {
+      if (aType > 0xFFFF)
+      {
+        EnableDebug = true;
+        DebugHex("Type", aType);
+        DebugHex("InterfaceMethodId", aInterfaceMethodId);
+        Debugger.SendKernelPanic(KernelPanics.VMT_TypeIdInvalid);
+        while (true) ;
+      }
+
+      var xTypeInfo = mTypes[aType];
+
+      if (xTypeInfo.InterfaceMethodIndexes == null)
+      {
+        EnableDebug = true;
+        DebugHex("InterfaceMethodIndexes is null for type", aType);
+        Debugger.SendKernelPanic(KernelPanics.VMT_MethodIndexesNull);
+        while (true);
+      }
+
+      if (xTypeInfo.TargetMethodIndexes == null)
+      {
+        EnableDebug = true;
+        DebugHex("TargetMethodIndexes is null for type", aType);
+        Debugger.SendKernelPanic(KernelPanics.VMT_MethodAddressesNull);
+        while (true);
+      }
+
+      for (int i = 0; i < xTypeInfo.MethodIndexes.Length; i++)
+      {
+        if (xTypeInfo.InterfaceMethodIndexes[i] == aInterfaceMethodId)
+        {
+          var xTargetMethodId = xTypeInfo.TargetMethodIndexes[i];
+          return GetMethodAddressForType(aType, xTargetMethodId);
+        }
+      }
+
+      EnableDebug = true;
+      DebugHex("Type", aType);
+      DebugHex("InterfaceMethodId", aInterfaceMethodId);
+      Debug("Not FOUND!");
+
+      Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
+      while (true) ;
+    }
   }
 
-  [StructLayout(LayoutKind.Explicit, Size = 36)]
+  [StructLayout(LayoutKind.Explicit, Size = 56)]
   public struct VTable
   {
     [FieldOffset(0)]
     public uint BaseTypeIdentifier;
 
     [FieldOffset(4)]
-    public int MethodCount;
+    public uint InterfaceCount;
 
     [FieldOffset(8)]
-    public uint[] MethodIndexes;
+    public uint[] InterfaceIndexes;
 
     [FieldOffset(16)]
-    public uint[] MethodAddresses;
+    public uint MethodCount;
 
-    [FieldOffset(24)]
-    public int InterfaceCount;
+    [FieldOffset(20)]
+    public uint[] MethodIndexes;
 
     [FieldOffset(28)]
-    public uint[] InterfaceIndexes;
+    public uint[] MethodAddresses;
+
+    [FieldOffset(36)]
+    public uint InterfaceMethodCount;
+
+    [FieldOffset(40)]
+    public uint[] InterfaceMethodIndexes;
+
+    [FieldOffset(48)]
+    public uint[] TargetMethodIndexes;
   }
 }
