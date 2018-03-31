@@ -19,9 +19,8 @@ nuget:
 
 build_script:
   - cmd: |
-      build\nuget restore "..\XSharp\XSharp.sln"
-      build\nuget restore "IL2CPU.sln"
-      msbuild "IL2CPU.sln" /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Platform="Any CPU" /p:Configuration=Debug /p:DeployExtension=false
+      msbuild "..\XSharp\XSharp.sln" /t:Restore /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+      msbuild "IL2CPU.sln" /t:Restore;Build /p:Platform="Any CPU" /p:Configuration=Debug /p:DeployExtension=false /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 # Disabled for now
 #artifacts:
