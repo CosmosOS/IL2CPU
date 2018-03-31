@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 
+using Serilog;
+
 using Cosmos.Build.Common;
 
 using IL2CPU.Debug.Symbols;
@@ -20,12 +22,6 @@ namespace Cosmos.IL2CPU
     // http://blogs.msdn.com/b/visualstudio/archive/2010/07/06/debugging-msbuild-script-with-visual-studio.aspx
     internal class CompilerEngine
     {
-        public Action<string> OnLogMessage;
-        public Action<string> OnLogError;
-        public Action<string> OnLogWarning;
-        public Action<Exception> OnLogException;
-        protected static Action<string> mStaticLog = null;
-
         public static string KernelPkg { get; set; }
         public static bool UseGen3Kernel
         {
@@ -42,33 +38,13 @@ namespace Cosmos.IL2CPU
 
         public string AssemblerLog = "XSharp.Assembler.log";
 
-        protected void LogTime(string message)
-        {
-        }
+        private ILogger _logger;
 
-        protected void LogMessage(string aMsg)
-        {
-            OnLogMessage?.Invoke(aMsg);
-        }
-
-        protected void LogWarning(string aMsg)
-        {
-            OnLogWarning?.Invoke(aMsg);
-        }
-
-        protected void LogError(string aMsg)
-        {
-            OnLogError?.Invoke(aMsg);
-        }
-
-        protected void LogException(Exception e)
-        {
-            OnLogException?.Invoke(e);
-        }
-
-        public CompilerEngine(ICompilerEngineSettings aSettings)
+        public CompilerEngine(ICompilerEngineSettings aSettings, ILogger logger)
         {
             mSettings = aSettings;
+            _logger = logger ?? new LoggerConfiguration().CreateLogger();
+
             EnsureCosmosPathsInitialization();
         }
 
@@ -81,13 +57,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                var builder = new StringBuilder();
-                builder.Append("Error while initializing Cosmos paths");
-                for (Exception scannedException = e; null != scannedException; scannedException = scannedException.InnerException)
-                {
-                    builder.Append(" | " + scannedException.Message);
-                }
-                LogError(builder.ToString());
+                _logger.Error(e, "Error while initializing Cosmos paths");
                 return false;
             }
         }
@@ -96,8 +66,7 @@ namespace Cosmos.IL2CPU
         {
             try
             {
-                LogMessage("Executing IL2CPU on assembly");
-                LogTime("Engine execute started");
+                _logger.Information("Executing IL2CPU on assembly");
 
                 AssemblyLoadContext.Default.Resolving += Default_Resolving;
 
@@ -144,9 +113,9 @@ namespace Cosmos.IL2CPU
                         xAsm.Assembler.Initialize();
                         using (var xScanner = new ILScanner(xAsm))
                         {
-                            xScanner.LogException = LogException;
-                            xScanner.LogWarning = LogWarning;
-                            CompilerHelpers.DebugEvent += LogMessage;
+                            xScanner.LogException = e => _logger.Error(e, "Exception occurred");
+                            xScanner.LogWarning = m => _logger.Warning(m);
+                            CompilerHelpers.DebugEvent += m => _logger.Information(m);
                             if (mSettings.EnableLogging)
                             {
                                 var xLogFile = xOutputFilenameWithoutExtension + ".log.html";
@@ -154,7 +123,7 @@ namespace Cosmos.IL2CPU
                                 {
                                     // file creation not possible
                                     mSettings.EnableLogging = false;
-                                    LogWarning("Could not create the file \"" + xLogFile + "\"! No log will be created!");
+                                    _logger.Warning("Could not create the file \"" + xLogFile + "\"! No log will be created!");
                                 }
                             }
 
@@ -203,13 +172,14 @@ namespace Cosmos.IL2CPU
                         //    (int)xDebugInfo.PersistanceDuration.TotalSeconds));
                     }
                 }
-                LogTime("Engine execute finished");
+
                 return true;
             }
             catch (Exception ex)
             {
-                LogException(ex);
-                LogMessage("Loaded assemblies: ");
+                _logger.Error(ex, "Error");
+                _logger.Information("Loaded assemblies: ");
+
                 foreach (var xAsm in AssemblyLoadContext.Default.GetLoadedAssemblies())
                 {
                     if (xAsm.IsDynamic)
@@ -219,7 +189,7 @@ namespace Cosmos.IL2CPU
 
                     try
                     {
-                        LogMessage(xAsm.Location);
+                        _logger.Information(xAsm.Location);
                     }
                     catch
                     {
@@ -300,15 +270,15 @@ namespace Cosmos.IL2CPU
             // will not be tried on them, but will on ASMs they reference.
 
             string xKernelBaseName = "Cosmos.System.Kernel";
-            LogMessage("Kernel Base: " + xKernelBaseName);
+            _logger.Information("Kernel Base: {KernelBaseName}", xKernelBaseName);
 
             Type xKernelType = null;
             foreach (string xRef in mSettings.References)
             {
-                LogMessage("Checking Reference: " + xRef);
+                _logger.Information("Checking Reference: {Reference}", xRef);
                 if (File.Exists(xRef))
                 {
-                    LogMessage("  Exists");
+                    _logger.Information("  Exists");
                     var xAssembly = AssemblyLoadContext.Default.LoadFromAssemblyCacheOrPath(xRef);
 
                     CompilerHelpers.Debug($"Looking for kernel in {xAssembly}");
@@ -330,7 +300,8 @@ namespace Cosmos.IL2CPU
                             {
                                 if (xKernelType != null)
                                 {
-                                    LogError($"Two kernels found: {xType.FullName} and {xKernelType.FullName}");
+                                    _logger.Error("Two kernels found: {CurrentType} and {KernelType}!",
+                                        xType.FullName, xKernelType.FullName);
                                     return null;
                                 }
                                 xKernelType = xType;
@@ -342,13 +313,13 @@ namespace Cosmos.IL2CPU
 
             if (xKernelType == null)
             {
-                LogError("No kernel found.");
+                _logger.Error("No kernel found.");
                 return null;
             }
             var xCtor = xKernelType.GetConstructor(Type.EmptyTypes);
             if (xCtor == null)
             {
-                LogError("Kernel has no public parameterless constructor.");
+                _logger.Error("Kernel has no public parameterless constructor.");
                 return null;
             }
             return xCtor;
@@ -365,10 +336,11 @@ namespace Cosmos.IL2CPU
 
             foreach (string xRef in mSettings.References)
             {
-                LogMessage("Checking Reference: " + xRef);
+                _logger.Information("Checking Reference: {Reference}", xRef);
+
                 if (File.Exists(xRef))
                 {
-                    LogMessage("  Exists");
+                    _logger.Information("  Exists");
                     var xAssembly = AssemblyLoadContext.Default.LoadFromAssemblyCacheOrPath(xRef);
                     CheckAssembly(xAssembly);
                 }
@@ -377,7 +349,7 @@ namespace Cosmos.IL2CPU
             void CheckAssembly(Assembly aAssembly)
             {
                 // Just for debugging
-                //LogMessage("Checking Assembly: " + aAssembly.Location);
+                //_logger.Information("Checking Assembly: {AssemblyLocation}", aAssembly.Location);
 
                 xCheckedAssemblies.Add(aAssembly.GetName().ToString());
 
@@ -404,18 +376,21 @@ namespace Cosmos.IL2CPU
                         if (xBootEntryAttribute != null)
                         {
                             var xEntryIndex = xBootEntryAttribute.EntryIndex;
+                            var xMethodName = $"{xMethod.ReturnType.FullName} {xMethod.DeclaringType.FullName}.{xMethod.Name}";
 
-                            LogMessage("Boot Entry found: Name: " + xMethod + ", Entry Index: "
-                                + (xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "null"));
+                            _logger.Information("Boot Entry found: Name = {MethodName}, Entry Index = ", xMethodName,
+                                xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "None");
 
                             if (xMethod.ReturnType != typeof(void))
                             {
-                                throw new NotSupportedException("Boot Entry should return void! Method: " + LabelName.Get(xMethod));
+                                throw new NotSupportedException(
+                                    "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
                             }
 
                             if (xMethod.GetParameters().Length != 0)
                             {
-                                throw new NotSupportedException("Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
+                                throw new NotSupportedException(
+                                    "Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
                             }
 
                             mBootEntries.Add(xMethod, xEntryIndex);
@@ -425,7 +400,8 @@ namespace Cosmos.IL2CPU
                     if (xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                              .Where(m => m.GetCustomAttribute<BootEntry>() != null).Any())
                     {
-                        throw new NotSupportedException("Boot Entry should be static! Type: " + LabelName.GetFullName(xType));
+                        throw new NotSupportedException(
+                            "Boot Entry should be static! Type: " + xType.FullName);
                     }
                 }
 
@@ -447,8 +423,7 @@ namespace Cosmos.IL2CPU
                     {
                         if (xReference.Name.Contains("Cosmos"))
                         {
-                            LogWarning("Cosmos Assembly not found!" + Environment.NewLine +
-                                       "Assembly Name: " + xReference.FullName);
+                            _logger.Warning("Cosmos Assembly not found! Assembly Name: {AssemblyName}", xReference.FullName);
                         }
                     }
                 }

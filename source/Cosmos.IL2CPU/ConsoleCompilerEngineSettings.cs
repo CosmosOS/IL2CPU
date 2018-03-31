@@ -2,43 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 
+using Serilog;
+
 using Cosmos.Build.Common;
 
 namespace Cosmos.IL2CPU
 {
     internal class ConsoleCompilerEngineSettings : ICompilerEngineSettings
     {
-        private Action<string> mLogMessage;
-        private Action<string> mLogError;
-
-        private List<string> mReferences;
-        private List<string> mAssemblySearchDirs;
-
-        private Dictionary<string, string> mCmdOptions;
-
-        public ConsoleCompilerEngineSettings(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
-        {
-            mLogMessage = aLogMessage;
-            mLogError = aLogError;
-
-            mReferences = new List<string>();
-            mAssemblySearchDirs = new List<string>();
-
-            mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            ParseArgs(aArgs);
-
-            if (File.Exists(ResponseFile))
-            {
-                ParseArgs(File.ReadAllLines(ResponseFile));
-            }
-
-            if (mCmdOptions.TryGetValue("KernelPkg", out var xKernelPkg))
-            {
-                CompilerEngine.KernelPkg = xKernelPkg;
-            }
-        }
-
         public bool EnableLogging
         {
             get => GetOption<bool>(nameof(EnableLogging));
@@ -66,6 +37,35 @@ namespace Cosmos.IL2CPU
         public string OutputFilename => GetOption<string>(nameof(OutputFilename));
 
         public string ResponseFile => GetOption<string>(nameof(ResponseFile));
+
+        private ILogger _logger;
+
+        private List<string> mReferences;
+        private List<string> mAssemblySearchDirs;
+
+        private Dictionary<string, string> mCmdOptions;
+
+        public ConsoleCompilerEngineSettings(string[] aArgs, ILogger logger)
+        {
+            _logger = logger;
+
+            mReferences = new List<string>();
+            mAssemblySearchDirs = new List<string>();
+
+            mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            ParseArgs(aArgs);
+
+            if (File.Exists(ResponseFile))
+            {
+                ParseArgs(File.ReadAllLines(ResponseFile));
+            }
+
+            if (mCmdOptions.TryGetValue("KernelPkg", out var xKernelPkg))
+            {
+                CompilerEngine.KernelPkg = xKernelPkg;
+            }
+        }
 
         private T GetEnumOption<T>(string aOptionName)
             where T : struct
@@ -95,7 +95,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                mLogError(e.ToString());
+                _logger.Error(e, "Error parsing argument!");
             }
 
             return default(T);
@@ -113,7 +113,7 @@ namespace Cosmos.IL2CPU
                 }
                 catch (Exception e)
                 {
-                    mLogError(e.ToString());
+                    _logger.Error(e, "Invalid conversion of argument!");
                 }
             }
 

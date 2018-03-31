@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Serilog;
+
 namespace Cosmos.IL2CPU
 {
     public class Program
@@ -7,53 +9,32 @@ namespace Cosmos.IL2CPU
         private const int Succeeded = 0;
         private const int Failed = 1;
 
-        public static int Run(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
+        public static int Run(string[] aArgs, ILogger logger)
         {
-            #region Null Checks
-
             if (aArgs == null)
             {
                 throw new ArgumentNullException(nameof(aArgs));
             }
 
-            if (aLogMessage == null)
-            {
-                throw new ArgumentNullException(nameof(aLogMessage));
-            }
-
-            if (aLogError == null)
-            {
-                throw new ArgumentNullException(nameof(aLogError));
-            }
-
-            #endregion
-
             try
             {
-                if (RunCompilerEngine(aArgs, aLogMessage, aLogError))
+                if (RunCompilerEngine(aArgs, logger))
                 {
                     return Succeeded;
                 }
             }
-            catch (Exception E)
+            catch (Exception e)
             {
-                aLogError(String.Format("Error occurred: " + E.ToString()));
+                logger.Error(e, "Error occurred");
             }
 
             return Failed;
         }
 
-        private static bool RunCompilerEngine(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
+        private static bool RunCompilerEngine(string[] aArgs, ILogger logger)
         {
-            var xSettings = new ConsoleCompilerEngineSettings(aArgs, aLogMessage, aLogError);
-
-            var xEngine = new CompilerEngine(xSettings)
-            {
-                OnLogError = aLogError,
-                OnLogWarning = m => aLogMessage(String.Format("Warning: {0}", m)),
-                OnLogMessage = aLogMessage,
-                OnLogException = m => aLogError(String.Format("Exception: {0}", m.ToString()))
-            };
+            var xSettings = new ConsoleCompilerEngineSettings(aArgs, logger);
+            var xEngine = new CompilerEngine(xSettings, logger);
 
             return xEngine.Execute();
         }
