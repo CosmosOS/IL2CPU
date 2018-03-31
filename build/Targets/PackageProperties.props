@@ -1,0 +1,20 @@
+<Project>
+
+    <PropertyGroup>
+        <IL2CPUDescription>IL2CPU is a compiler for .NET IL code to compile to assembly language for direct booting.</IL2CPUDescription>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>Cosmos</Authors>
+        <Copyright>Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
+        <PackageDescription>$(IL2CPUDescription)</PackageDescription>
+        <!--<PackageIconUrl></PackageIconUrl>-->
+        <PackageProjectUrl>https://www.il2cpu.net</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/raw/master/LICENSE.txt</PackageLicenseUrl>
+        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+        <PackageTags>IL2CPU IL Compiler AOT Cosmos OS Operating System .NET C# VB VB.NET F#</PackageTags>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/CosmosOS/IL2CPU</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>

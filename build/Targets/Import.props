@@ -1,0 +1,8 @@
+<Project>
+
+    <Import Project="RestoreSources.props" />
+    <Import Project="RepoLayout.props" />
+
+    <Import Project="PackageProperties.props" />
+
+</Project>
