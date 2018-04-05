@@ -91,7 +91,7 @@ namespace Cosmos.IL2CPU
                 return false;
             }
         }
-        
+
         public bool Execute()
         {
             try
@@ -118,15 +118,18 @@ namespace Cosmos.IL2CPU
                     }
                 }
 
-                var xOutputFilenameWithoutExtension = Path.ChangeExtension(mSettings.OutputFilename, null);
+                var debugCom = mSettings.DebugCom;
+
                 if (!mSettings.EnableDebug)
                 {
                     // Default of 1 is in Cosmos.Targets. Need to change to use proj props.
-                    mSettings.DebugCom = 0;
+                    debugCom = 0;
                 }
 
-                using (var xAsm = GetAppAssembler())
+                using (var xAsm = GetAppAssembler(debugCom))
                 {
+                    var xOutputFilenameWithoutExtension = Path.ChangeExtension(mSettings.OutputFilename, null);
+
                     using (var xDebugInfo = new DebugInfo(xOutputFilenameWithoutExtension + ".cdb", true, false))
                     {
                         xAsm.DebugInfo = xDebugInfo;
@@ -153,7 +156,6 @@ namespace Cosmos.IL2CPU
                                 if (!xScanner.EnableLogging(xLogFile))
                                 {
                                     // file creation not possible
-                                    mSettings.EnableLogging = false;
                                     LogWarning("Could not create the file \"" + xLogFile + "\"! No log will be created!");
                                 }
                             }
@@ -229,9 +231,9 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private AppAssembler GetAppAssembler()
+        private AppAssembler GetAppAssembler(byte debugCom)
         {
-            return new AppAssembler(mSettings.DebugCom, Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog));
+            return new AppAssembler(debugCom, Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog));
         }
 
         private Assembly Default_Resolving(AssemblyLoadContext aContext, AssemblyName aName)

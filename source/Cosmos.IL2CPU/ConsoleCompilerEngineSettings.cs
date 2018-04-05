@@ -8,6 +8,26 @@ namespace Cosmos.IL2CPU
 {
     internal class ConsoleCompilerEngineSettings : ICompilerEngineSettings
     {
+        public bool EnableLogging => GetOption<bool>(nameof(EnableLogging));
+
+        public bool EnableDebug => GetOption<bool>(nameof(EnableDebug));
+        public DebugMode DebugMode => GetEnumOption<DebugMode>(nameof(DebugMode));
+        public byte DebugCom => GetOption<byte>(nameof(DebugCom));
+        public bool EmitDebugSymbols => GetOption<bool>(nameof(EmitDebugSymbols));
+        public bool IgnoreDebugStubAttribute => GetOption<bool>(nameof(IgnoreDebugStubAttribute));
+
+        public TraceAssemblies TraceAssemblies => GetEnumOption<TraceAssemblies>(nameof(TraceAssemblies));
+        public bool EnableStackCorruptionDetection => GetOption<bool>(nameof(EnableStackCorruptionDetection));
+        public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
+            GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
+
+        public IEnumerable<string> References => mReferences;
+        public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
+
+        public string OutputFilename => GetOption<string>(nameof(OutputFilename));
+
+        public string ResponseFile => GetOption<string>(nameof(ResponseFile));
+
         private Action<string> mLogMessage;
         private Action<string> mLogError;
 
@@ -38,34 +58,6 @@ namespace Cosmos.IL2CPU
                 CompilerEngine.KernelPkg = xKernelPkg;
             }
         }
-
-        public bool EnableLogging
-        {
-            get => GetOption<bool>(nameof(EnableLogging));
-            set => mCmdOptions[nameof(EnableLogging)] = value.ToString();
-        }
-
-        public bool EnableDebug => GetOption<bool>(nameof(EnableDebug));
-        public DebugMode DebugMode => GetEnumOption<DebugMode>(nameof(DebugMode));
-        public byte DebugCom
-        {
-            get => GetOption<byte>(nameof(DebugCom));
-            set => mCmdOptions[nameof(DebugCom)] = value.ToString();
-        }
-        public bool EmitDebugSymbols => GetOption<bool>(nameof(EmitDebugSymbols));
-        public bool IgnoreDebugStubAttribute => GetOption<bool>(nameof(IgnoreDebugStubAttribute));
-
-        public TraceAssemblies TraceAssemblies => GetEnumOption<TraceAssemblies>(nameof(TraceAssemblies));
-        public bool EnableStackCorruptionDetection => GetOption<bool>(nameof(EnableStackCorruptionDetection));
-        public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
-            GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
-
-        public IEnumerable<string> References => mReferences;
-        public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
-
-        public string OutputFilename => GetOption<string>(nameof(OutputFilename));
-
-        public string ResponseFile => GetOption<string>(nameof(ResponseFile));
 
         private T GetEnumOption<T>(string aOptionName)
             where T : struct
@@ -122,21 +114,29 @@ namespace Cosmos.IL2CPU
 
         private void ParseArgs(string[] args)
         {
-            foreach (var s in args)
+            foreach (var arg in args)
             {
-                string[] s1 = s.Split(':');
-                string argID = s1[0].ToLower();
-                if (argID == "References".ToLower())
+                var indexOfSeparator = arg.IndexOf(':');
+
+                if (indexOfSeparator == -1)
                 {
-                    mReferences.Add(s.Replace(s1[0] + ":", ""));
+                    continue;
                 }
-                else if (argID == "AssemblySearchDirs".ToLower())
+
+                var key = arg.Substring(0, indexOfSeparator);
+                var value = arg.Substring(indexOfSeparator + 1);
+
+                if (String.Equals(key, "References", StringComparison.OrdinalIgnoreCase))
                 {
-                    mAssemblySearchDirs.Add(s.Replace(s1[0] + ":", ""));
+                    mReferences.Add(value);
+                }
+                else if (String.Equals(key, "AssemblySearchDirs", StringComparison.OrdinalIgnoreCase))
+                {
+                    mAssemblySearchDirs.Add(value);
                 }
                 else
                 {
-                    mCmdOptions[argID] = s.Replace(s1[0] + ":", "");
+                    mCmdOptions[key] = value;
                 }
             }
         }
