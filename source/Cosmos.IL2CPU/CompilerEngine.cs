@@ -20,27 +20,26 @@ namespace Cosmos.IL2CPU
     // http://blogs.msdn.com/b/visualstudio/archive/2010/07/06/debugging-msbuild-script-with-visual-studio.aspx
     internal class CompilerEngine
     {
+        private const string AssemblerLog = "XSharp.Assembler.log";
+
         public Action<string> OnLogMessage;
         public Action<string> OnLogError;
         public Action<string> OnLogWarning;
         public Action<Exception> OnLogException;
         protected static Action<string> mStaticLog = null;
 
+        // HACK: only GCImplementationRefs depends on this, remove when possible
+        public static TypeResolver TypeResolver { get; private set; }
+
         public static string KernelPkg { get; set; }
-        public static bool UseGen3Kernel
-        {
-            get
-            {
-                return String.Equals(KernelPkg, "X86", StringComparison.OrdinalIgnoreCase);
-            }
-        }
+        public static bool UseGen3Kernel => String.Equals(KernelPkg, "X86", StringComparison.OrdinalIgnoreCase);
 
         private ICompilerEngineSettings mSettings;
 
+        private AssemblyLoadContext _assemblyLoadContext;
+
         private Dictionary<MethodBase, int?> mBootEntries;
         private List<MemberInfo> mForceIncludes;
-
-        public string AssemblerLog = "XSharp.Assembler.log";
 
         protected void LogTime(string message)
         {
@@ -69,6 +68,12 @@ namespace Cosmos.IL2CPU
         public CompilerEngine(ICompilerEngineSettings aSettings)
         {
             mSettings = aSettings;
+
+            _assemblyLoadContext = new IsolatedAssemblyLoadContext(
+                mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
+
+            TypeResolver = new TypeResolver(_assemblyLoadContext);
+
             EnsureCosmosPathsInitialization();
         }
 
@@ -98,8 +103,6 @@ namespace Cosmos.IL2CPU
             {
                 LogMessage("Executing IL2CPU on assembly");
                 LogTime("Engine execute started");
-
-                AssemblyLoadContext.Default.Resolving += Default_Resolving;
 
                 // Gen2
                 // Find the kernel's entry point. We are looking for a public class Kernel, with public static void Boot()
@@ -145,7 +148,7 @@ namespace Cosmos.IL2CPU
                         }
 
                         xAsm.Assembler.Initialize();
-                        using (var xScanner = new ILScanner(xAsm))
+                        using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext)))
                         {
                             xScanner.LogException = LogException;
                             xScanner.LogWarning = LogWarning;
@@ -160,14 +163,17 @@ namespace Cosmos.IL2CPU
                                 }
                             }
 
+                            var plugsAssemblies = mSettings.PlugsReferences.Select(
+                                r => _assemblyLoadContext.LoadFromAssemblyPath(r));
+
                             if (UseGen3Kernel)
                             {
-                                xScanner.Execute(mBootEntries.Keys.ToArray(), mForceIncludes);
+                                xScanner.Execute(mBootEntries.Keys.ToArray(), mForceIncludes, plugsAssemblies);
                             }
                             else
                             {
                                 xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod(UseGen3Kernel ? "EntryPoint" : "Start"));
-                                xScanner.Execute(xKernelCtor);
+                                xScanner.Execute(xKernelCtor, plugsAssemblies);
                             }
 
                             //AppAssemblerRingsCheck.Execute(xScanner, xKernelCtor.DeclaringType.Assembly);
@@ -211,22 +217,6 @@ namespace Cosmos.IL2CPU
             catch (Exception ex)
             {
                 LogException(ex);
-                LogMessage("Loaded assemblies: ");
-                foreach (var xAsm in AssemblyLoadContext.Default.GetLoadedAssemblies())
-                {
-                    if (xAsm.IsDynamic)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        LogMessage(xAsm.Location);
-                    }
-                    catch
-                    {
-                    }
-                }
                 return false;
             }
         }
@@ -234,55 +224,6 @@ namespace Cosmos.IL2CPU
         private AppAssembler GetAppAssembler(byte debugCom)
         {
             return new AppAssembler(debugCom, Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog));
-        }
-
-        private Assembly Default_Resolving(AssemblyLoadContext aContext, AssemblyName aName)
-        {
-            foreach (var xRef in mSettings.References)
-            {
-                var xName = AssemblyLoadContext.GetAssemblyName(xRef);
-                if (xName.Name == aName.Name)
-                {
-                    return aContext.LoadFromAssemblyPath(xRef);
-                }
-            }
-
-            foreach (var xRef in mSettings.References)
-            {
-                var xKernelAssemblyDir = Path.GetDirectoryName(xRef);
-                var xAssemblyPath = Path.Combine(xKernelAssemblyDir, aName.Name);
-                if (File.Exists(xAssemblyPath + ".dll"))
-                {
-                    return aContext.LoadFromAssemblyPath(xAssemblyPath + ".dll");
-                }
-                if (File.Exists(xAssemblyPath + ".exe"))
-                {
-                    return aContext.LoadFromAssemblyPath(xAssemblyPath + ".exe");
-                }
-            }
-
-            // check for assembly in working directory
-            var xPathToCheck = Path.Combine(Directory.GetCurrentDirectory(), aName.Name + ".dll");
-            if (File.Exists(xPathToCheck))
-            {
-                return aContext.LoadFromAssemblyPath(xPathToCheck);
-            }
-
-            foreach (var xDir in mSettings.AssemblySearchDirs)
-            {
-                var xPath = Path.Combine(xDir, aName.Name + ".dll");
-                if (File.Exists(xPath))
-                {
-                    return aContext.LoadFromAssemblyPath(xPath);
-                }
-                xPath = Path.Combine(xDir, aName.Name + ".exe");
-                if (File.Exists(xPath))
-                {
-                    return aContext.LoadFromAssemblyPath(xPath);
-                }
-            }
-
-            return null;
         }
 
         #region Gen2
@@ -305,39 +246,39 @@ namespace Cosmos.IL2CPU
             LogMessage("Kernel Base: " + xKernelBaseName);
 
             Type xKernelType = null;
-            foreach (string xRef in mSettings.References)
+
+            LogMessage($"Checking target assembly: {mSettings.TargetAssembly}");
+
+            if (!File.Exists(mSettings.TargetAssembly))
             {
-                LogMessage("Checking Reference: " + xRef);
-                if (File.Exists(xRef))
+                throw new FileNotFoundException("Target assembly not found!", mSettings.TargetAssembly);
+            }
+
+            var xAssembly = _assemblyLoadContext.LoadFromAssemblyPath(mSettings.TargetAssembly);
+
+            CompilerHelpers.Debug($"Looking for kernel in {xAssembly}");
+
+            foreach (var xType in xAssembly.ExportedTypes)
+            {
+                if (!xType.IsGenericTypeDefinition && !xType.IsAbstract)
                 {
-                    LogMessage("  Exists");
-                    var xAssembly = AssemblyLoadContext.Default.LoadFromAssemblyCacheOrPath(xRef);
+                    CompilerHelpers.Debug($"Checking type {xType.FullName}");
 
-                    CompilerHelpers.Debug($"Looking for kernel in {xAssembly}");
-
-                    foreach (var xType in xAssembly.ExportedTypes)
+                    // We used to resolve with this:
+                    //   if (xType.IsSubclassOf(typeof(Cosmos.System.Kernel))) {
+                    // But this caused a single dependency on Cosmos.System which is bad.
+                    // We could use an attribute, or maybe an interface would be better in this limited case. Interface
+                    // will force user to implement what is needed if replacing our core. But in the end this is a "not needed" feature
+                    // and would only complicate things.
+                    // So for now at least, we look by name so we dont have a dependency since the method returns a MethodBase and not a Kernel instance anyway.
+                    if (xType.BaseType.FullName == xKernelBaseName)
                     {
-                        if (!xType.IsGenericTypeDefinition && !xType.IsAbstract)
+                        if (xKernelType != null)
                         {
-                            CompilerHelpers.Debug($"Checking type {xType.FullName}");
-
-                            // We used to resolve with this:
-                            //   if (xType.IsSubclassOf(typeof(Cosmos.System.Kernel))) {
-                            // But this caused a single dependency on Cosmos.System which is bad.
-                            // We could use an attribute, or maybe an interface would be better in this limited case. Interface
-                            // will force user to implement what is needed if replacing our core. But in the end this is a "not needed" feature
-                            // and would only complicate things.
-                            // So for now at least, we look by name so we dont have a dependency since the method returns a MethodBase and not a Kernel instance anyway.
-                            if (xType.BaseType.FullName == xKernelBaseName)
-                            {
-                                if (xKernelType != null)
-                                {
-                                    LogError($"Two kernels found: {xType.FullName} and {xKernelType.FullName}");
-                                    return null;
-                                }
-                                xKernelType = xType;
-                            }
+                            LogError($"Two kernels found: {xType.FullName} and {xKernelType.FullName}");
+                            return null;
                         }
+                        xKernelType = xType;
                     }
                 }
             }
@@ -365,16 +306,15 @@ namespace Cosmos.IL2CPU
 
             var xCheckedAssemblies = new List<string>();
 
-            foreach (string xRef in mSettings.References)
+            LogMessage($"Checking target assembly: {mSettings.TargetAssembly}");
+
+            if (!File.Exists(mSettings.TargetAssembly))
             {
-                LogMessage("Checking Reference: " + xRef);
-                if (File.Exists(xRef))
-                {
-                    LogMessage("  Exists");
-                    var xAssembly = AssemblyLoadContext.Default.LoadFromAssemblyCacheOrPath(xRef);
-                    CheckAssembly(xAssembly);
-                }
+                throw new FileNotFoundException("Target assembly not found!", mSettings.TargetAssembly);
             }
+
+            var xTargetAssembly = _assemblyLoadContext.LoadFromAssemblyPath(mSettings.TargetAssembly);
+            CheckAssembly(xTargetAssembly);
 
             void CheckAssembly(Assembly aAssembly)
             {
@@ -412,12 +352,14 @@ namespace Cosmos.IL2CPU
 
                             if (xMethod.ReturnType != typeof(void))
                             {
-                                throw new NotSupportedException("Boot Entry should return void! Method: " + LabelName.Get(xMethod));
+                                throw new NotSupportedException(
+                                    "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
                             }
 
                             if (xMethod.GetParameters().Length != 0)
                             {
-                                throw new NotSupportedException("Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
+                                throw new NotSupportedException(
+                                    "Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
                             }
 
                             mBootEntries.Add(xMethod, xEntryIndex);
@@ -427,7 +369,8 @@ namespace Cosmos.IL2CPU
                     if (xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                              .Where(m => m.GetCustomAttribute<BootEntry>() != null).Any())
                     {
-                        throw new NotSupportedException("Boot Entry should be static! Type: " + LabelName.GetFullName(xType));
+                        throw new NotSupportedException(
+                            "Boot Entry should be static! Type: " + xType.FullName);
                     }
                 }
 
@@ -437,7 +380,7 @@ namespace Cosmos.IL2CPU
                     {
                         if (!xCheckedAssemblies.Contains(xReference.ToString()))
                         {
-                            var xAssembly = AssemblyLoadContext.Default.LoadFromAssemblyName(xReference);
+                            var xAssembly = _assemblyLoadContext.LoadFromAssemblyName(xReference);
 
                             if (xAssembly != null)
                             {

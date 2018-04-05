@@ -5,12 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
 {
-    public class PlugManager
+    internal class PlugManager
     {
         public bool ThrowExceptions = true;
 
@@ -36,29 +35,11 @@ namespace Cosmos.IL2CPU
         // list of field plugs
         protected IDictionary<Type, IDictionary<string, PlugField>> mPlugFields = new Dictionary<Type, IDictionary<string, PlugField>>();
 
-        public Dictionary<Type, List<Type>> PlugImpls
-        {
-            get
-            {
-                return mPlugImpls;
-            }
-        }
+        public Dictionary<Type, List<Type>> PlugImpls => mPlugImpls;
+        public Dictionary<Type, List<Type>> PlugImplsInhrt => mPlugImplsInhrt;
+        public IDictionary<Type, IDictionary<string, PlugField>> PlugFields => mPlugFields;
 
-        public Dictionary<Type, List<Type>> PlugImplsInhrt
-        {
-            get
-            {
-                return mPlugImplsInhrt;
-            }
-        }
-
-        public IDictionary<Type, IDictionary<string, PlugField>> PlugFields
-        {
-            get
-            {
-                return mPlugFields;
-            }
-        }
+        private TypeResolver _typeResolver;
 
         private Orvid.Collections.SkipList ResolvedPlugs = new Orvid.Collections.SkipList();
 
@@ -67,13 +48,15 @@ namespace Cosmos.IL2CPU
             return LabelName.GetFullName(m);
         }
 
-        public PlugManager(LogExceptionDelegate aLogException, Action<string> aLogWarning)
+        public PlugManager(LogExceptionDelegate aLogException, Action<string> aLogWarning, TypeResolver typeResolver)
         {
             LogException = aLogException;
             LogWarning = aLogWarning;
+
+            _typeResolver = typeResolver;
         }
 
-        public void FindPlugImpls()
+        public void FindPlugImpls(IEnumerable<Assembly> assemblies)
         {
             // TODO: Cache method list with info - so we dont have to keep
             // scanning attributes for enabled etc repeatedly
@@ -87,7 +70,7 @@ namespace Cosmos.IL2CPU
             // and is substituted on the fly? Plug scanner would direct all access to that
             // class and throw an exception if any method, field, member etc is missing.
 
-            foreach (var xAsm in AssemblyLoadContext.Default.GetLoadedAssemblies())
+            foreach (var xAsm in assemblies)
             {
                 // Find all classes marked as a Plug
                 foreach (var xPlugType in xAsm.GetTypes())
@@ -103,7 +86,7 @@ namespace Cosmos.IL2CPU
                         {
                             try
                             {
-                                xTargetType = Type.GetType(xAttrib.TargetName, true, false);
+                                xTargetType = _typeResolver.ResolveType(xAttrib.TargetName, true, false);
                             }
                             catch (Exception ex)
                             {
@@ -114,8 +97,6 @@ namespace Cosmos.IL2CPU
                                 continue;
                             }
                         }
-                        // Only keep this plug if its for MS.NET.
-                        // TODO: Integrate with builder options to allow Mono support again.
 
                         Dictionary<Type, List<Type>> mPlugs;
                         if (xTargetType.ContainsGenericParameters)
@@ -467,7 +448,7 @@ namespace Cosmos.IL2CPU
                                 var xReplaceType = xParams[0].GetCustomAttributes(typeof(FieldType), false).ToList();
                                 if (xReplaceType.Any())
                                 {
-                                    xTypesStatic[0] = Type.GetType(((FieldType)xReplaceType[0]).Name, true);
+                                    xTypesStatic[0] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                 }
                                 else
                                 {
@@ -488,7 +469,7 @@ namespace Cosmos.IL2CPU
                                     var xReplaceType = xParam.GetCustomAttributes(typeof(FieldType), false).ToList();
                                     if (xReplaceType.Any())
                                     {
-                                        xTypesInst[xCurIdx] = Type.GetType(((FieldType)xReplaceType[0]).Name, true);
+                                        xTypesInst[xCurIdx] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                     }
                                     else
                                         xTypesInst[xCurIdx] = xParam.ParameterType;

@@ -18,7 +18,10 @@ namespace Cosmos.IL2CPU
         bool EnableStackCorruptionDetection { get; }
         StackCorruptionDetectionLevel StackCorruptionDetectionLevel { get; }
 
+        string TargetAssembly { get; }
+
         IEnumerable<string> References { get; }
+        IEnumerable<string> PlugsReferences { get; }
         IEnumerable<string> AssemblySearchDirs { get; }
 
         string OutputFilename { get; }

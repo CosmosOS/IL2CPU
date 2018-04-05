@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU
         }
     }
 
-    public class ILScanner : IDisposable
+    internal class ILScanner : IDisposable
     {
         public LogExceptionDelegate LogException = null;
         public Action<string> LogWarning = null;
@@ -70,12 +70,12 @@ namespace Cosmos.IL2CPU
 
         protected Dictionary<object, List<LogItem>> mLogMap;
 
-        public ILScanner(AppAssembler aAsmblr)
+        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver)
         {
             mAsmblr = aAsmblr;
             mReader = new ILReader();
 
-            mPlugManager = new PlugManager(LogException, LogWarning);
+            mPlugManager = new PlugManager(LogException, LogWarning, typeResolver);
         }
 
         public bool EnableLogging(string aPathname)
@@ -150,7 +150,7 @@ namespace Cosmos.IL2CPU
 
         #region Gen2
 
-        public void Execute(MethodBase aStartMethod)
+        public void Execute(MethodBase aStartMethod, IEnumerable<Assembly> plugsAssemblies)
         {
             if (aStartMethod == null)
             {
@@ -208,7 +208,7 @@ namespace Cosmos.IL2CPU
 
             #endregion
 
-            mPlugManager.FindPlugImpls();
+            mPlugManager.FindPlugImpls(plugsAssemblies);
             // Now that we found all plugs, scan them.
             // We have to scan them after we find all plugs, because
             // plugs can use other plugs
@@ -218,7 +218,7 @@ namespace Cosmos.IL2CPU
                 CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
-            ILOp.mPlugManager = mPlugManager;
+            ILOp.PlugManager = mPlugManager;
 
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");
@@ -261,7 +261,7 @@ namespace Cosmos.IL2CPU
 
         #region Gen3
 
-        public void Execute(MethodBase[] aBootEntries, List<MemberInfo> aForceIncludes)
+        public void Execute(MethodBase[] aBootEntries, List<MemberInfo> aForceIncludes, IEnumerable<Assembly> plugsAssemblies)
         {
             foreach (var xBootEntry in aBootEntries)
             {
@@ -274,7 +274,7 @@ namespace Cosmos.IL2CPU
                 Queue(xForceInclude, null, "Force Include");
             }
 
-            mPlugManager.FindPlugImpls();
+            mPlugManager.FindPlugImpls(plugsAssemblies);
             // Now that we found all plugs, scan them.
             // We have to scan them after we find all plugs, because
             // plugs can use other plugs
@@ -284,7 +284,7 @@ namespace Cosmos.IL2CPU
                 CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
-            ILOp.mPlugManager = mPlugManager;
+            ILOp.PlugManager = mPlugManager;
 
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");

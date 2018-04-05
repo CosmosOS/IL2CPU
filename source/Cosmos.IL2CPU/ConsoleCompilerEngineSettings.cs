@@ -21,7 +21,10 @@ namespace Cosmos.IL2CPU
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
             GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
 
+        public string TargetAssembly => GetOption<string>(nameof(TargetAssembly));
+
         public IEnumerable<string> References => mReferences;
+        public IEnumerable<string> PlugsReferences => mPlugsReferences;
         public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
 
         public string OutputFilename => GetOption<string>(nameof(OutputFilename));
@@ -32,6 +35,7 @@ namespace Cosmos.IL2CPU
         private Action<string> mLogError;
 
         private List<string> mReferences;
+        private List<string> mPlugsReferences;
         private List<string> mAssemblySearchDirs;
 
         private Dictionary<string, string> mCmdOptions;
@@ -42,6 +46,7 @@ namespace Cosmos.IL2CPU
             mLogError = aLogError;
 
             mReferences = new List<string>();
+            mPlugsReferences = new List<string>();
             mAssemblySearchDirs = new List<string>();
 
             mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -129,6 +134,10 @@ namespace Cosmos.IL2CPU
                 if (String.Equals(key, "References", StringComparison.OrdinalIgnoreCase))
                 {
                     mReferences.Add(value);
+                }
+                else if (String.Equals(key, "PlugsReferences", StringComparison.OrdinalIgnoreCase))
+                {
+                    mPlugsReferences.Add(value);
                 }
                 else if (String.Equals(key, "AssemblySearchDirs", StringComparison.OrdinalIgnoreCase))
                 {
