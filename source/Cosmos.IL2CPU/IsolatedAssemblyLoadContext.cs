@@ -25,7 +25,14 @@ namespace Cosmos.IL2CPU
                 {
                     _assemblies.Add(
                         assemblyIdentity,
-                        new Lazy<Assembly>(() => LoadFromAssemblyPath(assemblyPath)));
+                        new Lazy<Assembly>(
+                            () =>
+                            {
+                                // HACK: need to fix assembly loading
+                                return Default.LoadFromAssemblyPath(assemblyPath);
+
+                                //return LoadFromAssemblyPath(assemblyPath);
+                            }));
                 }
             }
         }
