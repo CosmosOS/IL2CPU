@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -23,6 +24,13 @@ namespace Cosmos.IL2CPU
                 }
                 else
                 {
+                    // HACK: need to fix assembly loading
+                    if (!AppDomain.CurrentDomain.GetAssemblies().Any(
+                        a => new AssemblyIdentity(a.GetName()).Equals(assemblyIdentity)))
+                    {
+                        Default.LoadFromAssemblyPath(assemblyPath);
+                    }
+
                     _assemblies.Add(
                         assemblyIdentity,
                         new Lazy<Assembly>(
