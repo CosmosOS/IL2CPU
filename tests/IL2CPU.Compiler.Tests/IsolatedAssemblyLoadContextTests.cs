@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using NUnit.Framework;
@@ -11,6 +10,19 @@ namespace IL2CPU.Compiler.Tests
     [TestFixture(TestOf = typeof(IsolatedAssemblyLoadContext))]
     public class IsolatedAssemblyLoadContextTests
     {
+        [Test]
+        public void Constructor_WhenMoreThanOneAssemblyWithTheSameIdentityIsAdded_DoesNotAddDuplicateEntries()
+        {
+            var assemblies = new List<string>()
+            {
+                typeof(IsolatedAssemblyLoadContext).Assembly.Location,
+                typeof(AssemblyFile).Assembly.Location,
+                typeof(DebugInfo).Assembly.Location
+            };
+
+            Assert.DoesNotThrow(() => new IsolatedAssemblyLoadContext(assemblies));
+        }
+
         [Test]
         public void LoadFromAssemblyName_ForTheSameAssembly_ReturnsDifferentAssemblyInstance()
         {
@@ -26,19 +38,6 @@ namespace IL2CPU.Compiler.Tests
             var loadedAssembly = assemblyLoadContext.LoadFromAssemblyName(assembly.GetName());
 
             Assert.AreNotEqual(assembly, loadedAssembly);
-        }
-
-        [Test]
-        public void Constructor_WhenMoreThanOneAssemblyWithTheSameIdentityIsAdded_ThrowsNotSupportedException()
-        {
-            var assemblies = new List<string>()
-            {
-                typeof(IsolatedAssemblyLoadContext).Assembly.Location,
-                typeof(AssemblyFile).Assembly.Location,
-                typeof(DebugInfo).Assembly.Location
-            };
-
-            Assert.Throws<NotSupportedException>(() => new IsolatedAssemblyLoadContext(assemblies));
         }
     }
 }

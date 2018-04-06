@@ -19,7 +19,7 @@ namespace Cosmos.IL2CPU
 
                 if (_assemblies.ContainsKey(assemblyIdentity))
                 {
-                    throw new NotSupportedException("Cannot load more than 1 assembly with the same identity!");
+                    continue;
                 }
                 else
                 {
