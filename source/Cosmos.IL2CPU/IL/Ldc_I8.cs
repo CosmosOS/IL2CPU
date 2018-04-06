@@ -1,23 +1,26 @@
 using System;
-using XSharp.Assembler;
-using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = XSharp.Assembler.x86;
-using System.Collections.Generic;
 
+using Cosmos.IL2CPU.ILOpCodes;
+
+using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldc_I8 )]
+    [OpCode(ILOpCode.Code.Ldc_I8)]
     public class Ldc_I8 : ILOp
     {
-        public Ldc_I8( XSharp.Assembler.Assembler aAsmblr ) : base( aAsmblr ) { }
+        public Ldc_I8(XSharp.Assembler.Assembler aAsmblr)
+            : base(aAsmblr)
+        {
+        }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode ) {
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
             var xOp = (OpInt64)aOpCode;
-			// push high part
-            new CPUx86.Push { DestinationValue = BitConverter.ToUInt32(BitConverter.GetBytes(xOp.Value), 4) };
-			// push low part
-			new CPUx86.Push { DestinationValue = BitConverter.ToUInt32(BitConverter.GetBytes(xOp.Value), 0) };
+            // push high part
+            XS.Push(BitConverter.ToUInt32(BitConverter.GetBytes(xOp.Value), 4));
+            // push low part
+            XS.Push(BitConverter.ToUInt32(BitConverter.GetBytes(xOp.Value), 0));
         }
     }
 }
