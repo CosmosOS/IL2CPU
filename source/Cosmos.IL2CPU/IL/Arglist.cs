@@ -1,18 +1,20 @@
 using System;
 
+using XSharp.Assembler;
+
 namespace Cosmos.IL2CPU.X86.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Arglist)]
-	public class Arglist: ILOp
-	{
-		public Arglist(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
-		{
-		}
+    [OpCode(ILOpCode.Code.Arglist)]
+    public class Arglist : ILOp
+    {
+        public Arglist(Assembler aAsmblr)
+            : base(aAsmblr)
+        {
+        }
 
-		public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
-		{
-			throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Arglist.cs->Error: Arglist not yet implemented!");
-		}
-
-	}
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
+            throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Arglist.cs->Error: Arglist not yet implemented!");
+        }
+    }
 }
