@@ -1,5 +1,3 @@
-using System;
-
 namespace Cosmos.IL2CPU.X86.IL
 {
     [OpCode(ILOpCode.Code.Volatile)]
@@ -12,7 +10,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            throw new NotImplementedException("TODO: Volatile");
+            //throw new NotImplementedException("TODO: Volatile");
         }
     }
 }
