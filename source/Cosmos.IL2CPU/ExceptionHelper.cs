@@ -31,15 +31,26 @@ namespace Cosmos.IL2CPU
             Console.WriteLine(xError);
             throw new OverflowException(xError);
         }
+
+        public static void ThrowNotFiniteNumberException(double offendingNumber)
+        {
+            throw new NotFiniteNumberException(offendingNumber);
+        }
     }
 
     public static class ExceptionHelperRefs
     {
         public static readonly FieldInfo CurrentExceptionRef;
 
+        public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef;
+
         static ExceptionHelperRefs()
         {
             CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
+
+            ThrowNotFiniteNumberExceptionRef = typeof(ExceptionHelper).GetMethod(
+                nameof(ExceptionHelper.ThrowNotFiniteNumberException),
+                BindingFlags.Public | BindingFlags.Static);
         }
     }
 }

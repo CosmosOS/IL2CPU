@@ -244,6 +244,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
@@ -305,6 +306,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             // Exception support
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
