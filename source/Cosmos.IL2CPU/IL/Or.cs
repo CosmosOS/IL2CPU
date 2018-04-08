@@ -1,26 +1,28 @@
 using System;
 
 using XSharp;
-using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Or )]
+    [OpCode(ILOpCode.Code.Or)]
     public class Or : ILOp
     {
-        public Or( XSharp.Assembler.Assembler aAsmblr )
-            : base( aAsmblr )
+        public Or(Assembler aAsmblr)
+            : base(aAsmblr)
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode )
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
             var xStackContent = aOpCode.StackPopTypes[0];
             var xStackContentSecond = aOpCode.StackPopTypes[1];
             var xStackContentSize = SizeOfType(xStackContent);
             var xStackContentSecondSize = SizeOfType(xStackContentSecond);
-			var xSize = Math.Max(xStackContentSize, xStackContentSecondSize);
-            if (ILOp.Align(xStackContentSize, 4u) != ILOp.Align(xStackContentSecondSize, 4u))
+            var xSize = Math.Max(xStackContentSize, xStackContentSecondSize);
+
+            if (Align(xStackContentSize, 4) != Align(xStackContentSecondSize, 4))
             {
                 throw new NotSupportedException("Operands have different size!");
             }
@@ -30,23 +32,23 @@ namespace Cosmos.IL2CPU.X86.IL
             }
 
             if (xSize > 4)
-			{
-				// [ESP] is low part
-				// [ESP + 4] is high part
-				// [ESP + 8] is low part
-				// [ESP + 12] is high part
-				XS.Pop(XSRegisters.EAX);
-				XS.Pop(XSRegisters.EDX);
-				// [ESP] is low part
-				// [ESP + 4] is high part
-				XS.Or(XSRegisters.ESP, XSRegisters.EAX, destinationIsIndirect: true);
-				XS.Or(XSRegisters.ESP, XSRegisters.EDX, destinationDisplacement: 4);
-			}
-			else
-			{
-				XS.Pop(XSRegisters.EAX);
-				XS.Or(XSRegisters.ESP, XSRegisters.EAX, destinationIsIndirect: true);
-			}
+            {
+                // [ESP] is low part
+                // [ESP + 4] is high part
+                // [ESP + 8] is low part
+                // [ESP + 12] is high part
+                XS.Pop(EAX);
+                XS.Pop(EDX);
+                // [ESP] is low part
+                // [ESP + 4] is high part
+                XS.Or(ESP, EAX, destinationIsIndirect: true);
+                XS.Or(ESP, EDX, destinationDisplacement: 4);
+            }
+            else
+            {
+                XS.Pop(EAX);
+                XS.Or(ESP, EAX, destinationIsIndirect: true);
+            }
         }
     }
 }
