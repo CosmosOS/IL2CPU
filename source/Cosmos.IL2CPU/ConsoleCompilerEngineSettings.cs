@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 using Cosmos.Build.Common;
 
@@ -7,10 +8,34 @@ namespace Cosmos.IL2CPU
 {
     internal class ConsoleCompilerEngineSettings : ICompilerEngineSettings
     {
+        public bool EnableLogging => GetOption<bool>(nameof(EnableLogging));
+
+        public bool EnableDebug => GetOption<bool>(nameof(EnableDebug));
+        public DebugMode DebugMode => GetEnumOption<DebugMode>(nameof(DebugMode));
+        public byte DebugCom => GetOption<byte>(nameof(DebugCom));
+        public bool EmitDebugSymbols => GetOption<bool>(nameof(EmitDebugSymbols));
+        public bool IgnoreDebugStubAttribute => GetOption<bool>(nameof(IgnoreDebugStubAttribute));
+
+        public TraceAssemblies TraceAssemblies => GetEnumOption<TraceAssemblies>(nameof(TraceAssemblies));
+        public bool EnableStackCorruptionDetection => GetOption<bool>(nameof(EnableStackCorruptionDetection));
+        public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
+            GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
+
+        public string TargetAssembly => GetOption<string>(nameof(TargetAssembly));
+
+        public IEnumerable<string> References => mReferences;
+        public IEnumerable<string> PlugsReferences => mPlugsReferences;
+        public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
+
+        public string OutputFilename => GetOption<string>(nameof(OutputFilename));
+
+        public string ResponseFile => GetOption<string>(nameof(ResponseFile));
+
         private Action<string> mLogMessage;
         private Action<string> mLogError;
 
         private List<string> mReferences;
+        private List<string> mPlugsReferences;
         private List<string> mAssemblySearchDirs;
 
         private Dictionary<string, string> mCmdOptions;
@@ -21,26 +46,16 @@ namespace Cosmos.IL2CPU
             mLogError = aLogError;
 
             mReferences = new List<string>();
+            mPlugsReferences = new List<string>();
             mAssemblySearchDirs = new List<string>();
 
-            mCmdOptions = new Dictionary<string, string>();
+            mCmdOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var s in aArgs)
+            ParseArgs(aArgs);
+
+            if (File.Exists(ResponseFile))
             {
-                string[] s1 = s.Split(':');
-                string argID = s1[0].ToLower();
-                if (argID == "References".ToLower())
-                {
-                    mReferences.Add(s.Replace(s1[0] + ":", ""));
-                }
-                else if (argID == "AssemblySearchDirs".ToLower())
-                {
-                    mAssemblySearchDirs.Add(s.Replace(s1[0] + ":", ""));
-                }
-                else
-                {
-                    mCmdOptions.Add(argID, s.Replace(s1[0] + ":", ""));
-                }
+                ParseArgs(File.ReadAllLines(ResponseFile));
             }
 
             if (mCmdOptions.TryGetValue("KernelPkg", out var xKernelPkg))
@@ -48,32 +63,6 @@ namespace Cosmos.IL2CPU
                 CompilerEngine.KernelPkg = xKernelPkg;
             }
         }
-
-        public bool EnableLogging
-        {
-            get => GetOption<bool>(nameof(EnableLogging));
-            set => mCmdOptions[nameof(EnableLogging)] = value.ToString();
-        }
-
-        public bool EnableDebug => GetOption<bool>(nameof(EnableDebug));
-        public DebugMode DebugMode => GetEnumOption<DebugMode>(nameof(DebugMode));
-        public byte DebugCom
-        {
-            get => GetOption<byte>(nameof(DebugCom));
-            set => mCmdOptions[nameof(DebugCom)] = value.ToString();
-        }
-        public bool EmitDebugSymbols => GetOption<bool>(nameof(EmitDebugSymbols));
-        public bool IgnoreDebugStubAttribute => GetOption<bool>(nameof(IgnoreDebugStubAttribute));
-
-        public TraceAssemblies TraceAssemblies => GetEnumOption<TraceAssemblies>(nameof(TraceAssemblies));
-        public bool EnableStackCorruptionDetection => GetOption<bool>(nameof(EnableStackCorruptionDetection));
-        public StackCorruptionDetectionLevel StackCorruptionDetectionLevel =>
-            GetEnumOption<StackCorruptionDetectionLevel>(nameof(StackCorruptionDetectionLevel));
-
-        public IEnumerable<string> References => mReferences;
-        public IEnumerable<string> AssemblySearchDirs => mAssemblySearchDirs;
-
-        public string OutputFilename => GetOption<string>(nameof(OutputFilename));
 
         private T GetEnumOption<T>(string aOptionName)
             where T : struct
@@ -126,6 +115,39 @@ namespace Cosmos.IL2CPU
             }
 
             return typeof(T) == typeof(string) ? (T)(object)String.Empty : default(T);
+        }
+
+        private void ParseArgs(string[] args)
+        {
+            foreach (var arg in args)
+            {
+                var indexOfSeparator = arg.IndexOf(':');
+
+                if (indexOfSeparator == -1)
+                {
+                    continue;
+                }
+
+                var key = arg.Substring(0, indexOfSeparator);
+                var value = arg.Substring(indexOfSeparator + 1);
+
+                if (String.Equals(key, "References", StringComparison.OrdinalIgnoreCase))
+                {
+                    mReferences.Add(value);
+                }
+                else if (String.Equals(key, "PlugsReferences", StringComparison.OrdinalIgnoreCase))
+                {
+                    mPlugsReferences.Add(value);
+                }
+                else if (String.Equals(key, "AssemblySearchDirs", StringComparison.OrdinalIgnoreCase))
+                {
+                    mAssemblySearchDirs.Add(value);
+                }
+                else
+                {
+                    mCmdOptions[key] = value;
+                }
+            }
         }
     }
 }

@@ -11,14 +11,16 @@ namespace Cosmos.IL2CPU
 
         static GCImplementationRefs()
         {
+            var typeResolver = CompilerEngine.TypeResolver;
+
             Type xType = null;
             if (CompilerEngine.UseGen3Kernel)
             {
-                xType = Type.GetType("Cosmos.CPU.x86.GCImplementation, Cosmos.CPU.x86", true);
+                xType = typeResolver.ResolveType("Cosmos.CPU.x86.GCImplementation, Cosmos.CPU.x86", true);
             }
             else
             {
-                xType = Type.GetType("Cosmos.Core.GCImplementation, Cosmos.Core", true);
+                xType = typeResolver.ResolveType("Cosmos.Core.GCImplementation, Cosmos.Core", true);
             }
             if (xType == null)
             {

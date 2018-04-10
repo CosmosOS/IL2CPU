@@ -1,4 +1,3 @@
-
 using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -14,8 +13,6 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
             XS.Jump(AppAssembler.TmpBranchLabel(aMethod, aOpCode));
-            //new CPU.Jump { DestinationLabel = AppAssembler.TmpBranchLabel(aMethod, aOpCode) };
-
+        }
     }
-  }
 }

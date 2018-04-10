@@ -1,47 +1,25 @@
-using System;
-
 using XSharp;
-using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
+using static XSharp.XSRegisters;
+
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldlen )]
+    [OpCode(ILOpCode.Code.Ldlen)]
     public class Ldlen : ILOp
     {
-        public Ldlen( XSharp.Assembler.Assembler aAsmblr )
-            : base( aAsmblr )
+        public Ldlen(Assembler aAsmblr)
+            : base(aAsmblr)
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode )
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
             DoNullReferenceCheck(Assembler, DebugEnabled, 4);
-            XS.Add(XSRegisters.ESP, 4);
-            XS.Pop(XSRegisters.EAX);
 
-            XS.Push(XSRegisters.EAX, displacement: 8);
+            XS.Add(ESP, 4);
+            XS.Pop(EAX);
+
+            XS.Push(EAX, displacement: 8);
         }
-
-
-        // using System;
-        //
-        // using CPUx86 = XSharp.Assembler.x86;
-        // using Cosmos.IL2CPU.X86;
-        //
-        // namespace Cosmos.IL2CPU.IL.X86 {
-        // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldlen)]
-        // 	public class Ldlen: Op {
-        // 		public Ldlen(ILReader aReader, MethodInformation aMethodInfo)
-        // 			: base(aReader, aMethodInfo) {
-        // 		}
-        // 		public override void DoAssemble() {
-        // 			Assembler.Stack.Pop();
-        //             XS.Pop(XSRegisters.EAX);
-        // 			XS.Add(XSRegisters.EAX, 8);
-        //             XS.Push(XSRegisters.EAX, isIndirect: true);
-        // 			Assembler.Stack.Push(new StackContent(4, typeof(uint)));
-        // 		}
-        // 	}
-        // }
-
     }
 }

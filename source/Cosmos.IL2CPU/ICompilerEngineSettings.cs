@@ -6,11 +6,11 @@ namespace Cosmos.IL2CPU
 {
     public interface ICompilerEngineSettings
     {
-        bool EnableLogging { get; set; }
+        bool EnableLogging { get; }
 
         bool EnableDebug { get; }
         DebugMode DebugMode { get; }
-        byte DebugCom { get; set; }
+        byte DebugCom { get; }
         bool EmitDebugSymbols { get; }
         bool IgnoreDebugStubAttribute { get; }
 
@@ -18,7 +18,10 @@ namespace Cosmos.IL2CPU
         bool EnableStackCorruptionDetection { get; }
         StackCorruptionDetectionLevel StackCorruptionDetectionLevel { get; }
 
+        string TargetAssembly { get; }
+
         IEnumerable<string> References { get; }
+        IEnumerable<string> PlugsReferences { get; }
         IEnumerable<string> AssemblySearchDirs { get; }
 
         string OutputFilename { get; }

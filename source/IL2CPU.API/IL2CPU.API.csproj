@@ -2,8 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
         <Description>IL2CPU API.
 $(IL2CPUDescription)</Description>
     </PropertyGroup>

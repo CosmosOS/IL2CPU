@@ -1,45 +1,19 @@
-using System;
-
+using XSharp;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-	[OpCode(ILOpCode.Code.Rethrow)]
-	public class Rethrow: ILOp
-	{
-		public Rethrow(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
-		{
-		}
+    [OpCode(ILOpCode.Code.Rethrow)]
+    public class Rethrow : ILOp
+    {
+        public Rethrow(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
+        {
+        }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
-       throw new NotImplementedException();
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
+            XS.Set(ECX, 3);
+            EmitExceptionLogic(Assembler, aMethod, aOpCode, false, null);
+        }
     }
-
-
-		// using System;
-		// using System.IO;
-		//
-		//
-		// using CPU = XSharp.Assembler.x86;
-		//
-		// namespace Cosmos.IL2CPU.IL.X86 {
-		// 	[XSharp.Assembler.OpCode(OpCodeEnum.Rethrow)]
-		// 	public class Rethrow: Op {
-		//         private string mNextLabel;
-		// 	    private string mCurLabel;
-		// 	    private uint mCurOffset;
-		// 	    private MethodInformation mMethodInformation;
-		// 		public Rethrow(ILReader aReader, MethodInformation aMethodInfo)
-		// 			: base(aReader, aMethodInfo) {
-		//              mMethodInformation = aMethodInfo;
-		// 		    mCurOffset = aReader.Position;
-		// 		    mCurLabel = IL.Op.GetInstructionLabel(aReader);
-		//             mNextLabel = IL.Op.GetInstructionLabel(aReader.NextPosition);
-		// 		}
-		// 		public override void DoAssemble() {
-		//             EmitNotImplementedException(Assembler, GetServiceProvider(), "Rethrow instruction is not implemented yet!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel);
-		// 		}
-		// 	}
-		// }
-
-	}
 }
