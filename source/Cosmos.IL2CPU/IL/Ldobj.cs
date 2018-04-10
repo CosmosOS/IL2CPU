@@ -1,21 +1,22 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
+
 using Cosmos.IL2CPU.ILOpCodes;
-using XSharp.Assembler;
 
 using XSharp;
+using XSharp.Assembler;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldobj )]
+    [OpCode(ILOpCode.Code.Ldobj)]
     public class Ldobj : ILOp
     {
-        public Ldobj( XSharp.Assembler.Assembler aAsmblr )
-            : base( aAsmblr )
+        public Ldobj(Assembler aAsmblr)
+            : base(aAsmblr)
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode )
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
             DoNullReferenceCheck(Assembler, DebugEnabled, 0);
             OpType xType = (OpType)aOpCode;
@@ -28,31 +29,31 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 throw new ArgumentNullException("type");
             }
-            XS.Pop(XSRegisters.EAX);
+            XS.Pop(EAX);
             var xObjSize = SizeOfType(type);
 
             switch (xObjSize % 4)
             {
                 case 1:
-                {
-                    XS.Xor(XSRegisters.EBX, XSRegisters.EBX);
-                    XS.Set(XSRegisters.BL, XSRegisters.EAX, sourceDisplacement: (int)(xObjSize - 1));
-                    //XS.ShiftLeft(XSRegisters.EBX, 24);
-                    XS.Push(XSRegisters.EBX);
-                    break;
-                }
+                    {
+                        XS.Xor(EBX, EBX);
+                        XS.Set(BL, EAX, sourceDisplacement: (int)(xObjSize - 1));
+                        //XS.ShiftLeft(XSRegisters.EBX, 24);
+                        XS.Push(EBX);
+                        break;
+                    }
                 case 2:
-                {
-                    XS.Xor(XSRegisters.EBX, XSRegisters.EBX);
-                    XS.Set(XSRegisters.BX, XSRegisters.EAX, sourceDisplacement: (int)(xObjSize - 2));
-                    //XS.ShiftLeft(XSRegisters.EBX, 16);
-                    XS.Push(XSRegisters.EBX);
-                    break;
-                }
+                    {
+                        XS.Xor(EBX, EBX);
+                        XS.Set(BX, EAX, sourceDisplacement: (int)(xObjSize - 2));
+                        //XS.ShiftLeft(XSRegisters.EBX, 16);
+                        XS.Push(EBX);
+                        break;
+                    }
                 case 0:
-                {
-                    break;
-                }
+                    {
+                        break;
+                    }
                 default:
                     throw new Exception("Remainder not supported!");
             }
@@ -61,7 +62,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             for (int i = 1; i <= (xObjSize / 4); i++)
             {
-                new CPUx86.Push {DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(xObjSize - (i * 4))};
+                XS.Push(EAX, displacement: (int)(xObjSize - (i * 4)));
             }
         }
     }
