@@ -173,6 +173,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
+          
+          if ((xValue1 == typeof(bool) && xValue2 == typeof(byte))
+              || (xValue1 == typeof(byte) && xValue2 == typeof(bool)))
+          {
+            return;
+          }
 
           if (xValue1.IsClass &&
               xValue2.IsClass)
