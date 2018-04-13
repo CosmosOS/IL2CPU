@@ -812,6 +812,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if ((StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(char))
+             || (StackPopTypes[0] == typeof(char) && StackPopTypes[1] == typeof(short)))
+            {
+              StackPushTypes[0] = typeof(int);
+              aSituationChanged = true;
+              return;
+            }
             if (OpCode == Code.Add &&
                 ((StackPopTypes[0] == typeof(IntPtr) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
                  || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && StackPopTypes[1] == typeof(IntPtr))))
