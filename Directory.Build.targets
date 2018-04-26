@@ -14,7 +14,8 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' == 'False'">$(RepoRoot)build\IL2CPU.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' != 'True'">$(RepoRoot)build\IL2CPU.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' == 'True'">$(RepoRoot)build\Tests.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
 
     <ItemGroup>
