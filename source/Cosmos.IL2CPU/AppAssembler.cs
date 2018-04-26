@@ -878,12 +878,12 @@ namespace Cosmos.IL2CPU
             return 56; // todo: retrieve from actual type info
         }
 
-        public byte[] AllocateEmptyVMTArray(int aLength, int aElementSize, uint aArrayTypeID)
+        public byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
         {
             var xData = new byte[16 + aLength * aElementSize];
             var xTemp = BitConverter.GetBytes(aArrayTypeID);
             Array.Copy(xTemp, 0, xData, 0, 4);
-            xTemp = BitConverter.GetBytes(0x80000002);
+            xTemp = BitConverter.GetBytes((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
             Array.Copy(xTemp, 0, xData, 4, 4);
             xTemp = BitConverter.GetBytes(aLength);
             Array.Copy(xTemp, 0, xData, 8, 4);
@@ -916,7 +916,7 @@ namespace Cosmos.IL2CPU
             }
 
             uint xArrayTypeID = aGetTypeID(typeof(Array));
-            byte[] xData = AllocateEmptyVMTArray(aTypesSet.Count, GetVTableEntrySize(), xArrayTypeID);
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, GetVTableEntrySize(), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
@@ -983,7 +983,7 @@ namespace Cosmos.IL2CPU
                     // Interface Count
                     var xInterfaces = xType.GetInterfaces();
                     Push((uint)xInterfaces.Length);
-                    xData = AllocateEmptyVMTArray(xInterfaces.Length, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyArray(xInterfaces.Length, sizeof(uint), xArrayTypeID);
                     // Interface Indexes Array
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceIndexesArray";
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
@@ -991,8 +991,8 @@ namespace Cosmos.IL2CPU
                     Push(0);
 
                     // Method array
-                    xData = AllocateEmptyVMTArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
-                    // Method Count
+                    xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
+                   // Method Count
                     Push((uint)xEmittedMethods.Count);
                     // Method Indexes Array
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
@@ -1006,7 +1006,7 @@ namespace Cosmos.IL2CPU
                     Push(0);
 
                     // Interface methods
-                    xData = AllocateEmptyVMTArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
                     // Interface method count
                     Push((uint)xEmittedInterfaceMethods.Count);
                     // Interface method indexes array
@@ -1023,7 +1023,7 @@ namespace Cosmos.IL2CPU
                     // Full type name
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}";
                     int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.FullName}");
-                    xData = AllocateEmptyVMTArray(xDataByteCount, 2, xArrayTypeID);
+                    xData = AllocateEmptyArray(xDataByteCount, 2, xArrayTypeID);
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
 
                     Call(VTablesImplRefs.SetTypeInfoRef);
@@ -1191,6 +1191,8 @@ namespace Cosmos.IL2CPU
         public void ProcessField(FieldInfo aField)
         {
             string xFieldName = DataMember.GetStaticFieldName(aField);
+            string xFieldContentsName = $"{xFieldName}__Contents";
+
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
                 var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
@@ -1203,7 +1205,7 @@ namespace Cosmos.IL2CPU
                 if (xItem != null)
                 {
                     var xItemType = xItem.GetType();
-                    xManifestResourceName = (string)xItemType.GetField("ResourceName").GetValue(xItem);
+                    xManifestResourceName = (string)xItemType.GetProperty("ResourceName")?.GetValue(xItem);
                 }
                 if (xManifestResourceName != null)
                 {
@@ -1212,33 +1214,38 @@ namespace Cosmos.IL2CPU
                     //                                (xCurrentField.DeclaringType.Assembly.FullName + "__" + xManifestResourceName).Replace(",",
                     //                                                                                                                       "_") + ".res");
                     var xTarget = new StringBuilder();
-                    using (var xStream = aField.DeclaringType.Assembly.GetManifestResourceStream(xManifestResourceName))
+                    byte[] xData;
+                    using (var xStream = aField.DeclaringType?.Assembly.GetManifestResourceStream(xManifestResourceName))
                     {
                         if (xStream == null)
                         {
                             throw new Exception("Resource '" + xManifestResourceName + "' not found!");
                         }
-                        xTarget.Append("0,");
-                        // todo: abstract this array code out.
-                        xTarget.Append((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
-                        xTarget.Append(",");
-                        xTarget.Append((int)xStream.Length);
-                        xTarget.Append(",");
-                        xTarget.Append("1,");
-                        while (xStream.Position < xStream.Length)
-                        {
-                            xTarget.Append(xStream.ReadByte());
-                            xTarget.Append(",");
-                        }
-                        xTarget.Append(",");
+
+                        uint xArrayTypeID = 0;
+                        xData = AllocateEmptyArray((int) xStream.Length, 1, xArrayTypeID);
+                        xStream.Read(xData, 16, (int) xStream.Length);
+
+                        //xTarget.Append("0,");
+                        //xTarget.Append((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
+                        //xTarget.Append(",");
+                        //xTarget.Append((int)xStream.Length);
+                        //xTarget.Append(",");
+                        //xTarget.Append("1,");
+                        //while (xStream.Position < xStream.Length)
+                        //{
+                        //    xTarget.Append(xStream.ReadByte());
+                        //    xTarget.Append(",");
+                        //}
+                        //xTarget.Remove(xTarget.Length - 1, 1);
                     }
 
-                    Assembler.DataMembers.Add(new DataMember("___" + xFieldName + "___Contents",
-                                                              "db",
-                                                              xTarget));
-                    Assembler.DataMembers.Add(new DataMember(xFieldName,
-                                                              "dd",
-                                                              "___" + xFieldName + "___Contents"));
+                    XS.DataMemberBytes(xFieldContentsName, xData);
+                    XS.DataMember(xFieldName, 1, "dd", "0");
+                    XS.DataMember("", 1, "dd", xFieldContentsName);
+
+                    //Assembler.DataMembers.Add(new DataMember(xFieldContentsName, "db", xTarget.ToString()));
+                    //Assembler.DataMembers.Add(new DataMember(xFieldName, "dd", xFieldContentsName));
                 }
                 else
                 {
