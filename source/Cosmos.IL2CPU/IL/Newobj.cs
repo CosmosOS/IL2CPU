@@ -98,6 +98,11 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Add(EAX, xArgSize + 4);
                 XS.Set(ESP, EAX, destinationDisplacement: (int)xArgSize);
 
+                XS.Push(EAX);
+
+                var xOpType = new OpType(xMethod.OpCode, xMethod.Position, xMethod.NextPosition, xMethod.Value.DeclaringType, xMethod.CurrentExceptionRegion);
+                new Initobj(aAssembler).Execute(aMethod, xOpType);
+
                 new Call(aAssembler).Execute(aMethod, xMethod);
 
                 // Need to put these *after* the call because the Call pops the args from the stack
