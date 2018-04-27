@@ -8,9 +8,11 @@ namespace Cosmos.IL2CPU
         public static readonly Assembly RuntimeAssemblyDef;
         public static readonly Type VTablesImplDef;
         public static readonly MethodBase SetTypeInfoRef;
-        public static readonly MethodBase SetMethodInfoRef;
         public static readonly MethodBase SetInterfaceInfoRef;
+        public static readonly MethodBase SetMethodInfoRef;
+        public static readonly MethodBase SetInterfaceMethodInfoRef;
         public static readonly MethodBase GetMethodAddressForTypeRef;
+        public static readonly MethodBase GetMethodAddressForInterfaceTypeRef;
         public static readonly MethodBase IsInstanceRef;
 
         static VTablesImplRefs()

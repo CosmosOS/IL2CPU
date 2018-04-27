@@ -27,13 +27,13 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xSourceIsFloat)
                 {
-                    XS.SSE.ConvertSS2SD(XMM0, ESP, sourceIsIndirect: true);
+                    XS.SSE2.ConvertSS2SD(XMM0, ESP, sourceIsIndirect: true);
                     XS.Sub(ESP, 4);
                     XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
                 }
                 else
                 {
-                    if (IsIntegerSigned(xSource))
+                    if (xSourceSize <= 2 || IsIntegerSigned(xSource))
                     {
                         XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
                         XS.Sub(ESP, 4);

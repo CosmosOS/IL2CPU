@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+        <Description>IL2CPU compiler.
+$(IL2CPUDescription)</Description>
+        <DevelopmentDependency>True</DevelopmentDependency>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Cosmos.IL2CPU\Cosmos.IL2CPU.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU
         }
     }
 
-    public class ILScanner : IDisposable
+    internal class ILScanner : IDisposable
     {
         public LogExceptionDelegate LogException = null;
         public Action<string> LogWarning = null;
@@ -70,12 +70,12 @@ namespace Cosmos.IL2CPU
 
         protected Dictionary<object, List<LogItem>> mLogMap;
 
-        public ILScanner(AppAssembler aAsmblr)
+        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver)
         {
             mAsmblr = aAsmblr;
             mReader = new ILReader();
 
-            mPlugManager = new PlugManager(LogException, LogWarning);
+            mPlugManager = new PlugManager(LogException, LogWarning, typeResolver);
         }
 
         public bool EnableLogging(string aPathname)
@@ -150,7 +150,7 @@ namespace Cosmos.IL2CPU
 
         #region Gen2
 
-        public void Execute(MethodBase aStartMethod)
+        public void Execute(MethodBase aStartMethod, IEnumerable<Assembly> plugsAssemblies)
         {
             if (aStartMethod == null)
             {
@@ -208,7 +208,7 @@ namespace Cosmos.IL2CPU
 
             #endregion
 
-            mPlugManager.FindPlugImpls();
+            mPlugManager.FindPlugImpls(plugsAssemblies);
             // Now that we found all plugs, scan them.
             // We have to scan them after we find all plugs, because
             // plugs can use other plugs
@@ -218,16 +218,18 @@ namespace Cosmos.IL2CPU
                 CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
-            ILOp.mPlugManager = mPlugManager;
+            ILOp.PlugManager = mPlugManager;
 
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");
             Queue(RuntimeEngineRefs.FinalizeApplicationRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -242,6 +244,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
@@ -259,7 +262,7 @@ namespace Cosmos.IL2CPU
 
         #region Gen3
 
-        public void Execute(MethodBase[] aBootEntries, List<MemberInfo> aForceIncludes)
+        public void Execute(MethodBase[] aBootEntries, List<MemberInfo> aForceIncludes, IEnumerable<Assembly> plugsAssemblies)
         {
             foreach (var xBootEntry in aBootEntries)
             {
@@ -272,7 +275,7 @@ namespace Cosmos.IL2CPU
                 Queue(xForceInclude, null, "Force Include");
             }
 
-            mPlugManager.FindPlugImpls();
+            mPlugManager.FindPlugImpls(plugsAssemblies);
             // Now that we found all plugs, scan them.
             // We have to scan them after we find all plugs, because
             // plugs can use other plugs
@@ -282,7 +285,7 @@ namespace Cosmos.IL2CPU
                 CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
             }
 
-            ILOp.mPlugManager = mPlugManager;
+            ILOp.PlugManager = mPlugManager;
 
             // Pull in extra implementations, GC etc.
             Queue(RuntimeEngineRefs.InitializeApplicationRef, null, "Explicit Entry");
@@ -290,7 +293,10 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -300,6 +306,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             // Exception support
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
@@ -323,12 +330,10 @@ namespace Cosmos.IL2CPU
         {
             foreach (var xOpCode in aOpCodes)
             {
-                var xOpMethod = xOpCode as ILOpCodes.OpMethod;
-                if (xOpMethod != null)
+                if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
                     xOpMethod.Value = (MethodBase)mItems.GetItemInList(xOpMethod.Value);
-                    xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value, true);
-                    xOpMethod.BaseMethodUID = GetMethodUID(xOpMethod.Value, false);
+                    xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }
             }
         }
@@ -472,123 +477,105 @@ namespace Cosmos.IL2CPU
 
             #region Virtuals scan
 
-            try
+            if (!xIsDynamicMethod && aMethod.IsVirtual)
             {
-                if (!xIsDynamicMethod && aMethod.IsVirtual)
+                // For virtuals we need to climb up the type tree
+                // and find the top base method. We then add that top
+                // node to the mVirtuals list. We don't need to add the
+                // types becuase adding DeclaringType will already cause
+                // all ancestor types to be added.
+
+                var xVirtMethod = aMethod;
+                var xVirtType = aMethod.DeclaringType;
+                MethodBase xNewVirtMethod;
+                while (true)
                 {
-                    // For virtuals we need to climb up the type tree
-                    // and find the top base method. We then add that top
-                    // node to the mVirtuals list. We don't need to add the
-                    // types becuase adding DeclaringType will already cause
-                    // all ancestor types to be added.
-
-                    var xVirtMethod = aMethod;
-                    var xVirtType = aMethod.DeclaringType;
-                    MethodBase xNewVirtMethod;
-                    while (true)
+                    xVirtType = xVirtType.BaseType;
+                    if (xVirtType == null)
                     {
-                        xVirtType = xVirtType.BaseType;
-                        if (xVirtType == null)
-                        {
-                            // We've reached object, can't go farther
-                            xNewVirtMethod = null;
-                        }
-                        else
-                        {
-                            xNewVirtMethod = xVirtType
-                                .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                .Where(method => method.Name == aMethod.Name
-                                                 && method.GetParameters().Select(param => param.ParameterType)
-                                                     .SequenceEqual(xParamTypes))
-                                .SingleOrDefault();
-                            if (xNewVirtMethod != null)
-                            {
-                                if (!xNewVirtMethod.IsVirtual)
-                                {
-                                    // This can happen if a virtual "replaces" a non virtual
-                                    // above it that is not virtual.
-                                    xNewVirtMethod = null;
-                                }
-                            }
-                        }
-
-                        // We dont bother to add these to Queue, because we have to do a
-                        // full downlevel scan if its a new base virtual anyways.
-                        if (xNewVirtMethod == null)
-                        {
-                            // If its already in the list, we mark it null
-                            // so we dont do a full downlevel scan.
-                            if (mVirtuals.Contains(xVirtMethod))
-                            {
-                                xVirtMethod = null;
-                            }
-
-                            break;
-                        }
-
-                        xVirtMethod = xNewVirtMethod;
+                        // We've reached object, can't go farther
+                        xNewVirtMethod = null;
                     }
-
-                    // New virtual base found, we need to downscan it
-                    // If it was already in mVirtuals, then ScanType will take
-                    // care of new additions.
-                    if (xVirtMethod != null)
+                    else
                     {
-                        Queue(xVirtMethod, aMethod, "Virtual Base");
-                        mVirtuals.Add(xVirtMethod);
-
-                        // List changes as we go, cant be foreach
-                        for (int i = 0; i < mItemsList.Count; i++)
+                        xNewVirtMethod = xVirtType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                                  .Where(method => method.Name == aMethod.Name
+                                                                   && method.GetParameters().Select(param => param.ParameterType)
+                                                                                            .SequenceEqual(xParamTypes))
+                                                  .SingleOrDefault();
+                        if (xNewVirtMethod != null)
                         {
-                            if (mItemsList[i] is Type xType && xType != xVirtMethod.DeclaringType && !xType.IsInterface)
+                            if (!xNewVirtMethod.IsVirtual)
                             {
-                                if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
+                                // This can happen if a virtual "replaces" a non virtual
+                                // above it that is not virtual.
+                                xNewVirtMethod = null;
+                            }
+                        }
+                    }
+                    // We dont bother to add these to Queue, because we have to do a
+                    // full downlevel scan if its a new base virtual anyways.
+                    if (xNewVirtMethod == null)
+                    {
+                        // If its already in the list, we mark it null
+                        // so we dont do a full downlevel scan.
+                        if (mVirtuals.Contains(xVirtMethod))
+                        {
+                            xVirtMethod = null;
+                        }
+                        break;
+                    }
+                    xVirtMethod = xNewVirtMethod;
+                }
+
+                // New virtual base found, we need to downscan it
+                // If it was already in mVirtuals, then ScanType will take
+                // care of new additions.
+                if (xVirtMethod != null)
+                {
+                    Queue(xVirtMethod, aMethod, "Virtual Base");
+                    mVirtuals.Add(xVirtMethod);
+
+                    // List changes as we go, cant be foreach
+                    for (int i = 0; i < mItemsList.Count; i++)
+                    {
+                        if (mItemsList[i] is Type xType && xType != xVirtMethod.DeclaringType && !xType.IsInterface)
+                        {
+                            if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
+                            {
+                                var xNewMethod = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                                      .Where(method => method.Name == aMethod.Name
+                                                                       && method.GetParameters().Select(param => param.ParameterType).SequenceEqual(xParamTypes))
+                                                      .SingleOrDefault();
+                                if (xNewMethod != null)
                                 {
-                                    var xNewMethod = xType
-                                        .GetMethods(
-                                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                        .Where(method => method.Name == aMethod.Name
-                                                         && method.GetParameters().Select(param => param.ParameterType)
-                                                             .SequenceEqual(xParamTypes))
-                                        .SingleOrDefault();
-                                    if (xNewMethod != null)
+                                    // We need to check IsVirtual, a non virtual could
+                                    // "replace" a virtual above it?
+                                    if (xNewMethod.IsVirtual)
                                     {
-                                        // We need to check IsVirtual, a non virtual could
-                                        // "replace" a virtual above it?
-                                        if (xNewMethod.IsVirtual)
-                                        {
-                                            Queue(xNewMethod, aMethod, "Virtual Downscan");
-                                        }
+                                        Queue(xNewMethod, aMethod, "Virtual Downscan");
                                     }
                                 }
-                                else if (xVirtMethod.DeclaringType.IsInterface &&
-                                         xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
+                            }
+                            else if (xVirtMethod.DeclaringType.IsInterface
+                                  && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
+                            {
+                                var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
+                                var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
+
+                                if (xMethodIndex != -1)
                                 {
-                                    var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
-                                    var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
+                                    var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
 
-                                    if (xMethodIndex != -1)
+                                    if (xMethod.DeclaringType == xType)
                                     {
-                                        var xMethod = xInterfaceMap.TargetMethods[xMethodIndex];
-
-                                        if (xMethod.DeclaringType == xType)
-                                        {
-                                            Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod,
-                                                "Virtual Downscan");
-                                        }
+                                        Queue(xInterfaceMap.TargetMethods[xMethodIndex], aMethod, "Virtual Downscan");
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                throw new Exception(Environment.NewLine
-                                    + "Error processing virtuals." + Environment.NewLine
-                                    + "  Method: " + LabelName.GetFullName(aMethod) + "." + Environment.NewLine
-                                    + "  Called from :" + Environment.NewLine + sourceItem + Environment.NewLine);
             }
 
             #endregion
@@ -834,104 +821,57 @@ namespace Cosmos.IL2CPU
             xList.Add(xLogItem);
         }
 
-        private MethodBase GetUltimateBaseMethod(MethodBase aMethod, Type[] aMethodParams, Type aCurrentInspectedType)
+        private MethodInfo GetUltimateBaseMethod(MethodInfo aMethod)
         {
-            MethodBase xInstanceBaseMethod = null;
-
-            Type xCurrentType = aCurrentInspectedType;
-            while (xCurrentType != null)
-            {
-                if (!xCurrentType.IsInterface)
-                {
-                    foreach (var xInterface in xCurrentType.GetInterfaces())
-                    {
-                        var xInterfaceMap = xCurrentType.GetInterfaceMap(xInterface);
-                        var xMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
-                            m => m.Name == aMethod.Name
-                                 && m.GetParameters().Select(
-                                     p => p.ParameterType).SequenceEqual(aMethodParams));
-
-                        if (xMethod != null && xMethod.DeclaringType == xCurrentType)
-                        {
-                            var xMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xMethod);
-
-                            if (xMethodIndex != -1)
-                            {
-                                return xInterfaceMap.InterfaceMethods[xMethodIndex];
-                            }
-                        }
-                    }
-                }
-
-                xCurrentType = xCurrentType.BaseType;
-            }
+            var xBaseMethod = aMethod;
 
             while (true)
             {
-                if (aCurrentInspectedType.BaseType == null)
-                {
-                    break;
-                }
-                aCurrentInspectedType = aCurrentInspectedType.BaseType;
-                MethodBase xFoundMethod = aCurrentInspectedType
-                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .SingleOrDefault(method => method.Name == aMethod.Name
-                                               && method.GetParameters().Select(param => param.ParameterType)
-                                                   .SequenceEqual(aMethodParams));
-                if (xFoundMethod == null)
-                {
-                    break;
-                }
-                ParameterInfo[] xParams = xFoundMethod.GetParameters();
-                bool xContinue = true;
-                for (int i = 0; i < xParams.Length; i++)
-                {
-                    if (xParams[i].ParameterType != aMethodParams[i])
-                    {
-                        xContinue = false;
-                    }
-                }
-                if (!xContinue)
-                {
-                    continue;
-                }
-                xInstanceBaseMethod = xFoundMethod;
+                var xBaseDefinition = xBaseMethod.GetBaseDefinition();
 
-                if ((xFoundMethod.IsVirtual == aMethod.IsVirtual) && (xFoundMethod.IsPrivate == false) && (xFoundMethod.IsPublic == aMethod.IsPublic) && (xFoundMethod.IsFamily == aMethod.IsFamily) && (xFoundMethod.IsFamilyAndAssembly == aMethod.IsFamilyAndAssembly) && (xFoundMethod.IsFamilyOrAssembly == aMethod.IsFamilyOrAssembly) && (xFoundMethod.IsFinal == false))
+                if (xBaseDefinition == xBaseMethod)
                 {
-                    var xFoundMethInfo = (MethodInfo)xFoundMethod;
-                    var xBaseMethInfo = (MethodInfo)xInstanceBaseMethod;
-                    if (xFoundMethInfo.ReturnType.AssemblyQualifiedName.Equals(xBaseMethInfo.ReturnType.AssemblyQualifiedName))
-                    {
-                        xInstanceBaseMethod = xFoundMethod;
-                    }
+                    return xBaseMethod;
                 }
+
+                xBaseMethod = xBaseDefinition;
             }
-
-            return xInstanceBaseMethod ?? aMethod;
         }
 
-        protected uint GetMethodUID(MethodBase aMethod, bool aExact)
+        protected uint GetMethodUID(MethodBase aMethod)
         {
-            if (!aExact)
+            if (mMethodUIDs.TryGetValue(aMethod, out var xMethodUID))
             {
-                var xParamTypes = aMethod.GetParameters().Select(p => p.ParameterType).ToArray();
-                var xBaseMethod = GetUltimateBaseMethod(aMethod, xParamTypes, aMethod.DeclaringType);
-
-                if (!mMethodUIDs.ContainsKey(xBaseMethod))
+                return xMethodUID;
+            }
+            else
+            {
+                if (!aMethod.DeclaringType.IsInterface)
                 {
-                    var xId = (uint)mMethodUIDs.Count;
-                    mMethodUIDs.Add(xBaseMethod, xId);
+                    if (aMethod is MethodInfo xMethodInfo)
+                    {
+                        var xBaseMethod = GetUltimateBaseMethod(xMethodInfo);
+
+                        if (!mMethodUIDs.TryGetValue(xBaseMethod, out xMethodUID))
+                        {
+                            xMethodUID = (uint)mMethodUIDs.Count;
+                            mMethodUIDs.Add(xBaseMethod, xMethodUID);
+                        }
+
+                        if (!new MethodBaseComparer().Equals(aMethod, xBaseMethod))
+                        {
+                            mMethodUIDs.Add(aMethod, xMethodUID);
+                        }
+
+                        return xMethodUID;
+                    }
                 }
 
-                return mMethodUIDs[xBaseMethod];
+                xMethodUID = (uint)mMethodUIDs.Count;
+                mMethodUIDs.Add(aMethod, xMethodUID);
+
+                return xMethodUID;
             }
-            if (!mMethodUIDs.ContainsKey(aMethod))
-            {
-                var xId = (uint)mMethodUIDs.Count;
-                mMethodUIDs.Add(aMethod, xId);
-            }
-            return mMethodUIDs[aMethod];
         }
 
         protected uint GetTypeUID(Type aType)
@@ -1076,7 +1016,7 @@ namespace Cosmos.IL2CPU
             }
 
             var xTypes = new HashSet<Type>();
-            var xMethods = new HashSet<MethodBase>();
+            var xMethods = new HashSet<MethodBase>(new MethodBaseComparer());
             foreach (var xItem in mItems)
             {
                 if (xItem is MethodBase)
@@ -1089,7 +1029,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, x => GetMethodUID(x, false));
+            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, GetMethodUID);
         }
     }
 }

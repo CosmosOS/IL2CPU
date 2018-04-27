@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (!xSourceIsFloat)
                 {
-                    if (IsIntegerSigned(xSource))
+                    if (xSourceSize <= 2 || IsIntegerSigned(xSource))
                     {
                         XS.SSE.ConvertSI2SS(XMM0, ESP, sourceIsIndirect: true);
                         XS.SSE.MoveSS(ESP, XMM0, destinationIsIndirect: true);

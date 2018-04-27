@@ -1,0 +1,11 @@
+<Project>
+
+    <PropertyGroup>
+        <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+        <CosmosRepoRoot>$(RepoRoot)..\Cosmos\</CosmosRepoRoot>
+        <XSharpRepoRoot>$(RepoRoot)..\XSharp\</XSharpRepoRoot>
+    </PropertyGroup>
+
+    <Import Project="build\Targets\Import.props" />
+
+</Project>

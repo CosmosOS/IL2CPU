@@ -1,14 +1,13 @@
-using System;
-
 using XSharp;
-using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Pop)]
+    [OpCode(ILOpCode.Code.Pop)]
     public class Pop : ILOp
     {
-        public Pop(XSharp.Assembler.Assembler aAsmblr)
+        public Pop(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
@@ -17,8 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             // todo: implement exception support.
             var xSize = SizeOfType(aOpCode.StackPopTypes[0]);
-            XS.Add(XSRegisters.ESP, Align((uint)xSize, 4));
+            XS.Add(ESP, Align(xSize, 4));
         }
-
     }
 }

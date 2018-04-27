@@ -98,6 +98,11 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Add(EAX, xArgSize + 4);
                 XS.Set(ESP, EAX, destinationDisplacement: (int)xArgSize);
 
+                XS.Push(EAX);
+
+                var xOpType = new OpType(xMethod.OpCode, xMethod.Position, xMethod.NextPosition, xMethod.Value.DeclaringType, xMethod.CurrentExceptionRegion);
+                new Initobj(aAssembler).Execute(aMethod, xOpType);
+
                 new Call(aAssembler).Execute(aMethod, xMethod);
 
                 // Need to put these *after* the call because the Call pops the args from the stack
@@ -146,6 +151,36 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
                         XS.ShiftLeft(EAX, 1);
                         XS.Push(EAX);
+                    }
+                    /*
+                     * TODO see if something is needed in stack / register to make them really work
+                     */
+                    else if (xParams.Length == 3
+                             && (xParams[0].ParameterType == typeof(sbyte*)
+                             && xParams[1].ParameterType == typeof(int)
+                             && xParams[2].ParameterType == typeof(int)))
+                    {
+                        xHasCalcSize = true;
+                        XS.Push(ESP, isIndirect: true);
+                    }
+                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
+                    {
+                        xHasCalcSize = true;
+                        /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
+                        var xSByteCountLabel = currentLabel + ".SByteCount";
+
+                        XS.Set(EAX, ESP, sourceIsIndirect: true);
+                        XS.Or(ECX, 0xFFFFFFFF);
+
+                        XS.Label(xSByteCountLabel);
+
+                        XS.Increment(EAX);
+                        XS.Increment(ECX);
+
+                        XS.Compare(EAX, 0, destinationIsIndirect: true);
+                        XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
+
+                        XS.Push(ECX);
                     }
                     else
                     {

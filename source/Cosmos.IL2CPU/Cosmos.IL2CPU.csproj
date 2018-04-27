@@ -3,10 +3,14 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-        <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\IL2CPU.snk</AssemblyOriginatorKeyFile>
         <Description>$(IL2CPUDescription)</Description>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>IL2CPU.Compiler.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100f539d415816bc35bdc6e0fdba2be8fe3ba85eb86b6dd0f9eb134cc3c4513c64227f18ae08069c9456c23b87b49cb4a14838037d5d4154adc033dcba263d60cb26e04afd13d09f850e4df25746d0aa49681bd960912a16a1dccb5e92c3abf954a10a1e5daafa6625f18223a32f0211591437820d8a1c9f1beb41e8e2819b1c1bb</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
@@ -15,11 +19,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
-        <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
-        <ProjectReference Include="..\..\..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
-        <ProjectReference Include="..\..\..\XSharp\source\XSharp.Assembler\XSharp.Assembler.csproj" />
-        <ProjectReference Include="..\..\..\XSharp\source\XSharp\XSharp.csproj" />
+        <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
+        <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
+        <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
+        <ProjectReference Include="$(XSharpRepoRoot)source\XSharp.Assembler\XSharp.Assembler.csproj" />
+        <ProjectReference Include="$(XSharpRepoRoot)source\XSharp\XSharp.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
     </ItemGroup>

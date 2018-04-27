@@ -1,0 +1,30 @@
+<Project>
+
+    <PropertyGroup>
+        <!--
+            This property should exist, according to the docs, but it has no effect on pack.
+        -->
+        <PackageVersionPrefix>$([System.DateTime]::Now.ToString("yyyy.MM.dd"))</PackageVersionPrefix>
+        <PackageVersion Condition="'$(PackageVersionPrefix)' != '' AND '$(VersionSuffix)' != ''">$(PackageVersionPrefix)-$(VersionSuffix)</PackageVersion>
+        <PackageVersion Condition="'$(PackageVersionPrefix)' != '' AND '$(VersionSuffix)' == ''">$(PackageVersionPrefix)</PackageVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <SignAssembly>True</SignAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' != 'True'">$(RepoRoot)build\IL2CPU.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' == 'True'">$(RepoRoot)build\Tests.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.NetFramework.Analyzers" Version="2.6.0" PrivateAssets="All" />
+    </ItemGroup>
+
+    <Import Project="build\Targets\Import.targets" />
+
+</Project>

@@ -1,13 +1,12 @@
-using System;
-
-using CPUx86 = XSharp.Assembler.x86;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ret)]
+    [OpCode(ILOpCode.Code.Ret)]
     public class Ret : ILOp
     {
-        public Ret(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
+        public Ret(Assembler aAsmblr)
+            : base(aAsmblr)
         {
         }
 

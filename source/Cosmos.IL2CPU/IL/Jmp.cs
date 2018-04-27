@@ -1,18 +1,20 @@
 using System;
 
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Jmp)]
-	public class Jmp: ILOp
-	{
-		public Jmp(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
-		{
-		}
+    [OpCode(ILOpCode.Code.Jmp)]
+    public class Jmp : ILOp
+    {
+        public Jmp(Assembler aAsmblr)
+            : base(aAsmblr)
+        {
+        }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
-      throw new NotImplementedException();
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
+            throw new NotImplementedException();
+        }
     }
-		
-	}
 }
