@@ -1,7 +1,10 @@
-using Cosmos.IL2CPU.Extensions;
 using System;
-using System.Linq;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+
 using XSharp;
+using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -31,90 +34,106 @@ namespace Cosmos.IL2CPU.X86.IL
     ///
     /// This is typically checked when Microsoft Intermediate Language (MSIL) instructions are converted to native code, not at run time.
     /// </remarks>
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldfld)]
+    [OpCode(ILOpCode.Code.Ldfld)]
     public class Ldfld : ILOp
     {
-        public Ldfld(XSharp.Assembler.Assembler aAsmblr)
+        public Ldfld(Assembler aAsmblr)
             : base(aAsmblr)
         {
         }
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            var xOpCode = (ILOpCodes.OpField)aOpCode;
-            DoExecute(Assembler, xOpCode.Value.DeclaringType, xOpCode.Value.GetFullName(), true, DebugEnabled, aOpCode.StackPopTypes[0]);
-        }
+            var xOpCode = (OpField)aOpCode;
+            var xStackType = aOpCode.StackPopTypes[0];
 
-        public static int GetFieldOffset(Type aDeclaringType, string aFieldId)
-        {
-            int xExtraOffset = 0;
-            var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);
-            bool xNeedsGC = IsReferenceType(aDeclaringType);
-            if (xNeedsGC)
-            {
-                xExtraOffset = 12;
-            }
-            return (int)(xExtraOffset + xFieldInfo.Offset);
-        }
+            var xFieldInfo = ResolveField(xOpCode.Value);
+            var xDeclaringType = xFieldInfo.DeclaringType;
+            var xFieldType = xFieldInfo.FieldType;
+            var xOffset = GetFieldOffset(xFieldInfo);
 
-        public static void DoExecute(XSharp.Assembler.Assembler Assembler, Type aDeclaringType, string xFieldId, bool aDerefExternalField, bool debugEnabled, Type aTypeOnStack)
-        {
-            var xOffset = GetFieldOffset(aDeclaringType, xFieldId);
-            var xFields = GetFieldsInfo(aDeclaringType, false);
-            var xFieldInfo = (from item in xFields
-                              where item.Id == xFieldId
-                              select item).Single();
             XS.Comment("Field: " + xFieldInfo.Id);
             XS.Comment("Type: " + xFieldInfo.FieldType.ToString());
             XS.Comment("Size: " + xFieldInfo.Size);
-            XS.Comment("DeclaringType: " + aDeclaringType.FullName);
-            XS.Comment("TypeOnStack: " + aTypeOnStack.FullName);
+            XS.Comment("DeclaringType: " + xDeclaringType.FullName);
+            XS.Comment("TypeOnStack: " + xStackType.FullName);
             XS.Comment("Offset: " + xOffset + " (includes object header)");
 
-            if (aDeclaringType.IsValueType && aTypeOnStack == aDeclaringType)
+            if (xDeclaringType.IsValueType && MemberInfoComparer.Instance.Equals(xDeclaringType, xStackType))
             {
-                #region Read struct value from stack
+                var xDeclaringTypeStackSize = Align(SizeOfType(xDeclaringType), 4);
+                var xFieldSize = xFieldInfo.Size;
+                var xStackOffset = (int)(-xDeclaringTypeStackSize + xOffset + xFieldSize - 4);
 
-                // This is a 3-step process
-                // 1. Move the actual value below the stack (negative to ESP)
-                // 2. Move the value at the right spot of the stack (positive to stack)
-                // 3. Adjust stack to remove the struct
-                //
-                // This is necessary, as the value could otherwise overwrite the struct too soon.
+                XS.Add(ESP, xDeclaringTypeStackSize);
 
-                var xTypeStorageSize = GetStorageSize(aDeclaringType);
-                var xFieldStorageSize = xFieldInfo.Size;
+                if ((xFieldInfo.Size < 4 && IsIntegralType(xFieldType))
+                    || xFieldType == typeof(bool)
+                    || xFieldType == typeof(char))
+                {
+                    if (IsIntegerSigned(xFieldType))
+                    {
+                        XS.MoveSignExtend(EAX, ESP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
+                        XS.Push(EAX);
+                    }
+                    else
+                    {
+                        XS.MoveZeroExtend(EAX, ESP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
+                        XS.Push(EAX);
+                    }
 
-                // Step 1, Move the actual value below the stack (negative to ESP)
-                CopyValue(ESP, -(int)xFieldStorageSize, ESP, xOffset, xFieldStorageSize);
+                    return;
+                }
 
-                // Step 2 Move the value at the right spot of the stack (positive to stack)
-                var xStackOffset = (int)(Align(xTypeStorageSize, 4) - xFieldStorageSize);
-                CopyValue(ESP, xStackOffset, ESP, -(int)xFieldStorageSize, xFieldStorageSize);
+                for (int i = 0; i < xFieldSize / 4; i++)
+                {
+                    XS.Push(ESP, displacement: xStackOffset);
+                }
 
-                // Step 3 Adjust stack to remove the struct
-                XS.Add(ESP, Align((uint)(xStackOffset), 4));
+                switch (xFieldSize % 4)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        XS.Xor(EAX, EAX);
+                        XS.Set(AL, ESP, sourceDisplacement: xStackOffset + 3);
+                        XS.Push(EAX);
+                        break;
+                    case 2:
+                        XS.Xor(EAX, EAX);
+                        XS.Set(AX, ESP, sourceDisplacement: xStackOffset + 2);
+                        XS.Push(EAX);
+                        break;
+                    case 3:
+                        XS.Xor(EAX, EAX);
+                        XS.Set(AX, ESP, sourceDisplacement: xStackOffset + 2);
+                        XS.ShiftLeft(EAX, 4);
+                        XS.Set(AL, ESP, sourceDisplacement: xStackOffset + 1);
+                        XS.Push(EAX);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
 
-                #endregion Read struct value from stack
                 return;
             }
 
             // pushed size is always 4 or 8
             var xSize = xFieldInfo.Size;
-            if (IsReferenceType(aTypeOnStack))
+            if (IsReferenceType(xStackType))
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, 4);
+                DoNullReferenceCheck(Assembler, DebugEnabled, 4);
                 XS.Add(ESP, 4);
             }
             else
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, 0);
+                DoNullReferenceCheck(Assembler, DebugEnabled, 0);
             }
             XS.Pop(ECX);
 
             XS.Add(ECX, (uint)(xOffset));
 
-            if (xFieldInfo.IsExternalValue && aDerefExternalField)
+            if (xFieldInfo.IsExternalValue)
             {
                 XS.Set(ECX, ECX, sourceIsIndirect: true);
             }
@@ -152,6 +171,30 @@ namespace Cosmos.IL2CPU.X86.IL
                 default:
                     throw new Exception(string.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType.ToString(), xSize));
             }
+        }
+
+        public static int GetFieldOffset(Type aDeclaringType, string aFieldId)
+        {
+            int xExtraOffset = 0;
+            var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);
+            bool xNeedsGC = IsReferenceType(aDeclaringType);
+            if (xNeedsGC)
+            {
+                xExtraOffset = 12;
+            }
+            return (int)(xExtraOffset + xFieldInfo.Offset);
+        }
+
+        public static int GetFieldOffset(_FieldInfo fieldInfo)
+        {
+            var offset = (int)fieldInfo.Offset;
+
+            if (IsReferenceType(fieldInfo.DeclaringType))
+            {
+                offset += ObjectUtils.FieldDataOffset;
+            }
+
+            return offset;
         }
     }
 }
