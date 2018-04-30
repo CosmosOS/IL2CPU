@@ -240,7 +240,7 @@ namespace Cosmos.IL2CPU
                             METHODLABELNAME = xMethodLabel,
                             IsArgument = false,
                             INDEXINMETHOD = xLocals[i].LocalIndex,
-                            NAME = "",
+                            NAME = "Local" + xLocals[i].LocalIndex,
                             OFFSET = 0 - (int)ILOp.GetEBPOffsetForLocalForDebugger(aMethod, i),
                             TYPENAME = xLocals[i].LocalType.AssemblyQualifiedName
                         };
