@@ -239,14 +239,14 @@ namespace Cosmos.IL2CPU
                         {
                             METHODLABELNAME = xMethodLabel,
                             IsArgument = false,
-                            INDEXINMETHOD = xLocals[i].Slot,
-                            NAME = xLocals[i].Name,
+                            INDEXINMETHOD = xLocals[i].LocalIndex,
+                            NAME = "Local" + xLocals[i].LocalIndex,
                             OFFSET = 0 - (int)ILOp.GetEBPOffsetForLocalForDebugger(aMethod, i),
-                            TYPENAME = xLocals[i].Type.AssemblyQualifiedName
+                            TYPENAME = xLocals[i].LocalType.AssemblyQualifiedName
                         };
                         mLocals_Arguments_Infos.Add(xInfo);
 
-                        var xSize = ILOp.Align(ILOp.SizeOfType(xLocals[i].Type), 4);
+                        var xSize = ILOp.Align(ILOp.SizeOfType(xLocals[i].LocalType), 4);
                         XS.Comment(String.Format("Local {0}, Size {1}", i, xSize));
                         for (int j = 0; j < xSize / 4; j++)
                         {
@@ -368,7 +368,7 @@ namespace Cosmos.IL2CPU
                 var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
                 for (int j = xLocalInfos.Count - 1; j >= 0; j--)
                 {
-                    xLocalsSize += ILOp.Align(ILOp.SizeOfType(xLocalInfos[j].Type), 4);
+                    xLocalsSize += ILOp.Align(ILOp.SizeOfType(xLocalInfos[j].LocalType), 4);
 
                     if (xLocalsSize >= 256)
                     {
@@ -578,9 +578,8 @@ namespace Cosmos.IL2CPU
                 #region Exception handling support code
 
                 _ExceptionRegionInfo xCurrentExceptionRegion = null;
-                var xBody = aMethod.MethodBase.GetMethodBodyBlock();
                 // todo: add support for nested handlers using a stack or so..
-                foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.MethodBase.DeclaringType.Module))
+                foreach (_ExceptionRegionInfo xHandler in aMethod.MethodBase.GetExceptionRegionInfos())
                 {
                     if (xHandler.TryOffset > 0)
                     {
@@ -1233,12 +1232,8 @@ namespace Cosmos.IL2CPU
                         xTarget.Append(",");
                     }
 
-                    Assembler.DataMembers.Add(new DataMember("___" + xFieldName + "___Contents",
-                                                              "db",
-                                                              xTarget));
-                    Assembler.DataMembers.Add(new DataMember(xFieldName,
-                                                              "dd",
-                                                              "___" + xFieldName + "___Contents"));
+                    Assembler.DataMembers.Add(new DataMember($"___{xFieldName}___Contents", "db", xTarget));
+                    Assembler.DataMembers.Add(new DataMember(xFieldName, "dd", $"___{xFieldName}___Contents"));
                 }
                 else
                 {
@@ -1254,8 +1249,7 @@ namespace Cosmos.IL2CPU
                     var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
                     if (xAsmLabelAttributes.Count() > 0)
                     {
-                        Assembler.DataMembers.Add(new DataMember(
-                            xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
+                        Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
                     }
                     else
                     {
@@ -1495,7 +1489,7 @@ namespace Cosmos.IL2CPU
                 {
                     var xLocals = aMethod.MethodBase.GetLocalVariables();
                     var xLocalsSize = (from item in xLocals
-                                       select ILOp.Align(ILOp.SizeOfType(item.Type), 4)).Sum();
+                                       select ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
                     xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
                     xStackDifference = (uint?)xMLSymbol.StackDiff;
                 }

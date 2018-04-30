@@ -21,7 +21,6 @@ namespace IL2CPU.Debug.Symbols
         private readonly PEReader mPEReader;
         private readonly MetadataReader mMetadataReader;
         private readonly PdbSymbolReader mSymbolReader;
-        private static readonly Dictionary<string, List<ILLocalVariable>> xLocalVariableInfosCache = new Dictionary<string, List<ILLocalVariable>>();
 
         private DebugSymbolReader(string aFilePath)
         {
@@ -161,138 +160,16 @@ namespace IL2CPU.Debug.Symbols
             return null;
         }
 
-        public static List<ILLocalVariable> GetLocalVariableInfos(MethodBase aMethodBase)
+        public static IList<LocalVariableInfo> GetLocalVariableInfos(MethodBase aMethodBase)
         {
-            string xMenthodId = $"{aMethodBase.MetadataToken}_{aMethodBase.DeclaringType?.FullName}_{aMethodBase.Name}";
-
-            if (xLocalVariableInfosCache.ContainsKey(xMenthodId))
-            {
-                return xLocalVariableInfosCache[xMenthodId];
-            }
-            var xLocalVariables = new List<ILLocalVariable>();
-
-            string xLocation = aMethodBase.Module.Assembly.Location;
-            var xGenericMethodParameters = new Type[0];
-            var xGenericTypeParameters = new Type[0];
-            if (aMethodBase.IsGenericMethod)
-            {
-                xGenericMethodParameters = aMethodBase.GetGenericArguments();
-            }
-            if (aMethodBase.DeclaringType != null && aMethodBase.DeclaringType.IsGenericType)
-            {
-                xGenericTypeParameters = aMethodBase.DeclaringType.GetGenericArguments();
-            }
-
-            var xReader = GetReader(xLocation).mMetadataReader;
-            List<ILLocalVariable> xLocalVariablesFromPdb = null;
             try
             {
-                if (mCurrentDebugSymbolReader?.mSymbolReader != null)
-                {
-                    xLocalVariablesFromPdb = mCurrentDebugSymbolReader.mSymbolReader.GetLocalVariableNamesForMethod(aMethodBase.MetadataToken).ToList();
-                }
+                return aMethodBase.GetMethodBody().LocalVariables;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                return new List<LocalVariableInfo>();
             }
-
-            var xTypes = ResolveLocalsFromSignature(xReader, aMethodBase, xGenericTypeParameters, xGenericMethodParameters).ToList();
-            for (int i = 0; i < xTypes.Count; i++)
-            {
-                int xSlot = i;
-                string xName = "Local" + i;
-                bool xCompilerGenerated = true;
-                ILLocalVariable xLocal = xLocalVariablesFromPdb?.FirstOrDefault(x => x.Slot == i);
-                if (xLocal != null)
-                {
-                    xName = xLocal.Name;
-                    xSlot = xLocal.Slot;
-                    xCompilerGenerated = xLocal.CompilerGenerated;
-                }
-                xLocalVariables.Add(new ILLocalVariable(xSlot, xName, xCompilerGenerated, xTypes[i]));
-            }
-
-            xLocalVariableInfosCache.Add(xMenthodId, xLocalVariables);
-            return xLocalVariables;
-        }
-
-        private static List<Type> ResolveLocalsFromSignature(MetadataReader aReader, MethodBase aMethodBase, Type[] aGenericTypeParameters, Type[] aGenericMethodParameters)
-        {
-            var xLocalVariables = new List<Type>();
-            var xMethodBody = GetMethodBodyBlock(aMethodBase.Module, aMethodBase.MetadataToken);
-            if (xMethodBody != null && !xMethodBody.LocalSignature.IsNil)
-            {
-                var xSig = aReader.GetStandaloneSignature(xMethodBody.LocalSignature);
-                var xLocals = xSig.DecodeLocalSignature(new LocalTypeProvider(aMethodBase.Module), new LocalTypeGenericContext(aGenericTypeParameters.ToImmutableArray(), aGenericMethodParameters.ToImmutableArray()));
-                foreach (var xLocal in xLocals)
-                {
-                    xLocalVariables.Add(xLocal);
-                }
-            }
-            return xLocalVariables;
-        }
-
-        public static Type GetCatchType(Module aModule, ExceptionRegion aRegion)
-        {
-            string xLocation = aModule.Assembly.Location;
-            var xReader = MetadataHelper.TryGetReader(xLocation);
-            switch (aRegion.CatchType.Kind)
-            {
-                case HandleKind.TypeReference:
-                    return MetadataHelper.GetTypeFromReference(xReader, aModule,
-                        (TypeReferenceHandle)aRegion.CatchType, 0);
-                case HandleKind.TypeDefinition:
-                    return aModule.ResolveType(MetadataTokens.GetToken(aRegion.CatchType));
-                case HandleKind.FieldDefinition:
-                    break;
-                case HandleKind.MethodDefinition:
-                    break;
-                case HandleKind.Parameter:
-                    break;
-                case HandleKind.InterfaceImplementation:
-                    break;
-                case HandleKind.MemberReference:
-                    break;
-                case HandleKind.Constant:
-                    break;
-                case HandleKind.CustomAttribute:
-                    break;
-                case HandleKind.DeclarativeSecurityAttribute:
-                    break;
-                case HandleKind.StandaloneSignature:
-                    break;
-                case HandleKind.EventDefinition:
-                    break;
-                case HandleKind.PropertyDefinition:
-                    break;
-                case HandleKind.MethodImplementation:
-                    break;
-                case HandleKind.ModuleReference:
-                    break;
-                case HandleKind.TypeSpecification:
-                    break;
-                case HandleKind.AssemblyDefinition:
-                    break;
-                case HandleKind.AssemblyFile:
-                    break;
-                case HandleKind.AssemblyReference:
-                    break;
-                case HandleKind.ExportedType:
-                    break;
-                case HandleKind.GenericParameter:
-                    break;
-                case HandleKind.MethodSpecification:
-                    break;
-                case HandleKind.GenericParameterConstraint:
-                    break;
-                case HandleKind.MethodDebugInformation:
-                    break;
-                case HandleKind.CustomDebugInformation:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            throw new NotImplementedException();
         }
 
         public static bool TryGetStaticFieldValue(Module aModule, int aMetadataToken, ref byte[] aBuffer)

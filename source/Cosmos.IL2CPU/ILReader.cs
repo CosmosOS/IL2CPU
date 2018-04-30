@@ -51,7 +51,7 @@ namespace Cosmos.IL2CPU
         public List<ILOpCode> ProcessMethod(MethodBase aMethod)
         {
             var xResult = new List<ILOpCode>();
-            var xBody = aMethod.GetMethodBodyBlock();
+            var xBody = aMethod.GetMethodBody();
             // Cache for use in field and method resolution
             Type[] xTypeGenArgs = Type.EmptyTypes;
             Type[] xMethodGenArgs = Type.EmptyTypes;
@@ -71,14 +71,14 @@ namespace Cosmos.IL2CPU
                 return null;
             }
 
-            var xIL = xBody.GetILBytes();
+            var xIL = xBody.GetILAsByteArray();
             int xPos = 0;
             while (xPos < xIL.Length)
             {
                 _ExceptionRegionInfo xCurrentExceptionRegion = null;
                 #region Determine current handler
                 // todo: add support for nested handlers using a stack or so..
-                foreach (_ExceptionRegionInfo xHandler in xBody.GetExceptionRegionInfos(aMethod.DeclaringType.Module))
+                foreach (_ExceptionRegionInfo xHandler in aMethod.GetExceptionRegionInfos())
                 {
                     if (xHandler.TryOffset >= 0)
                     {

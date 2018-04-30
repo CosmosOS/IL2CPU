@@ -13,7 +13,6 @@ namespace IL2CPU.Debug.Symbols.Pdb
     public abstract class PdbSymbolReader : IDisposable
     {
         public abstract IEnumerable<ILSequencePoint> GetSequencePointsForMethod(int methodToken);
-        public abstract IEnumerable<ILLocalVariable> GetLocalVariableNamesForMethod(int methodToken);
         public abstract void Dispose();
     }
 }
