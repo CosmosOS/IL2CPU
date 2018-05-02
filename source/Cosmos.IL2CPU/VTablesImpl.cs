@@ -241,7 +241,7 @@ namespace Cosmos.IL2CPU
         while (true);
       }
 
-      for (int i = 0; i < xTypeInfo.MethodIndexes.Length; i++)
+      for (int i = 0; i < xTypeInfo.InterfaceMethodIndexes.Length; i++)
       {
         if (xTypeInfo.InterfaceMethodIndexes[i] == aInterfaceMethodId)
         {
