@@ -5,13 +5,11 @@ namespace Cosmos.IL2CPU
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
     public sealed class OpCodeAttribute : Attribute
     {
-        public ILOpCode.Code OpCode => opCode;
+        public ILOpCode.Code OpCode { get; }
 
-        private readonly ILOpCode.Code opCode;
-
-        public OpCodeAttribute(ILOpCode.Code OpCode)
+        public OpCodeAttribute(ILOpCode.Code aOpCode)
         {
-            opCode = OpCode;
+            OpCode = aOpCode;
         }
     }
 }
