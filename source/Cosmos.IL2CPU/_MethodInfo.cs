@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using IL2CPU.API;
 using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
@@ -10,15 +9,17 @@ namespace Cosmos.IL2CPU
     {
         public enum TypeEnum { Normal, Plug, NeedsPlug };
 
-        public readonly MethodBase MethodBase;
-        public readonly TypeEnum Type;
-        public readonly UInt32 UID;
-        public readonly _MethodInfo PlugMethod;
-        public readonly Type MethodAssembler;
-        public readonly bool IsInlineAssembler = false;
-        public readonly bool DebugStubOff;
-        public _MethodInfo PluggedMethod;
-        public uint LocalVariablesSize;
+        public MethodBase MethodBase { get; }
+        public TypeEnum Type { get; }
+        public UInt32 UID { get; }
+        public _MethodInfo PlugMethod { get; }
+        public Type MethodAssembler { get; }
+        public bool IsInlineAssembler { get; }
+        public bool DebugStubOff { get; }
+        public _MethodInfo PluggedMethod { get; set; }
+        public uint LocalVariablesSize { get; set; }
+
+        public bool IsWildcard { get; set; }
 
         public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
         {
@@ -52,12 +53,6 @@ namespace Cosmos.IL2CPU
                                             };
                 DebugStubOff = attrib.Off;
             }
-        }
-
-        public bool IsWildcard
-        {
-            get;
-            set;
         }
     }
 }

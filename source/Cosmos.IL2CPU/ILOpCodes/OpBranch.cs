@@ -151,6 +151,10 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
+          if (xValue1 == typeof(Boolean) && xValue2 == typeof(Boolean))
+          {
+            return;
+          }
           if ((xValue1 == typeof(int) && xValue2 == typeof(IntPtr))
               || (xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
           {

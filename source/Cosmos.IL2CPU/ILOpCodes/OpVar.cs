@@ -58,14 +58,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
       switch (OpCode)
       {
         case Code.Ldloc:
-          StackPushTypes[0] = xLocals[Value].Type;
+          StackPushTypes[0] = xLocals[Value].LocalType;
           if (StackPushTypes[0].IsEnum)
           {
             StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
           }
           return;
         case Code.Ldloca:
-          StackPushTypes[0] = xLocals[Value].Type.MakeByRefType();
+          StackPushTypes[0] = xLocals[Value].LocalType.MakeByRefType();
           return;
         case Code.Ldarg:
           if (!aMethod.IsStatic)

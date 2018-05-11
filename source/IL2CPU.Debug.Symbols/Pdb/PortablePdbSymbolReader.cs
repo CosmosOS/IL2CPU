@@ -104,48 +104,5 @@ namespace IL2CPU.Debug.Symbols.Pdb
                 yield return new ILSequencePoint(sequencePoint.Offset, url, sequencePoint.StartLine);
             }
         }
-
-        //
-        // Gather the local details in a scope and then recurse to child scopes
-        //
-        private void ProbeScopeForLocals(List<ILLocalVariable> variables, LocalScopeHandle localScopeHandle)
-        {
-            var localScope = _reader.GetLocalScope(localScopeHandle);
-
-            foreach (var localVariableHandle in localScope.GetLocalVariables())
-            {
-                var localVariable = _reader.GetLocalVariable(localVariableHandle);
-
-                var name = _reader.GetString(localVariable.Name);
-                bool compilerGenerated = (localVariable.Attributes & LocalVariableAttributes.DebuggerHidden) != 0;
-
-                variables.Add(new ILLocalVariable(localVariable.Index, name, compilerGenerated));
-            }
-
-            var children = localScope.GetChildren();
-            while (children.MoveNext())
-            {
-                ProbeScopeForLocals(variables, children.Current);
-            }
-        }
-
-        //
-        // Recursively scan the scopes for a method stored in a PDB and gather the local slots
-        // and names for all of them.  This assumes a CSC-like compiler that doesn't re-use
-        // local slots in the same method across scopes.
-        //
-        public override IEnumerable<ILLocalVariable> GetLocalVariableNamesForMethod(int methodToken)
-        {
-            var debugInformationHandle = MetadataTokens.MethodDefinitionHandle(methodToken).ToDebugInformationHandle();
-
-            var localScopes = _reader.GetLocalScopes(debugInformationHandle);
-
-            var variables = new List<ILLocalVariable>();
-            foreach (var localScopeHandle in localScopes)
-            {
-                ProbeScopeForLocals(variables, localScopeHandle);
-            }
-            return variables;
-        }
     }
 }

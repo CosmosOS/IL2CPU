@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Cosmos.IL2CPU {
-  public class PlugInfo {
-    /// <summary>
-    /// The index in mMethodsToProcess of the plug method.
-    /// </summary>
-    public readonly uint TargetUID;
+namespace Cosmos.IL2CPU
+{
+    public class PlugInfo
+    {
+        /// <summary>
+        /// The index in mMethodsToProcess of the plug method.
+        /// </summary>
+        public uint TargetUID { get; }
 
-    public readonly Type PlugMethodAssembler;
+        public Type PlugMethodAssembler { get; }
 
-    public PlugInfo(uint aTargetUID, Type aPlugMethodAssembler) {
-      TargetUID = aTargetUID;
-      PlugMethodAssembler = aPlugMethodAssembler;
+        public PlugInfo(uint aTargetUID, Type aPlugMethodAssembler)
+        {
+            TargetUID = aTargetUID;
+            PlugMethodAssembler = aPlugMethodAssembler;
+        }
     }
-  }
 }
