@@ -2,6 +2,7 @@ using CPU = XSharp.Assembler.x86;
 using Cosmos.IL2CPU.ILOpCodes;
 using IL2CPU.API;
 using XSharp;
+using System;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -16,18 +17,21 @@ namespace Cosmos.IL2CPU.X86.IL
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
       DoNullReferenceCheck(Assembler, DebugEnabled, 0);
-      OpType xType = (OpType)aOpCode;
+      var xType = ((OpType)aOpCode).Value;
       string xBaseLabel = GetLabel(aMethod, aOpCode) + ".";
-      string xTypeID = GetTypeIDLabel(xType.Value);
-      uint xTypeSize = SizeOfType(xType.Value);
+      string xTypeID = GetTypeIDLabel(xType);
+      uint xTypeSize = SizeOfType(xType);
       string mReturnNullLabel = xBaseLabel + "_ReturnNull";
 
       XS.Compare(XSRegisters.ESP, 0, destinationIsIndirect: true);
       XS.Jump(CPU.ConditionalTestEnum.Zero, mReturnNullLabel);
+
       XS.Set(XSRegisters.EAX, XSRegisters.ESP, sourceIsIndirect: true);
       XS.Push(XSRegisters.EAX, isIndirect: true);
       XS.Push(xTypeID, isIndirect: true);
+      XS.Push(Convert.ToUInt32(xType.IsInterface));
       Call.DoExecute(Assembler, aMethod, VTablesImplRefs.IsInstanceRef, aOpCode, GetLabel(aMethod, aOpCode), xBaseLabel + "_After_IsInstance_Call", DebugEnabled);
+
       XS.Label(xBaseLabel + "_After_IsInstance_Call");
       XS.Pop(XSRegisters.EAX);
       XS.Compare(XSRegisters.EAX, 0);

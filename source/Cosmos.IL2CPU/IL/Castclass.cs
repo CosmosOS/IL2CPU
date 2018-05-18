@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 
 using Cosmos.IL2CPU.ILOpCodes;
@@ -30,6 +31,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Jump(CPUx86.ConditionalTestEnum.Zero, xReturnNullLabel);
             XS.Push(EAX, isIndirect: true);
             XS.Push(xTypeID, isIndirect: true);
+            XS.Push(Convert.ToUInt32(xType.Value.IsInterface));
 
             MethodBase xMethodIsInstance = VTablesImplRefs.IsInstanceRef;
 
