@@ -915,7 +915,7 @@ namespace Cosmos.IL2CPU
             }
 
             uint xArrayTypeID = aGetTypeID(typeof(Array));
-            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(typeof(VTablesImpl)), xArrayTypeID);
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(typeof(VTable)), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
