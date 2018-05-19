@@ -1,13 +1,6 @@
-//#define VMT_DEBUG
+#define VMT_DEBUG
 //#define COSMOSDEBUG
 
-using Cosmos.Build.Common;
-using IL2CPU.Debug.Symbols;
-using IL2CPU.API;
-using IL2CPU.API.Attribs;
-using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.IL2CPU.X86.IL;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +8,19 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
+#if VMT_DEBUG
 using System.Xml;
+#endif
+
+using Cosmos.Build.Common;
+
+using IL2CPU.API;
+using IL2CPU.API.Attribs;
+using IL2CPU.Debug.Symbols;
+using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.ILOpCodes;
+using Cosmos.IL2CPU.X86.IL;
+
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
@@ -872,11 +877,6 @@ namespace Cosmos.IL2CPU
             X86.IL.Ldsflda.DoExecute(Assembler, aMethod, DataMember.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
 
-        protected int GetVTableEntrySize()
-        {
-            return 56; // todo: retrieve from actual type info
-        }
-
         public byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
         {
             var xData = new byte[16 + aLength * aElementSize];
@@ -915,7 +915,7 @@ namespace Cosmos.IL2CPU
             }
 
             uint xArrayTypeID = aGetTypeID(typeof(Array));
-            byte[] xData = AllocateEmptyArray(aTypesSet.Count, GetVTableEntrySize(), xArrayTypeID);
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(typeof(VTablesImpl)), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
@@ -991,7 +991,7 @@ namespace Cosmos.IL2CPU
 
                     // Method array
                     xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
-                   // Method Count
+                    // Method Count
                     Push((uint)xEmittedMethods.Count);
                     // Method Indexes Array
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
@@ -1075,8 +1075,8 @@ namespace Cosmos.IL2CPU
                     for (int j = 0; j < xEmittedInterfaceMethods.Count; j++)
                     {
                         var xMethod = xEmittedInterfaceMethods.ElementAt(j);
-                        var xInterfaceMethodUID = aGetMethodUID(xMethod.Key);
-                        var xTargetMethodUID = aGetMethodUID(xMethod.Value);
+                        var xInterfaceMethodUID = aGetMethodUID(xMethod.InterfaceMethod);
+                        var xTargetMethodUID = aGetMethodUID(xMethod.TargetMethod);
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("InterfaceMethod");
                         xVmtDebugOutput.WriteAttributeString("InterfaceMethodId", xInterfaceMethodUID.ToString());
@@ -1108,7 +1108,7 @@ namespace Cosmos.IL2CPU
             XS.Return();
         }
 
-        private IList<MethodBase> GetEmittedMethods(Type aType, HashSet<MethodBase> aMethodSet)
+        private static IReadOnlyList<MethodBase> GetEmittedMethods(Type aType, HashSet<MethodBase> aMethodSet)
         {
             var xList = new List<MethodBase>();
 
@@ -1123,16 +1123,18 @@ namespace Cosmos.IL2CPU
             return xList;
         }
 
-        private static Dictionary<MethodBase, MethodBase> EmptyEmittedInterfaceMethodsDictionary = new Dictionary<MethodBase, MethodBase>(0);
+        private static readonly List<(MethodBase, MethodBase)> EmptyEmittedInterfaceMethodsList =
+            new List<(MethodBase, MethodBase)>(0);
 
-        private IDictionary<MethodBase, MethodBase> GetEmittedInterfaceMethods(Type aType, HashSet<MethodBase> aMethodSet)
+        private static IReadOnlyList<(MethodBase InterfaceMethod, MethodBase TargetMethod)> GetEmittedInterfaceMethods(
+            Type aType, HashSet<MethodBase> aMethodSet)
         {
             if (aType.IsInterface || aType.IsArray)
             {
-                return EmptyEmittedInterfaceMethodsDictionary;
+                return EmptyEmittedInterfaceMethodsList;
             }
 
-            var xEmittedInterfaceMethods = new Dictionary<MethodBase, MethodBase>();
+            var xEmittedInterfaceMethods = new List<(MethodBase, MethodBase)>();
 
             foreach (var xInterface in aType.GetInterfaces())
             {
@@ -1145,46 +1147,15 @@ namespace Cosmos.IL2CPU
 
                     if (xTargetMethod != null)
                     {
-                        xEmittedInterfaceMethods.Add(
-                            xInterfaceMap.InterfaceMethods[Array.IndexOf(xInterfaceMap.TargetMethods, xTargetMethod)],
-                            xMethod);
+                        var xInterfaceMethodIndex = Array.IndexOf(xInterfaceMap.TargetMethods, xTargetMethod);
+                        var xInterfaceMethod = xInterfaceMap.InterfaceMethods[xInterfaceMethodIndex];
+
+                        xEmittedInterfaceMethods.Add((xInterfaceMethod, xMethod));
                     }
                 }
             }
 
             return xEmittedInterfaceMethods;
-        }
-
-        public MethodBase GetInterfaceImplementation(Type aType, MethodBase aMethod)
-        {
-            var xParams = aMethod.GetParameters().Select(xParam => xParam.ParameterType).ToArray();
-            var xMethod = aType.GetMethod($"{aMethod.DeclaringType.FullName}.{aMethod.Name}", xParams);
-
-            if (xMethod == null)
-            {
-                // get private implementation
-                xMethod = aType.GetMethod(aMethod.Name, xParams);
-            }
-
-            if (xMethod == null)
-            {
-                try
-                {
-                    var xMap = aType.GetInterfaceMap(aMethod.DeclaringType);
-                    for (int k = 0; k < xMap.InterfaceMethods.Length; k++)
-                    {
-                        if (xMap.InterfaceMethods[k] == aMethod)
-                        {
-                            xMethod = xMap.TargetMethods[k];
-                            break;
-                        }
-                    }
-                }
-                catch
-                {
-                }
-            }
-            return xMethod;
         }
 
         public void ProcessField(FieldInfo aField)
@@ -1222,8 +1193,8 @@ namespace Cosmos.IL2CPU
                         }
 
                         uint xArrayTypeID = 0;
-                        xData = AllocateEmptyArray((int) xStream.Length, 1, xArrayTypeID);
-                        xStream.Read(xData, 16, (int) xStream.Length);
+                        xData = AllocateEmptyArray((int)xStream.Length, 1, xArrayTypeID);
+                        xStream.Read(xData, 16, (int)xStream.Length);
 
                         //xTarget.Append("0,");
                         //xTarget.Append((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
