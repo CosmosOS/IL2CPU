@@ -325,7 +325,7 @@ namespace Cosmos.IL2CPU
 
                 foreach (var xType in aAssembly.GetTypes())
                 {
-                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceInclude>();
+                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
 
                     if (xForceIncludeAttribute != null)
                     {
@@ -334,7 +334,7 @@ namespace Cosmos.IL2CPU
 
                     foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceInclude>();
+                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
 
                         if (xForceIncludeAttribute != null)
                         {
@@ -433,7 +433,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private void ForceInclude(MemberInfo aMemberInfo, ForceInclude aForceIncludeAttribute)
+        private void ForceInclude(MemberInfo aMemberInfo, ForceIncludeAttribute aForceIncludeAttribute)
         {
             if (aMemberInfo is Type xType)
             {
