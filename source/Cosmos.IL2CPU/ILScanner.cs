@@ -15,13 +15,18 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
 {
-    public delegate void LogExceptionDelegate(Exception e);
-
     public class ScannerQueueItem
     {
-        public MemberInfo Item;
-        public string SourceItem;
-        public string QueueReason;
+        public MemberInfo Item { get; }
+        public string QueueReason { get; }
+        public string SourceItem { get; }
+
+        public ScannerQueueItem(MemberInfo aMemberInfo, string aQueueReason, string aSourceItem)
+        {
+            Item = aMemberInfo;
+            QueueReason = aQueueReason;
+            SourceItem = aSourceItem;
+        }
 
         public override string ToString()
         {
@@ -31,7 +36,7 @@ namespace Cosmos.IL2CPU
 
     internal class ILScanner : IDisposable
     {
-        public LogExceptionDelegate LogException = null;
+        public Action<Exception> LogException = null;
         public Action<string> LogWarning = null;
 
         protected ILReader mReader;
@@ -136,6 +141,7 @@ namespace Cosmos.IL2CPU
                 {
                     LogMapPoint(aSrc, aSrcType, aItem);
                 }
+
                 mItems.Add(aItem);
                 mItemsList.Add(aItem);
 
@@ -144,7 +150,7 @@ namespace Cosmos.IL2CPU
                     aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
                 }
 
-                mQueue.Enqueue(new ScannerQueueItem { Item = aItem, QueueReason = aSrcType, SourceItem = aSrc + Environment.NewLine + sourceItem });
+                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType, aSrc + Environment.NewLine + sourceItem));
             }
         }
 
@@ -154,7 +160,7 @@ namespace Cosmos.IL2CPU
         {
             if (aStartMethod == null)
             {
-                throw new ArgumentNullException("aStartMethod");
+                throw new ArgumentNullException(nameof(aStartMethod));
             }
             // TODO: Investigate using MS CCI
             // Need to check license, as well as in profiler
@@ -235,7 +241,7 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
             Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", new Type[] { }, null), null, "Explicit Entry");
+            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
             Queue(typeof(ExceptionHelper).GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
             Queue(typeof(ExceptionHelper).GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
 
@@ -246,7 +252,7 @@ namespace Cosmos.IL2CPU
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             // Start from entry point of this program
             Queue(aStartMethod, null, "Entry Point");
@@ -308,7 +314,7 @@ namespace Cosmos.IL2CPU
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(String).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             ScanQueue();
             UpdateAssemblies();
@@ -371,8 +377,7 @@ namespace Cosmos.IL2CPU
                             mLogWriter.WriteLine("<a name=\"Item" + xBookmarks[xItem.Item].ToString() + "_S\"></a>");
                         }
 
-                        int xHref;
-                        if (!xBookmarks.TryGetValue(xList.Key, out xHref))
+                        if (!xBookmarks.TryGetValue(xList.Key, out var xHref))
                         {
                             xHref = -1;
                         }
@@ -413,13 +418,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public int MethodCount
-        {
-            get
-            {
-                return mMethodUIDs.Count;
-            }
-        }
+        public int MethodCount => mMethodUIDs.Count;
 
         protected string LogItemText(object aItem)
         {
@@ -468,10 +467,6 @@ namespace Cosmos.IL2CPU
             if (aMethod is MethodInfo)
             {
                 Queue(((MethodInfo)aMethod).ReturnType, aMethod, "Return Type");
-            }
-            if (aMethod.GetFullName().IndexOf("Run", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                ;
             }
             // Scan virtuals
 
@@ -654,9 +649,8 @@ namespace Cosmos.IL2CPU
                         {
                             Queue(((ILOpCodes.OpType)xOpCode).Value, aMethod, "OpCode Value");
                         }
-                        else if (xOpCode is ILOpCodes.OpField)
+                        else if (xOpCode is ILOpCodes.OpField xOpField)
                         {
-                            var xOpField = (ILOpCodes.OpField)xOpCode;
                             //TODO: Need to do this? Will we get a ILOpCodes.OpType as well?
                             Queue(xOpField.Value.DeclaringType, aMethod, "OpCode Value");
                             if (xOpField.Value.IsStatic)
@@ -666,21 +660,20 @@ namespace Cosmos.IL2CPU
                                 Queue(xOpField.Value, aMethod, "OpCode Value");
                             }
                         }
-                        else if (xOpCode is ILOpCodes.OpToken)
+                        else if (xOpCode is ILOpCodes.OpToken xOpToken)
                         {
-                            var xTokenOp = (ILOpCodes.OpToken)xOpCode;
-                            if (xTokenOp.ValueIsType)
+                            if (xOpToken.ValueIsType)
                             {
-                                Queue(xTokenOp.ValueType, aMethod, "OpCode Value");
+                                Queue(xOpToken.ValueType, aMethod, "OpCode Value");
                             }
-                            if (xTokenOp.ValueIsField)
+                            if (xOpToken.ValueIsField)
                             {
-                                Queue(xTokenOp.ValueField.DeclaringType, aMethod, "OpCode Value");
-                                if (xTokenOp.ValueField.IsStatic)
+                                Queue(xOpToken.ValueField.DeclaringType, aMethod, "OpCode Value");
+                                if (xOpToken.ValueField.IsStatic)
                                 {
                                     //TODO: Why do we add static fields, but not instance?
                                     // AW: instance fields are "added" always, as part of a type, but for static fields, we need to emit a datamember
-                                    Queue(xTokenOp.ValueField, aMethod, "OpCode Value");
+                                    Queue(xOpToken.ValueField, aMethod, "OpCode Value");
                                 }
                             }
                         }
@@ -771,14 +764,12 @@ namespace Cosmos.IL2CPU
                 CompilerHelpers.Debug($"ILScanner: ScanQueue - '{xItem}'");
                 // Check for MethodBase first, they are more numerous
                 // and will reduce compares
-                if (xItem.Item is MethodBase)
+                if (xItem.Item is MethodBase xMethod)
                 {
-                    var xMethod = (MethodBase)xItem.Item;
                     ScanMethod(xMethod, false, xItem.SourceItem);
                 }
-                else if (xItem.Item is Type)
+                else if (xItem.Item is Type xType)
                 {
-                    var xType = (Type)xItem.Item;
                     ScanType(xType);
 
                     // Methods and fields cant exist without types, so we only update
@@ -812,8 +803,7 @@ namespace Cosmos.IL2CPU
                 SrcType = aSrcType,
                 Item = aItem
             };
-            List<LogItem> xList;
-            if (!mLogMap.TryGetValue(aSrc, out xList))
+            if (!mLogMap.TryGetValue(aSrc, out var xList))
             {
                 xList = new List<LogItem>();
                 mLogMap.Add(aSrc, xList);
@@ -902,9 +892,8 @@ namespace Cosmos.IL2CPU
         {
             foreach (var xItem in mItems)
             {
-                if (xItem is MethodBase)
+                if (xItem is MethodBase xMethod)
                 {
-                    var xMethod = (MethodBase)xItem;
                     var xParams = xMethod.GetParameters();
                     var xParamTypes = xParams.Select(q => q.ParameterType).ToArray();
                     var xPlug = mPlugManager.ResolvePlug(xMethod, xParamTypes);

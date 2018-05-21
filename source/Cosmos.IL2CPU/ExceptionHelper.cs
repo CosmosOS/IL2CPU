@@ -5,7 +5,9 @@ namespace Cosmos.IL2CPU
 {
     public static class ExceptionHelper
     {
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         public static Exception CurrentException;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         public static void ThrowArgumentOutOfRange(string aError)
         {
@@ -40,17 +42,11 @@ namespace Cosmos.IL2CPU
 
     public static class ExceptionHelperRefs
     {
-        public static readonly FieldInfo CurrentExceptionRef;
+        public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
 
-        public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef;
-
-        static ExceptionHelperRefs()
-        {
-            CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
-
-            ThrowNotFiniteNumberExceptionRef = typeof(ExceptionHelper).GetMethod(
+        public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
+            typeof(ExceptionHelper).GetMethod(
                 nameof(ExceptionHelper.ThrowNotFiniteNumberException),
                 BindingFlags.Public | BindingFlags.Static);
-        }
     }
 }
