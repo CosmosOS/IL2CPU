@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 
 namespace Cosmos.IL2CPU.ILOpCodes {
@@ -18,6 +17,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       {
         case Code.Ldc_I4:
           return 0;
+        case Code.Unaligned:
+          return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
@@ -29,6 +30,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       {
         case Code.Ldc_I4:
           return 1;
+        case Code.Unaligned:
+          return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
