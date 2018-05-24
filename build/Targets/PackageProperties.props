@@ -5,9 +5,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <IsPackable>False</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <Authors>Cosmos</Authors>
         <Copyright>Copyright © 2007-$([System.DateTime]::Now.Year) COSMOS Project</Copyright>
-        <PackageDescription>$(IL2CPUDescription)</PackageDescription>
         <!--<PackageIconUrl></PackageIconUrl>-->
         <PackageProjectUrl>https://www.il2cpu.net</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/CosmosOS/IL2CPU/raw/master/LICENSE.txt</PackageLicenseUrl>

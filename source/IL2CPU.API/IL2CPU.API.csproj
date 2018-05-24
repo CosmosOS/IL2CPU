@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <Description>IL2CPU API.
-$(IL2CPUDescription)</Description>
+        <IsPackable>True</IsPackable>
+        <PackageDescription>IL2CPU API.</PackageDescription>
     </PropertyGroup>
 
 </Project>
