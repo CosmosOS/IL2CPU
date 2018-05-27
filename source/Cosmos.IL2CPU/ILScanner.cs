@@ -49,8 +49,10 @@ namespace Cosmos.IL2CPU
 
         protected OurHashSet<MemberInfo> mItems = new OurHashSet<MemberInfo>();
         protected List<object> mItemsList = new List<object>();
+
         // Contains items to be scanned, both types and methods
         protected Queue<ScannerQueueItem> mQueue = new Queue<ScannerQueueItem>();
+
         // Virtual methods are nasty and constantly need to be rescanned for
         // overriding methods in new types, so we keep track of them separately.
         // They are also in the main mItems and mQueue.
@@ -64,6 +66,7 @@ namespace Cosmos.IL2CPU
         // Logging
         // Only use for debugging and profiling.
         protected bool mLogEnabled = false;
+
         protected string mMapPathname;
         protected TextWriter mLogWriter;
 
@@ -212,7 +215,7 @@ namespace Cosmos.IL2CPU
             //    -Types and Methods in Queue - to be scanned
             // -Finally, do compilation
 
-            #endregion
+            #endregion Description
 
             mPlugManager.FindPlugImpls(plugsAssemblies);
             // Now that we found all plugs, scan them.
@@ -264,7 +267,7 @@ namespace Cosmos.IL2CPU
             mAsmblr.EmitEntrypoint(aStartMethod);
         }
 
-        #endregion
+        #endregion Gen2
 
         #region Gen3
 
@@ -323,7 +326,7 @@ namespace Cosmos.IL2CPU
             mAsmblr.EmitEntrypoint(null, aBootEntries);
         }
 
-        #endregion
+        #endregion Gen3
 
         public void QueueMethod(MethodBase method)
         {
@@ -573,7 +576,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            #endregion
+            #endregion Virtuals scan
 
             MethodBase xPlug = null;
             // Plugs may use plugs, but plugs won't be plugged over themself
@@ -722,7 +725,7 @@ namespace Cosmos.IL2CPU
                     {
                         xParamTypes[i] = xParams[i].ParameterType;
                     }
-                    var xMethod = aType.GetMethod(xVirt.Name, xParamTypes);
+                    var xMethod = aType.GetMethod(xVirt.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, xParamTypes, null);
                     if (xMethod != null)
                     {
                         // We need to check IsVirtual, a non virtual could

@@ -28,7 +28,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Set(EAX, ESP, sourceDisplacement: 4);
 
             XS.Compare(EAX, 0);
-            XS.Jump(CPUx86.ConditionalTestEnum.Zero, xReturnNullLabel);
+            XS.Jump(CPUx86.ConditionalTestEnum.Zero, xNextPositionLabel);
             XS.Push(EAX, isIndirect: true);
             XS.Push(xTypeID, isIndirect: true);
             XS.Push(Convert.ToUInt32(xType.Value.IsInterface));
