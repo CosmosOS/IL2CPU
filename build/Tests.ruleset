@@ -278,8 +278,8 @@
     <Rule Id="IDE1005WithoutSuggestion" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.Features" RuleNamespace="Microsoft.CodeAnalysis.Features">
-    <Rule Id="IDE0010" Action="Warning" />
-    <Rule Id="IDE0010WithoutSuggestion" Action="Warning" />
+    <Rule Id="IDE0010" Action="None" />
+    <Rule Id="IDE0010WithoutSuggestion" Action="None" />
     <Rule Id="IDE0033" Action="Warning" />
     <Rule Id="IDE0033WithoutSuggestion" Action="Warning" />
   </Rules>
