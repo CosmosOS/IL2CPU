@@ -10,10 +10,9 @@ using System.Text;
 
 using Cosmos.Build.Common;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
-
-using XSharp.Assembler;
+using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
 {

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 
+using IL2CPU.API;
 using IL2CPU.Debug.Symbols;
-
-using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.Extensions
 {

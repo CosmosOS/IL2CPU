@@ -8,8 +8,9 @@ using System.Runtime.InteropServices;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.X86.IL;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using IL2CPU.Debug.Symbols;
 
 using XSharp;
 using XSharp.Assembler;

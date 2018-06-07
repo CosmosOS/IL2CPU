@@ -666,7 +666,7 @@ namespace Cosmos.IL2CPU
 
                 if (xNeedsExceptionPush)
                 {
-                    Push(DataMember.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
+                    Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
                     XS.Push(0);
                 }
 
@@ -876,7 +876,7 @@ namespace Cosmos.IL2CPU
 
         protected void Ldsflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
         {
-            X86.IL.Ldsflda.DoExecute(Assembler, aMethod, DataMember.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
+            X86.IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
 
         public static byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
@@ -904,7 +904,7 @@ namespace Cosmos.IL2CPU
             mSequences = Array.Empty<DebugInfo.SequencePoint>();
 
             var xTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-            string xTheName = DataMember.GetStaticFieldName(xTypesFieldRef);
+            string xTheName = LabelName.GetStaticFieldName(xTypesFieldRef);
             DataMember xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
                                       where item.Name == xTheName
                                       select item).FirstOrDefault();
@@ -1162,7 +1162,7 @@ namespace Cosmos.IL2CPU
 
         public void ProcessField(FieldInfo aField)
         {
-            string xFieldName = DataMember.GetStaticFieldName(aField);
+            string xFieldName = LabelName.GetStaticFieldName(aField);
             string xFieldContentsName = $"{xFieldName}__Contents";
 
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
@@ -1368,7 +1368,7 @@ namespace Cosmos.IL2CPU
             XS.Push(EBP);
             XS.Set(EBP, ESP);
             XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
-            XS.Set(DataMember.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
+            XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
                 LdStr.GetContentsArrayName(""), destinationDisplacement: 4);
 
             var xMemberId = 0;
