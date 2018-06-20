@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
             XS.Pop(EAX);
             var xObjSize = SizeOfType(type);
