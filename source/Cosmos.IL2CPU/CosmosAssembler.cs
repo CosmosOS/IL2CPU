@@ -18,13 +18,15 @@ namespace Cosmos.IL2CPU
             mComPort = comPort;
         }
 
-        protected int mComPort = 0;
+        private int mComPort = 0;
 
-        /// <summary>
-        /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
-        /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
-        /// </summary>
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+                              /// <summary>
+                              /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
+                              /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
+                              /// </summary>
         public static bool ReadDebugStubFromDisk = true;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         public virtual void WriteDebugVideo(string aText)
         {
