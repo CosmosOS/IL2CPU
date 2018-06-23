@@ -7,7 +7,9 @@ namespace Cosmos.IL2CPU
 {
     public static class CompilerHelpers
     {
+#pragma warning disable CA1710 // Identifiers should have correct suffix
         public static event Action<string> DebugEvent;
+#pragma warning restore CA1710 // Identifiers should have correct suffix
 
         private static void DoDebug(string message)
         {
@@ -24,15 +26,15 @@ namespace Cosmos.IL2CPU
         [Conditional("COSMOSDEBUG")]
         public static void Debug(string aMessage, params object[] aParams)
         {
-            string xMessage = aMessage;
+            var xMessage = aMessage;
 
             if (aParams != null)
             {
                 xMessage = xMessage + " : ";
                 for (int i = 0; i < aParams.Length; i++)
                 {
-                    string xParam = aParams[i].ToString();
-                    if (!string.IsNullOrWhiteSpace(xParam))
+                    var xParam = aParams[i].ToString();
+                    if (!String.IsNullOrWhiteSpace(xParam))
                     {
                         xMessage = xMessage + " " + xParam;
                     }
@@ -43,9 +45,6 @@ namespace Cosmos.IL2CPU
         }
 
         [Conditional("COSMOSDEBUG")]
-        public static void Debug(string aMessage)
-        {
-            DoDebug(aMessage);
-        }
+        public static void Debug(string aMessage) => DoDebug(aMessage);
     }
 }
