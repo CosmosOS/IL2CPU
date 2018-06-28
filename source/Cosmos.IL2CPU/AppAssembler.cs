@@ -29,34 +29,34 @@ using Label = XSharp.Assembler.Label;
 
 namespace Cosmos.IL2CPU
 {
-    public class AppAssembler : IDisposable
+    internal sealed class AppAssembler : IDisposable
     {
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
-        protected const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
-        protected List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new List<LOCAL_ARGUMENT_INFO>();
-        protected ILOp[] mILOpsLo = new ILOp[256];
-        protected ILOp[] mILOpsHi = new ILOp[256];
+        private const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
+        private List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new List<LOCAL_ARGUMENT_INFO>();
+        private ILOp[] mILOpsLo = new ILOp[256];
+        private ILOp[] mILOpsHi = new ILOp[256];
         public bool ShouldOptimize = false;
         public DebugInfo DebugInfo { get; set; }
         private string mLogDir;
-        protected TextWriter mLog;
-        protected Dictionary<string, ModuleDefinition> mLoadedModules = new Dictionary<string, ModuleDefinition>();
-        protected DebugInfo.SequencePoint[] mSequences = Array.Empty<DebugInfo.SequencePoint>();
+        private TextWriter mLog;
+        private Dictionary<string, ModuleDefinition> mLoadedModules = new Dictionary<string, ModuleDefinition>();
+        private DebugInfo.SequencePoint[] mSequences = Array.Empty<DebugInfo.SequencePoint>();
         public TraceAssemblies TraceAssemblies;
         public bool DebugEnabled = false;
         public bool StackCorruptionDetection = false;
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel;
         public DebugMode DebugMode;
         public bool IgnoreDebugStubAttribute;
-        protected static HashSet<string> mDebugLines = new HashSet<string>();
-        protected List<MethodIlOp> mSymbols = new List<MethodIlOp>();
-        protected List<INT3Label> mINT3Labels = new List<INT3Label>();
+        private static HashSet<string> mDebugLines = new HashSet<string>();
+        private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
+        private List<INT3Label> mINT3Labels = new List<INT3Label>();
         public readonly CosmosAssembler Assembler;
         //
-        protected string mCurrentMethodLabel;
-        protected long mCurrentMethodLabelEndGuid;
-        protected long mCurrentMethodGuid;
+        private string mCurrentMethodLabel;
+        private long mCurrentMethodLabelEndGuid;
+        private long mCurrentMethodGuid;
 
         public AppAssembler(int aComPort, string assemblerLogFile)
         {
@@ -66,7 +66,7 @@ namespace Cosmos.IL2CPU
             InitILOps();
         }
 
-        protected virtual CosmosAssembler CreateAssembler(int aComPort)
+        private CosmosAssembler CreateAssembler(int aComPort)
         {
             return new CosmosAssembler(aComPort);
         }
@@ -81,7 +81,7 @@ namespace Cosmos.IL2CPU
             GC.SuppressFinalize(this);
         }
 
-        protected void MethodBegin(_MethodInfo aMethod)
+        private void MethodBegin(_MethodInfo aMethod)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Comment("Assembly: " + aMethod.MethodBase.DeclaringType.Assembly.FullName);
@@ -298,7 +298,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        protected void MethodEnd(_MethodInfo aMethod)
+        private void MethodEnd(_MethodInfo aMethod)
         {
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
 
@@ -773,12 +773,12 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        protected void InitILOps()
+        private void InitILOps()
         {
             InitILOps(typeof(ILOp));
         }
 
-        protected virtual void InitILOps(Type aAssemblerBaseOp)
+        private void InitILOps(Type aAssemblerBaseOp)
         {
             foreach (var xType in aAssemblerBaseOp.Assembly.GetExportedTypes())
             {
@@ -803,42 +803,42 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        protected static void Move(string aDestLabelName, int aValue)
+        private static void Move(string aDestLabelName, int aValue)
         {
             XS.Set(aDestLabelName, (uint)aValue, destinationIsIndirect: true, size: RegisterSize.Int32);
         }
 
-        protected static void Push(uint aValue)
+        private static void Push(uint aValue)
         {
             XS.Push(aValue);
         }
 
-        protected static void Push(string aLabelName, bool isIndirect = false)
+        private static void Push(string aLabelName, bool isIndirect = false)
         {
             XS.Push(aLabelName, isIndirect: isIndirect);
         }
 
-        protected static void Call(MethodBase aMethod)
+        private static void Call(MethodBase aMethod)
         {
             XS.Call(LabelName.Get(aMethod));
         }
 
-        protected static void Jump(string aLabelName)
+        private static void Jump(string aLabelName)
         {
             XS.Jump(aLabelName);
         }
 
-        protected static _FieldInfo ResolveField(_MethodInfo method, string fieldId, bool aOnlyInstance)
+        private static _FieldInfo ResolveField(_MethodInfo method, string fieldId, bool aOnlyInstance)
         {
             return ILOp.ResolveField(method.MethodBase.DeclaringType, fieldId, aOnlyInstance);
         }
 
-        protected void Ldarg(_MethodInfo aMethod, int aIndex)
+        private void Ldarg(_MethodInfo aMethod, int aIndex)
         {
             X86.IL.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
         }
 
-        protected void Call(_MethodInfo aMethod, _MethodInfo aTargetMethod, string aNextLabel)
+        private void Call(_MethodInfo aMethod, _MethodInfo aTargetMethod, string aNextLabel)
         {
             var xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
             if (xSize > 0)
@@ -869,12 +869,12 @@ namespace Cosmos.IL2CPU
                      }, aNextLabel);
         }
 
-        protected void Ldflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
+        private void Ldflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
         {
             X86.IL.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
         }
 
-        protected void Ldsflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
+        private void Ldsflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
         {
             X86.IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
@@ -895,7 +895,7 @@ namespace Cosmos.IL2CPU
 
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
 
-        public virtual void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
+        public void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Label(InitVMTCodeLabel);
@@ -1338,7 +1338,7 @@ namespace Cosmos.IL2CPU
             MethodEnd(aFrom);
         }
 
-        protected static void WriteDebug(MethodBase aMethod, uint aSize, uint aSize2)
+        private static void WriteDebug(MethodBase aMethod, uint aSize, uint aSize2)
         {
             var xLine = String.Format("{0}\t{1}\t{2}", LabelName.GetFullName(aMethod), aSize, aSize2);
         }
@@ -1436,12 +1436,12 @@ namespace Cosmos.IL2CPU
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        protected void AfterOp(_MethodInfo aMethod, ILOpCode aOpCode)
+        private void AfterOp(_MethodInfo aMethod, ILOpCode aOpCode)
 #pragma warning restore CA1822 // Mark members as static
         {
         }
 
-        protected void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint)
+        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint)
         {
             string xLabel = TmpPosLabel(aMethod, aOpCode);
             Assembler.CurrentIlLabel = xLabel;
@@ -1543,7 +1543,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        protected void EmitTracer(_MethodInfo aMethod, ILOpCode aOp, string aNamespace, bool emitInt3NotNop, out bool INT3Emitted, out bool INT3PlaceholderEmitted, bool isNewSourcePoint)
+        private void EmitTracer(_MethodInfo aMethod, ILOpCode aOp, string aNamespace, bool emitInt3NotNop, out bool INT3Emitted, out bool INT3PlaceholderEmitted, bool isNewSourcePoint)
         {
             // NOTE - These if statements can be optimized down - but clarity is
             // more important than the optimizations. Furthermore the optimizations available
