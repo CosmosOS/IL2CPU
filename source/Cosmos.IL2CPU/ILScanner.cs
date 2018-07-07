@@ -11,8 +11,6 @@ using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 
-using XSharp.Assembler;
-
 namespace Cosmos.IL2CPU
 {
     public class ScannerQueueItem
@@ -253,6 +251,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
@@ -313,9 +312,6 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
-            // Exception support
-            Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Reflection;
 
+using IL2CPU.API.Attribs;
+
 namespace Cosmos.IL2CPU
 {
+    [ForceInclude]
     public static class ExceptionHelper
     {
 #pragma warning disable CA2211 // Non-constant fields should not be visible
@@ -38,15 +41,19 @@ namespace Cosmos.IL2CPU
         {
             throw new NotFiniteNumberException(offendingNumber);
         }
+
+        public static void ThrowInvalidCastException() => throw new InvalidCastException();
     }
 
+    [ForceInclude]
     public static class ExceptionHelperRefs
     {
         public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
 
+        public static readonly MethodInfo ThrowInvalidCastExceptionRef =
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowInvalidCastException));
+
         public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
-            typeof(ExceptionHelper).GetMethod(
-                nameof(ExceptionHelper.ThrowNotFiniteNumberException),
-                BindingFlags.Public | BindingFlags.Static);
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
     }
 }
