@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
 using System.Reflection;
+
+using IL2CPU.API;
+
 using XSharp;
 using XSharp.Assembler;
 using CPUx86 = XSharp.Assembler.x86;
@@ -51,7 +54,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         xOffset += SizeOfType(xInfo.FieldType);
       }
-      string xDataName = DataMember.GetStaticFieldName(xField);
+      string xDataName = LabelName.GetStaticFieldName(xField);
       if (xIsReferenceType)
       {
         XS.Add(XSRegisters.ESP, 4);

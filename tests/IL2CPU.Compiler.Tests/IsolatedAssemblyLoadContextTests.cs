@@ -20,7 +20,7 @@ namespace IL2CPU.Compiler.Tests
                 typeof(DebugInfo).Assembly.Location
             };
 
-            Assert.DoesNotThrow(() => new IsolatedAssemblyLoadContext(assemblies));
+            Assert.DoesNotThrow(() => _ = new IsolatedAssemblyLoadContext(assemblies));
         }
 
         [Test]

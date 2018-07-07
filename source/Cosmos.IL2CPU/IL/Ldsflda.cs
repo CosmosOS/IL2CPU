@@ -1,9 +1,9 @@
 using System;
-using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler;
 using System.Reflection;
 using System.Linq;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
 
 using XSharp;
 
@@ -19,15 +19,15 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      var xOpCode = (ILOpCodes.OpField) aOpCode;
-      var xFieldName = DataMember.GetStaticFieldName(xOpCode.Value);
+      var xOpCode = (OpField) aOpCode;
+      var xFieldName = LabelName.GetStaticFieldName(xOpCode.Value);
       DoExecute(Assembler, aMethod, xFieldName, xOpCode.Value.DeclaringType, aOpCode);
     }
 
     public static void DoExecute(XSharp.Assembler.Assembler assembler, _MethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
     {
       // call cctor:
-      var xCctor = (declaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? new ConstructorInfo[0]).SingleOrDefault();
+      var xCctor = (declaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? Array.Empty<ConstructorInfo>()).SingleOrDefault();
       if (xCctor != null)
       {
         XS.Call(LabelName.Get(xCctor));

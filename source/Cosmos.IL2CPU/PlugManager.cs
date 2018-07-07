@@ -1,10 +1,13 @@
-using IL2CPU.API;
-using IL2CPU.API.Attribs;
-using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
+using Cosmos.IL2CPU.Extensions;
+
+using IL2CPU.API;
+using IL2CPU.API.Attribs;
+
 using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
@@ -13,7 +16,7 @@ namespace Cosmos.IL2CPU
     {
         public bool ThrowExceptions = true;
 
-        public LogExceptionDelegate LogException = null;
+        public Action<Exception> LogException = null;
 
         ////public delegate void ScanMethodDelegate(MethodBase aMethod, bool aIsPlug, string sourceItem);
         //public ScanMethodDelegate ScanMethod = null;
@@ -48,7 +51,7 @@ namespace Cosmos.IL2CPU
             return LabelName.GetFullName(m);
         }
 
-        public PlugManager(LogExceptionDelegate aLogException, Action<string> aLogWarning, TypeResolver typeResolver)
+        public PlugManager(Action<Exception> aLogException, Action<string> aLogWarning, TypeResolver typeResolver)
         {
             LogException = aLogException;
             LogWarning = aLogWarning;

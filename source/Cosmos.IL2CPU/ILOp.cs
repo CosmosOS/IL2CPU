@@ -8,8 +8,9 @@ using System.Runtime.InteropServices;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.X86.IL;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using IL2CPU.Debug.Symbols;
 
 using XSharp;
 using XSharp.Assembler;
@@ -193,13 +194,11 @@ namespace Cosmos.IL2CPU
             }
 
             // now check plugs
-            IDictionary<string, PlugField> xPlugFields;
-            if (PlugManager.PlugFields.TryGetValue(aType, out xPlugFields))
+            if (PlugManager.PlugFields.TryGetValue(aType, out var xPlugFields))
             {
                 foreach (var xPlugField in xPlugFields)
                 {
-                    _FieldInfo xPluggedField = null;
-                    if (xCurList.TryGetValue(xPlugField.Key, out xPluggedField))
+                    if (xCurList.TryGetValue(xPlugField.Key, out var xPluggedField))
                     {
                         // plugfield modifies an already existing field
 
@@ -457,15 +456,13 @@ namespace Cosmos.IL2CPU
                     switch (aCurrentOpCode.CurrentExceptionRegion.Kind)
                     {
                         case ExceptionRegionKind.Catch:
-                            {
-                                xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                                break;
-                            }
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
+                            break;
                         case ExceptionRegionKind.Finally:
-                            {
-                                xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                                break;
-                            }
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
+                            break;
+                        case ExceptionRegionKind.Filter:
+                        case ExceptionRegionKind.Fault:
                         default:
                             {
                                 throw new Exception("ExceptionHandlerType '" + aCurrentOpCode.CurrentExceptionRegion.Kind.ToString() +
@@ -531,7 +528,7 @@ namespace Cosmos.IL2CPU
             if (debugEnabled)
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
-                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: (int)stackOffsetToCheck);
+                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
@@ -560,7 +557,7 @@ namespace Cosmos.IL2CPU
                 {
                     Console.WriteLine("\t'{0}'", xField.Id);
                 }
-                throw new Exception(string.Format("Field '{0}' not found on type '{1}'", aField, aDeclaringType.FullName));
+                throw new Exception(String.Format("Field '{0}' not found on type '{1}'", aField, aDeclaringType.FullName));
             }
             return xFieldInfo;
         }
@@ -635,7 +632,7 @@ namespace Cosmos.IL2CPU
         {
             if (aType == null)
             {
-                throw new ArgumentNullException("aType");
+                throw new ArgumentNullException(nameof(aType));
             }
             if (aType.IsPointer || aType.IsByRef)
             {
@@ -649,7 +646,9 @@ namespace Cosmos.IL2CPU
             {
                 return 8;
             }
+#pragma warning disable IDE0010 // Add missing cases
             switch (aType.FullName)
+#pragma warning restore IDE0010 // Add missing cases
             {
                 case "System.Char":
                     return 2;

@@ -11,13 +11,13 @@ namespace IL2CPU.API.Attribs
 
         public Plug(Type target)
         {
-            Target = target ?? throw new ArgumentNullException();
+            Target = target ?? throw new ArgumentNullException(nameof(target));
             return;
         }
 
         public Plug(string targetName)
         {
-            if (string.IsNullOrEmpty(targetName)) { throw new ArgumentNullException(); }
+            if (String.IsNullOrEmpty(targetName)) { throw new ArgumentNullException(nameof(targetName)); }
             TargetName = targetName;
             return;
         }

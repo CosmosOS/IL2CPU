@@ -70,14 +70,14 @@ namespace IL2CPU.Compiler.Tests
             Assert.That(size, Is.EqualTo(24));
         }
 
-        private Type MockDefaultValueType(params Mock<FieldInfo>[] fieldTypes) =>
-            MockValueTypeFull(fieldMocks: fieldTypes);
-        private Type MockSequentialValueType(int pack, params Mock<FieldInfo>[] fieldTypes) =>
-            MockValueTypeFull(pack: pack, fieldMocks: fieldTypes);
-        private Type MockExplicitValueType(params Mock<FieldInfo>[] fieldTypes) =>
-            MockValueTypeFull(LayoutKind.Explicit, fieldMocks: fieldTypes);
-        private Type MockAutoValueType(int pack, params Mock<FieldInfo>[] fieldTypes) =>
-            MockValueTypeFull(LayoutKind.Auto, fieldMocks: fieldTypes);
+        private Type MockDefaultValueType(params Mock<FieldInfo>[] fieldMocks) =>
+            MockValueTypeFull(fieldMocks: fieldMocks);
+        private Type MockSequentialValueType(int pack, params Mock<FieldInfo>[] fieldMocks) =>
+            MockValueTypeFull(pack: pack, fieldMocks: fieldMocks);
+        private Type MockExplicitValueType(params Mock<FieldInfo>[] fieldMocks) =>
+            MockValueTypeFull(LayoutKind.Explicit, fieldMocks: fieldMocks);
+        private Type MockAutoValueType(int pack, params Mock<FieldInfo>[] fieldMocks) =>
+            MockValueTypeFull(LayoutKind.Auto, pack, fieldMocks: fieldMocks);
 
         private Type MockValueTypeFull(
             LayoutKind layoutKind = LayoutKind.Sequential,

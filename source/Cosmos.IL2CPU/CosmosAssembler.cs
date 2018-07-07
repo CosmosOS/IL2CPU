@@ -18,13 +18,15 @@ namespace Cosmos.IL2CPU
             mComPort = comPort;
         }
 
-        protected int mComPort = 0;
+        private int mComPort = 0;
 
-        /// <summary>
-        /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
-        /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
-        /// </summary>
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+                              /// <summary>
+                              /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
+                              /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
+                              /// </summary>
         public static bool ReadDebugStubFromDisk = true;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         public virtual void WriteDebugVideo(string aText)
         {
@@ -38,8 +40,8 @@ namespace Cosmos.IL2CPU
             if (xPreBootLogging)
             {
                 new Comment("DebugVideo '" + aText + "'");
-                UInt32 xVideo = 0xB8000;
-                for (UInt32 i = xVideo; i < xVideo + 80 * 2; i = i + 2)
+                uint xVideo = 0xB8000;
+                for (uint i = xVideo; i < xVideo + 80 * 2; i = i + 2)
                 {
                     new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
                     new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
@@ -75,10 +77,10 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("_NATIVE_GDT_Contents", xGDT.ToArray()));
 
             XS.Comment("Tell CPU about GDT");
-            var xGdtPtr = new UInt16[3];
+            var xGdtPtr = new ushort[3];
 
             // Size of GDT Table - 1
-            xGdtPtr[0] = (UInt16)(xGDT.Count - 1);
+            xGdtPtr[0] = (ushort)(xGDT.Count - 1);
             DataMembers.Add(new DataMember("_NATIVE_GDT_Pointer", xGdtPtr));
             new Mov
             {
@@ -87,16 +89,16 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = 2,
                 SourceRef = ElementReference.New("_NATIVE_GDT_Contents")
             };
-            XS.Set(XSRegisters.EAX, "_NATIVE_GDT_Pointer");
-            XS.LoadGdt(XSRegisters.EAX, isIndirect: true);
+            XS.Set(EAX, "_NATIVE_GDT_Pointer");
+            XS.LoadGdt(EAX, isIndirect: true);
 
             XS.Comment("Set data segments");
-            XS.Set(XSRegisters.EAX, mGdData);
-            XS.Set(XSRegisters.DS, XSRegisters.AX);
-            XS.Set(XSRegisters.ES, XSRegisters.AX);
-            XS.Set(XSRegisters.FS, XSRegisters.AX);
-            XS.Set(XSRegisters.GS, XSRegisters.AX);
-            XS.Set(XSRegisters.SS, XSRegisters.AX);
+            XS.Set(EAX, mGdData);
+            XS.Set(DS, AX);
+            XS.Set(ES, AX);
+            XS.Set(FS, AX);
+            XS.Set(GS, AX);
+            XS.Set(SS, AX);
 
             XS.Comment("Force reload of code segment");
             new JumpToSegment
@@ -111,7 +113,7 @@ namespace Cosmos.IL2CPU
         protected void SetIdtDescriptor(int aNo, string aLabel, bool aDisableInts)
         {
             int xOffset = aNo * 8;
-            XS.Set(XSRegisters.EAX, aLabel);
+            XS.Set(EAX, aLabel);
             var xIDT = ElementReference.New("_NATIVE_IDT_Contents");
             new Mov
             {
@@ -127,7 +129,7 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = xOffset + 1,
                 SourceReg = RegistersEnum.AH
             };
-            XS.ShiftRight(XSRegisters.EAX, 16);
+            XS.ShiftRight(EAX, 16);
             new Mov
             {
                 DestinationRef = xIDT,
@@ -179,7 +181,7 @@ namespace Cosmos.IL2CPU
             new Comment(this, "BEGIN - Create IDT");
 
             // Create IDT
-            UInt16 xIdtSize = 8 * 256;
+            ushort xIdtSize = 8 * 256;
             DataMembers.Add(new DataMember("_NATIVE_IDT_Contents", new byte[xIdtSize]));
 
             //
@@ -202,7 +204,7 @@ namespace Cosmos.IL2CPU
             //SetIdtDescriptor(1, "DebugStub_INT0"); - Change to GPF
 
             // Set IDT
-            DataMembers.Add(new DataMember("_NATIVE_IDT_Pointer", new UInt16[]
+            DataMembers.Add(new DataMember("_NATIVE_IDT_Pointer", new ushort[]
                                                                   {
                                                                       xIdtSize, 0, 0
                                                                   }));
@@ -214,12 +216,12 @@ namespace Cosmos.IL2CPU
                 SourceRef = ElementReference.New("_NATIVE_IDT_Contents")
             };
 
-            XS.Set(XSRegisters.EAX, "_NATIVE_IDT_Pointer");
+            XS.Set(EAX, "_NATIVE_IDT_Pointer");
 
             if (mComPort > 0)
             {
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.Processor_IntsEnabled], 1, destinationIsIndirect: true, size: RegisterSize.Byte8);
-                XS.LoadIdt(XSRegisters.EAX, isIndirect: true);
+                XS.LoadIdt(EAX, isIndirect: true);
             }
             XS.Label("AfterCreateIDT");
             new Comment(this, "END - Create IDT");
@@ -263,7 +265,7 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_Low", 0));
             DataMembers.Add(new DataMember("Before_Kernel_Stack", new byte[0x50000]));
-            DataMembers.Add(new DataMember("Kernel_Stack", new byte[0]));
+            DataMembers.Add(new DataMember("Kernel_Stack", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultiBootInfo_Structure", new uint[1]));
 
             // constants
@@ -279,7 +281,7 @@ namespace Cosmos.IL2CPU
 
             // This is our first entry point. Multiboot uses this as Cosmos entry point.
             new Label("Kernel_Start", isGlobal: true);
-            XS.Set(XSRegisters.ESP, "Kernel_Stack");
+            XS.Set(ESP, "Kernel_Stack");
 
             // Displays "Cosmos" in top left. Used to make sure Cosmos is booted in case of hang.
             // ie bootloader debugging. This must be the FIRST code, even before setup so we know
@@ -308,16 +310,16 @@ namespace Cosmos.IL2CPU
                 DestinationIsIndirect = true,
                 SourceReg = RegistersEnum.EBX
             };
-            XS.Add(XSRegisters.EBX, 4);
-            XS.Set(XSRegisters.EAX, XSRegisters.EBX, sourceIsIndirect: true);
+            XS.Add(EBX, 4);
+            XS.Set(EAX, EBX, sourceIsIndirect: true);
             new Mov
             {
                 DestinationRef = ElementReference.New("MultiBootInfo_Memory_Low"),
                 DestinationIsIndirect = true,
                 SourceReg = RegistersEnum.EAX
             };
-            XS.Add(XSRegisters.EBX, 4);
-            XS.Set(XSRegisters.EAX, XSRegisters.EBX, sourceIsIndirect: true);
+            XS.Add(EBX, 4);
+            XS.Set(EAX, EBX, sourceIsIndirect: true);
             new Mov
             {
                 DestinationRef = ElementReference.New("MultiBootInfo_Memory_High"),
@@ -470,9 +472,9 @@ namespace Cosmos.IL2CPU
             // emit helper functions:
             Action<byte, byte> xOutBytes = (port, value) =>
             {
-                XS.Set(XSRegisters.DX, port);
-                XS.Set(XSRegisters.EAX, value);
-                XS.WriteToPortDX(XSRegisters.AL);
+                XS.Set(DX, port);
+                XS.Set(EAX, value);
+                XS.WriteToPortDX(AL);
             };
 
             Action xIOWait = () => xOutBytes(0x80, 0x22);
@@ -507,7 +509,7 @@ namespace Cosmos.IL2CPU
 
         public const string EntryPointName = "__ENGINE_ENTRYPOINT__";
 
-        protected byte[] GdtDescriptor(UInt32 aBase, UInt32 aSize, bool aCode)
+        protected byte[] GdtDescriptor(uint aBase, uint aSize, bool aCode)
         {
             // Limit is a confusing word. Is it the max physical address or size?
             // In fact it is the size, and 286 docs actually refer to it as size
@@ -579,7 +581,7 @@ namespace Cosmos.IL2CPU
 
         protected override void OnBeforeFlush()
         {
-            DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", new byte[0]) });
+            DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
         }
 
         protected override void OnFlushTextAfterEmitEverything(TextWriter aOutput)

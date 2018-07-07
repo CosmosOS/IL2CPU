@@ -5,7 +5,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpType : ILOpCode
   {
-    public readonly Type Value;
+    public Type Value { get; }
 
     public OpType(Code aOpCode, int aPos, int aNextPos, Type aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)

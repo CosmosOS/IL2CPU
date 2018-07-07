@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-using XSharp.Assembler;
+using IL2CPU.API;
 
 namespace Cosmos.IL2CPU
 {
