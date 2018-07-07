@@ -51,6 +51,18 @@ namespace IL2CPU.API
             return aMethodLabel + ".IL_" + aIlPos.ToString("X4");
         }
 
+        private const string IllegalIdentifierChars = "&.,+$<>{}-`\'/\\ ()[]*!=";
+
+        public static string FilterStringForIncorrectChars(string aName)
+        {
+            string xTempResult = aName;
+            foreach (char c in IllegalIdentifierChars)
+            {
+                xTempResult = xTempResult.Replace(c, '_');
+            }
+            return xTempResult;
+        }
+
         // no array bracket, they need to replace, for unique names for used types in methods
         private static readonly System.Text.RegularExpressions.Regex IllegalCharsReplace = new System.Text.RegularExpressions.Regex(@"[&.,+$<>{}\-\`\\'/\\ \(\)\*!=]", System.Text.RegularExpressions.RegexOptions.Compiled);
 
@@ -208,11 +220,15 @@ namespace IL2CPU.API
             return xBuilder.ToString();
         }
 
+        public static string GetFullName(FieldInfo aField)
+        {
+            return GetFullName(aField.FieldType) + " " + GetFullName(aField.DeclaringType) + "." + aField.Name;
+        }
+
         public static string GetStaticFieldName(FieldInfo aField)
         {
-            return "static_field__"
-                + IllegalCharsReplace.Replace(GetFullName(aField.DeclaringType), "_")
-                + "_" + IllegalCharsReplace.Replace(aField.Name, "_");
+            return FilterStringForIncorrectChars(
+                "static_field__" + GetFullName(aField.DeclaringType) + "." + aField.Name);
         }
     }
 }
