@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpString : ILOpCode {
-    public readonly string Value;
+    public string Value { get; }
 
     public OpString(Code aOpCode, int aPos, int aNextPos, string aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {

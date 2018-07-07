@@ -5,8 +5,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpMethod : ILOpCode
   {
-    public MethodBase Value;
-    public uint ValueUID;
+    public MethodBase Value { get; set; }
+    public uint ValueUID { get; set; }
 
     public OpMethod(Code aOpCode, int aPos, int aNextPos, MethodBase aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)

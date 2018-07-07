@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpSingle : ILOpCode {
-    public readonly Single Value;
+    public float Value { get; }
 
-    public OpSingle(Code aOpCode, int aPos, int aNextPos, Single aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpSingle(Code aOpCode, int aPos, int aNextPos, float aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
       Value = aValue;
     }
@@ -39,7 +39,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       switch (OpCode)
       {
         case Code.Ldc_R4:
-          StackPushTypes[0] = typeof (Single);
+          StackPushTypes[0] = typeof(float);
           return;
         default:
           break;

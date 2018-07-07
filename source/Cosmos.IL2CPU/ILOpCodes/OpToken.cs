@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Reflection;
 
-
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpToken : ILOpCode {
-    public readonly Int32 Value;
-    public readonly FieldInfo ValueField;
-    public readonly Type ValueType;
+    public int Value { get; }
+    public FieldInfo ValueField { get; }
+    public Type ValueType { get; }
 
     public bool ValueIsType
     {
@@ -39,7 +38,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         }
     }
 
-    public OpToken(Code aOpCode, int aPos, int aNextPos, Int32 aValue, Module aModule, Type[] aTypeGenericArgs, Type[] aMethodGenericArgs, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpToken(Code aOpCode, int aPos, int aNextPos, int aValue, Module aModule, Type[] aTypeGenericArgs, Type[] aMethodGenericArgs, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
       Value = aValue;
       if (ValueIsField)

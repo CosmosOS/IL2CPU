@@ -6,9 +6,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpVar : ILOpCode
   {
-    public readonly UInt16 Value;
+    public ushort Value { get; }
 
-    public OpVar(Code aOpCode, int aPos, int aNextPos, UInt16 aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpVar(Code aOpCode, int aPos, int aNextPos, ushort aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
         : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;

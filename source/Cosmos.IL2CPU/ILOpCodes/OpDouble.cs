@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpDouble : ILOpCode {
-    public readonly double Value;
+    public double Value { get; }
 
     public OpDouble(Code aOpCode, int aPos, int aNextPos, double aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
@@ -38,8 +38,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
 
       switch (OpCode)
       {
-          case Code.Ldc_R8:
-          StackPushTypes[0] = typeof (Double);
+        case Code.Ldc_R8:
+          StackPushTypes[0] = typeof(double);
           break;
         default:
           break;
