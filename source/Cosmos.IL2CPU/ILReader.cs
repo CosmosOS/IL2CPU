@@ -1,9 +1,10 @@
-﻿using Cosmos.IL2CPU.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
+
+using Cosmos.IL2CPU.Extensions;
 
 namespace Cosmos.IL2CPU
 {
@@ -52,6 +53,15 @@ namespace Cosmos.IL2CPU
         {
             var xResult = new List<ILOpCode>();
             var xBody = aMethod.GetMethodBody();
+
+            if (aMethod.DeclaringType.FullName == "System.Runtime.CompilerServices.Unsafe")
+            {
+                xBody = Type.GetType(
+                    "System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe")
+                    .GetMethod(aMethod.Name, Array.ConvertAll(aMethod.GetParameters(), p => p.ParameterType))
+                    .GetMethodBody();
+            }
+
             // Cache for use in field and method resolution
             Type[] xTypeGenArgs = Type.EmptyTypes;
             Type[] xMethodGenArgs = Type.EmptyTypes;
