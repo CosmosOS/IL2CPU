@@ -10,10 +10,9 @@ using System.Text;
 
 using Cosmos.Build.Common;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
-
-using XSharp.Assembler;
+using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
 {
@@ -325,7 +324,7 @@ namespace Cosmos.IL2CPU
 
                 foreach (var xType in aAssembly.GetTypes())
                 {
-                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceInclude>();
+                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
 
                     if (xForceIncludeAttribute != null)
                     {
@@ -334,7 +333,7 @@ namespace Cosmos.IL2CPU
 
                     foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceInclude>();
+                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
 
                         if (xForceIncludeAttribute != null)
                         {
@@ -433,7 +432,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private void ForceInclude(MemberInfo aMemberInfo, ForceInclude aForceIncludeAttribute)
+        private void ForceInclude(MemberInfo aMemberInfo, ForceIncludeAttribute aForceIncludeAttribute)
         {
             if (aMemberInfo is Type xType)
             {

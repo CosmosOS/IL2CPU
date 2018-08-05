@@ -1,5 +1,7 @@
 using System;
 
+using IL2CPU.API;
+
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;

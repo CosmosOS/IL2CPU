@@ -11,42 +11,23 @@ namespace Orvid.Collections
 {
     public class SkipList<T>
     {
-        protected Node _head = new Node(Array.Empty<byte>(), default(T), 33);
         /// <summary>
         /// The main node that the rest of the list is based on.
         /// </summary>
-        public Node Head
-        {
-            get
-            {
-                return _head;
-            }
-        }
-        protected Random _rand = new Random();
-        public Random Random
-        {
-            get
-            {
-                return _rand;
-            }
-        }
-        protected int _levels = 1;
+        public Node Head { get; private set; } = new Node(Array.Empty<byte>(), default(T), 33);
+
+        public Random Random { get; private set; } = new Random();
+
         /// <summary>
         /// An Int32 representing how deep the list is.
         /// </summary>
-        public int Levels
-        {
-            get
-            {
-                return _levels;
-            }
-        }
+        public int Levels { get; private set; } = 1;
 
         public SkipList()
         {
-            _head = new Node(Array.Empty<byte>(), default(T), 33);
-            _rand = new Random();
-            _levels = 1;
+            Head = new Node(Array.Empty<byte>(), default(T), 33);
+            Random = new Random();
+            Levels = 1;
         }
 
         /// <summary>
@@ -64,18 +45,18 @@ namespace Orvid.Collections
         {
             byte[] key2 = Encoding.ASCII.GetBytes(key);
             int level = 0;
-            for (int R = _rand.Next(); (R & 1) == 1; R >>= 1)
+            for (int R = Random.Next(); (R & 1) == 1; R >>= 1)
             {
                 level++;
-                if (level == _levels)
+                if (level == Levels)
                 {
-                    _levels++;
+                    Levels++;
                     break;
                 }
             }
             var newNode = new Node(key2, value, level + 1);
-            var cur = _head;
-            for (int i = _levels - 1; i >= 0; i--)
+            var cur = Head;
+            for (int i = Levels - 1; i >= 0; i--)
             {
                 for (; cur.Next[i] != null; cur = cur.Next[i])
                 {
@@ -95,9 +76,9 @@ namespace Orvid.Collections
 
         public void Clear()
         {
-            _head = new Node(Array.Empty<byte>(), default(T), 33);
-            _rand = new Random();
-            _levels = 1;
+            Head = new Node(Array.Empty<byte>(), default(T), 33);
+            Random = new Random();
+            Levels = 1;
             GC.Collect();
         }
 
@@ -107,9 +88,9 @@ namespace Orvid.Collections
         public bool Contains(string key, out T value)
         {
             byte[] value2 = Encoding.ASCII.GetBytes(key);
-            for (int i = _levels - 1; i >= 0; i--)
+            for (int i = Levels - 1; i >= 0; i--)
             {
-                for (var cur = _head; cur.Next[i] != null; cur = cur.Next[i])
+                for (var cur = Head; cur.Next[i] != null; cur = cur.Next[i])
                 {
                     if (ArrayGreaterThan(cur.Next[i].Key, value2))
                     {
@@ -135,9 +116,9 @@ namespace Orvid.Collections
             byte[] value2 = Encoding.ASCII.GetBytes(key);
 
             bool found = false;
-            for (int i = _levels - 1; i >= 0; i--)
+            for (int i = Levels - 1; i >= 0; i--)
             {
-                for (var cur = _head; cur.Next[i] != null; cur = cur.Next[i])
+                for (var cur = Head; cur.Next[i] != null; cur = cur.Next[i])
                 {
                     if (ArraysEqual(cur.Next[i].Key, value2))
                     {
@@ -158,7 +139,7 @@ namespace Orvid.Collections
 
         public IEnumerator<T> GetEnumerator()
         {
-            var cur = _head.Next[0];
+            var cur = Head.Next[0];
             while (cur != null)
             {
                 yield return cur.Value;

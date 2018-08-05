@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpSwitch : ILOpCode {
-    public readonly int[] BranchLocations;
+    public int[] BranchLocations { get; }
 
     public OpSwitch(Code aOpCode, int aPos, int aNextPos, int[] aBranchLocations, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {

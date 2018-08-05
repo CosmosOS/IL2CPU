@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Metadata;
-
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpInt64 : ILOpCode
   {
-    public readonly UInt64 Value;
+    public ulong Value { get; }
 
-    public OpInt64(Code aOpCode, int aPos, int aNextPos, UInt64 aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpInt64(Code aOpCode, int aPos, int aNextPos, ulong aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;

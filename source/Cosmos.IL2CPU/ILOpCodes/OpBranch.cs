@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpBranch : ILOpCode
   {
-    public readonly int Value;
+    public int Value { get; }
 
     public OpBranch(Code aOpCode, int aPos, int aNextPos, int aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
@@ -139,11 +139,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xValue1 == typeof(Single) && xValue2 == typeof(Single))
+          if (xValue1 == typeof(float) && xValue2 == typeof(float))
           {
             return;
           }
-          if (xValue1 == typeof(Double) && xValue2 == typeof(Double))
+          if (xValue1 == typeof(double) && xValue2 == typeof(double))
           {
             return;
           }
@@ -151,7 +151,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xValue1 == typeof(Boolean) && xValue2 == typeof(Boolean))
+          if (xValue1 == typeof(bool) && xValue2 == typeof(bool))
           {
             return;
           }

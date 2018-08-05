@@ -1,9 +1,10 @@
-﻿using Cosmos.IL2CPU.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
+
+using Cosmos.IL2CPU.Extensions;
 
 namespace Cosmos.IL2CPU
 {
@@ -14,8 +15,8 @@ namespace Cosmos.IL2CPU
         // back to a unifed array, instead of 64k entries
         // we can change it to a signed int, and then add x0200 to the value.
         // This will reduce array size down to 768 entries.
-        protected OpCode[] mOpCodesLo = new OpCode[256];
-        protected OpCode[] mOpCodesHi = new OpCode[256];
+        private static readonly OpCode[] mOpCodesLo = new OpCode[256];
+        private static readonly OpCode[] mOpCodesHi = new OpCode[256];
 
         public ILReader()
         {
@@ -52,6 +53,15 @@ namespace Cosmos.IL2CPU
         {
             var xResult = new List<ILOpCode>();
             var xBody = aMethod.GetMethodBody();
+
+            if (aMethod.DeclaringType.FullName == "System.Runtime.CompilerServices.Unsafe")
+            {
+                xBody = Type.GetType(
+                    "System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe")
+                    .GetMethod(aMethod.Name, Array.ConvertAll(aMethod.GetParameters(), p => p.ParameterType))
+                    .GetMethodBody();
+            }
+
             // Cache for use in field and method resolution
             Type[] xTypeGenArgs = Type.EmptyTypes;
             Type[] xMethodGenArgs = Type.EmptyTypes;
@@ -441,17 +451,17 @@ namespace Cosmos.IL2CPU
 
         // We could use BitConvertor, unfortuantely they "hardcoded" endianness. Its fine for reading IL now...
         // but they essentially do the same as we do, just a bit slower.
-        private UInt16 ReadUInt16(byte[] aBytes, int aPos)
+        private ushort ReadUInt16(byte[] aBytes, int aPos)
         {
-            return (UInt16)(aBytes[aPos + 1] << 8 | aBytes[aPos]);
+            return (ushort)(aBytes[aPos + 1] << 8 | aBytes[aPos]);
         }
 
-        private Int32 ReadInt32(byte[] aBytes, int aPos)
+        private int ReadInt32(byte[] aBytes, int aPos)
         {
             return aBytes[aPos + 3] << 24 | aBytes[aPos + 2] << 16 | aBytes[aPos + 1] << 8 | aBytes[aPos];
         }
 
-        private UInt64 ReadUInt64(byte[] aBytes, int aPos)
+        private ulong ReadUInt64(byte[] aBytes, int aPos)
         {
             //return (UInt64)(
             //  aBytes[aPos + 7] << 56 | aBytes[aPos + 6] << 48 | aBytes[aPos + 5] << 40 | aBytes[aPos + 4] << 32

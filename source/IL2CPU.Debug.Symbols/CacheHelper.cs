@@ -7,11 +7,7 @@ namespace IL2CPU.Debug.Symbols
     {
         public CacheHelper(Func<TKey, TValue> getValueFunc)
         {
-            if (getValueFunc == null)
-            {
-                throw new ArgumentNullException("getValueFunc");
-            }
-            mGetValueFunc = getValueFunc;
+            mGetValueFunc = getValueFunc ?? throw new ArgumentNullException(nameof(getValueFunc));
         }
 
         private readonly Func<TKey, TValue> mGetValueFunc;

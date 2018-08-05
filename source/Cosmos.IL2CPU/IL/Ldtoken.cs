@@ -1,5 +1,6 @@
 using System;
 
+using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
 using XSharp;
@@ -26,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             }
             if (xToken.ValueIsField)
             {
-                xTokenAddress = DataMember.GetStaticFieldName(xToken.ValueField);
+                xTokenAddress = LabelName.GetStaticFieldName(xToken.ValueField);
             }
 
             if (String.IsNullOrEmpty(xTokenAddress))

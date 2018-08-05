@@ -4,8 +4,7 @@
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
-        <Description>IL2CPU compiler.
-$(IL2CPUDescription)</Description>
+        <PackageDescription>IL2CPU compiler.</PackageDescription>
         <DevelopmentDependency>True</DevelopmentDependency>
     </PropertyGroup>
 

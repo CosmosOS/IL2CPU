@@ -1,3 +1,5 @@
+using IL2CPU.API;
+
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -18,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoNullReferenceCheck(Assembler, DebugEnabled, 4);
             XS.Add(ESP, 4);
             XS.Pop(EAX);
-            XS.Set(DataMember.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), EAX, destinationIsIndirect: true);
+            XS.Set(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), EAX, destinationIsIndirect: true);
             XS.Call("SystemExceptionOccurred");
             XS.Set(ECX, 3);
             EmitExceptionLogic(Assembler, aMethod, aOpCode, false, null);

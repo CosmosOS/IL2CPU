@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Metadata;
 
+using IL2CPU.API;
 using IL2CPU.Debug.Symbols;
-using IL2CPU.Debug.Symbols.Pdb;
-
-using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.Extensions
 {

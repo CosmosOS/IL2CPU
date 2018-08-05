@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpField : ILOpCode
   {
-    public readonly FieldInfo Value;
+    public FieldInfo Value { get; }
 
     public OpField(Code aOpCode, int aPos, int aNextPos, FieldInfo aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)

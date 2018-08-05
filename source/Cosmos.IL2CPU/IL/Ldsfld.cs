@@ -1,7 +1,10 @@
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
 using System.Reflection;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+
 using XSharp;
 using XSharp.Assembler;
 using CPUx86 = XSharp.Assembler.x86;
@@ -41,7 +44,7 @@ namespace Cosmos.IL2CPU.X86.IL
       //    aExtraOffset = 12;
       //}
 
-      string xDataName = DataMember.GetStaticFieldName(xField);
+      string xDataName = LabelName.GetStaticFieldName(xField);
 
       var xTypeNeedsGC = IsReferenceType(xField.FieldType);
       if (xTypeNeedsGC)

@@ -1,3 +1,4 @@
+using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
 using XSharp;

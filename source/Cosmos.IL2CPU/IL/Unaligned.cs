@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            throw new NotImplementedException("TODO: Unaligned");
+            //throw new NotImplementedException("TODO: Unaligned");
         }
     }
 }

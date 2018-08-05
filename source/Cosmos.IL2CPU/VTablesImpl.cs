@@ -1,10 +1,15 @@
-﻿using Cosmos.Debug.Kernel;
-using System;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+
+using Cosmos.Debug.Kernel;
 
 namespace Cosmos.IL2CPU
 {
   // todo: optimize this, probably using assembler
+  [SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix")]
+  [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
+  [SuppressMessage("Style", "IDE0011:Add braces")]
   public static partial class VTablesImpl
   {
     // this field seems to be always empty, but the VTablesImpl class is embedded in the final exe.
@@ -15,14 +20,29 @@ namespace Cosmos.IL2CPU
 
     }
 
-    public static bool IsInstance(uint aObjectType, uint aDesiredObjectType)
+    public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
     {
-      var xCurrentType = aObjectType;
-
       if (aObjectType == 0)
       {
         return true;
       }
+
+      if (aIsInterface)
+      {
+        var xType = mTypes[aObjectType];
+
+        for (int i = 0; i < xType.InterfaceCount; i++)
+        {
+          if (xType.InterfaceIndexes[i] == aDesiredObjectType)
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      var xCurrentType = aObjectType;
 
       do
       {
@@ -142,8 +162,7 @@ namespace Cosmos.IL2CPU
         DebugHex("Type", aType);
         DebugHex("MethodId", aMethodId);
         Debugger.SendKernelPanic(KernelPanics.VMT_TypeIdInvalid);
-        while (true)
-          ;
+        while (true) ;
       }
       var xCurrentType = aType;
       do
@@ -157,16 +176,14 @@ namespace Cosmos.IL2CPU
           EnableDebug = true;
           DebugHex("MethodIndexes is null for type", aType);
           Debugger.SendKernelPanic(KernelPanics.VMT_MethodIndexesNull);
-          while (true)
-            ;
+          while (true) ;
         }
         if (xCurrentTypeInfo.MethodAddresses == null)
         {
           EnableDebug = true;
           DebugHex("MethodAddresses is null for type", aType);
           Debugger.SendKernelPanic(KernelPanics.VMT_MethodAddressesNull);
-          while (true)
-            ;
+          while (true) ;
         }
 
         for (int i = 0; i < xCurrentTypeInfo.MethodIndexes.Length; i++)
@@ -179,9 +196,9 @@ namespace Cosmos.IL2CPU
               EnableDebug = true;
               DebugHex("Type", xCurrentType);
               DebugHex("MethodId", aMethodId);
-              DebugHex("Result", (uint)xResult);
+              DebugHex("Result", xResult);
               DebugHex("i", (uint)i);
-              DebugHex("MethodCount", (uint)xCurrentTypeInfo.MethodCount);
+              DebugHex("MethodCount", xCurrentTypeInfo.MethodCount);
               DebugHex("MethodAddresses.Length", (uint)xCurrentTypeInfo.MethodAddresses.Length);
               Debug("Method found, but address is invalid!");
               Debugger.SendKernelPanic(KernelPanics.VMT_MethodFoundButAddressInvalid);
@@ -199,7 +216,7 @@ namespace Cosmos.IL2CPU
         }
         xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
       }
-      while (true);
+      while (true) ;
 
       EnableDebug = true;
       DebugHex("Type", aType);
@@ -207,8 +224,7 @@ namespace Cosmos.IL2CPU
       Debug("Not FOUND!");
 
       Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
-      while (true)
-        ;
+      while (true) ;
       throw new Exception("Cannot find virtual method!");
     }
 
@@ -230,7 +246,7 @@ namespace Cosmos.IL2CPU
         EnableDebug = true;
         DebugHex("InterfaceMethodIndexes is null for type", aType);
         Debugger.SendKernelPanic(KernelPanics.VMT_MethodIndexesNull);
-        while (true);
+        while (true) ;
       }
 
       if (xTypeInfo.TargetMethodIndexes == null)
@@ -238,7 +254,7 @@ namespace Cosmos.IL2CPU
         EnableDebug = true;
         DebugHex("TargetMethodIndexes is null for type", aType);
         Debugger.SendKernelPanic(KernelPanics.VMT_MethodAddressesNull);
-        while (true);
+        while (true) ;
       }
 
       for (int i = 0; i < xTypeInfo.InterfaceMethodIndexes.Length; i++)
@@ -260,6 +276,7 @@ namespace Cosmos.IL2CPU
     }
   }
 
+  [SuppressMessage("Design", "CA1051:Do not declare visible instance fields")]
   [StructLayout(LayoutKind.Explicit, Size = 56)]
   public struct VTable
   {

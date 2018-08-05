@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using System.Reflection.Metadata;
-
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpInt : ILOpCode {
-    public readonly int Value;
+    public int Value { get; }
 
     public OpInt(Code aOpCode, int aPos, int aNextPos, int aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
@@ -18,6 +16,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       {
         case Code.Ldc_I4:
           return 0;
+        case Code.Unaligned:
+          return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
@@ -29,6 +29,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       {
         case Code.Ldc_I4:
           return 1;
+        case Code.Unaligned:
+          return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
