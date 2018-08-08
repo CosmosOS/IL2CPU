@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 using System.Text;
 
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -254,17 +253,17 @@ namespace Cosmos.IL2CPU
       #endregion
     }
 
-    public readonly Code OpCode;
+    public Code OpCode { get; }
 
     // Op offset within method. Used for labels etc in assembly.
-    public readonly int Position;
+    public int Position { get; }
 
     // position of the next instruction
-    public readonly int NextPosition;
+    public int NextPosition { get; }
 
-    public readonly _ExceptionRegionInfo CurrentExceptionRegion;
+    public ExceptionBlock CurrentExceptionRegion { get; }
 
-    protected ILOpCode(Code aOpCode, int aPos, int aNextPos, _ExceptionRegionInfo aCurrentExceptionRegion)
+    protected ILOpCode(Code aOpCode, int aPos, int aNextPos, ExceptionBlock aCurrentExceptionRegion)
     {
       OpCode = aOpCode;
       Position = aPos;
@@ -284,27 +283,26 @@ namespace Cosmos.IL2CPU
     /// So a 100byte struct is 1 pop, even though it might be multiple 32-bit or 64-bit words on the stack.
     /// </summary>
     /// <param name="aMethod"></param>
-    public abstract int GetNumberOfStackPops(MethodBase aMethod);
+    public abstract int GetNumberOfStackPops(MethodInfo aMethod);
 
     /// <summary>
     /// Returns the number of items pushed to the stack. This is the logical stack, not physical items.
     /// So a 100byte struct is 1 pop, even though it might be multiple 32-bit or 64-bit words on the stack.
     /// </summary>
     /// <param name="aMethod"></param>
-    public abstract int GetNumberOfStackPushes(MethodBase aMethod);
+    public abstract int GetNumberOfStackPushes(MethodInfo aMethod);
 
-    public Type[] StackPopTypes { get; private set; }
+    public TypeInfo[] StackPopTypes { get; private set; }
+    public TypeInfo[] StackPushTypes { get; private set; }
 
-    public Type[] StackPushTypes { get; private set; }
-
-    internal void InitStackAnalysis(MethodBase aMethod)
+    internal void InitStackAnalysis(MethodInfo aMethod)
     {
-      StackPopTypes = new Type[GetNumberOfStackPops(aMethod)];
-      StackPushTypes = new Type[GetNumberOfStackPushes(aMethod)];
+      StackPopTypes = new TypeInfo[GetNumberOfStackPops(aMethod)];
+      StackPushTypes = new TypeInfo[GetNumberOfStackPushes(aMethod)];
       DoInitStackAnalysis(aMethod);
     }
 
-    protected virtual void DoInitStackAnalysis(MethodBase aMethod)
+    protected virtual void DoInitStackAnalysis(MethodInfo aMethod)
     {
     }
 
@@ -316,7 +314,7 @@ namespace Cosmos.IL2CPU
 
     public uint? StackOffsetBeforeExecution = null;
 
-    public void InterpretStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    public void InterpretStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       if (Processed)
       {
@@ -364,7 +362,7 @@ namespace Cosmos.IL2CPU
       // if current instruction is the first instruction of a catch statement, "push" the exception type now
       if (CurrentExceptionRegion != null && CurrentExceptionRegion.HandlerOffset == Position)
       {
-        if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)
+        if (CurrentExceptionRegion.Kind != ExceptionBlockKind.Finally)
         {
           aStack.Push(CurrentExceptionRegion.CatchType);
         }
@@ -398,9 +396,15 @@ namespace Cosmos.IL2CPU
           StackPopTypes[i] = xActualStackItem;
           aSituationChanged = true;
         }
+        if (xActualStackItem.IsPinned
+            && xActualStackItem.GetElementType() == StackPopTypes[i])
+        {
+          StackPopTypes[i] = xActualStackItem;
+          aSituationChanged = true;
+        }
         if (StackPopTypes[i] != xActualStackItem && !StackPopTypes[i].IsAssignableFrom(xActualStackItem)
-            && !((StackPopTypes[i].IsPointer || StackPopTypes[i].IsByRef)
-                 && (xActualStackItem.IsPointer || xActualStackItem.IsByRef)))
+            && !((StackPopTypes[i].IsPointer || StackPopTypes[i].IsByReference)
+                 && (xActualStackItem.IsPointer || xActualStackItem.IsByReference)))
         {
           throw new Exception($"OpCode {this} tries to pop item at stack position {i} with type {StackPopTypes[i]}, but actual type is {xActualStackItem}");
         }
@@ -414,9 +418,9 @@ namespace Cosmos.IL2CPU
       {
         DoInterpretStackTypes(ref aSituationChanged);
       }
-      catch (Exception E)
+      catch (Exception e)
       {
-        throw new Exception("Error interpreting stacktypes for " + this, E);
+        throw new Exception("Error interpreting stacktypes for " + this, e);
       }
       foreach (var xPushItem in StackPushTypes)
       {
@@ -433,7 +437,8 @@ namespace Cosmos.IL2CPU
       //
     }
 
-    protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(
+      IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       if (aOpCodes.TryGetValue(NextPosition, out var xNextOpCode))
       {
@@ -442,12 +447,12 @@ namespace Cosmos.IL2CPU
       }
     }
 
-    protected virtual void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected virtual void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       InterpretInstruction(NextPosition, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
     }
 
-    protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
@@ -456,7 +461,7 @@ namespace Cosmos.IL2CPU
       }
     }
 
-    protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
@@ -464,7 +469,7 @@ namespace Cosmos.IL2CPU
       }
     }
 
-    private void InterpretInstruction(ILOpCode xNextOpCode, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    private void InterpretInstruction(ILOpCode xNextOpCode, IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       xNextOpCode.InterpretStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth - 1);
     }

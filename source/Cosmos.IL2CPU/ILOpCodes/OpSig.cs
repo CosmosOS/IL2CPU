@@ -1,31 +1,36 @@
 ﻿using System;
-using System.Reflection;
+using System.Reflection.Metadata;
 
-namespace Cosmos.IL2CPU.ILOpCodes {
-  public class OpSig : ILOpCode {
-    public int Value { get; }
+using IL2CPU.Reflection;
 
-    public OpSig(Code aOpCode, int aPos, int aNextPos, int aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
-      : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
-      Value = aValue;
-    }
-
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+namespace Cosmos.IL2CPU.ILOpCodes
+{
+    public class OpSig : ILOpCode
     {
-      switch (OpCode)
-      {
-        default:
-          throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
-      }
-    }
+        public MethodSignature<TypeInfo> Value { get; }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
-    {
-      switch (OpCode)
-      {
-        default:
-          throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
-      }
+        public OpSig(Code aOpCode, int aPos, int aNextPos, MethodSignature<TypeInfo> aValue, ExceptionBlock aCurrentExceptionRegion)
+            : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
+        {
+            Value = aValue;
+        }
+
+        public override int GetNumberOfStackPops(MethodInfo aMethod)
+        {
+            switch (OpCode)
+            {
+                default:
+                    throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
+            }
+        }
+
+        public override int GetNumberOfStackPushes(MethodInfo aMethod)
+        {
+            switch (OpCode)
+            {
+                default:
+                    throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
+            }
+        }
     }
-  }
 }

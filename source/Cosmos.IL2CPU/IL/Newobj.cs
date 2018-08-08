@@ -1,12 +1,14 @@
-using IL2CPU.API;
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
-using System.Reflection;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
+
 using XSharp;
 using XSharp.Assembler;
+using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
-using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -27,12 +29,13 @@ namespace Cosmos.IL2CPU.X86.IL
             Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value);
         }
 
-        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor)
+        public static void Assemble(
+            Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, TypeInfo objectType, MethodInfo constructor)
         {
             // call cctor:
             if (aMethod != null)
             {
-                var xCctor = (objectType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? Array.Empty<ConstructorInfo>()).SingleOrDefault();
+                var xCctor = (objectType.GetTypeInitializer());
                 if (xCctor != null)
                 {
                     XS.Call(LabelName.Get(xCctor));
@@ -73,10 +76,10 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
 
                 uint xArgSize = 0;
-                var xParameterList = constructor.GetParameters();
+                var xParameterList = constructor.ParameterTypes;
                 foreach (var xParam in xParameterList)
                 {
-                    xArgSize = xArgSize + Align(SizeOfType(xParam.ParameterType), 4);
+                    xArgSize = xArgSize + Align(SizeOfType(xParam), 4);
                 }
                 XS.Comment("ArgSize: " + xArgSize);
 
@@ -91,7 +94,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Set(ECX, xArgSize / 4);
 
                 // move the args to their new location
-                new CPUx86.Movs { Size = 32, Prefixes = CPUx86.InstructionPrefixes.Repeat };
+                new Movs { Size = 32, Prefixes = InstructionPrefixes.Repeat };
 
                 // set struct ptr
                 XS.Set(EAX, ESP);
@@ -115,7 +118,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 // If not ValueType, then we need gc
 
-                var xParams = constructor.GetParameters();
+                var xParamTypes = constructor.ParameterTypes;
 
                 // array length + 8
                 bool xHasCalcSize = false;
@@ -124,7 +127,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 // try calculating size:
                 if (constructor.DeclaringType == typeof(string))
                 {
-                    if (xParams.Length == 1 && xParams[0].ParameterType == typeof(char[]))
+                    if (xParamTypes.Count == 1 && xParamTypes[0] == typeof(char[]))
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceDisplacement: 4, sourceIsIndirect: true); // address
@@ -133,19 +136,19 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Multiply(EDX);
                         XS.Push(EAX);
                     }
-                    else if (xParams.Length == 3
-                             && (xParams[0].ParameterType == typeof(char[]) || xParams[0].ParameterType == typeof(char*))
-                             && xParams[1].ParameterType == typeof(int)
-                             && xParams[2].ParameterType == typeof(int))
+                    else if (xParamTypes.Count == 3
+                             && (xParamTypes[0] == typeof(char[]) || xParamTypes[0] == typeof(char*))
+                             && xParamTypes[1] == typeof(int)
+                             && xParamTypes[2] == typeof(int))
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
                         XS.ShiftLeft(EAX, 1);
                         XS.Push(EAX);
                     }
-                    else if (xParams.Length == 2
-                             && xParams[0].ParameterType == typeof(char)
-                             && xParams[1].ParameterType == typeof(int))
+                    else if (xParamTypes.Count == 2
+                             && xParamTypes[0] == typeof(char)
+                             && xParamTypes[1] == typeof(int))
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
@@ -155,15 +158,15 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                      * TODO see if something is needed in stack / register to make them really work
                      */
-                    else if (xParams.Length == 3
-                             && (xParams[0].ParameterType == typeof(sbyte*)
-                             && xParams[1].ParameterType == typeof(int)
-                             && xParams[2].ParameterType == typeof(int)))
+                    else if (xParamTypes.Count == 3
+                             && (xParamTypes[0] == typeof(sbyte*)
+                             && xParamTypes[1] == typeof(int)
+                             && xParamTypes[2] == typeof(int)))
                     {
                         xHasCalcSize = true;
                         XS.Push(ESP, isIndirect: true);
                     }
-                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
+                    else if (xParamTypes.Count == 1 && xParamTypes[0] == typeof(sbyte*))
                     {
                         xHasCalcSize = true;
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
@@ -178,7 +181,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Increment(ECX);
 
                         XS.Compare(EAX, 0, destinationIsIndirect: true);
-                        XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
+                        XS.Jump(ConditionalTestEnum.NotEqual, xSByteCountLabel);
 
                         XS.Push(ECX);
                     }
@@ -213,15 +216,15 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Set(EAX, EBX, destinationIsIndirect: true);
                 XS.Set(EAX, (uint)ObjectUtils.InstanceTypeEnum.NormalObject, destinationDisplacement: 4, destinationIsIndirect: true, size: RegisterSize.Int32);
                 XS.Set(EAX, xMemSize, destinationDisplacement: 8, destinationIsIndirect: true, size: RegisterSize.Int32);
-                uint xSize = (uint)(from item in xParams
-                                    let xQSize = Align(SizeOfType(item.ParameterType), 4)
-                                    select (int)xQSize).Take(xParams.Length).Sum();
+                uint xSize = (uint)(from item in xParamTypes
+                                    let xQSize = Align(SizeOfType(item), 4)
+                                    select (int)xQSize).Take(xParamTypes.Count).Sum();
                 XS.Push(0);
 
-                foreach (var xParam in xParams)
+                for (int p = 0; p < xParamTypes.Count; p++)
                 {
-                    uint xParamSize = Align(SizeOfType(xParam.ParameterType), 4);
-                    XS.Comment($"Arg {xParam.Name}: {xParamSize}");
+                    uint xParamSize = Align(SizeOfType(xParamTypes[p]), 4);
+                    XS.Comment($"Arg {constructor.Parameters[p].Name}: {xParamSize}");
                     for (int i = 0; i < xParamSize; i += 4)
                     {
                         XS.Push(ESP, isIndirect: true, displacement: (int)(xSize + 8));
@@ -236,7 +239,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     // todo: only happening for real methods now, not for ctor's ?
                     XS.Test(ECX, 2);
                     string xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount.ToString();
-                    XS.Jump(CPUx86.ConditionalTestEnum.Equal, xNoErrorLabel);
+                    XS.Jump(ConditionalTestEnum.Equal, xNoErrorLabel);
 
                     PushAlignedParameterSize(constructor);
 
@@ -256,15 +259,15 @@ namespace Cosmos.IL2CPU.X86.IL
             }
         }
 
-        private static void PushAlignedParameterSize(MethodBase aMethod)
+        private static void PushAlignedParameterSize(MethodInfo aMethod)
         {
-            ParameterInfo[] xParams = aMethod.GetParameters();
+            var xParams = aMethod.ParameterTypes;
 
             uint xSize;
-            XS.Comment("[ Newobj.PushAlignedParameterSize start count = " + xParams.Length.ToString() + " ]");
-            for (int i = 0; i < xParams.Length; i++)
+            XS.Comment("[ Newobj.PushAlignedParameterSize start count = " + xParams.Count.ToString() + " ]");
+            for (int i = 0; i < xParams.Count; i++)
             {
-                xSize = SizeOfType(xParams[i].ParameterType);
+                xSize = SizeOfType(xParams[i]);
                 XS.Add(ESP, Align(xSize, 4));
             }
             XS.Comment("[ Newobj.PushAlignedParameterSize end ]");

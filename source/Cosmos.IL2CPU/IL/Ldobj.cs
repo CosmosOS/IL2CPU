@@ -1,6 +1,7 @@
 using System;
 
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 using XSharp.Assembler;
@@ -23,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoAssemble(xType.Value);
         }
 
-        public static void DoAssemble(Type type)
+        public static void DoAssemble(TypeInfo type)
         {
             if (type == null)
             {

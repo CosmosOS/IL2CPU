@@ -1,8 +1,7 @@
 using System;
-using System.Linq;
-using System.Reflection;
 
 using IL2CPU.API;
+using IL2CPU.Reflection;
 
 using XSharp;
 using XSharp.Assembler;
@@ -20,13 +19,13 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      var xType = aMethod.MethodBase.DeclaringType;
+      var xType = aMethod.MethodInfo.DeclaringType;
       var xOpCode = (ILOpCodes.OpField)aOpCode;
-      FieldInfo xField = xOpCode.Value;
+      var xField = xOpCode.Value;
       var xIsReferenceType = IsReferenceType(xField.FieldType);
 
       // call cctor:
-      var xCctor = (xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic)).SingleOrDefault();
+      var xCctor = (xField.DeclaringType.GetTypeInitializer());
       if (xCctor != null)
       {
         XS.Call(LabelName.Get(xCctor));
@@ -43,17 +42,6 @@ namespace Cosmos.IL2CPU.X86.IL
       //}
       new Comment(Assembler, "Type = '" + xField.FieldType.FullName /*+ "', NeedsGC = " + xNeedsGC*/ );
 
-      uint xOffset = 0;
-
-      var xFields = xField.DeclaringType.GetFields();
-
-      foreach (FieldInfo xInfo in xFields)
-      {
-        if (xInfo == xField)
-          break;
-
-        xOffset += SizeOfType(xInfo.FieldType);
-      }
       string xDataName = LabelName.GetStaticFieldName(xField);
       if (xIsReferenceType)
       {
@@ -78,7 +66,7 @@ namespace Cosmos.IL2CPU.X86.IL
         case 2:
           {
             XS.Pop(XSRegisters.EAX);
-            new CPUx86.Mov { DestinationRef = XSharp.Assembler.ElementReference.New(xDataName, (int)((xSize / 4) * 4)), DestinationIsIndirect = true, SourceReg = CPUx86.RegistersEnum.AX };
+            new CPUx86.Mov { DestinationRef = ElementReference.New(xDataName, (int)((xSize / 4) * 4)), DestinationIsIndirect = true, SourceReg = CPUx86.RegistersEnum.AX };
             break;
           }
         case 0:

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 using IL2CPU.API.Attribs;
 
@@ -43,17 +42,5 @@ namespace Cosmos.IL2CPU
         }
 
         public static void ThrowInvalidCastException() => throw new InvalidCastException();
-    }
-
-    [ForceInclude]
-    public static class ExceptionHelperRefs
-    {
-        public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
-
-        public static readonly MethodInfo ThrowInvalidCastExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowInvalidCastException));
-
-        public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
     }
 }

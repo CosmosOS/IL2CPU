@@ -1,14 +1,12 @@
-using System;
-using System.Reflection;
-
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Call)]
+    [OpCode(ILOpCode.Code.Call)]
     public class Call : ILOp
     {
         public Call(XSharp.Assembler.Assembler aAsmblr)
@@ -16,7 +14,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public static uint GetStackSizeToReservate(MethodBase aMethod, Type aType = null)
+        public static uint GetStackSizeToReservate(MethodInfo aMethod, TypeInfo aType = null)
         {
 
             var xMethodInfo = aMethod as MethodInfo;
@@ -32,10 +30,10 @@ namespace Cosmos.IL2CPU.X86.IL
 
             // todo: implement exception support
             int xExtraStackSize = (int)Align(xReturnSize, 4);
-            var xParameters = aMethod.GetParameters();
+            var xParameters = aMethod.ParameterTypes;
             foreach (var xItem in xParameters)
             {
-                xExtraStackSize -= (int)Align(SizeOfType(xItem.ParameterType), 4);
+                xExtraStackSize -= (int)Align(SizeOfType(xItem), 4);
             }
             if (!xMethodInfo.IsStatic)
             {
@@ -81,19 +79,19 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpMethod = aOpCode as OpMethod;
-            DoExecute(Assembler, aMethod, xOpMethod.Value, aOpCode, LabelName.Get(aMethod.MethodBase), DebugEnabled);
+            DoExecute(Assembler, aMethod, xOpMethod.Value, aOpCode, LabelName.Get(aMethod.MethodInfo), DebugEnabled);
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodInfo aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
         {
             DoExecute(Assembler, aCurrentMethod, aTargetMethod, aCurrent, currentLabel, ILOp.GetLabel(aCurrentMethod, aCurrent.NextPosition), debugEnabled);
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodInfo aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
         {
             var xMethodInfo = aTargetMethod as MethodInfo;
             string xNormalAddress = LabelName.Get(aTargetMethod);
-            var xParameters = aTargetMethod.GetParameters();
+            var xParameters = aTargetMethod.ParameterTypes;
 
             // todo: implement exception support
             uint xExtraStackSize = GetStackSizeToReservate(aTargetMethod);
@@ -102,7 +100,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 uint xThisOffset = 0;
                 foreach (var xItem in xParameters)
                 {
-                    xThisOffset += Align(SizeOfType(xItem.ParameterType), 4);
+                    xThisOffset += Align(SizeOfType(xItem), 4);
                 }
                 var stackOffsetToCheck = xThisOffset;
                 if (IsReferenceType(aTargetMethod.DeclaringType))

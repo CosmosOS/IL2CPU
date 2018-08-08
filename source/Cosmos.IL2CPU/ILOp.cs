@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-
-using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.X86.IL;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
+using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.X86.IL;
+using IL2CPU.Reflection;
+using IL2CPU.Reflection.Types;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 using XSharp;
 using XSharp.Assembler;
-using CPU = XSharp.Assembler.x86;
+using XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU
 {
@@ -34,9 +34,9 @@ namespace Cosmos.IL2CPU
         // could be used for other things, profiling, analysis, reporting, etc
         public abstract void Execute(_MethodInfo aMethod, ILOpCode aOpCode);
 
-        public static string GetTypeIDLabel(Type aType)
+        public static string GetTypeIDLabel(TypeInfo aType)
         {
-            return "VMT__TYPE_ID_HOLDER__" + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aType) + " ASM_IS__" + aType.Assembly.GetName().Name);
+            return "VMT__TYPE_ID_HOLDER__" + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aType) + " ASM_IS__" + aType.Assembly.Identity.Name);
         }
 
         public static uint Align(uint aSize, uint aAlign)
@@ -64,18 +64,15 @@ namespace Cosmos.IL2CPU
             return GetLabel(aMethod, aOpCode.Position);
         }
 
-        public static string GetLabel(MethodBase aMethod)
-        {
-            return LabelName.Get(aMethod);
-        }
+        public static string GetLabel(MethodInfo aMethod) => LabelName.Get(aMethod);
 
         public static string GetLabel(_MethodInfo aMethod)
         {
             if (aMethod.PluggedMethod != null)
             {
-                return "PLUG_FOR___" + GetLabel(aMethod.PluggedMethod.MethodBase);
+                return "PLUG_FOR___" + GetLabel(aMethod.PluggedMethod.MethodInfo);
             }
-            return GetLabel(aMethod.MethodBase);
+            return GetLabel(aMethod.MethodInfo);
         }
 
         public static string GetLabel(_MethodInfo aMethod, int aPos)
@@ -99,7 +96,7 @@ namespace Cosmos.IL2CPU
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameNormal);
         }
 
-        public static uint GetStackCountForLocal(_MethodInfo aMethod, Type aField)
+        public static uint GetStackCountForLocal(_MethodInfo aMethod, TypeInfo aField)
         {
             var xSize = SizeOfType(aField);
             var xResult = xSize / 4;
@@ -112,16 +109,16 @@ namespace Cosmos.IL2CPU
 
         public static uint GetEBPOffsetForLocal(_MethodInfo aMethod, int localIndex)
         {
-            var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
+            var xLocalTypes = aMethod.MethodInfo.MethodBody.LocalTypes;
             uint xOffset = 4;
-            for (int i = 0; i < xLocalInfos.Count; i++)
+            for (int i = 0; i < xLocalTypes.Count; i++)
             {
                 if (i == localIndex)
                 {
                     break;
                 }
-                var xField = xLocalInfos[i];
-                xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4;
+                var xLocal = xLocalTypes[i];
+                xOffset += GetStackCountForLocal(aMethod, xLocal) * 4;
             }
             return xOffset;
         }
@@ -130,41 +127,28 @@ namespace Cosmos.IL2CPU
         {
             // because the memory is read in positive direction, we need to add additional size if greater than 4
             uint xOffset = GetEBPOffsetForLocal(aMethod, localIndex);
-            var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
-            var xField = xLocalInfos[localIndex];
-            xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4 - 4;
+            var xLocalInfos = aMethod.MethodInfo.MethodBody.LocalTypes;
+            var xLocal = xLocalInfos[localIndex];
+            xOffset += GetStackCountForLocal(aMethod, xLocal) * 4 - 4;
             return xOffset;
         }
 
         protected void ThrowNotImplementedException(string aMessage)
         {
             XS.Push(LdStr.GetContentsArrayName(aMessage));
-            new CPU.Call
-            {
-                DestinationLabel =
-                LabelName.Get(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented",
-                  BindingFlags.Static | BindingFlags.Public))
-            };
+            XS.Call(LabelName.Get(ExceptionHelperRefs.ThrowNotImplementedRef));
         }
 
         protected void ThrowOverflowException()
         {
-            new CPU.Call
-            {
-                DestinationLabel =
-                LabelName.Get(typeof(ExceptionHelper).GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public))
-            };
+            XS.Call(LabelName.Get(ExceptionHelperRefs.ThrowOverflowRef));
+
         }
 
-        private static void DoGetFieldsInfo(Type aType, List<_FieldInfo> aFields, bool includeStatic)
+        private static void DoGetFieldsInfo(TypeInfo aType, List<_FieldInfo> aFields, bool includeStatic)
         {
             var xCurList = new Dictionary<string, _FieldInfo>();
-            var xBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-            if (includeStatic)
-            {
-                xBindingFlags |= BindingFlags.Static;
-            }
-            var xFields = (from item in aType.GetFields(xBindingFlags)
+            var xFields = (from item in aType.GetFields(f => includeStatic || !f.IsStatic)
                            orderby item.Name, item.DeclaringType.ToString()
                            select item).ToArray();
             for (int i = 0; i < xFields.Length; i++)
@@ -212,30 +196,32 @@ namespace Cosmos.IL2CPU
                     }
                     else
                     {
-                        xPluggedField = new _FieldInfo(xPlugField.Value.FieldId, SizeOfType(xPlugField.Value.FieldType), aType,
-                          xPlugField.Value.FieldType);
+                        xPluggedField = new _FieldInfo(
+                          xPlugField.Value.FieldId,
+                          SizeOfType(TypeOf(xPlugField.Value.FieldType)),
+                          aType,
+                          TypeOf(xPlugField.Value.FieldType));
+
                         aFields.Add(xPluggedField);
                     }
                 }
             }
 
-            Type xBase = aType.BaseType;
-            if (xBase != null)
+            if (aType.BaseType != null)
             {
-                DoGetFieldsInfo(xBase, aFields, includeStatic);
+                DoGetFieldsInfo(aType.BaseType, aFields, includeStatic);
             }
         }
 
-        public static List<_FieldInfo> GetFieldsInfo(Type aType, bool includeStatic)
+        public static List<_FieldInfo> GetFieldsInfo(TypeInfo aType, bool includeStatic)
         {
-            if (aType.IsValueType)
+            if (aType is DefinedType xDefinedType && xDefinedType.IsValueType)
             {
                 var fieldsInfo = GetValueTypeFieldsInfo(aType);
 
                 if (includeStatic)
                 {
-                    foreach (var field in aType.GetFields(
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                    foreach (var field in xDefinedType.Fields.Where(f => f.IsStatic))
                     {
                         fieldsInfo.Add(
                             new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), aType, field.FieldType));
@@ -271,37 +257,37 @@ namespace Cosmos.IL2CPU
                 }
             }
             DebugInfo.CurrentInstance.WriteFieldInfoToFile(xDebugInfs);
-            List<DebugInfo.Field_Map> xFieldMapping = new List<DebugInfo.Field_Map>();
+            var xFieldMapping = new List<DebugInfo.Field_Map>();
             GetFieldMapping(xResult, xFieldMapping, aType);
             DebugInfo.CurrentInstance.WriteFieldMappingToFile(xFieldMapping);
             return xResult;
         }
 
-        private static List<_FieldInfo> GetValueTypeFieldsInfo(Type type)
+        private static List<_FieldInfo> GetValueTypeFieldsInfo(TypeInfo type)
         {
             var structLayoutAttribute = type.StructLayoutAttribute;
             var fieldInfos = new List<_FieldInfo>();
 
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var fields = type.GetFields(f => !f.IsStatic);
 
             switch (structLayoutAttribute.Value)
             {
                 case LayoutKind.Auto:
                 case LayoutKind.Sequential:
+
                     var offset = 0;
                     var pack = structLayoutAttribute.Pack;
 
                     if (pack == 0)
                     {
-                        pack = (int)SizeOfType(typeof(IntPtr));
+                        pack = (int)GetNativeIntegerSize();
                     }
 
-                    if (fields.Length > 0)
+                    if (fields.Any())
                     {
                         var typeAlignment = Math.Min(pack, fields.Max(f => SizeOfType(f.FieldType)));
-
-                        Array.Sort(fields, (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
-
+                        fields = fields.OrderBy(f => f.MetadataToken);
+                        
                         foreach (var field in fields)
                         {
                             var fieldSize = SizeOfType(field.FieldType);
@@ -321,17 +307,20 @@ namespace Cosmos.IL2CPU
                     }
 
                     break;
+
                 case LayoutKind.Explicit:
+
                     foreach (var field in fields)
                     {
                         var fieldInfo = new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), type, field.FieldType);
-                        fieldInfo.Offset = (uint)(field.GetCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
+                        fieldInfo.Offset = (uint)field.Offset;
                         fieldInfo.Field = field;
 
                         fieldInfos.Add(fieldInfo);
                     }
 
                     break;
+
                 default:
                     throw new NotSupportedException();
             }
@@ -339,8 +328,8 @@ namespace Cosmos.IL2CPU
             return fieldInfos;
         }
 
-        private static void GetFieldMapping(List<_FieldInfo> aFieldInfs, List<DebugInfo.Field_Map> aFieldMapping,
-          Type aType)
+        private static void GetFieldMapping(
+            List<_FieldInfo> aFieldInfs, List<DebugInfo.Field_Map> aFieldMapping, TypeInfo aType)
         {
             var xFMap = new DebugInfo.Field_Map();
             xFMap.TypeName = aType.AssemblyQualifiedName;
@@ -365,7 +354,7 @@ namespace Cosmos.IL2CPU
             return inf.Id;
         }
 
-        protected static uint GetStorageSize(Type aType)
+        protected static uint GetStorageSize(TypeInfo aType)
         {
             if (aType.IsValueType)
             {
@@ -374,7 +363,7 @@ namespace Cosmos.IL2CPU
 
                 if (pack == 0)
                 {
-                    pack = (int)SizeOfType(typeof(IntPtr));
+                    pack = (int)GetNativeIntegerSize();
                 }
 
                 var fieldsInfo = GetFieldsInfo(aType, false);
@@ -455,14 +444,14 @@ namespace Cosmos.IL2CPU
                 {
                     switch (aCurrentOpCode.CurrentExceptionRegion.Kind)
                     {
-                        case ExceptionRegionKind.Catch:
+                        case ExceptionBlockKind.Catch:
                             xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
                             break;
-                        case ExceptionRegionKind.Finally:
+                        case ExceptionBlockKind.Finally:
                             xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
                             break;
-                        case ExceptionRegionKind.Filter:
-                        case ExceptionRegionKind.Fault:
+                        case ExceptionBlockKind.Filter:
+                        case ExceptionBlockKind.Fault:
                         default:
                             {
                                 throw new Exception("ExceptionHandlerType '" + aCurrentOpCode.CurrentExceptionRegion.Kind.ToString() +
@@ -491,28 +480,28 @@ namespace Cosmos.IL2CPU
 
                 if (aCleanup != null)
                 {
-                    XS.Jump(CPU.ConditionalTestEnum.Equal, aJumpTargetNoException);
+                    XS.Jump(ConditionalTestEnum.Equal, aJumpTargetNoException);
                     aCleanup();
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
+                        XS.Jump(ConditionalTestEnum.NotEqual,
                           GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual, xJumpTo);
+                        XS.Jump(ConditionalTestEnum.NotEqual, xJumpTo);
                     }
                 }
                 else
                 {
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
+                        XS.Jump(ConditionalTestEnum.NotEqual,
                           GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual, xJumpTo);
+                        XS.Jump(ConditionalTestEnum.NotEqual, xJumpTo);
                     }
                 }
             }
@@ -529,7 +518,7 @@ namespace Cosmos.IL2CPU
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
                 XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: stackOffsetToCheck);
-                XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
+                XS.Jump(ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".NullCheck_GetCurrAddress");
@@ -543,7 +532,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public static _FieldInfo ResolveField(Type aDeclaringType, string aField, bool aOnlyInstance)
+        public static _FieldInfo ResolveField(TypeInfo aDeclaringType, string aField, bool aOnlyInstance)
         {
             var xFields = GetFieldsInfo(aDeclaringType, !aOnlyInstance);
             var xFieldInfo = (from item in xFields
@@ -565,8 +554,7 @@ namespace Cosmos.IL2CPU
         public static _FieldInfo ResolveField(FieldInfo fieldInfo)
         {
             var fieldsInfo = GetFieldsInfo(fieldInfo.DeclaringType, fieldInfo.IsStatic);
-            return fieldsInfo.SingleOrDefault(
-                f => MemberInfoComparer.Instance.Equals(f.Field, fieldInfo))
+            return fieldsInfo.SingleOrDefault(f => f.Field == fieldInfo)
                 ?? ResolveField(fieldInfo.DeclaringType, fieldInfo.GetFullName(), !fieldInfo.IsStatic);
         }
 
@@ -596,45 +584,44 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public static bool IsReferenceType(Type aType)
-        {
-            return !aType.IsValueType && !aType.IsPointer && !aType.IsByRef;
-        }
+        public static bool IsReferenceType(TypeInfo aType) => !aType.IsValueType && !aType.IsPointer && !aType.IsByReference;
 
-        public static bool IsIntegerSigned(Type aType)
+        public static bool IsIntegerSigned(TypeInfo aType)
         {
             return aType.FullName == "System.SByte" || aType.FullName == "System.Int16" || aType.FullName == "System.Int32" ||
                    aType.FullName == "System.Int64";
         }
 
-        public static bool IsIntegralType(Type type)
+        public static bool IsIntegralType(TypeInfo type)
         {
             return type == typeof(byte) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)
                    || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
         }
 
-        public static bool IsIntegralTypeOrPointer(Type type)
-        {
-            return IsIntegralType(type) || type.IsPointer || type.IsByRef;
-        }
+        public static bool IsIntegralTypeOrPointer(TypeInfo type) =>
+            IsIntegralType(type) || type.IsPointer || type.IsByReference;
 
-        public static bool IsPointer(Type aPointer)
-        {
-            return aPointer.IsPointer || aPointer.IsByRef || aPointer == typeof(IntPtr) || aPointer == typeof(UIntPtr);
-        }
+        public static bool IsUnmanagedPointer(TypeInfo aType) =>
+            aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
 
-        public static bool IsByRef(Type aType) => aType.IsByRef;
+        public static bool IsByRef(TypeInfo aType) => aType.IsByReference;
 
-        public static bool IsNativeInt(Type aType) => aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
+        public static bool IsPointer(TypeInfo aPointer) => IsUnmanagedPointer(aPointer) || IsByRef(aPointer);
 
-        public static uint SizeOfType(Type aType)
+        public static bool IsNativeInt(TypeInfo aType) => aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
+
+        public static uint SizeOfType(TypeInfo aType)
         {
             if (aType == null)
             {
                 throw new ArgumentNullException(nameof(aType));
             }
-            if (aType.IsPointer || aType.IsByRef)
+            if (aType.IsPinned)
+            {
+                aType = aType.GetElementType();
+            }
+            if (aType.IsPointer || aType.IsByReference)
             {
                 return 4;
             }
@@ -664,10 +651,9 @@ namespace Cosmos.IL2CPU
                 case "System.UInt64":
                 case "System.Int64":
                     return 8;
-                //TODO: for now hardcode IntPtr and UIntPtr to be 32-bit
                 case "System.UIntPtr":
                 case "System.IntPtr":
-                    return 4;
+                    return GetNativeIntegerSize();
                 case "System.Boolean":
                     return 1;
                 case "System.Single":
@@ -683,31 +669,19 @@ namespace Cosmos.IL2CPU
                 case "System.DateTime":
                     return 8;
             }
-            if (aType.FullName != null && aType.FullName.EndsWith("*"))
-            {
-                // pointer
-                return 4;
-            }
-            // array
-            //TypeSpecification xTypeSpec = aType as TypeSpecification;
-            //if (xTypeSpec != null) {
-            //    return 4;
-            //}
-            if (aType.IsEnum)
-            {
-                return SizeOfType(aType.GetField("value__").FieldType);
-            }
+
             if (aType.IsValueType)
             {
                 // structs are stored in the stack, so stack size = storage size
                 return GetStorageSize(aType);
             }
-            return 4;
+
+            throw new NotImplementedException($"SizeOfType not implemented for type '{aType}' !");
         }
 
-        protected static bool TypeIsFloat(Type type)
-        {
-            return type == typeof(float) || type == typeof(double);
-        }
+        protected static bool TypeIsFloat(TypeInfo type) => type == typeof(float) || type == typeof(double);
+
+        //TODO: for now hardcode IntPtr and UIntPtr to be 32-bit
+        protected static uint GetNativeIntegerSize() => 4;
     }
 }

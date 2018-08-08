@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using System.Reflection;
-
-using Cosmos.IL2CPU.ILOpCodes;
 
 using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 using XSharp.Assembler;
@@ -27,10 +26,10 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpMethod.Value, xOpMethod.ValueUID, aOpCode, DebugEnabled);
         }
 
-        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool debugEnabled)
+        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodInfo aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool debugEnabled)
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
-            Type xPopType = aOp.StackPopTypes.Last();
+            var xPopType = aOp.StackPopTypes.Last();
 
             string xNormalAddress = "";
             if (aTargetMethod.IsStatic || !aTargetMethod.IsVirtual || aTargetMethod.IsFinal)
@@ -38,19 +37,14 @@ namespace Cosmos.IL2CPU.X86.IL
                 xNormalAddress = LabelName.Get(aTargetMethod);
             }
 
-            uint xReturnSize = 0;
-            var xMethodInfo = aTargetMethod as MethodInfo;
-            if (xMethodInfo != null)
-            {
-                xReturnSize = Align(SizeOfType(xMethodInfo.ReturnType), 4);
-            }
+            var xReturnSize = Align(SizeOfType(aTargetMethod.ReturnType), 4);
 
             var xExtraStackSize = Call.GetStackSizeToReservate(aTargetMethod, xPopType);
             int xThisOffset = 0;
-            var xParameters = aTargetMethod.GetParameters();
+            var xParameters = aTargetMethod.ParameterTypes;
             foreach (var xItem in xParameters)
             {
-                xThisOffset += (int)Align(SizeOfType(xItem.ParameterType), 4);
+                xThisOffset += (int)Align(SizeOfType(xItem), 4);
             }
 
             // This is finding offset to self? It looks like we dont need offsets of other
@@ -86,7 +80,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 * $esp                 Params
                 * $esp + mThisOffset   This
                 */
-                if ((xPopType.IsPointer) || (xPopType.IsByRef))
+                if ((xPopType.IsPointer) || (xPopType.IsByReference))
                 {
                     xPopType = xPopType.GetElementType();
                     string xTypeId = GetTypeIDLabel(xPopType);
@@ -214,7 +208,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     EmitExceptionCleanupAfterCall(Assembler, xResultSize, xStackOffsetBefore, xPopSize);
                 });
             XS.Label(xCurrentMethodLabel + ".NoExceptionAfterCall");
-            XS.Comment("Argument Count = " + xParameters.Length);
+            XS.Comment("Argument Count = " + xParameters.Count);
         }
     }
 }

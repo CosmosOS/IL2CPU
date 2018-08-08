@@ -2,6 +2,7 @@ using System;
 
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 using XSharp.Assembler;
@@ -59,7 +60,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Comment("TypeOnStack: " + xStackType.FullName);
             XS.Comment("Offset: " + xOffset + " (includes object header)");
 
-            if (xDeclaringType.IsValueType && MemberInfoComparer.Instance.Equals(xDeclaringType, xStackType))
+            if (xDeclaringType.IsValueType && xDeclaringType == xStackType)
             {
                 var xDeclaringTypeStackSize = Align(SizeOfType(xDeclaringType), 4);
                 var xFieldSize = xFieldInfo.Size;
@@ -169,11 +170,11 @@ namespace Cosmos.IL2CPU.X86.IL
                         break;
                     }
                 default:
-                    throw new Exception(string.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType.ToString(), xSize));
+                    throw new Exception(String.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType.ToString(), xSize));
             }
         }
 
-        public static int GetFieldOffset(Type aDeclaringType, string aFieldId)
+        public static int GetFieldOffset(TypeInfo aDeclaringType, string aFieldId)
         {
             int xExtraOffset = 0;
             var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);

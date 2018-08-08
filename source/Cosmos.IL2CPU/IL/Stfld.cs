@@ -1,7 +1,9 @@
-using Cosmos.IL2CPU.Extensions;
 using System;
 using System.Linq;
-using System.Reflection;
+
+using Cosmos.IL2CPU.Extensions;
+using IL2CPU.Reflection;
+
 using XSharp;
 using CPUx86 = XSharp.Assembler.x86;
 
@@ -22,9 +24,9 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, xField, DebugEnabled, IsReferenceType(aOpCode.StackPopTypes[1]));
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, string aFieldId, Type aDeclaringObject, bool aNeedsGC, bool debugEnabled)
+    public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, string aFieldId, TypeInfo aDeclaringObject, bool aNeedsGC, bool debugEnabled)
     {
-      var xType = aMethod.MethodBase.DeclaringType;
+      var xType = aMethod.MethodInfo.DeclaringType;
 
       var xFields = GetFieldsInfo(aDeclaringObject, false);
       var xFieldInfo = (from item in xFields

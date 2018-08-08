@@ -1,8 +1,8 @@
 using Cosmos.IL2CPU.ILOpCodes;
-using System;
+using IL2CPU.Reflection;
+
 using XSharp;
 using static XSharp.XSRegisters;
-
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -28,24 +28,24 @@ namespace Cosmos.IL2CPU.X86.IL
        * The function GetArgumentDisplacement() does not give the correct displacement for the Ldarga opcode
        * we need to "fix" it subtracting the argSize and 4
        */
-      Type xArgType;
-      if (aMethod.MethodBase.IsStatic)
+      TypeInfo xArgType;
+      if (aMethod.MethodInfo.IsStatic)
       {
-        xArgType = aMethod.MethodBase.GetParameters()[aParam].ParameterType;
+        xArgType = aMethod.MethodInfo.ParameterTypes[aParam];
       }
       else
       {
         if (aParam == 0u)
         {
-          xArgType = aMethod.MethodBase.DeclaringType;
+          xArgType = aMethod.MethodInfo.DeclaringType;
           if (xArgType.IsValueType)
           {
-            xArgType = xArgType.MakeByRefType();
+            xArgType = xArgType.MakeByReferenceType();
           }
         }
         else
         {
-          xArgType = aMethod.MethodBase.GetParameters()[aParam - 1].ParameterType;
+          xArgType = aMethod.MethodInfo.ParameterTypes[aParam - 1];
         }
       }
 

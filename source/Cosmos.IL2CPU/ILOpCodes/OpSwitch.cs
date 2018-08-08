@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpSwitch : ILOpCode {
-    public int[] BranchLocations { get; }
+    public IReadOnlyList<int> BranchLocations { get; }
 
-    public OpSwitch(Code aOpCode, int aPos, int aNextPos, int[] aBranchLocations, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpSwitch(Code aOpCode, int aPos, int aNextPos, IReadOnlyList<int> aBranchLocations, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
       BranchLocations = aBranchLocations;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -23,7 +24,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -34,7 +35,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -70,13 +71,13 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       throw new Exception("Wrong type: " + StackPopTypes[0].FullName);
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       foreach (var xTarget in BranchLocations)
       {
-        base.InterpretInstruction(xTarget, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+        base.InterpretInstruction(xTarget, aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
       }
-      base.DoInterpretNextInstructionStackTypes(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+      base.DoInterpretNextInstructionStackTypes(aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
     }
   }
 }

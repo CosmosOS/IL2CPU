@@ -6,4 +6,8 @@
         <PackageDescription>IL2CPU API.</PackageDescription>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\IL2CPU.Reflection\IL2CPU.Reflection.csproj" />
+    </ItemGroup>
+
 </Project>

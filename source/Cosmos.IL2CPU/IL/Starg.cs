@@ -1,11 +1,12 @@
 using Cosmos.IL2CPU.ILOpCodes;
-using System;
+using IL2CPU.Reflection;
+
 using XSharp;
 using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Starg)]
+  [OpCode(ILOpCode.Code.Starg)]
   public class Starg : ILOp
   {
     public Starg(XSharp.Assembler.Assembler aAsmblr)
@@ -22,24 +23,24 @@ namespace Cosmos.IL2CPU.X86.IL
     public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
     {
       var xDisplacement = Ldarg.GetArgumentDisplacement(aMethod, aParam);
-      Type xArgType;
-      if (aMethod.MethodBase.IsStatic)
+      TypeInfo xArgType;
+      if (aMethod.MethodInfo.IsStatic)
       {
-        xArgType = aMethod.MethodBase.GetParameters()[aParam].ParameterType;
+        xArgType = aMethod.MethodInfo.ParameterTypes[aParam];
       }
       else
       {
         if (aParam == 0u)
         {
-          xArgType = aMethod.MethodBase.DeclaringType;
+          xArgType = aMethod.MethodInfo.DeclaringType;
           if (xArgType.IsValueType)
           {
-            xArgType = xArgType.MakeByRefType();
+            xArgType = xArgType.MakeByReferenceType();
           }
         }
         else
         {
-          xArgType = aMethod.MethodBase.GetParameters()[aParam - 1].ParameterType;
+          xArgType = aMethod.MethodInfo.ParameterTypes[aParam - 1];
         }
       }
 

@@ -1,9 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -11,13 +10,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
   {
     public int Value { get; }
 
-    public OpBranch(Code aOpCode, int aPos, int aNextPos, int aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpBranch(Code aOpCode, int aPos, int aNextPos, int aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -44,7 +43,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -71,7 +70,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -98,6 +97,10 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
           if (ILOp.IsIntegralType(xPopType))
+          {
+            return;
+          }
+          if (xPopType.IsPointer)
           {
             return;
           }
@@ -196,7 +199,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<TypeInfo> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
       switch (OpCode)
       {
@@ -213,12 +216,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Beq:
         case Code.Bne_Un:
         case Code.Br:
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
-          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
           break;
         case Code.Leave:
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
-          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
+          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<TypeInfo>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
 
           break;
         default:

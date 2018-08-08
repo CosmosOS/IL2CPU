@@ -1,11 +1,11 @@
-using System;
-using System.Reflection;
-
 using IL2CPU.API;
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
+using System.Linq;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -27,8 +27,8 @@ namespace Cosmos.IL2CPU.X86.IL
       uint xSize = SizeOfType(xType.Value);
 
       //TODO cache it to reduce calculation
-      string xTypeID = GetTypeIDLabel(typeof(Array));
-      MethodBase xCtor = typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
+      string xTypeID = GetTypeIDLabel(TypeOf(BclType.Array));
+      var xCtor = TypeOf(BclType.Array).Methods.First(m => m.IsConstructor);
       string xCtorName = LabelName.Get(xCtor);
 
       XS.Comment("Element Size = " + xSize);

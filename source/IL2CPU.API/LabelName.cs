@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+
+using IL2CPU.Reflection;
+using IL2CPU.Reflection.Types;
 
 namespace IL2CPU.API
 {
@@ -12,7 +13,7 @@ namespace IL2CPU.API
         /// <summary>
         /// Cache for label names.
         /// </summary>
-        private static Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
+        private static Dictionary<MethodInfo, string> labelNamesCache = new Dictionary<MethodInfo, string>();
 
         // All label naming code should be changed to use this class.
 
@@ -34,7 +35,7 @@ namespace IL2CPU.API
         // Max length of labels at 256. We use lower here so that we still have room for suffixes for IL positions, etc.
         const int MaxLengthWithoutSuffix = 200;
 
-        public static string Get(MethodBase aMethod)
+        public static string Get(MethodInfo aMethod)
         {
             if (labelNamesCache.TryGetValue(aMethod, out var result))
             {
@@ -81,7 +82,7 @@ namespace IL2CPU.API
             xName = xName.Replace("[]", "array");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
-            xName = IllegalCharsReplace.Replace(xName, string.Empty);
+            xName = IllegalCharsReplace.Replace(xName, String.Empty);
 
             if (xName.Length > MaxLengthWithoutSuffix)
             {
@@ -103,115 +104,116 @@ namespace IL2CPU.API
             return xName;
         }
 
-        public static string GetFullName(Type aType)
+        public static string GetFullName(TypeInfo aType)
         {
-            if (aType.IsGenericParameter)
+            if (aType == null)
             {
-                return aType.FullName;
+                return String.Empty;
             }
-            StringBuilder xSB = new StringBuilder(256);
-            if (aType.IsArray)
+
+            var xSB = new StringBuilder(256);
+
+            switch (aType)
             {
-                xSB.Append(GetFullName(aType.GetElementType()));
-                xSB.Append("[");
-                int xRank = aType.GetArrayRank();
-                while (xRank > 1)
-                {
-                    xSB.Append(",");
-                    xRank--;
-                }
-                xSB.Append("]");
-                return xSB.ToString();
+                case ArrayType xArrayType:
+
+                    xSB.Append(GetFullName(xArrayType.ElementType));
+                    xSB.Append("[");
+
+                    int xRank = xArrayType.Rank;
+
+                    while (xRank > 1)
+                    {
+                        xSB.Append(",");
+                        xRank--;
+                    }
+
+                    xSB.Append("]");
+
+                    return xSB.ToString();
+
+                case ByReferenceType xByRefType:
+
+                    return "&" + GetFullName(xByRefType.ElementType);
+
+                case DefinedType xDefinedType:
+
+                    if (xDefinedType.IsGenericType && !xDefinedType.IsGenericTypeDefinition)
+                    {
+                        xSB.Append(GetFullName(xDefinedType.GetGenericTypeDefinition()));
+                    }
+                    else
+                    {
+                        xSB.Append(aType.FullName);
+                    }
+
+                    if (xDefinedType.IsGenericType)
+                    {
+                        xSB.Append("<");
+                        var xArgs = xDefinedType.GenericArguments;
+                        for (int i = 0; i < xArgs.Count - 1; i++)
+                        {
+                            xSB.Append(GetFullName(xArgs[i]));
+                            xSB.Append(", ");
+                        }
+                        xSB.Append(GetFullName(xArgs[xArgs.Count - 1]));
+                        xSB.Append(">");
+                    }
+                    return xSB.ToString();
             }
-            if (aType.IsByRef && aType.HasElementType)
-            {
-                return "&" + GetFullName(aType.GetElementType());
-            }
-            if (aType.IsGenericType && !aType.IsGenericTypeDefinition)
-            {
-                xSB.Append(GetFullName(aType.GetGenericTypeDefinition()));
-            }
-            else
-            {
-                xSB.Append(aType.FullName);
-            }
-            if (aType.IsGenericType)
-            {
-                xSB.Append("<");
-                var xArgs = aType.GetGenericArguments();
-                for (int i = 0; i < xArgs.Length - 1; i++)
-                {
-                    xSB.Append(GetFullName(xArgs[i]));
-                    xSB.Append(", ");
-                }
-                xSB.Append(GetFullName(xArgs.Last()));
-                xSB.Append(">");
-            }
-            return xSB.ToString();
+
+            return aType.ToString();
         }
 
-        public static string GetFullName(MethodBase aMethod)
+        public static string GetFullName(MethodInfo aMethod)
         {
             if (aMethod == null)
             {
                 throw new ArgumentNullException(nameof(aMethod));
             }
+
             var xBuilder = new StringBuilder(256);
-            var xParts = aMethod.ToString().Split(' ');
-            var xParts2 = xParts.Skip(1).ToArray();
-            var xMethodInfo = aMethod as System.Reflection.MethodInfo;
-            if (xMethodInfo != null)
-            {
-                xBuilder.Append(GetFullName(xMethodInfo.ReturnType));
-            }
-            else
-            {
-                var xCtor = aMethod as ConstructorInfo;
-                if (xCtor != null)
-                {
-                    xBuilder.Append(typeof(void).FullName);
-                }
-                else
-                {
-                    xBuilder.Append(xParts[0]);
-                }
-            }
+
+            xBuilder.Append(GetFullName(aMethod.ReturnType));
             xBuilder.Append("  ");
+
             if (aMethod.DeclaringType != null)
             {
                 xBuilder.Append(GetFullName(aMethod.DeclaringType));
             }
             else
             {
-                xBuilder.Append("dynamic_method");
+                xBuilder.Append("global_method");
             }
+
             xBuilder.Append(".");
             xBuilder.Append(aMethod.Name);
-            if (aMethod.IsGenericMethod || aMethod.IsGenericMethodDefinition)
+
+            if (aMethod.IsGenericMethod)
             {
-                var xGenArgs = aMethod.GetGenericArguments();
-                if (xGenArgs.Length > 0)
+                var xGenArgs = aMethod.GenericArguments;
+                if (xGenArgs.Count > 0)
                 {
                     xBuilder.Append("<");
-                    for (int i = 0; i < xGenArgs.Length - 1; i++)
+                    for (int i = 0; i < xGenArgs.Count - 1; i++)
                     {
                         xBuilder.Append(GetFullName(xGenArgs[i]));
                         xBuilder.Append(", ");
                     }
-                    xBuilder.Append(GetFullName(xGenArgs.Last()));
+                    xBuilder.Append(GetFullName(xGenArgs[xGenArgs.Count - 1]));
                     xBuilder.Append(">");
                 }
             }
             xBuilder.Append("(");
-            var xParams = aMethod.GetParameters();
-            for (var i = 0; i < xParams.Length; i++)
+            var xParams = aMethod.Parameters;
+            for (var i = 0; i < xParams.Count; i++)
             {
                 if (i == 0 && xParams[i].Name == "aThis")
                 {
                     continue;
                 }
-                xBuilder.Append(GetFullName(xParams[i].ParameterType));
-                if (i < (xParams.Length - 1))
+                xBuilder.Append(GetFullName(aMethod.ParameterTypes[i]));
+                if (i < (xParams.Count - 1))
                 {
                     xBuilder.Append(", ");
                 }
@@ -225,10 +227,8 @@ namespace IL2CPU.API
             return GetFullName(aField.FieldType) + " " + GetFullName(aField.DeclaringType) + "." + aField.Name;
         }
 
-        public static string GetStaticFieldName(FieldInfo aField)
-        {
-            return FilterStringForIncorrectChars(
+        public static string GetStaticFieldName(FieldInfo aField) =>
+            FilterStringForIncorrectChars(
                 "static_field__" + GetFullName(aField.DeclaringType) + "." + aField.Name);
-        }
     }
 }

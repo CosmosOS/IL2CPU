@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Reflection;
 
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -8,13 +9,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
   {
     public FieldInfo Value { get; }
 
-    public OpField(Code aOpCode, int aPos, int aNextPos, FieldInfo aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpField(Code aOpCode, int aPos, int aNextPos, FieldInfo aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -35,7 +36,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -56,7 +57,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -70,7 +71,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Ldsflda:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = TypeOf(BclType.IntPtr);
           return;
         case Code.Ldfld:
           StackPushTypes[0] = Value.FieldType;
@@ -92,9 +93,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (StackPopTypes[0].IsValueType &&
               !StackPopTypes[0].IsPrimitive)
           {
-            StackPopTypes[0] = StackPopTypes[0].MakeByRefType();
+            StackPopTypes[0] = StackPopTypes[0].MakeByReferenceType();
           }
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = TypeOf(BclType.IntPtr);
           return;
       }
     }
@@ -116,7 +117,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           else if (Value.DeclaringType.IsValueType && !Value.DeclaringType.IsPrimitive)
           {
-            expectedType = typeof(void*);
+            expectedType = TypeOf(BclType.Void).MakePointerType();
           }
           if (StackPopTypes[1] == expectedType ||
               StackPopTypes[1] == Value.FieldType)
@@ -233,7 +234,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
           if (StackPopTypes[0] == Value.DeclaringType.MakePointerType() ||
-              StackPopTypes[0] == Value.DeclaringType.MakeByRefType() ||
+              StackPopTypes[0] == Value.DeclaringType.MakeByReferenceType() ||
               StackPopTypes[0] == typeof(void*) ||
               StackPopTypes[0] == typeof(IntPtr))
           {

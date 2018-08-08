@@ -1,11 +1,14 @@
-using IL2CPU.API;
 using System;
 using System.Linq;
-using CPU = XSharp.Assembler;
 using System.Text;
-using XSharp.Assembler;
+
+using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
+
 using XSharp;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -29,7 +32,7 @@ namespace Cosmos.IL2CPU.X86.IL
             // if that changes, we need to change the code below!
             // We also need to change the debugstub to fix this then.
             #region Debug verification
-            var xFields = GetFieldsInfo(typeof(string), false).Where(i => !i.IsStatic).ToArray();
+            var xFields = GetFieldsInfo(TypeOf(BclType.String), false).Where(i => !i.IsStatic).ToArray();
             if (xFields[0].Id != "System.Int32 System.String.m_stringLength" || xFields[0].Offset != 0)
             {
                 throw new Exception("Fields changed!");
@@ -43,11 +46,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public static string GetContentsArrayName(string aLiteral)
         {
-            var xAsm = CPU.Assembler.CurrentInstance;
+            var xAsm = Assembler.CurrentInstance;
+            var xEncoding = Encoding.Unicode;
 
-            Encoding xEncoding = Encoding.Unicode;
+            var xDataName = xAsm.GetIdentifier("StringLiteral");
 
-            string xDataName = xAsm.GetIdentifier("StringLiteral");
             var xBytecount = xEncoding.GetByteCount(aLiteral);
             var xObjectData = new byte[(4 * 4) + (xBytecount)];
             Array.Copy(BitConverter.GetBytes((int)-1), 0, xObjectData, 0, 4);

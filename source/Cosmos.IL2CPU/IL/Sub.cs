@@ -24,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
             var xStackTop2Size = SizeOfType(xStackTop2);
             if (xStackTopSize != xStackTop2Size)
             {
-                throw new Exception("Different size for substract: " + aMethod.MethodBase + "!");
+                throw new Exception("Different size for substract: " + aMethod.MethodInfo + "!");
             }
 
             var xStackTopIsFloat = TypeIsFloat(xStackTop);

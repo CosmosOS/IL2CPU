@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Reflection;
+
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpString : ILOpCode {
     public string Value { get; }
 
-    public OpString(Code aOpCode, int aPos, int aNextPos, string aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpString(Code aOpCode, int aPos, int aNextPos, string aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -21,7 +23,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -32,14 +34,14 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
       switch (OpCode)
       {
         case Code.Ldstr:
-          StackPushTypes[0] = typeof (string);
+          StackPushTypes[0] = TypeOf(BclType.String);
           break;
         default:
           break;

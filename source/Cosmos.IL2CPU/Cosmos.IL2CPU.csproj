@@ -12,17 +12,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
-        <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
-        <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
         <ProjectReference Include="$(XSharpRepoRoot)source\XSharp.Assembler\XSharp.Assembler.csproj" />
         <ProjectReference Include="$(XSharpRepoRoot)source\XSharp\XSharp.csproj" />
+        <ProjectReference Include="..\IL2CPU.Reflection.Extensions\IL2CPU.Reflection.Extensions.csproj" />
+        <ProjectReference Include="..\IL2CPU.Reflection\IL2CPU.Reflection.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
     </ItemGroup>

@@ -1,5 +1,3 @@
-using System;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -22,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
             if (IsReferenceType(xSource))
             {
                 // todo: Stop GC tracking
-                XS.Add(ESP, SizeOfType(typeof(IntPtr)));
+                XS.Add(ESP, GetNativeIntegerSize());
             }
             else if (IsPointer(xSource))
             {

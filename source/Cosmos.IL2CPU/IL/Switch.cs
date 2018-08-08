@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
             ILOpCodes.OpSwitch OpSw = (ILOpCodes.OpSwitch)aOpCode;
             XS.Pop(XSRegisters.EAX);
 
-            for (int i = 0; i < OpSw.BranchLocations.Length; i++)
+            for (int i = 0; i < OpSw.BranchLocations.Count; i++)
             {
                 string xDestLabel = AppAssembler.TmpPosLabel(aMethod, OpSw.BranchLocations[i]);
 

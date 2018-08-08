@@ -1,6 +1,8 @@
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
-using System.Reflection;
+
+using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
+
 using XSharp;
 using static XSharp.XSRegisters;
 
@@ -37,10 +39,10 @@ namespace Cosmos.IL2CPU.X86.IL
     /// <returns></returns>
     public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aParam)
     {
-      var xMethodBase = aMethod.MethodBase;
+      var xMethodBase = aMethod.MethodInfo;
       if (aMethod.PluggedMethod != null)
       {
-        xMethodBase = aMethod.PluggedMethod.MethodBase;
+        xMethodBase = aMethod.PluggedMethod.MethodInfo;
       }
       var xMethodInfo = xMethodBase as MethodInfo;
       uint xReturnSize = 0;
@@ -50,12 +52,12 @@ namespace Cosmos.IL2CPU.X86.IL
       }
       uint xOffset = 8;
       var xCorrectedOpValValue = aParam;
-      if (!aMethod.MethodBase.IsStatic && aParam > 0)
+      if (!aMethod.MethodInfo.IsStatic && aParam > 0)
       {
         // if the method has a $this, the OpCode value includes the this at index 0, but GetParameters() doesnt include the this
         xCorrectedOpValValue -= 1;
       }
-      var xParams = xMethodBase.GetParameters();
+      var xParams = xMethodBase.ParameterTypes;
       if (aParam == 0 && !xMethodBase.IsStatic)
       {
         // return the this parameter, which is not in .GetParameters()
@@ -72,15 +74,15 @@ namespace Cosmos.IL2CPU.X86.IL
         uint xArgSize = 0;
         foreach (var xParam in xParams)
         {
-          xArgSize += Align(SizeOfType(xParam.ParameterType), 4);
+          xArgSize += Align(SizeOfType(xParam), 4);
         }
         if (!xMethodBase.IsStatic)
         {
           xArgSize += 4; // add $this pointer
         }
-        for (int i = xParams.Length - 1; i >= aParam; i--)
+        for (int i = xParams.Count - 1; i >= aParam; i--)
         {
-          var xSize = Align(SizeOfType(xParams[i].ParameterType), 4);
+          var xSize = Align(SizeOfType(xParams[i]), 4);
           xOffset += xSize;
         }
         if (xReturnSize > xArgSize)
@@ -93,16 +95,16 @@ namespace Cosmos.IL2CPU.X86.IL
       }
       else
       {
-        for (int i = xParams.Length - 1; i > xCorrectedOpValValue; i--)
+        for (int i = xParams.Count - 1; i > xCorrectedOpValValue; i--)
         {
-          var xSize = Align(SizeOfType(xParams[i].ParameterType), 4);
+          var xSize = Align(SizeOfType(xParams[i]), 4);
           xOffset += xSize;
         }
-        var xCurArgSize = Align(SizeOfType(xParams[xCorrectedOpValValue].ParameterType), 4);
+        var xCurArgSize = Align(SizeOfType(xParams[xCorrectedOpValValue]), 4);
         uint xArgSize = 0;
         foreach (var xParam in xParams)
         {
-          xArgSize += Align(SizeOfType(xParam.ParameterType), 4);
+          xArgSize += Align(SizeOfType(xParam), 4);
         }
         if (!xMethodBase.IsStatic)
         {
@@ -149,26 +151,26 @@ namespace Cosmos.IL2CPU.X86.IL
       }
     }
 
-    public static Type GetArgumentType(_MethodInfo aMethod, ushort aParam)
+    public static TypeInfo GetArgumentType(_MethodInfo aMethod, ushort aParam)
     {
-      Type xArgType;
-      if (aMethod.MethodBase.IsStatic)
+      TypeInfo xArgType;
+      if (aMethod.MethodInfo.IsStatic)
       {
-        xArgType = aMethod.MethodBase.GetParameters()[aParam].ParameterType;
+        xArgType = aMethod.MethodInfo.ParameterTypes[aParam];
       }
       else
       {
         if (aParam == 0u)
         {
-          xArgType = aMethod.MethodBase.DeclaringType;
+          xArgType = aMethod.MethodInfo.DeclaringType;
           if (xArgType.IsValueType)
           {
-            xArgType = xArgType.MakeByRefType();
+            xArgType = xArgType.MakeByReferenceType();
           }
         }
         else
         {
-          xArgType = aMethod.MethodBase.GetParameters()[aParam - 1].ParameterType;
+          xArgType = aMethod.MethodInfo.ParameterTypes[aParam - 1];
         }
       }
 
