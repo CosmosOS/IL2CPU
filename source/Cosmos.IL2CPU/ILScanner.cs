@@ -9,6 +9,7 @@ using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using Cosmos.IL2CPU.Extensions;
 using IL2CPU.Reflection;
+using IL2CPU.Runtime;
 using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU
@@ -109,6 +110,11 @@ namespace Cosmos.IL2CPU
 
             if (!mItems.Contains(aItem))
             {
+                if (aItem is TypeInfo xType && xType.IsSZArray)
+                {
+                    Queue(TypeOf(typeof(Vector<>)).MakeGenericType(xType.GetElementType()), xType, "SZ Array");
+                }
+
                 if (mLogEnabled)
                 {
                     LogMapPoint(aSrc, aSrcType, aItem);
@@ -220,12 +226,19 @@ namespace Cosmos.IL2CPU
             // register system types:
             Queue(TypeOf(BclType.Array), null, "Explicit Entry");
             Queue(TypeOf(BclType.Array).Methods.Single(m => m.IsConstructor && m.ParameterTypes.Count == 0), null, "Explicit Entry");
+
+            // VMT
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(typeof(VTable))), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.Byte)), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.Char)), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.UInt32)), null, "Explicit Entry");
+
             Queue(TypeOf(typeof(MulticastDelegate)).Methods.Single(m => m.Name == "GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
 
-            mAsmblr.ProcessField(TypeOf(BclType.String).Fields.Single(f => f.Name == "Empty" && f.IsStatic));
+            mAsmblr.ProcessField(TypeOf(BclType.String).Fields.Single(f => f.Name == "Empty" && f.IsStatic), GetTypeUID);
 
             // Start from entry point of this program
             Queue(aStartMethod, null, "Entry Point");
@@ -284,10 +297,17 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
             Queue(TypeOf(BclType.Array).Methods.Single(m => m.IsConstructor && m.ParameterTypes.Count == 0), null, "Explicit Entry");
+
+            // VMT
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(typeof(VTable))), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.Byte)), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.Char)), null, "Explicit Entry");
+            Queue(TypeOf(typeof(Vector<>)).MakeGenericType(TypeOf(BclType.UInt32)), null, "Explicit Entry");
+
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
             Queue(TypeOf(typeof(MulticastDelegate)).Methods.Single(m => m.Name == "GetInvocationList"), null, "Explicit Entry");
 
-            mAsmblr.ProcessField(TypeOf(BclType.String).Fields.Single(f => f.Name == "Empty" && f.IsStatic));
+            mAsmblr.ProcessField(TypeOf(BclType.String).Fields.Single(f => f.Name == "Empty" && f.IsStatic), GetTypeUID);
 
             ScanQueue();
             UpdateAssemblies();
@@ -513,7 +533,8 @@ namespace Cosmos.IL2CPU
                                 }
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
-                                  && xType.ImplementsInterface(xVirtMethod.DeclaringType))
+                                  && xType.ImplementsInterface(xVirtMethod.DeclaringType)
+                                  && !(xType.IsSZArray && xVirtMethod.DeclaringType.IsGenericType))
                             {
                                 var xInterfaceMap = xType.GetInterfaceMapping(xVirtMethod.DeclaringType);
                                 var xTargetMethod = xInterfaceMap.SingleOrDefault(
@@ -602,6 +623,11 @@ namespace Cosmos.IL2CPU
                         else if (xOpCode is ILOpCodes.OpType xOpType)
                         {
                             Queue(xOpType.Value, aMethod, "OpCode Value");
+
+                            if (xOpCode.OpCode == ILOpCode.Code.Newarr)
+                            {
+                                Queue(TypeOf(typeof(Vector<>)).MakeGenericType(xOpType.Value), aMethod, "Newarr Vector");
+                            }
                         }
                         else if (xOpCode is ILOpCodes.OpField xOpField)
                         {
@@ -681,7 +707,9 @@ namespace Cosmos.IL2CPU
                 //if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface)
                 if (xVirt.DeclaringType.IsInterface)
                 {
-                    if (!aType.IsInterface && aType.ImplementsInterface(xVirt.DeclaringType))
+                    if (!aType.IsInterface
+                        && aType.ImplementsInterface(xVirt.DeclaringType)
+                        && !(aType.IsSZArray && xVirt.DeclaringType.IsGenericType))
                     {
                         var xIntfMapping = aType.GetInterfaceMapping(xVirt.DeclaringType);
                         var xTargetMethod = xIntfMapping.SingleOrDefault(m => m.InterfaceMethod == xVirt).TargetMethod;
@@ -941,7 +969,7 @@ namespace Cosmos.IL2CPU
                 }
                 else if (xItem is FieldInfo)
                 {
-                    mAsmblr.ProcessField((FieldInfo)xItem);
+                    mAsmblr.ProcessField((FieldInfo)xItem, GetTypeUID);
                 }
             }
 

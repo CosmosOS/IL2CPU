@@ -32,7 +32,11 @@ namespace IL2CPU.Reflection
             Version = version ?? ZeroVersion;
             Culture = String.IsNullOrEmpty(culture) ? null : culture;
 
-            if (!publicKeyOrToken.IsEmpty)
+            if (publicKeyOrToken.IsDefaultOrEmpty)
+            {
+                PublicKeyToken = ImmutableArray<byte>.Empty;
+            }
+            else
             {
                 PublicKeyToken = publicKeyOrToken.Length == 8
                     ? publicKeyOrToken

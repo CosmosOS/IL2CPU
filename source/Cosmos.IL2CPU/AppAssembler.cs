@@ -21,6 +21,7 @@ using Cosmos.IL2CPU.ILOpCodes;
 using Cosmos.IL2CPU.X86.IL;
 using IL2CPU.Reflection;
 using IL2CPU.Reflection.Debug;
+using IL2CPU.Runtime;
 using static Cosmos.IL2CPU.TypeRefHelper;
 
 using XSharp;
@@ -881,16 +882,19 @@ namespace Cosmos.IL2CPU
             X86.IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodInfo.DeclaringType, null);
         }
 
-        public static byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
+        public static byte[] AllocateEmptyArray(int aLength, TypeInfo aElementType, Func<TypeInfo, uint> aGetTypeId)
         {
-            var xData = new byte[16 + aLength * aElementSize];
-            var xTemp = BitConverter.GetBytes(aArrayTypeID);
+            var xElementSize = ILOp.SizeOfType(aElementType);
+            var xArrayTypeId = aGetTypeId(TypeOf(typeof(Vector<>)).MakeGenericType(aElementType));
+
+            var xData = new byte[16 + aLength * xElementSize];
+            var xTemp = BitConverter.GetBytes(xArrayTypeId);
             Array.Copy(xTemp, 0, xData, 0, 4);
             xTemp = BitConverter.GetBytes((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
             Array.Copy(xTemp, 0, xData, 4, 4);
             xTemp = BitConverter.GetBytes(aLength);
             Array.Copy(xTemp, 0, xData, 8, 4);
-            xTemp = BitConverter.GetBytes(aElementSize);
+            xTemp = BitConverter.GetBytes(xElementSize);
             Array.Copy(xTemp, 0, xData, 12, 4);
             return xData;
         }
@@ -922,8 +926,7 @@ namespace Cosmos.IL2CPU
                      select item).First());
             }
 
-            uint xArrayTypeID = aGetTypeID(TypeOf(BclType.Array));
-            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(TypeOf(typeof(VTable))), xArrayTypeID);
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, TypeOf(typeof(VTable)), aGetTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
@@ -951,25 +954,25 @@ namespace Cosmos.IL2CPU
                     var xEmittedMethods = GetEmittedMethods(xType, aMethodsSet);
                     var xEmittedInterfaceMethods = GetEmittedInterfaceMethods(xType, aMethodsSet);
 
-                    int? xBaseIndex = null;
+                    uint? xBaseIndex = null;
+
                     if (xType.BaseType == null)
                     {
-                        xBaseIndex = (int)xTypeID;
+                        xBaseIndex = xTypeID;
                     }
                     else
                     {
-                        for (int t = 0; t < aTypesSet.Count; t++)
+                        if (xType.GetGenericTypeDefinition() == TypeOf(typeof(Vector<>)))
                         {
-                            // todo: optimize check
-                            var xItem = aTypesSet.Skip(t).First();
-                            if (xItem.ToString() == xType.BaseType.ToString())
-                            {
-                                xBaseIndex = (int)aGetTypeID(xItem);
-                                break;
-                            }
+                            xBaseIndex = aGetTypeID(TypeOf(BclType.Array));
+                        }
+                        else
+                        {
+                            xBaseIndex = aGetTypeID(xType.BaseType);
                         }
                     }
-                    if (xBaseIndex == null)
+
+                    if (!xBaseIndex.HasValue)
                     {
                         throw new Exception("Base type not found!");
                     }
@@ -985,12 +988,12 @@ namespace Cosmos.IL2CPU
                     Push(xTypeID);
 
                     // Base Type ID
-                    Push((uint)xBaseIndex.Value);
+                    Push(xBaseIndex.Value);
 
                     // Interface Count
                     var xInterfaces = xType.GetImplementedInterfaces().ToList();
                     Push((uint)xInterfaces.Count);
-                    xData = AllocateEmptyArray(xInterfaces.Count, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyArray(xInterfaces.Count, TypeOf(BclType.UInt32), aGetTypeID);
                     // Interface Indexes Array
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceIndexesArray";
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
@@ -998,7 +1001,7 @@ namespace Cosmos.IL2CPU
                     Push(0);
 
                     // Method array
-                    xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyArray(xEmittedMethods.Count, TypeOf(BclType.UInt32), aGetTypeID);
                     // Method Count
                     Push((uint)xEmittedMethods.Count);
                     // Method Indexes Array
@@ -1013,7 +1016,7 @@ namespace Cosmos.IL2CPU
                     Push(0);
 
                     // Interface methods
-                    xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
+                    xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, TypeOf(BclType.UInt32), aGetTypeID);
                     // Interface method count
                     Push((uint)xEmittedInterfaceMethods.Count);
                     // Interface method indexes array
@@ -1030,7 +1033,7 @@ namespace Cosmos.IL2CPU
                     // Full type name
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}";
                     int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.Identity.FullName}");
-                    xData = AllocateEmptyArray(xDataByteCount, 2, xArrayTypeID);
+                    xData = AllocateEmptyArray(xDataByteCount, TypeOf(BclType.Char), aGetTypeID);
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
 
                     Call(VTablesImplRefs.SetTypeInfoRef);
@@ -1162,7 +1165,7 @@ namespace Cosmos.IL2CPU
             return xEmittedInterfaceMethods;
         }
 
-        public void ProcessField(FieldInfo aField)
+        public void ProcessField(FieldInfo aField, Func<TypeInfo, uint> aGetTypeId)
         {
             string xFieldName = LabelName.GetStaticFieldName(aField);
             string xFieldContentsName = $"{xFieldName}__Contents";
@@ -1197,8 +1200,7 @@ namespace Cosmos.IL2CPU
                             throw new Exception("Resource '" + xManifestResourceName + "' not found!");
                         }
 
-                        uint xArrayTypeID = 0;
-                        xData = AllocateEmptyArray((int)xStream.Length, 1, xArrayTypeID);
+                        xData = AllocateEmptyArray((int)xStream.Length, TypeOf(BclType.Byte), aGetTypeId);
                         xStream.Read(xData, 16, (int)xStream.Length);
 
                         //xTarget.Append("0,");

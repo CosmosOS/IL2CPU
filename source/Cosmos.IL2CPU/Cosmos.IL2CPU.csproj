@@ -21,6 +21,7 @@
         <ProjectReference Include="..\IL2CPU.Reflection\IL2CPU.Reflection.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
+        <ProjectReference Include="..\IL2CPU.Runtime\IL2CPU.Runtime.csproj" />
     </ItemGroup>
 
 </Project>
