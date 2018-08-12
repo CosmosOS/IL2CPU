@@ -1,35 +1,43 @@
 ﻿using System;
-using System.Reflection;
+using System.Linq;
+
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
-    public static class VTablesImplRefs
+    internal static class VTablesImplRefs
     {
-        public static readonly Assembly RuntimeAssemblyDef;
-        public static readonly Type VTablesImplDef;
-        public static readonly MethodBase SetTypeInfoRef;
-        public static readonly MethodBase SetInterfaceInfoRef;
-        public static readonly MethodBase SetMethodInfoRef;
-        public static readonly MethodBase SetInterfaceMethodInfoRef;
-        public static readonly MethodBase GetMethodAddressForTypeRef;
-        public static readonly MethodBase GetMethodAddressForInterfaceTypeRef;
-        public static readonly MethodBase IsInstanceRef;
+        public static readonly MethodInfo SetTypeInfoRef;
+        public static readonly MethodInfo SetInterfaceInfoRef;
+        public static readonly MethodInfo SetMethodInfoRef;
+        public static readonly MethodInfo SetInterfaceMethodInfoRef;
+        public static readonly MethodInfo GetMethodAddressForTypeRef;
+        public static readonly MethodInfo GetMethodAddressForInterfaceTypeRef;
+        public static readonly MethodInfo IsInstanceRef;
+
+        public static readonly FieldInfo mTypesRef;
 
         static VTablesImplRefs()
         {
-            VTablesImplDef = typeof(VTablesImpl);
-            foreach (FieldInfo xField in typeof(VTablesImplRefs).GetFields())
+            var vTablesImplType = CompilerEngine.MetadataContext.ImportType(typeof(VTablesImpl));
+
+            foreach (var xField in typeof(VTablesImplRefs).GetFields().Where(f => f.FieldType == typeof(MethodInfo)))
             {
                 if (xField.Name.EndsWith("Ref"))
                 {
-                    MethodBase xTempMethod = VTablesImplDef.GetMethod(xField.Name.Substring(0, xField.Name.Length - "Ref".Length));
+                    var xTempMethod = vTablesImplType.Methods.SingleOrDefault(
+                        m => m.Name == xField.Name.Substring(0, xField.Name.Length - "Ref".Length));
+
                     if (xTempMethod == null)
                     {
-                        throw new Exception("Method '" + xField.Name.Substring(0, xField.Name.Length - "Ref".Length) + "' not found on RuntimeEngine!");
+                        throw new Exception("Method '" + xField.Name.Substring(0, xField.Name.Length - "Ref".Length) + "' not found on VTablesImpl!");
                     }
+
                     xField.SetValue(null, xTempMethod);
                 }
             }
+
+            mTypesRef = vTablesImplType.Fields.Single(f => f.Name == "mTypes");
         }
     }
 }

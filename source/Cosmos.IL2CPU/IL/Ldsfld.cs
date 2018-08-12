@@ -1,17 +1,15 @@
 using System;
-using System.Linq;
-using System.Reflection;
 
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
-using XSharp.Assembler;
 using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldsfld)]
+  [OpCode(ILOpCode.Code.Ldsfld)]
   public class Ldsfld : ILOp
   {
     public Ldsfld(XSharp.Assembler.Assembler aAsmblr)
@@ -22,12 +20,12 @@ namespace Cosmos.IL2CPU.X86.IL
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
 
-      var xType = aMethod.MethodBase.DeclaringType;
+      var xType = aMethod.MethodInfo.DeclaringType;
       var xOpCode = (OpField)aOpCode;
-      FieldInfo xField = xOpCode.Value;
+      var xField = xOpCode.Value;
 
       // call cctor:
-      var xCctor = (xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic)).SingleOrDefault();
+      var xCctor = (xField.DeclaringType.GetTypeInitializer());
       if (xCctor != null)
       {
         XS.Call(LabelName.Get(xCctor));

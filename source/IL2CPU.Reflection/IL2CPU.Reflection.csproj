@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard1.3</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <NoWarn>CA1303;CA1716;CA1720;$(NoWarn)</NoWarn>
+        <!-- https://github.com/dotnet/corefx/issues/23372 -->
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.IO.UnmanagedMemoryStream" Version="4.3.0" />
+        <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
+        <PackageReference Include="System.ValueTuple" Version="4.3.1" />
+    </ItemGroup>
+
+</Project>

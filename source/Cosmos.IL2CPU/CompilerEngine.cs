@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 
 using Cosmos.Build.Common;
@@ -13,6 +11,8 @@ using Cosmos.Build.Common;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
+using IL2CPU.Reflection;
+using IL2CPU.Reflection.Types;
 
 namespace Cosmos.IL2CPU
 {
@@ -26,19 +26,18 @@ namespace Cosmos.IL2CPU
         public Action<string> OnLogWarning;
         public Action<Exception> OnLogException;
         protected static Action<string> mStaticLog = null;
-
-        // HACK: only GCImplementationRefs depends on this, remove when possible
-        public static TypeResolver TypeResolver { get; private set; }
+        
+        public static MetadataContext MetadataContext { get; private set; }
 
         public static string KernelPkg { get; set; }
         public static bool UseGen3Kernel => String.Equals(KernelPkg, "X86", StringComparison.OrdinalIgnoreCase);
 
         private ICompilerEngineSettings mSettings;
 
-        private AssemblyLoadContext _assemblyLoadContext;
+        private MetadataContext _metadataContext;
 
-        private Dictionary<MethodBase, int?> mBootEntries;
-        private List<MemberInfo> mForceIncludes;
+        private Dictionary<MethodInfo, int?> mBootEntries = new Dictionary<MethodInfo, int?>();
+        private List<MemberInfo> mForceIncludes = new List<MemberInfo>();
 
         protected void LogTime(string message)
         {
@@ -68,10 +67,10 @@ namespace Cosmos.IL2CPU
         {
             mSettings = aSettings;
 
-            _assemblyLoadContext = new IsolatedAssemblyLoadContext(
-                mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
+            var assemblies = mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly);
+            _metadataContext = MetadataContext.FromAssemblyPaths(assemblies);
 
-            TypeResolver = new TypeResolver(_assemblyLoadContext);
+            MetadataContext = _metadataContext;
 
             EnsureCosmosPathsInitialization();
         }
@@ -105,7 +104,7 @@ namespace Cosmos.IL2CPU
 
                 // Gen2
                 // Find the kernel's entry point. We are looking for a public class Kernel, with public static void Boot()
-                MethodBase xKernelCtor = null;
+                MethodInfo xKernelCtor = null;
 
                 if (UseGen3Kernel)
                 {
@@ -147,7 +146,7 @@ namespace Cosmos.IL2CPU
                         }
 
                         xAsm.Assembler.Initialize();
-                        using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext)))
+                        using (var xScanner = new ILScanner(xAsm, _metadataContext))
                         {
                             xScanner.LogException = LogException;
                             xScanner.LogWarning = LogWarning;
@@ -163,7 +162,7 @@ namespace Cosmos.IL2CPU
                             }
 
                             var plugsAssemblies = mSettings.PlugsReferences.Select(
-                                r => _assemblyLoadContext.LoadFromAssemblyPath(r));
+                                r => _metadataContext.ResolveFromPath(r));
 
                             if (UseGen3Kernel)
                             {
@@ -171,7 +170,7 @@ namespace Cosmos.IL2CPU
                             }
                             else
                             {
-                                xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod(UseGen3Kernel ? "EntryPoint" : "Start"));
+                                xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod("Start", Array.Empty<TypeInfo>()));
                                 xScanner.Execute(xKernelCtor, plugsAssemblies);
                             }
 
@@ -231,7 +230,7 @@ namespace Cosmos.IL2CPU
         /// the kernel default constructor.</summary>
         /// <returns>The kernel default constructor or a null reference if either none or several such
         /// constructor could be found.</returns>
-        private MethodBase LoadAssemblies()
+        private MethodInfo LoadAssemblies()
         {
             // Try to load explicit path references.
             // These are the references of our boot project. We dont actually ever load the boot
@@ -244,7 +243,7 @@ namespace Cosmos.IL2CPU
             string xKernelBaseName = "Cosmos.System.Kernel";
             LogMessage("Kernel Base: " + xKernelBaseName);
 
-            Type xKernelType = null;
+            DefinedType xKernelType = null;
 
             LogMessage($"Checking target assembly: {mSettings.TargetAssembly}");
 
@@ -253,7 +252,7 @@ namespace Cosmos.IL2CPU
                 throw new FileNotFoundException("Target assembly not found!", mSettings.TargetAssembly);
             }
 
-            var xAssembly = _assemblyLoadContext.LoadFromAssemblyPath(mSettings.TargetAssembly);
+            var xAssembly = _metadataContext.ResolveFromPath(mSettings.TargetAssembly);
 
             CompilerHelpers.Debug($"Looking for kernel in {xAssembly}");
 
@@ -261,7 +260,7 @@ namespace Cosmos.IL2CPU
             {
                 if (!xType.IsGenericTypeDefinition && !xType.IsAbstract)
                 {
-                    CompilerHelpers.Debug($"Checking type {xType.FullName}");
+                    CompilerHelpers.Debug($"Checking type {xType}");
 
                     // We used to resolve with this:
                     //   if (xType.IsSubclassOf(typeof(Cosmos.System.Kernel))) {
@@ -287,7 +286,7 @@ namespace Cosmos.IL2CPU
                 LogError("No kernel found.");
                 return null;
             }
-            var xCtor = xKernelType.GetConstructor(Type.EmptyTypes);
+            var xCtor = xKernelType.GetConstructor(Array.Empty<TypeInfo>());
             if (xCtor == null)
             {
                 LogError("Kernel has no public parameterless constructor.");
@@ -300,10 +299,7 @@ namespace Cosmos.IL2CPU
 
         private void LoadBootEntries()
         {
-            mBootEntries = new Dictionary<MethodBase, int?>();
-            mForceIncludes = new List<MemberInfo>();
-
-            var xCheckedAssemblies = new List<string>();
+            var xCheckedAssemblies = new List<AssemblyIdentity>();
 
             LogMessage($"Checking target assembly: {mSettings.TargetAssembly}");
 
@@ -312,17 +308,17 @@ namespace Cosmos.IL2CPU
                 throw new FileNotFoundException("Target assembly not found!", mSettings.TargetAssembly);
             }
 
-            var xTargetAssembly = _assemblyLoadContext.LoadFromAssemblyPath(mSettings.TargetAssembly);
+            var xTargetAssembly = _metadataContext.ResolveFromPath(mSettings.TargetAssembly);
             CheckAssembly(xTargetAssembly);
 
-            void CheckAssembly(Assembly aAssembly)
+            void CheckAssembly(AssemblyInfo aAssembly)
             {
                 // Just for debugging
                 //LogMessage("Checking Assembly: " + aAssembly.Location);
 
-                xCheckedAssemblies.Add(aAssembly.GetName().ToString());
+                xCheckedAssemblies.Add(aAssembly.Identity);
 
-                foreach (var xType in aAssembly.GetTypes())
+                foreach (var xType in aAssembly.ExportedTypes)
                 {
                     var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
 
@@ -331,7 +327,7 @@ namespace Cosmos.IL2CPU
                         ForceInclude(xType, xForceIncludeAttribute);
                     }
 
-                    foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                    foreach (var xMethod in xType.Methods.Where(m => m.IsStatic))
                     {
                         xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
 
@@ -349,13 +345,13 @@ namespace Cosmos.IL2CPU
                             LogMessage("Boot Entry found: Name: " + xMethod + ", Entry Index: "
                                 + (xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "null"));
 
-                            if (xMethod.ReturnType != typeof(void))
+                            if (xMethod.ReturnType != _metadataContext.GetBclType(BclType.Void))
                             {
                                 throw new NotSupportedException(
                                     "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
                             }
 
-                            if (xMethod.GetParameters().Length != 0)
+                            if (xMethod.ParameterTypes.Count != 0)
                             {
                                 throw new NotSupportedException(
                                     "Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
@@ -365,21 +361,20 @@ namespace Cosmos.IL2CPU
                         }
                     }
 
-                    if (xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                             .Where(m => m.GetCustomAttribute<BootEntry>() != null).Any())
+                    if (xType.Methods.Where(m => !m.IsStatic && m.GetCustomAttribute<BootEntry>() != null).Any())
                     {
                         throw new NotSupportedException(
                             "Boot Entry should be static! Type: " + xType.FullName);
                     }
                 }
 
-                foreach (var xReference in aAssembly.GetReferencedAssemblies())
+                foreach (var xReference in aAssembly.ReferencedAssemblies)
                 {
                     try
                     {
-                        if (!xCheckedAssemblies.Contains(xReference.ToString()))
+                        if (!xCheckedAssemblies.Contains(xReference))
                         {
-                            var xAssembly = _assemblyLoadContext.LoadFromAssemblyName(xReference);
+                            var xAssembly = _metadataContext.ResolveAssembly(xReference);
 
                             if (xAssembly != null)
                             {
@@ -434,21 +429,13 @@ namespace Cosmos.IL2CPU
 
         private void ForceInclude(MemberInfo aMemberInfo, ForceIncludeAttribute aForceIncludeAttribute)
         {
-            if (aMemberInfo is Type xType)
+            if (aMemberInfo is DefinedType xType)
             {
                 mForceIncludes.Add(xType);
 
-                foreach (var xMethod in xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                foreach (var xMethod in xType.Methods.Where(x => !x.IsSpecialName))
                 {
                     mForceIncludes.Add(xMethod);
-                }
-
-                foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-                {
-                    if (!xMethod.IsSpecialName)
-                    {
-                        mForceIncludes.Add(xMethod);
-                    }
                 }
             }
             else if (aMemberInfo is MethodInfo xMethod)

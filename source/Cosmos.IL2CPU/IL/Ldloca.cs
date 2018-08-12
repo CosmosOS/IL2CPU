@@ -1,5 +1,5 @@
-using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 using XSharp.Assembler;
@@ -18,11 +18,17 @@ namespace Cosmos.IL2CPU.X86.IL
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpVar = (OpVar)aOpCode;
-      var xVar = aMethod.MethodBase.GetLocalVariables()[xOpVar.Value];
-      var xEBPOffset = GetEBPOffsetForLocal(aMethod, xOpVar.Value);
-      xEBPOffset += (uint)(((int)GetStackCountForLocal(aMethod, xVar.LocalType) - 1) * 4);
+      var xVar = aMethod.MethodInfo.MethodBody.LocalTypes[xOpVar.Value];
 
-      XS.Comment("Local type = " + xVar.LocalType);
+      if (xVar.IsPinned)
+      {
+        xVar = xVar.GetElementType();
+      }
+
+      var xEBPOffset = GetEBPOffsetForLocal(aMethod, xOpVar.Value);
+      xEBPOffset += (uint)(((int)GetStackCountForLocal(aMethod, xVar) - 1) * 4);
+
+      XS.Comment("Local type = " + xVar);
       XS.Comment("Local EBP offset = " + xEBPOffset);
 
       XS.Set(EAX, EBP);

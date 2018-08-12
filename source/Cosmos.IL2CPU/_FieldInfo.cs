@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reflection;
+
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -11,8 +12,8 @@ namespace Cosmos.IL2CPU
 
         public FieldInfo Field { get; set; }
 
-        public Type DeclaringType { get; }
-        public Type FieldType { get; set; }
+        public TypeInfo DeclaringType { get; }
+        public TypeInfo FieldType { get; set; }
         public uint Size { get; set; }
         public bool IsExternalValue { get; set; }
         public bool IsStatic { get; set; }
@@ -41,7 +42,7 @@ namespace Cosmos.IL2CPU
 
         private uint mOffset;
 
-        public _FieldInfo(string aId, uint aSize, Type aDeclaringType, Type aFieldType)
+        public _FieldInfo(string aId, uint aSize, TypeInfo aDeclaringType, TypeInfo aFieldType)
         {
             Id = aId;
             DeclaringType = aDeclaringType;

@@ -26,7 +26,7 @@ namespace Cosmos.IL2CPU.X86.IL
             if (IsReferenceType(xSource))
             {
                 // todo: Stop GC tracking
-                XS.Add(ESP, SizeOfType(typeof(UIntPtr)));
+                XS.Add(ESP, GetNativeIntegerSize());
 
                 // todo: x64
                 XS.Pop(EAX);

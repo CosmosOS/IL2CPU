@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.Extensions
 {
