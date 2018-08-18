@@ -68,6 +68,31 @@ namespace Cosmos.IL2CPU
         {
             mSettings = aSettings;
 
+            #region Assembly Path Checks
+
+            if (!File.Exists(mSettings.TargetAssembly))
+            {
+                throw new FileNotFoundException("The target assembly path is invalid!", mSettings.TargetAssembly);
+            }
+
+            foreach (var xReference in mSettings.References)
+            {
+                if (!File.Exists(mSettings.TargetAssembly))
+                {
+                    throw new FileNotFoundException("A reference assembly path is invalid!", xReference);
+                }
+            }
+
+            foreach (var xPlugsReference in mSettings.PlugsReferences)
+            {
+                if (!File.Exists(mSettings.TargetAssembly))
+                {
+                    throw new FileNotFoundException("A plugs reference assembly path is invalid!", xPlugsReference);
+                }
+            }
+
+            #endregion
+
             _assemblyLoadContext = new IsolatedAssemblyLoadContext(
                 mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
 
