@@ -1,0 +1,24 @@
+<Project>
+
+    <PropertyGroup>
+        <IL2CPUPublicKey>0024000004800000940000000602000000240000525341310004000001000100f539d415816bc35bdc6e0fdba2be8fe3ba85eb86b6dd0f9eb134cc3c4513c64227f18ae08069c9456c23b87b49cb4a14838037d5d4154adc033dcba263d60cb26e04afd13d09f850e4df25746d0aa49681bd960912a16a1dccb5e92c3abf954a10a1e5daafa6625f18223a32f0211591437820d8a1c9f1beb41e8e2819b1c1bb</IL2CPUPublicKey>
+    </PropertyGroup>
+
+    <Target Name="GenerateInternalsVisibleTo" BeforeTargets="GetAssemblyAttributes" Condition="'@(InternalsVisibleTo)' != ''">
+
+        <ItemGroup>
+            <InternalsVisibleTo Update="@(InternalsVisibleTo)" PublicKey="$(IL2CPUPublicKey)" Condition="'%(InternalsVisibleTo.Key)' == 'IL2CPU'" />
+        </ItemGroup>
+
+        <Error Text="Unknown public key '%(InternalsVisibleTo.Key)'!" Condition="'%(InternalsVisibleTo.Key)' != '' AND '%(InternalsVisibleTo.PublicKey)' == ''" />
+
+        <ItemGroup>
+            <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+                <_Parameter1 Condition="'%(InternalsVisibleTo.PublicKey)' == ''">%(InternalsVisibleTo.Identity)</_Parameter1>
+                <_Parameter1 Condition="'%(InternalsVisibleTo.PublicKey)' != ''">%(InternalsVisibleTo.Identity), PublicKey=%(InternalsVisibleTo.PublicKey)</_Parameter1>
+            </AssemblyAttribute>
+        </ItemGroup>
+
+    </Target>
+
+</Project>
