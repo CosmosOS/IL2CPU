@@ -1,0 +1,25 @@
+<Project>
+
+    <ItemGroup>
+        <XSharpPackage Include="XSharp" ProjectPath="source\XSharp\XSharp.csproj" />
+        <XSharpPackage Include="XSharp.Assembler" ProjectPath="source\XSharp.Assembler\XSharp.Assembler.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalPackage Include="@(XSharpPackage)" Version="$(XSharpVersion)" RepoRoot="$(XSharpRepoRoot)" />
+        <PackageReference Update="@(XSharpPackage)" Version="$(XSharpVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalPackage Update="@(InternalPackage->HasMetadata('ProjectPath'))">
+            <ProjectPath>$([System.IO.Path]::Combine(%(RepoRoot), %(ProjectPath)))</ProjectPath>
+            <ProjectExists Condition="Exists(%(ProjectPath))">True</ProjectExists>
+        </InternalPackage>
+        <InternalPackageToRemove Include="@(InternalPackage)" Exclude="@(PackageReference)" />
+        <InternalPackageToRemove Include="@(InternalPackage->!WithMetadataValue('ProjectExists', 'True'))" />
+        <InternalPackage Remove="@(InternalPackageToRemove)" />
+        <PackageReference Remove="@(InternalPackage)" />
+        <ProjectReference Include="@(InternalPackage->'%(ProjectPath)')" />
+    </ItemGroup>
+
+</Project>

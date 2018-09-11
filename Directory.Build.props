@@ -6,6 +6,10 @@
         <XSharpRepoRoot>$(RepoRoot)..\XSharp\</XSharpRepoRoot>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <XSharpVersion>0.1.0-build521</XSharpVersion>
+    </PropertyGroup>
+
     <Import Project="build\Targets\Import.props" />
 
 </Project>
