@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 
 using Cosmos.Debug.Kernel;
 
@@ -277,34 +276,19 @@ namespace Cosmos.IL2CPU
   }
 
   [SuppressMessage("Design", "CA1051:Do not declare visible instance fields")]
-  [StructLayout(LayoutKind.Explicit, Size = 56)]
   public struct VTable
   {
-    [FieldOffset(0)]
     public uint BaseTypeIdentifier;
 
-    [FieldOffset(4)]
     public uint InterfaceCount;
-
-    [FieldOffset(8)]
     public uint[] InterfaceIndexes;
 
-    [FieldOffset(16)]
     public uint MethodCount;
-
-    [FieldOffset(20)]
     public uint[] MethodIndexes;
-
-    [FieldOffset(28)]
     public uint[] MethodAddresses;
 
-    [FieldOffset(36)]
     public uint InterfaceMethodCount;
-
-    [FieldOffset(40)]
     public uint[] InterfaceMethodIndexes;
-
-    [FieldOffset(48)]
     public uint[] TargetMethodIndexes;
   }
 }
