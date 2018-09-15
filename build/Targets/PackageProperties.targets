@@ -1,0 +1,10 @@
+<Project>
+
+    <PropertyGroup>
+        <PackageDescription Condition="'$(PackageDescription)' != ''">$(PackageDescription)
+
+$(IL2CPUDescription)</PackageDescription>
+        <PackageDescription Condition="'$(PackageDescription)' == ''">$(IL2CPUDescription)</PackageDescription>
+    </PropertyGroup>
+
+</Project>

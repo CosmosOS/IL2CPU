@@ -1,13 +1,10 @@
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
-// using System.Collections.Generic;
-// using System.IO;
-// using System.Linq;
-//
-// using IL2CPU=Cosmos.IL2CPU;
 using System.Reflection;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+
 using XSharp;
-using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.X86.IL
 {

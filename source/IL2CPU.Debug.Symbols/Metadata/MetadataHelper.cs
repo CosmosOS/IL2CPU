@@ -11,17 +11,11 @@ namespace IL2CPU.Debug.Symbols.Metadata
     internal static class MetadataHelper
     {
         private static MetadataStringDecoder mMetadataStringDecoder;
-        private static readonly Dictionary<string, MetadataReaderProvider> mMetadataCache;
-
-        static MetadataHelper()
-        {
-            mMetadataCache = new Dictionary<string, MetadataReaderProvider>();
-        }
+        private static readonly Dictionary<string, MetadataReaderProvider> mMetadataCache = new Dictionary<string, MetadataReaderProvider>();
 
         public static MetadataReader TryGetReader(string aAssemblyPath)
         {
-            MetadataReaderProvider provider;
-            if (mMetadataCache.TryGetValue(aAssemblyPath, out provider))
+            if (mMetadataCache.TryGetValue(aAssemblyPath, out var provider))
             {
                 return provider.GetMetadataReader();
             }
@@ -74,9 +68,7 @@ namespace IL2CPU.Debug.Symbols.Metadata
                     return null;
                 }
 
-                string pdbPath;
-                MetadataReaderProvider provider;
-                if (peReader.TryOpenAssociatedPortablePdb(aAssemblyPath, TryOpenFile, out provider, out pdbPath))
+                if (peReader.TryOpenAssociatedPortablePdb(aAssemblyPath, TryOpenFile, out var provider, out var pdbPath))
                 {
                     return provider;
                 }

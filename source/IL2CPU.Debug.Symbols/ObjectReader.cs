@@ -17,16 +17,11 @@ namespace IL2CPU.Debug.Symbols
         // -1 is before first read, -2 is closed
         public ObjectReader(IEnumerable<T> items)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException("items");
-            }
-            mItems = items;
+            mItems = items ?? throw new ArgumentNullException(nameof(items));
             mItemsEnumerator = items.GetEnumerator();
 
             // initialize
-            Tuple<string[], Func<object, object>[]> xInfo;
-            if (mInfo.TryGetValue(typeof(T).FullName, out xInfo))
+            if (mInfo.TryGetValue(typeof(T).FullName, out var xInfo))
             {
                 mFieldGetters = xInfo.Item2;
                 mFieldNames = xInfo.Item1;
@@ -67,23 +62,14 @@ namespace IL2CPU.Debug.Symbols
             mCurrentIndex = -2;
         }
 
-        public int Depth
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int Depth => throw new NotImplementedException();
 
         public DataTable GetSchemaTable()
         {
             throw new NotImplementedException();
         }
 
-        public bool IsClosed
-        {
-            get
-            {
-                return mCurrentIndex == -2;
-            }
-        }
+        public bool IsClosed => mCurrentIndex == -2;
 
         public bool NextResult()
         {
@@ -121,13 +107,7 @@ namespace IL2CPU.Debug.Symbols
             Close();
         }
 
-        public int FieldCount
-        {
-            get
-            {
-                return mFieldNames.Length;
-            }
-        }
+        public int FieldCount => mFieldNames.Length;
 
         public bool GetBoolean(int i)
         {
@@ -239,14 +219,8 @@ namespace IL2CPU.Debug.Symbols
             throw new NotImplementedException();
         }
 
-        public object this[string name]
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public object this[string name] => throw new NotImplementedException();
 
-        public object this[int i]
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public object this[int i] => throw new NotImplementedException();
     }
 }

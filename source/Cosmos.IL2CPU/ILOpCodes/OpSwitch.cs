@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpSwitch : ILOpCode {
-    public readonly int[] BranchLocations;
+    public int[] BranchLocations { get; }
 
     public OpSwitch(Code aOpCode, int aPos, int aNextPos, int[] aBranchLocations, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
@@ -65,6 +63,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
 
       if (StackPopTypes[0] == typeof(int) ||
           StackPopTypes[0] == typeof(uint) ||
+          StackPopTypes[0] == typeof(short) ||
+          StackPopTypes[0] == typeof(ushort) ||
           StackPopTypes[0] == typeof(byte))
       {
         return;

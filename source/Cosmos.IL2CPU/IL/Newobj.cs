@@ -32,7 +32,7 @@ namespace Cosmos.IL2CPU.X86.IL
             // call cctor:
             if (aMethod != null)
             {
-                var xCctor = (objectType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? new ConstructorInfo[0]).SingleOrDefault();
+                var xCctor = (objectType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? Array.Empty<ConstructorInfo>()).SingleOrDefault();
                 if (xCctor != null)
                 {
                     XS.Call(LabelName.Get(xCctor));
@@ -97,6 +97,11 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Set(EAX, ESP);
                 XS.Add(EAX, xArgSize + 4);
                 XS.Set(ESP, EAX, destinationDisplacement: (int)xArgSize);
+
+                XS.Push(EAX);
+
+                var xOpType = new OpType(xMethod.OpCode, xMethod.Position, xMethod.NextPosition, xMethod.Value.DeclaringType, xMethod.CurrentExceptionRegion);
+                new Initobj(aAssembler).Execute(aMethod, xOpType);
 
                 new Call(aAssembler).Execute(aMethod, xMethod);
 

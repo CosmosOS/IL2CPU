@@ -4,78 +4,59 @@
 // Last modified: March 18, 2011.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Collections;
 
 namespace Orvid.Collections
 {
-    public class SkipList
+    public class SkipList<T>
     {
-        protected Node _head = new Node(new byte[] { }, null, 33);
         /// <summary>
         /// The main node that the rest of the list is based on.
         /// </summary>
-        public Node Head
-        {
-            get
-            {
-                return _head;
-            }
-        }
-        protected Random _rand = new Random();
-        public Random Random
-        {
-            get
-            {
-                return _rand;
-            }
-        }
-        protected int _levels = 1;
+        public Node Head { get; private set; } = new Node(Array.Empty<byte>(), default(T), 33);
+
+        public Random Random { get; private set; } = new Random();
+
         /// <summary>
         /// An Int32 representing how deep the list is.
         /// </summary>
-        public int Levels
-        {
-            get
-            {
-                return _levels;
-            }
-        }
+        public int Levels { get; private set; } = 1;
 
         public SkipList()
         {
-            _head = new Node(new byte[] { }, null, 33);
-            _rand = new Random();
-            _levels = 1;
+            Head = new Node(Array.Empty<byte>(), default(T), 33);
+            Random = new Random();
+            Levels = 1;
         }
 
         /// <summary>
         /// Adds an item to the skip list.
         /// </summary>
-        public void Add(string key, System.Reflection.MethodBase value)
+        public void Add(string key, T value)
         {
-            this.Insert(key, value);
+            Insert(key, value);
         }
 
         /// <summary>
         /// Inserts an item into the skip list.
         /// </summary>
-        public void Insert(string key, System.Reflection.MethodBase value)
+        public void Insert(string key, T value)
         {
-            byte[] key2 = ASCIIEncoding.ASCII.GetBytes(key);
+            byte[] key2 = Encoding.ASCII.GetBytes(key);
             int level = 0;
-            for (int R = _rand.Next(); (R & 1) == 1; R >>= 1)
+            for (int R = Random.Next(); (R & 1) == 1; R >>= 1)
             {
                 level++;
-                if (level == _levels)
+                if (level == Levels)
                 {
-                    _levels++;
+                    Levels++;
                     break;
                 }
             }
-            Node newNode = new Node(key2, value, level + 1);
-            Node cur = _head;
-            for (int i = _levels - 1; i >= 0; i--)
+            var newNode = new Node(key2, value, level + 1);
+            var cur = Head;
+            for (int i = Levels - 1; i >= 0; i--)
             {
                 for (; cur.Next[i] != null; cur = cur.Next[i])
                 {
@@ -95,21 +76,21 @@ namespace Orvid.Collections
 
         public void Clear()
         {
-            _head = new Node(new byte[] { }, null, 33);
-            _rand = new Random();
-            _levels = 1;
-            System.GC.Collect();
+            Head = new Node(Array.Empty<byte>(), default(T), 33);
+            Random = new Random();
+            Levels = 1;
+            GC.Collect();
         }
 
         /// <summary>
         /// Returns whether a particular key already exists in the skip list
         /// </summary>
-        public bool Contains(string key, out System.Reflection.MethodBase value)
+        public bool Contains(string key, out T value)
         {
-            byte[] value2 = ASCIIEncoding.ASCII.GetBytes(key);
-            for (int i = _levels - 1; i >= 0; i--)
+            byte[] value2 = Encoding.ASCII.GetBytes(key);
+            for (int i = Levels - 1; i >= 0; i--)
             {
-                for (Node cur = _head; cur.Next[i] != null; cur = cur.Next[i])
+                for (var cur = Head; cur.Next[i] != null; cur = cur.Next[i])
                 {
                     if (ArrayGreaterThan(cur.Next[i].Key, value2))
                     {
@@ -122,7 +103,7 @@ namespace Orvid.Collections
                     }
                 }
             }
-            value = null;
+            value = default(T);
             return false;
         }
 
@@ -132,12 +113,12 @@ namespace Orvid.Collections
         /// </summary>
         public bool Remove(string key)
         {
-            byte[] value2 = ASCIIEncoding.ASCII.GetBytes(key);
+            byte[] value2 = Encoding.ASCII.GetBytes(key);
 
             bool found = false;
-            for (int i = _levels - 1; i >= 0; i--)
+            for (int i = Levels - 1; i >= 0; i--)
             {
-                for (Node cur = _head; cur.Next[i] != null; cur = cur.Next[i])
+                for (var cur = Head; cur.Next[i] != null; cur = cur.Next[i])
                 {
                     if (ArraysEqual(cur.Next[i].Key, value2))
                     {
@@ -156,9 +137,9 @@ namespace Orvid.Collections
             return found;
         }
 
-        public IEnumerator<System.Reflection.MethodBase> GetEnumerator()
+        public IEnumerator<T> GetEnumerator()
         {
-            Node cur = _head.Next[0];
+            var cur = Head.Next[0];
             while (cur != null)
             {
                 yield return cur.Value;
@@ -166,13 +147,13 @@ namespace Orvid.Collections
             }
         }
 
-        protected bool ArraysEqual(byte[] firstArray, byte[] secondArray)
+        private static bool ArraysEqual(byte[] firstArray, byte[] secondArray)
         {
             if (firstArray.Length != secondArray.Length)
             {
                 return false;
             }
-            Int32 curlen = 0;
+            var curlen = 0;
             foreach (byte b in firstArray)
             {
                 if (b != secondArray[curlen])
@@ -184,7 +165,7 @@ namespace Orvid.Collections
             return true;
         }
 
-        protected bool ArrayGreaterThan(byte[] firstArray, byte[] secondArray)
+        private static bool ArrayGreaterThan(byte[] firstArray, byte[] secondArray)
         {
             if (firstArray.Length != secondArray.Length)
             {
@@ -192,7 +173,7 @@ namespace Orvid.Collections
             }
             else
             {
-                Int32 n1 = 0;
+                var n1 = 0;
                 foreach (byte b in firstArray)
                 {
                     if (b != secondArray[n1])
@@ -215,53 +196,20 @@ namespace Orvid.Collections
             }
         }
 
-
+        [SuppressMessage("Performance", "CA1819:Properties should not return arrays", Scope = "member")]
+        [SuppressMessage("Design", "CA1034:Nested types should not be visible", Scope = "type")]
         public class Node
         {
-            private Node[] next;
-            public Node[] Next
-            {
-                get
-                {
-                    return this.next;
-                }
-                private set
-                {
-                    this.next = value;
-                }
-            }
-            private byte[] key;
-            public byte[] Key
-            {
-                get
-                {
-                    return key;
-                }
-                set
-                {
-                    this.key = value;
-                }
-            }
-            private System.Reflection.MethodBase value;
-            public System.Reflection.MethodBase Value
-            {
-                get
-                {
-                    return value;
-                }
-                set
-                {
-                    this.value = value;
-                }
-            }
+            public Node[] Next { get; }
+            public byte[] Key { get; }
+            public T Value { get; }
 
-            public Node(byte[] key, System.Reflection.MethodBase value, int level)
+            public Node(byte[] key, T value, int level)
             {
-                this.key = key;
-                this.value = value;
-                this.next = new Node[level];
+                Key = key;
+                Value = value;
+                Next = new Node[level];
             }
         }
-
     }
 }

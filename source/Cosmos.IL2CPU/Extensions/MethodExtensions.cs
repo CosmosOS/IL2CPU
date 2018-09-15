@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Metadata;
 
+using IL2CPU.API;
 using IL2CPU.Debug.Symbols;
-using IL2CPU.Debug.Symbols.Pdb;
-
-using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.Extensions
 {
@@ -16,21 +13,16 @@ namespace Cosmos.IL2CPU.Extensions
             return LabelName.Get(aMethod);
         }
 
-        public static IList<ILLocalVariable> GetLocalVariables(this MethodBase aThis)
+        public static IList<LocalVariableInfo> GetLocalVariables(this MethodBase aThis)
         {
             return DebugSymbolReader.GetLocalVariableInfos(aThis);
         }
 
-        public static MethodBodyBlock GetMethodBodyBlock(this MethodBase aThis)
+        public static IEnumerable<_ExceptionRegionInfo> GetExceptionRegionInfos(this MethodBase aThis)
         {
-            return DebugSymbolReader.GetMethodBodyBlock(aThis.Module, aThis.MetadataToken);
-        }
-
-        public static IEnumerable<_ExceptionRegionInfo> GetExceptionRegionInfos(this MethodBodyBlock aThis, Module aModule)
-        {
-            foreach (var x in aThis.ExceptionRegions)
+            foreach (var x in aThis.GetMethodBody().ExceptionHandlingClauses)
             {
-                yield return new _ExceptionRegionInfo(aModule, x);
+                yield return new _ExceptionRegionInfo(x);
             }
         }
     }

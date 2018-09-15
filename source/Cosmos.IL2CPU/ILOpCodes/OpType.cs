@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Reflection;
 
-
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpType : ILOpCode
   {
-    public readonly Type Value;
+    public Type Value { get; }
 
     public OpType(Code aOpCode, int aPos, int aNextPos, Type aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
@@ -108,7 +107,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           StackPushTypes[0] = typeof(void*);
           return;
         case Code.Box:
-          if (Value.IsPrimitive)
+          if (Value.IsValueType)
           {
             StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
           }
@@ -168,37 +167,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
           return;
         default:
           break;
-      }
-    }
-
-    /// <summary>
-    /// Based on updated StackPopTypes, try to update
-    /// </summary>
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
-    {
-      base.DoInterpretStackTypes(ref aSituationChanged);
-
-      switch (OpCode)
-      {
-        case Code.Box:
-          if (StackPushTypes[0] != null)
-          {
-            return;
-          }
-
-          if (StackPopTypes[0] == null)
-          {
-            return;
-          }
-
-          if (ILOp.IsIntegralType(StackPopTypes[0]) &&
-              ILOp.IsIntegralType(Value))
-          {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
-            aSituationChanged = true;
-            return;
-          }
-          throw new Exception("Wrong poptype: " + StackPopTypes[0].FullName);
       }
     }
   }

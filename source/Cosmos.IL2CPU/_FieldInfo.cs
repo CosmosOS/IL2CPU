@@ -7,19 +7,28 @@ namespace Cosmos.IL2CPU
     [DebuggerDisplay("Field = '{Id}', Offset = {Offset}, Size = {Size}")]
     public class _FieldInfo
     {
-        public readonly string Id;
+        public string Id { get; }
+
+        public FieldInfo Field { get; set; }
+
+        public Type DeclaringType { get; }
+        public Type FieldType { get; set; }
+        public uint Size { get; set; }
+        public bool IsExternalValue { get; set; }
+        public bool IsStatic { get; set; }
+
+        public bool IsOffsetSet { get; private set; }
+
         /// <summary>
         /// Does NOT include any kind of method header!
         /// </summary>
-        private uint mOffset;
-        public bool IsOffsetSet = false;
         public uint Offset
         {
             get
             {
                 if (!IsOffsetSet)
                 {
-                    throw new Exception("Offset is being used, but hasnt been set yet!");
+                    throw new InvalidOperationException("Offset is being used, but hasnt been set yet!");
                 }
                 return mOffset;
             }
@@ -30,17 +39,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public FieldInfo Field
-        {
-            get;
-            set;
-        }
-
-        public readonly Type DeclaringType;
-        public Type FieldType;
-        public uint Size;
-        public bool IsExternalValue;
-        public bool IsStatic;
+        private uint mOffset;
 
         public _FieldInfo(string aId, uint aSize, Type aDeclaringType, Type aFieldType)
         {

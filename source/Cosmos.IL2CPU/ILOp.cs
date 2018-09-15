@@ -8,8 +8,9 @@ using System.Runtime.InteropServices;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.X86.IL;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using IL2CPU.Debug.Symbols;
 
 using XSharp;
 using XSharp.Assembler;
@@ -120,7 +121,7 @@ namespace Cosmos.IL2CPU
                     break;
                 }
                 var xField = xLocalInfos[i];
-                xOffset += GetStackCountForLocal(aMethod, xField.Type) * 4;
+                xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4;
             }
             return xOffset;
         }
@@ -131,7 +132,7 @@ namespace Cosmos.IL2CPU
             uint xOffset = GetEBPOffsetForLocal(aMethod, localIndex);
             var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
             var xField = xLocalInfos[localIndex];
-            xOffset += GetStackCountForLocal(aMethod, xField.Type) * 4 - 4;
+            xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4 - 4;
             return xOffset;
         }
 
@@ -193,13 +194,11 @@ namespace Cosmos.IL2CPU
             }
 
             // now check plugs
-            IDictionary<string, PlugField> xPlugFields;
-            if (PlugManager.PlugFields.TryGetValue(aType, out xPlugFields))
+            if (PlugManager.PlugFields.TryGetValue(aType, out var xPlugFields))
             {
                 foreach (var xPlugField in xPlugFields)
                 {
-                    _FieldInfo xPluggedField = null;
-                    if (xCurList.TryGetValue(xPlugField.Key, out xPluggedField))
+                    if (xCurList.TryGetValue(xPlugField.Key, out var xPluggedField))
                     {
                         // plugfield modifies an already existing field
 
@@ -229,6 +228,23 @@ namespace Cosmos.IL2CPU
 
         public static List<_FieldInfo> GetFieldsInfo(Type aType, bool includeStatic)
         {
+            if (aType.IsValueType)
+            {
+                var fieldsInfo = GetValueTypeFieldsInfo(aType);
+
+                if (includeStatic)
+                {
+                    foreach (var field in aType.GetFields(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                    {
+                        fieldsInfo.Add(
+                            new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), aType, field.FieldType));
+                    }
+                }
+
+                return fieldsInfo;
+            }
+
             var xResult = new List<_FieldInfo>(16);
             DoGetFieldsInfo(aType, xResult, includeStatic);
             xResult.Reverse();
@@ -261,6 +277,68 @@ namespace Cosmos.IL2CPU
             return xResult;
         }
 
+        private static List<_FieldInfo> GetValueTypeFieldsInfo(Type type)
+        {
+            var structLayoutAttribute = type.StructLayoutAttribute;
+            var fieldInfos = new List<_FieldInfo>();
+
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            switch (structLayoutAttribute.Value)
+            {
+                case LayoutKind.Auto:
+                case LayoutKind.Sequential:
+                    var offset = 0;
+                    var pack = structLayoutAttribute.Pack;
+
+                    if (pack == 0)
+                    {
+                        pack = (int)SizeOfType(typeof(IntPtr));
+                    }
+
+                    if (fields.Length > 0)
+                    {
+                        var typeAlignment = Math.Min(pack, fields.Max(f => SizeOfType(f.FieldType)));
+
+                        Array.Sort(fields, (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
+
+                        foreach (var field in fields)
+                        {
+                            var fieldSize = SizeOfType(field.FieldType);
+
+                            var fieldAlignment = Math.Min(typeAlignment, fieldSize);
+                            offset = (int)Align((uint)offset, (uint)fieldAlignment);
+
+                            var fieldInfo = new _FieldInfo(
+                                field.GetFullName(), SizeOfType(field.FieldType), type, field.FieldType);
+                            fieldInfo.Offset = (uint)offset;
+                            fieldInfo.Field = field;
+
+                            fieldInfos.Add(fieldInfo);
+
+                            offset += (int)fieldSize;
+                        }
+                    }
+
+                    break;
+                case LayoutKind.Explicit:
+                    foreach (var field in fields)
+                    {
+                        var fieldInfo = new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), type, field.FieldType);
+                        fieldInfo.Offset = (uint)(field.GetCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
+                        fieldInfo.Field = field;
+
+                        fieldInfos.Add(fieldInfo);
+                    }
+
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+
+            return fieldInfos;
+        }
+
         private static void GetFieldMapping(List<_FieldInfo> aFieldInfs, List<DebugInfo.Field_Map> aFieldMapping,
           Type aType)
         {
@@ -289,6 +367,32 @@ namespace Cosmos.IL2CPU
 
         protected static uint GetStorageSize(Type aType)
         {
+            if (aType.IsValueType)
+            {
+                var structLayoutAttribute = aType.StructLayoutAttribute;
+                var pack = structLayoutAttribute.Pack;
+
+                if (pack == 0)
+                {
+                    pack = (int)SizeOfType(typeof(IntPtr));
+                }
+
+                var fieldsInfo = GetFieldsInfo(aType, false);
+
+                if (fieldsInfo.Count > 0)
+                {
+                    var typeAlignment = (uint)Math.Min(fieldsInfo.Max(f => f.Size), pack);
+
+                    return (uint)Math.Max(
+                        structLayoutAttribute.Size,
+                        Align(fieldsInfo.Max(f => f.Offset + f.Size), typeAlignment));
+                }
+                else
+                {
+                    return (uint)Math.Max(structLayoutAttribute.Size, 0);
+                }
+            }
+
             return (from item in GetFieldsInfo(aType, false)
                     where !item.IsStatic
                     orderby item.Offset descending
@@ -352,15 +456,13 @@ namespace Cosmos.IL2CPU
                     switch (aCurrentOpCode.CurrentExceptionRegion.Kind)
                     {
                         case ExceptionRegionKind.Catch:
-                            {
-                                xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                                break;
-                            }
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
+                            break;
                         case ExceptionRegionKind.Finally:
-                            {
-                                xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                                break;
-                            }
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
+                            break;
+                        case ExceptionRegionKind.Filter:
+                        case ExceptionRegionKind.Fault:
                         default:
                             {
                                 throw new Exception("ExceptionHandlerType '" + aCurrentOpCode.CurrentExceptionRegion.Kind.ToString() +
@@ -426,7 +528,7 @@ namespace Cosmos.IL2CPU
             if (debugEnabled)
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
-                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: (int)stackOffsetToCheck);
+                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
@@ -455,9 +557,17 @@ namespace Cosmos.IL2CPU
                 {
                     Console.WriteLine("\t'{0}'", xField.Id);
                 }
-                throw new Exception(string.Format("Field '{0}' not found on type '{1}'", aField, aDeclaringType.FullName));
+                throw new Exception(String.Format("Field '{0}' not found on type '{1}'", aField, aDeclaringType.FullName));
             }
             return xFieldInfo;
+        }
+
+        public static _FieldInfo ResolveField(FieldInfo fieldInfo)
+        {
+            var fieldsInfo = GetFieldsInfo(fieldInfo.DeclaringType, fieldInfo.IsStatic);
+            return fieldsInfo.SingleOrDefault(
+                f => MemberInfoComparer.Instance.Equals(f.Field, fieldInfo))
+                ?? ResolveField(fieldInfo.DeclaringType, fieldInfo.GetFullName(), !fieldInfo.IsStatic);
         }
 
         protected static void CopyValue(XSRegisters.Register32 destination, int destinationDisplacement, XSRegisters.Register32 source, int sourceDisplacement, uint size)
@@ -522,7 +632,7 @@ namespace Cosmos.IL2CPU
         {
             if (aType == null)
             {
-                throw new ArgumentNullException("aType");
+                throw new ArgumentNullException(nameof(aType));
             }
             if (aType.IsPointer || aType.IsByRef)
             {
@@ -536,7 +646,9 @@ namespace Cosmos.IL2CPU
             {
                 return 8;
             }
+#pragma warning disable IDE0010 // Add missing cases
             switch (aType.FullName)
+#pragma warning restore IDE0010 // Add missing cases
             {
                 case "System.Char":
                     return 2;
@@ -587,12 +699,8 @@ namespace Cosmos.IL2CPU
             }
             if (aType.IsValueType)
             {
-                var xSla = aType.StructLayoutAttribute;
-                if ((xSla != null) && (xSla.Size > 0))
-                {
-                    return (uint)xSla.Size;
-                }
-                return (uint)(from item in GetFieldsInfo(aType, false) select (int)item.Size).Sum();
+                // structs are stored in the stack, so stack size = storage size
+                return GetStorageSize(aType);
             }
             return 4;
         }

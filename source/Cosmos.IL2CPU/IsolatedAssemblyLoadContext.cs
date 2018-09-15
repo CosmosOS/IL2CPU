@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -16,7 +17,18 @@ namespace Cosmos.IL2CPU
 
             foreach (var assemblyPath in assemblyPaths)
             {
-                var assemblyIdentity = new AssemblyIdentity(GetAssemblyName(assemblyPath));
+                AssemblyName assemblyName;
+
+                try
+                {
+                    assemblyName = GetAssemblyName(assemblyPath);
+                }
+                catch (ArgumentException e)
+                {
+                    throw new FileLoadException($"Failed to get assembly name for '{assemblyPath}' !", e);
+                }
+
+                var assemblyIdentity = new AssemblyIdentity(assemblyName);
 
                 if (_assemblies.ContainsKey(assemblyIdentity))
                 {

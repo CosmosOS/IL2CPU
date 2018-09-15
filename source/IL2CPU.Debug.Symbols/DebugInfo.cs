@@ -14,7 +14,7 @@ namespace IL2CPU.Debug.Symbols
 {
     using SourceInfos = SortedList<uint, SourceInfo>;
 
-    public class DebugInfo : IDisposable
+    public sealed class DebugInfo : IDisposable
     {
         /// <summary>
         /// Current id of the generation.
@@ -50,16 +50,11 @@ namespace IL2CPU.Debug.Symbols
             public List<string> FieldNames = new List<string>();
         }
 
-        protected SqliteConnection mConnection;
-        protected string mDbName;
+        private SqliteConnection mConnection;
+        private string mDbName;
         // Dont use DbConnectionStringBuilder class, it doesnt work with LocalDB properly.
         //protected mDataSouce = @".\SQLEXPRESS";
-        protected string mConnStr;
-
-        public void DeleteDB(string aDbName, string aPathname)
-        {
-            File.Delete(aDbName);
-        }
+        private string mConnStr;
 
         public DebugInfo(string aPathname, bool aCreate = false, bool aCreateIndexes = false)
         {
@@ -97,7 +92,7 @@ namespace IL2CPU.Debug.Symbols
                 //
                 if (aCreateIndexes)
                 {
-                    this.CreateIndexes();
+                    CreateIndexes();
                 }
             }
 
@@ -141,8 +136,7 @@ namespace IL2CPU.Debug.Symbols
 
             mDocumentIdByNameCache = new CacheHelper<string, long?>(n =>
             {
-                long xId;
-                var xHasResult = DocumentGUIDs.TryGetValue(n, out xId);
+                var xHasResult = DocumentGUIDs.TryGetValue(n, out var xId);
                 if (xHasResult)
                 {
                     return xId;
@@ -240,7 +234,7 @@ namespace IL2CPU.Debug.Symbols
             return xLabels;
         }
 
-        protected List<string> local_MappingTypeNames = new List<string>();
+        private List<string> local_MappingTypeNames = new List<string>();
         public void WriteFieldMappingToFile(IEnumerable<Field_Map> aMapping)
         {
             var xMaps = aMapping.Where(delegate (Field_Map mp)
@@ -312,7 +306,7 @@ namespace IL2CPU.Debug.Symbols
             aSymbols.Add(xMap);
         }
 
-        protected List<string> mLocalFieldInfoNames = new List<string>();
+        private List<string> mLocalFieldInfoNames = new List<string>();
         public void WriteFieldInfoToFile(IList<FIELD_INFO> aFields)
         {
             var itemsToAdd = new List<FIELD_INFO>(aFields.Count);
@@ -325,7 +319,7 @@ namespace IL2CPU.Debug.Symbols
                     itemsToAdd.Add(xItem);
                 }
             }
-            BulkInsert<FIELD_INFO>("FIELD_INFOS", itemsToAdd, 2500, true);
+            BulkInsert("FIELD_INFOS", itemsToAdd, 2500, true);
         }
 
         public class SequencePoint
@@ -360,7 +354,7 @@ namespace IL2CPU.Debug.Symbols
             return xSeqPoints.ToArray();
         }
 
-        protected List<Method> mMethods = new List<Method>();
+        private List<Method> mMethods = new List<Method>();
         public void AddMethod(Method aMethod, bool aFlush = false)
         {
             if (aMethod != null)

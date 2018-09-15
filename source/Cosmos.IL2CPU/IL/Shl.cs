@@ -1,6 +1,5 @@
 using System;
 using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler;
 
 using XSharp;
 using static XSharp.XSRegisters;

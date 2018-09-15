@@ -10,10 +10,9 @@ using System.Text;
 
 using Cosmos.Build.Common;
 
-using IL2CPU.Debug.Symbols;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
-
-using XSharp.Assembler;
+using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
 {
@@ -68,6 +67,31 @@ namespace Cosmos.IL2CPU
         public CompilerEngine(ICompilerEngineSettings aSettings)
         {
             mSettings = aSettings;
+
+            #region Assembly Path Checks
+
+            if (!File.Exists(mSettings.TargetAssembly))
+            {
+                throw new FileNotFoundException("The target assembly path is invalid!", mSettings.TargetAssembly);
+            }
+
+            foreach (var xReference in mSettings.References)
+            {
+                if (!File.Exists(mSettings.TargetAssembly))
+                {
+                    throw new FileNotFoundException("A reference assembly path is invalid!", xReference);
+                }
+            }
+
+            foreach (var xPlugsReference in mSettings.PlugsReferences)
+            {
+                if (!File.Exists(mSettings.TargetAssembly))
+                {
+                    throw new FileNotFoundException("A plugs reference assembly path is invalid!", xPlugsReference);
+                }
+            }
+
+            #endregion
 
             _assemblyLoadContext = new IsolatedAssemblyLoadContext(
                 mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
@@ -325,7 +349,7 @@ namespace Cosmos.IL2CPU
 
                 foreach (var xType in aAssembly.GetTypes())
                 {
-                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceInclude>();
+                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
 
                     if (xForceIncludeAttribute != null)
                     {
@@ -334,7 +358,7 @@ namespace Cosmos.IL2CPU
 
                     foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceInclude>();
+                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
 
                         if (xForceIncludeAttribute != null)
                         {
@@ -433,7 +457,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private void ForceInclude(MemberInfo aMemberInfo, ForceInclude aForceIncludeAttribute)
+        private void ForceInclude(MemberInfo aMemberInfo, ForceIncludeAttribute aForceIncludeAttribute)
         {
             if (aMemberInfo is Type xType)
             {

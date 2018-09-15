@@ -46,11 +46,11 @@ namespace Cosmos.IL2CPU.X86.IL
             }
 
             var xExtraStackSize = Call.GetStackSizeToReservate(aTargetMethod, xPopType);
-            uint xThisOffset = 0;
+            int xThisOffset = 0;
             var xParameters = aTargetMethod.GetParameters();
             foreach (var xItem in xParameters)
             {
-                xThisOffset += Align(SizeOfType(xItem.ParameterType), 4);
+                xThisOffset += (int)Align(SizeOfType(xItem.ParameterType), 4);
             }
 
             // This is finding offset to self? It looks like we dont need offsets of other
@@ -111,7 +111,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 if (xExtraStackSize > 0)
                 {
-                    xThisOffset -= xExtraStackSize;
+                    xThisOffset -= (int)xExtraStackSize;
                 }
 
                 /*
@@ -161,12 +161,12 @@ namespace Cosmos.IL2CPU.X86.IL
                     if (xHasParams
                         || !xNeedsExtraStackSize)
                     {
-                        XS.Add(ESP, xThisOffset + 4);
+                        XS.Add(ESP, (uint)(xThisOffset + 4));
                     }
 
                     for (int i = 0; i < xThisOffset / 4; i++)
                     {
-                        XS.Push(ESP, displacement: -4);
+                        XS.Push(ESP, displacement: -8);
                     }
 
                     if (xHasParams

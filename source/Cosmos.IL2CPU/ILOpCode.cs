@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -18,6 +19,7 @@ namespace Cosmos.IL2CPU
   //     only needed by reader and not ILOpCode
   public abstract class ILOpCode
   {
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
     public enum Code : ushort
     {
       #region Values
@@ -364,7 +366,7 @@ namespace Cosmos.IL2CPU
       {
         if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)
         {
-          aStack.Push(CurrentExceptionRegion.GetCatchType());
+          aStack.Push(CurrentExceptionRegion.CatchType);
         }
       }
 
@@ -387,10 +389,10 @@ namespace Cosmos.IL2CPU
           aSituationChanged = true;
         }
         if ((StackPopTypes[i] != xActualStackItem)
-            && (((StackPopTypes[i] == typeof(Byte)) || (StackPopTypes[i] == typeof(SByte)))
-                || ((StackPopTypes[i] == typeof(UInt16)) || (StackPopTypes[i] == typeof(Int16)))
-                || ((StackPopTypes[i] == typeof(UInt32)) || (StackPopTypes[i] == typeof(Int32)))
-                || ((StackPopTypes[i] == typeof(UInt64)) || (StackPopTypes[i] == typeof(Int64)))
+            && (((StackPopTypes[i] == typeof(byte)) || (StackPopTypes[i] == typeof(sbyte)))
+                || ((StackPopTypes[i] == typeof(ushort)) || (StackPopTypes[i] == typeof(short)))
+                || ((StackPopTypes[i] == typeof(uint)) || (StackPopTypes[i] == typeof(int)))
+                || ((StackPopTypes[i] == typeof(ulong)) || (StackPopTypes[i] == typeof(long)))
                 || ((StackPopTypes[i] == typeof(UIntPtr)) || (StackPopTypes[i] == typeof(IntPtr)))))
         {
           StackPopTypes[i] = xActualStackItem;
@@ -433,8 +435,7 @@ namespace Cosmos.IL2CPU
 
     protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
-      ILOpCode xNextOpCode;
-      if (aOpCodes.TryGetValue(NextPosition, out xNextOpCode))
+      if (aOpCodes.TryGetValue(NextPosition, out var xNextOpCode))
       {
         ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
         InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
@@ -448,8 +449,7 @@ namespace Cosmos.IL2CPU
 
     protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
-      ILOpCode xNextOpCode;
-      if (aOpCodes.TryGetValue(aPosition, out xNextOpCode))
+      if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
         ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
         InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
@@ -458,8 +458,7 @@ namespace Cosmos.IL2CPU
 
     protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
     {
-      ILOpCode xNextOpCode;
-      if (aOpCodes.TryGetValue(aPosition, out xNextOpCode))
+      if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
         InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
       }
