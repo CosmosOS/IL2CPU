@@ -20,6 +20,8 @@ namespace Cosmos.IL2CPU.X86.IL
             var xStackItem = aOpCode.StackPopTypes[0];
             var xSize = Math.Max(SizeOfType(xStackItem), SizeOfType(aOpCode.StackPopTypes[1]));
             var xIsFloat = TypeIsFloat(xStackItem);
+            var xBaseLabel = GetLabel(aMethod, aOpCode);
+            var xNoDivideByZeroExceptionLabel = xBaseLabel + "_NoDivideByZeroException";
 
             if (xSize > 8)
             {
@@ -47,6 +49,15 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Pop(ESI);
                     // high
                     XS.Pop(EDI);
+
+                    XS.Xor(EAX, EAX);
+                    XS.Or(EAX, ESI);
+                    XS.Or(EAX, EDI);
+                    XS.Jump(ConditionalTestEnum.NotZero, xNoDivideByZeroExceptionLabel);
+
+                    XS.Call(GetLabel(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef));
+
+                    XS.Label(xNoDivideByZeroExceptionLabel);
 
                     // dividend
                     // low
@@ -165,6 +176,14 @@ namespace Cosmos.IL2CPU.X86.IL
                 else
                 {
                     XS.Pop(ECX);
+
+                    XS.Test(ECX, ECX);
+                    XS.Jump(ConditionalTestEnum.NotZero, xNoDivideByZeroExceptionLabel);
+
+                    XS.Call(GetLabel(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef));
+
+                    XS.Label(xNoDivideByZeroExceptionLabel);
+
                     XS.Pop(EAX);
 
                     XS.SignExtendAX(RegisterSize.Int32);
