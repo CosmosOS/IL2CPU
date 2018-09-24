@@ -15,14 +15,14 @@
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+        <PackageReference Include="XSharp" />
+        <PackageReference Include="XSharp.Assembler" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
-        <ProjectReference Include="$(XSharpRepoRoot)source\XSharp.Assembler\XSharp.Assembler.csproj" />
-        <ProjectReference Include="$(XSharpRepoRoot)source\XSharp\XSharp.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
     </ItemGroup>
