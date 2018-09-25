@@ -11,4 +11,6 @@
 
     <Import Project="InternalPackages.targets" />
 
+    <Import Project="PackageVersions.targets" />
+
 </Project>

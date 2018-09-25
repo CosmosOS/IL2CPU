@@ -19,10 +19,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.1" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.1" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.NetCore.Analyzers" Version="2.6.1" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.NetFramework.Analyzers" Version="2.6.1" PrivateAssets="All" />
+        <RoslynAnalyzer Include="Microsoft.CodeAnalysis.Analyzers" />
+        <RoslynAnalyzer Include="Microsoft.CodeQuality.Analyzers" />
+        <RoslynAnalyzer Include="Microsoft.NetCore.Analyzers" />
+        <RoslynAnalyzer Include="Microsoft.NetFramework.Analyzers" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="@(RoslynAnalyzer)" PrivateAssets="All" />
     </ItemGroup>
 
     <Import Project="build\Targets\Import.targets" />
