@@ -224,6 +224,7 @@ namespace Cosmos.IL2CPU
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
+            Queue(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef, null, "Explicit Entry");
 
             mAsmblr.ProcessField(TypeOf(BclType.String).Fields.Single(f => f.Name == "Empty" && f.IsStatic));
 

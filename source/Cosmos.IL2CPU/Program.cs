@@ -35,9 +35,9 @@ namespace Cosmos.IL2CPU
                     return Succeeded;
                 }
             }
-            catch (Exception E)
+            catch (Exception e)
             {
-                aLogError(String.Format("Error occurred: " + E.ToString()));
+                aLogError(String.Format("Error occurred: " + e.ToString()));
             }
 
             return Failed;

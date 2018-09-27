@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <XSharpVersion>0.1.0-build521</XSharpVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <LangVersion>Latest</LangVersion>
     </PropertyGroup>
 

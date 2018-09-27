@@ -1495,7 +1495,7 @@ namespace Cosmos.IL2CPU
                 {
                     var xLocals = aMethod.MethodInfo.MethodBody.LocalTypes;
                     var xLocalsSize = (from item in xLocals
-                                       select ILOp.Align(ILOp.SizeOfType(item), 4)).Sum();
+                                       select (int)ILOp.Align(ILOp.SizeOfType(item), 4)).Sum();
                     xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
                     xStackDifference = (uint?)xMLSymbol.StackDiff;
                 }

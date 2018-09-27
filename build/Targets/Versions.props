@@ -1,0 +1,7 @@
+<Project>
+
+    <PropertyGroup>
+        <RoslynAnalyzersVersion>2.6.2</RoslynAnalyzersVersion>
+    </PropertyGroup>
+
+</Project>

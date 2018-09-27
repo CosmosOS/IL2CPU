@@ -17,6 +17,8 @@ namespace Cosmos.IL2CPU
             throw new ArgumentOutOfRangeException(aError);
         }
 
+        public static void ThrowDivideByZeroException() => throw new DivideByZeroException();
+
         public static void ThrowInvalidOperation(string aError)
         {
             Console.WriteLine(aError);

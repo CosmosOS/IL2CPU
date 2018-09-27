@@ -18,6 +18,9 @@ namespace Cosmos.IL2CPU
         public static readonly MethodInfo ThrowArgumentOutOfRangeRef =
             ExceptionHelperTypeInfo.Methods.Single(m => m.Name == nameof(ThrowArgumentOutOfRange));
 
+        public static readonly MethodInfo ThrowDivideByZeroExceptionRef =
+            ExceptionHelperTypeInfo.Methods.Single(m => m.Name == nameof(ThrowDivideByZeroException));
+
         public static readonly MethodInfo ThrowInvalidOperationRef =
             ExceptionHelperTypeInfo.Methods.Single(m => m.Name == nameof(ThrowInvalidOperation));
 

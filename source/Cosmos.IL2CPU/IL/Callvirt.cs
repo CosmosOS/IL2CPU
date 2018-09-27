@@ -160,7 +160,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                     for (int i = 0; i < xThisOffset / 4; i++)
                     {
-                        XS.Push(ESP, displacement: -4);
+                        XS.Push(ESP, displacement: -8);
                     }
 
                     if (xHasParams
