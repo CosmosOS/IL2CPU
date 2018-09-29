@@ -21,10 +21,10 @@ namespace Cosmos.IL2CPU
         private int mComPort = 0;
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
-                              /// <summary>
-                              /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
-                              /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
-                              /// </summary>
+        /// <summary>
+        /// Setting this field to false means the .xs files for the debug stub are read from the DebugStub assembly.
+        /// This allows the automated kernel tester to use the live ones, instead of the installed ones.
+        /// </summary>
         public static bool ReadDebugStubFromDisk = true;
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
@@ -62,10 +62,7 @@ namespace Cosmos.IL2CPU
 
             // Null Segment - Selector 0x00
             // Not used, but required by many emulators.
-            xGDT.AddRange(new byte[8]
-                          {
-                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-                          });
+            xGDT.AddRange(new byte[8] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
             // Code Segment
             mGdCode = (byte)xGDT.Count;
@@ -232,10 +229,7 @@ namespace Cosmos.IL2CPU
             uint xSig = 0x1BADB002;
 
             DataMembers.Add(new DataIfNotDefined("ELF_COMPILATION"));
-            DataMembers.Add(new DataMember("MultibootSignature", new uint[]
-                                                                 {
-                                                                     xSig
-                                                                 }));
+            DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
             uint xFlags = 0x10003;
             DataMembers.Add(new DataMember("MultibootFlags", xFlags));
             DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
@@ -248,10 +242,7 @@ namespace Cosmos.IL2CPU
 
             DataMembers.Add(new DataIfDefined("ELF_COMPILATION"));
             xFlags = 0x00003;
-            DataMembers.Add(new DataMember("MultibootSignature", new uint[]
-                                                                 {
-                                                                     xSig
-                                                                 }));
+            DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
             DataMembers.Add(new DataMember("MultibootFlags", xFlags));
             DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
             DataMembers.Add(new DataEndIfDefined());
@@ -386,31 +377,17 @@ namespace Cosmos.IL2CPU
             {
                 var xGen = new AsmGenerator();
 
-                var xGenerateAssembler =
-                    new Action<object>(i =>
-                    {
-                        if (i is StreamReader)
-                        {
-                            var xAsm = xGen.Generate((StreamReader)i);
-                            CurrentInstance.Instructions.AddRange(xAsm.Instructions);
-                            CurrentInstance.DataMembers.AddRange(xAsm.DataMembers);
-                        }
-                        else if (i is string)
-                        {
-                            var xAsm = xGen.Generate((string)i);
-                            CurrentInstance.Instructions.AddRange(xAsm.Instructions);
-                            CurrentInstance.DataMembers.AddRange(xAsm.DataMembers);
-                        }
-                        else
-                        {
-                            throw new Exception("Object type '" + i.ToString() + "' not supported!");
-                        }
-                    });
+                void GenerateAssembler(Assembler assembler)
+                {
+                    CurrentInstance.Instructions.AddRange(assembler.Instructions);
+                    CurrentInstance.DataMembers.AddRange(assembler.DataMembers);
+                }
+
                 if (ReadDebugStubFromDisk)
                 {
                     foreach (var xFile in Directory.GetFiles(CosmosPaths.DebugStubSrc, "*.xs"))
                     {
-                        xGenerateAssembler(xFile);
+                        GenerateAssembler(xGen.Generate(xFile));
                     }
                 }
                 else
@@ -425,7 +402,7 @@ namespace Cosmos.IL2CPU
                         {
                             using (var xReader = new StreamReader(xStream))
                             {
-                                xGenerateAssembler(xReader);
+                                GenerateAssembler(xGen.Generate(xReader));
                             }
                         }
                     }
