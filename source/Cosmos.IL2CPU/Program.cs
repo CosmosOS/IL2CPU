@@ -2,7 +2,7 @@
 
 namespace Cosmos.IL2CPU
 {
-    public class Program
+    public static class Program
     {
         private const int Succeeded = 0;
         private const int Failed = 1;

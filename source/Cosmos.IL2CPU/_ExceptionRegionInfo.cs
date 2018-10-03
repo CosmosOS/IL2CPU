@@ -6,14 +6,14 @@ namespace Cosmos.IL2CPU
 {
     public class _ExceptionRegionInfo
     {
-        public readonly ExceptionHandlingClause ExceptionClause;
-        public readonly int HandlerOffset;
-        public readonly int HandlerLength;
-        public readonly int TryOffset;
-        public readonly int TryLength;
-        public readonly int FilterOffset;
-        public readonly ExceptionRegionKind Kind;
-        public readonly Type CatchType;
+        public ExceptionHandlingClause ExceptionClause { get; }
+        public int HandlerOffset { get; }
+        public int HandlerLength { get; }
+        public int TryOffset { get; }
+        public int TryLength { get; }
+        public int FilterOffset { get; }
+        public ExceptionRegionKind Kind { get; }
+        public Type CatchType { get; }
 
         public _ExceptionRegionInfo(ExceptionHandlingClause aExceptionClause)
         {
@@ -44,9 +44,9 @@ namespace Cosmos.IL2CPU
                     Kind = ExceptionRegionKind.Finally;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-
+                // ignored
             }
         }
     }
