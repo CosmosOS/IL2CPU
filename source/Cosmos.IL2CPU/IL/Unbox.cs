@@ -30,7 +30,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (xIsNullable)
             {
-                xType = xType.GenericTypeArguments[0];
+                xType = xType.GenericArguments[0];
 
                 XS.Compare(ESP, 0, destinationIsIndirect: true);
                 XS.Jump(ConditionalTestEnum.Equal, xAfterInstanceCheckLabel);
