@@ -538,18 +538,20 @@ namespace Cosmos.IL2CPU
                         {
                             if (xType.IsSubclassOf(xVirtMethod.DeclaringType))
                             {
-                                var xNewMethod = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                var enumerable = xType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                                                       .Where(method => method.Name == aMethod.Name
-                                                                       && method.GetParameters().Select(param => param.ParameterType).SequenceEqual(xParamTypes))
-                                                      .SingleOrDefault();
+                                                                       && method.GetParameters().Select(param => param.ParameterType).SequenceEqual(xParamTypes));
+                                // We need to check IsVirtual, a non virtual could
+                                // "replace" a virtual above it?
+                                var xNewMethod = enumerable.FirstOrDefault(m => m.IsVirtual);
+                                while (xNewMethod != null && (xNewMethod.Attributes & MethodAttributes.NewSlot) != 0)
+                                {
+                                    xType = xType.BaseType;
+                                    xNewMethod = enumerable.Where(m => m.DeclaringType == xType).SingleOrDefault();
+                                }
                                 if (xNewMethod != null)
                                 {
-                                    // We need to check IsVirtual, a non virtual could
-                                    // "replace" a virtual above it?
-                                    if (xNewMethod.IsVirtual)
-                                    {
-                                        Queue(xNewMethod, aMethod, "Virtual Downscan");
-                                    }
+                                    Queue(xNewMethod, aMethod, "Virtual Downscan");
                                 }
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
