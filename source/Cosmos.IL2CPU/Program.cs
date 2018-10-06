@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Cosmos.IL2CPU
 {
@@ -9,6 +10,19 @@ namespace Cosmos.IL2CPU
 
         public static int Run(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
+            var debug = Environment.GetEnvironmentVariable(EnvironmentVariables.IL2CPU_DEBUG);
+
+            if (String.Equals(debug, Boolean.TrueString, StringComparison.OrdinalIgnoreCase)
+                || String.Equals(debug, "1", StringComparison.OrdinalIgnoreCase))
+            {
+                aLogMessage($"Waiting for debugger. PID: {Process.GetCurrentProcess().Id}");
+
+                while (!Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+            }
+
             #region Null Checks
 
             if (aArgs == null)
