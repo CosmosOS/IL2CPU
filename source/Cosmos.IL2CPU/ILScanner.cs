@@ -969,9 +969,16 @@ namespace Cosmos.IL2CPU
             if (aMethodInfo.DeclaringType.FullName == "System.Runtime.CompilerServices.Unsafe")
             {
                 var type = CompilerEngine.MetadataContext.ResolveTypeByName(
-                    "System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices");
+                    "System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
 
-                aMethodInfo = type.GetMethod(aMethodInfo.Name, aMethodInfo.ParameterTypes);
+                var method = type.GetMethod(aMethodInfo.Name, aMethodInfo.ParameterTypes);
+
+                if (aMethodInfo.IsGenericMethod)
+                {
+                    method = method.MakeGenericMethod(aMethodInfo.GenericArguments);
+                }
+
+                aMethodInfo = method;
             }
 
             if (aMethodInfo.MethodBody == null)

@@ -81,9 +81,31 @@ namespace IL2CPU.Reflection
 
             foreach (var method in type.Methods)
             {
-                if (method.Name == name
-                    && method.ParameterTypes.SequenceEqual(parameterTypes))
+                if (method.Name == name)
                 {
+                    if (method.ParameterTypes.Count != parameterTypes.Count)
+                    {
+                        continue;
+                    }
+
+                    bool matches = true;
+
+                    for (int i = 0; i < parameterTypes.Count; i++)
+                    {
+                        if (!TypeIsGenericParameter(parameterTypes[i])
+                            && !TypeIsGenericParameter(method.ParameterTypes[i])
+                            && parameterTypes[i] != method.ParameterTypes[i])
+                        {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if (!matches)
+                    {
+                        continue;
+                    }
+                    
                     if (match?.Invoke(method) ?? true)
                     {
                         return method;
@@ -91,6 +113,25 @@ namespace IL2CPU.Reflection
 
                     break;
                 }
+            }
+
+            bool TypeIsGenericParameter(TypeInfo typeInfo)
+            {
+                if (typeInfo == null)
+                {
+                    return true;
+                }
+
+                if (typeInfo is ArrayType
+                    || typeInfo is ByReferenceType
+                    || typeInfo is PinnedType
+                    || typeInfo is PointerType
+                    || typeInfo is SZArrayType)
+                {
+                    return TypeIsGenericParameter(typeInfo.GetElementType());
+                }
+
+                return false;
             }
 
             return null;
