@@ -4,6 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <IsPackable>True</IsPackable>
         <PackageDescription>IL2CPU API.</PackageDescription>
+        <NoWarn>CA1707;$(NoWarn)</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
