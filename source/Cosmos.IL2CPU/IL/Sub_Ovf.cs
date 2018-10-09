@@ -3,6 +3,7 @@ using CPUx86 = XSharp.Assembler.x86;
 using XSharp.Assembler.x86;
 using XSharp;
 using static XSharp.XSRegisters;
+using System.Reflection;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -49,7 +50,15 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // Let's check if we add overflow and if so throw OverflowException
         XS.Jump(ConditionalTestEnum.NoOverflow, xSuccessLabel);
-        ThrowOverflowException();
+        if (xSize > 4) // Hack to stop stack corruption
+        {
+          XS.Add(ESP, 8);
+        }
+        else
+        {
+          XS.Add(ESP, 4);
+        }
+        Call.DoExecute(Assembler, aMethod, typeof(ExceptionHelper).GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public), aOpCode, GetLabel(aMethod, aOpCode), xSuccessLabel, DebugEnabled);
         XS.Label(xSuccessLabel);
       }
     }
