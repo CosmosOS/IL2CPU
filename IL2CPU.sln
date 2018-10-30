@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Build.Common", "..\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IL2CPU.Debug.Symbols", "source\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj", "{8037EF30-3CC2-4555-ACF0-8392250FAE2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Core.DebugStub", "..\Cosmos\source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj", "{D8E80776-2800-469B-AE31-D1C016D5E8D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Core.DebugStub", "source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj", "{D8E80776-2800-469B-AE31-D1C016D5E8D3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Debug.Kernel", "..\Cosmos\source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj", "{EDE13333-B2E6-4E04-B995-209B8BDFA9D4}"
 EndProject
