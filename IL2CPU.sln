@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IL2CPU", "source\IL2CPU\IL2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{D232F471-5A59-438F-87EA-E1809E3BEDB4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Build.Common", "..\Cosmos\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj", "{8F02A68D-1C14-4665-A41E-076252F2055E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos.Build.Common", "..\Common\source\Cosmos.Build.Common\Cosmos.Build.Common.csproj", "{8F02A68D-1C14-4665-A41E-076252F2055E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IL2CPU.Debug.Symbols", "source\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj", "{8037EF30-3CC2-4555-ACF0-8392250FAE2C}"
 EndProject
