@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-		<PackageReference Include="Cosmos.Build.Common" />
+        <PackageReference Include="Cosmos.Build.Common" />
         <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
@@ -21,8 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
+        <ProjectReference Include="..\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
     </ItemGroup>
