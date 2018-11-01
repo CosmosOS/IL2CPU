@@ -21,4 +21,4 @@ build_script:
       msbuild "build\Build.proj" /t:Restore;Build;Pack /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 artifacts:
-  - path: 'artifacts\nupkg\*.nupkg'
+  - path: 'artifacts\Debug\nupkg\*.nupkg'
