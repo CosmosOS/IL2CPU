@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="X# Rule Set" Description="X# Rule Set" ToolsVersion="15.0">
+<RuleSet Name="IL2CPU Rule Set" Description="IL2CPU Rule Set" ToolsVersion="15.0">
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1000" Action="Info" />
     <Rule Id="CA1001" Action="Warning" />
