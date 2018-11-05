@@ -9,10 +9,9 @@
 
 # Build results
 
-[Oo]bj/
+[Aa]rtifacts
 [Bb]in
-[Dd]ebug/
-[Rr]elease/
+[Oo]bj/
 [Pp]ackages/
 
 *.[Oo]bj
