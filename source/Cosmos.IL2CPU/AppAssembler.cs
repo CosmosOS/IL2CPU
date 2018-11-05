@@ -249,7 +249,7 @@ namespace Cosmos.IL2CPU
                             INDEXINMETHOD = i,
                             NAME = "Local" + i,
                             OFFSET = 0 - (int)ILOp.GetEBPOffsetForLocalForDebugger(aMethod, i),
-                            TYPENAME = xLocals[i].AssemblyQualifiedName
+                            TYPENAME = xLocals[i].FullName
                         };
                         mLocals_Arguments_Infos.Add(xInfo);
 
@@ -274,7 +274,7 @@ namespace Cosmos.IL2CPU
                         NAME = "this:" + X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
                         INDEXINMETHOD = 0,
                         OFFSET = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
-                        TYPENAME = aMethod.MethodInfo.DeclaringType.AssemblyQualifiedName
+                        TYPENAME = aMethod.MethodInfo.DeclaringType.FullName
                     });
 
                     xIdxOffset++;
@@ -295,7 +295,7 @@ namespace Cosmos.IL2CPU
                         INDEXINMETHOD = (int)(i + xIdxOffset),
                         NAME = aMethod.MethodInfo.Parameters[i].Name,
                         OFFSET = xOffset,
-                        TYPENAME = xParams[i].AssemblyQualifiedName
+                        TYPENAME = xParams[i].FullName
                     });
                 }
             }

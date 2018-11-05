@@ -7,7 +7,6 @@
     <Import Project="StrongName.targets" />
 
     <Import Project="Tests.targets" Condition="'$(IsTestProject)' == 'True'" />
-    <Import Project="VSIX.targets" Condition="'$(IsVsixProject)' == 'True'" />
 
     <Import Project="InternalPackages.targets" />
 

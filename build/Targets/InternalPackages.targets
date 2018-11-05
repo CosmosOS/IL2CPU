@@ -1,5 +1,13 @@
 <Project>
 
+	<ItemGroup>
+		<CommonPackage Include="Cosmos.Build.Common" ProjectPath="source\Cosmos.Build.Common\Cosmos.Build.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalPackage Include="@(CommonPackage)" Version="$(CommonVersion)" RepoRoot="$(CommonRepoRoot)" />
+	</ItemGroup>
+
     <ItemGroup>
         <XSharpPackage Include="XSharp" ProjectPath="source\XSharp\XSharp.csproj" />
         <XSharpPackage Include="XSharp.Assembler" ProjectPath="source\XSharp.Assembler\XSharp.Assembler.csproj" />

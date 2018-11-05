@@ -2,6 +2,9 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <PackageDescription>IL2CPU debug symbols APIs.</PackageDescription>
+        <IsPackable>True</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

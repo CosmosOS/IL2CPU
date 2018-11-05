@@ -250,7 +250,7 @@ namespace Cosmos.IL2CPU
                 {
                     xDebugInfs.Add(new FIELD_INFO()
                     {
-                        TYPE = xInfo.FieldType.AssemblyQualifiedName,
+                        TYPE = xInfo.FieldType.FullName,
                         OFFSET = (int)xInfo.Offset,
                         NAME = GetNameForField(xInfo),
                     });
@@ -332,7 +332,7 @@ namespace Cosmos.IL2CPU
             List<_FieldInfo> aFieldInfs, List<DebugInfo.Field_Map> aFieldMapping, TypeInfo aType)
         {
             var xFMap = new DebugInfo.Field_Map();
-            xFMap.TypeName = aType.AssemblyQualifiedName;
+            xFMap.TypeName = aType.FullName;
             foreach (var xInfo in aFieldInfs)
             {
                 xFMap.FieldNames.Add(GetNameForField(xInfo));
@@ -348,7 +348,7 @@ namespace Cosmos.IL2CPU
             if (loc >= 0)
             {
                 string fName = inf.Id.Substring(loc, inf.Id.Length - loc);
-                return inf.DeclaringType.AssemblyQualifiedName + fName;
+                return inf.DeclaringType.FullName + fName;
             }
 
             return inf.Id;
