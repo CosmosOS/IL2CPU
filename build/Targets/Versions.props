@@ -1,6 +1,10 @@
 <Project>
 
     <PropertyGroup>
+        <MicrosoftNETTestSdkVersion>15.9.0</MicrosoftNETTestSdkVersion>
+        <MoqVersion>4.10.1</MoqVersion>
+        <NUnitVersion>3.11.0</NUnitVersion>
+        <NUnit3TestAdapterVersion>3.12.0</NUnit3TestAdapterVersion>
         <RoslynAnalyzersVersion>2.6.2</RoslynAnalyzersVersion>
     </PropertyGroup>
 
