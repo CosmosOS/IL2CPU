@@ -1408,7 +1408,7 @@ namespace Cosmos.IL2CPU
             Assembler.WriteDebugVideo("Now create the kernel class");
             if (!CompilerEngine.UseGen3Kernel)
             {
-                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint);
+                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint, DebugEnabled);
                 Assembler.WriteDebugVideo("Kernel class created");
             }
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";

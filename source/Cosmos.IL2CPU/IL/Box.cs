@@ -17,6 +17,12 @@ namespace Cosmos.IL2CPU.X86.IL
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
       OpType xType = (OpType)aOpCode;
+
+      if (IsReferenceType(xType.Value))
+      {
+        return;
+      }
+
       uint xSize = Align(SizeOfType(xType.Value), 4);
       string xTypeID = GetTypeIDLabel(xType.Value);
 

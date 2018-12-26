@@ -251,7 +251,7 @@ namespace Cosmos.IL2CPU
                                             for (int i = 0; i < posMethParamTypes.Length && (i + offset) < xParamTypes.Length; i++)
                                             {
                                                 //Continue if current type is null i.e. was a pointer as that could be any type originally.
-                                                if (xParamTypes[i + offset] != null && !posMethParamTypes[i].Equals(xParamTypes[i + offset]))
+                                                if (xParamTypes[i + offset] != null && !xParamTypes[i + offset].Equals(posMethParamTypes[i]))
                                                 {
                                                     if (offset == 0)
                                                     {

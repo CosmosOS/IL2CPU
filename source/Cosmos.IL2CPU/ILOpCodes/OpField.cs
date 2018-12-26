@@ -89,12 +89,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             StackPopTypes[0] = StackPopTypes[0].GetEnumUnderlyingType();
           }
-          if (StackPopTypes[0].IsValueType &&
-              !StackPopTypes[0].IsPrimitive)
+          if (StackPopTypes[0].IsValueType)
           {
             StackPopTypes[0] = StackPopTypes[0].MakeByRefType();
           }
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = ILOp.IsNativeInt(StackPopTypes[0]) ? StackPopTypes[0] : Value.FieldType.MakeByRefType();
           return;
       }
     }
@@ -174,8 +173,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (Value.FieldType.IsClass &&
-              StackPopTypes[0] == typeof(NullRef))
+          if (ILOp.IsReferenceType(Value.FieldType)
+              && StackPopTypes[0] == typeof(NullRef))
           {
             return;
           }

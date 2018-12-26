@@ -81,6 +81,10 @@ namespace IL2CPU.API
             xName = xName.Replace("[]", "array");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
+
+            // replace <> before, as it's used as a prefix for compiler generated classes (need to investigate more)
+            xName = xName.Replace("<>", "compilergenerated");
+
             xName = IllegalCharsReplace.Replace(xName, string.Empty);
 
             if (xName.Length > MaxLengthWithoutSuffix)
@@ -130,13 +134,7 @@ namespace IL2CPU.API
             if (aType.IsGenericType && !aType.IsGenericTypeDefinition)
             {
                 xSB.Append(GetFullName(aType.GetGenericTypeDefinition()));
-            }
-            else
-            {
-                xSB.Append(aType.FullName);
-            }
-            if (aType.IsGenericType)
-            {
+
                 xSB.Append("<");
                 var xArgs = aType.GetGenericArguments();
                 for (int i = 0; i < xArgs.Length - 1; i++)
@@ -147,6 +145,11 @@ namespace IL2CPU.API
                 xSB.Append(GetFullName(xArgs.Last()));
                 xSB.Append(">");
             }
+            else
+            {
+                xSB.Append(aType.FullName);
+            }
+
             return xSB.ToString();
         }
 
@@ -186,9 +189,10 @@ namespace IL2CPU.API
                 xBuilder.Append("dynamic_method");
             }
             xBuilder.Append(".");
-            xBuilder.Append(aMethod.Name);
-            if (aMethod.IsGenericMethod || aMethod.IsGenericMethodDefinition)
+            if (aMethod.IsGenericMethod && !aMethod.IsGenericMethodDefinition)
             {
+                xBuilder.Append(xMethodInfo.GetGenericMethodDefinition().Name);
+
                 var xGenArgs = aMethod.GetGenericArguments();
                 if (xGenArgs.Length > 0)
                 {
@@ -201,6 +205,10 @@ namespace IL2CPU.API
                     xBuilder.Append(GetFullName(xGenArgs.Last()));
                     xBuilder.Append(">");
                 }
+            }
+            else
+            {
+                xBuilder.Append(aMethod.Name);
             }
             xBuilder.Append("(");
             var xParams = aMethod.GetParameters();

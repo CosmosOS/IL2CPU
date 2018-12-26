@@ -1,8 +1,10 @@
-using IL2CPU.API;
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
 using System.Reflection;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -24,10 +26,10 @@ namespace Cosmos.IL2CPU.X86.IL
             string xCurrentLabel = GetLabel(aMethod, aOpCode);
             var xType = xMethod.Value.DeclaringType;
 
-            Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value);
+            Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value, DebugEnabled);
         }
 
-        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor)
+        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor, bool debugEnabled)
         {
             // call cctor:
             if (aMethod != null)
@@ -181,6 +183,13 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
 
                         XS.Push(ECX);
+                    }
+                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(ReadOnlySpan<char>))
+                    {
+                        var getLengthMethod = typeof(ReadOnlySpan<char>).GetProperty("Length").GetMethod;
+                        Call.DoExecute(aAssembler, aMethod, getLengthMethod, xMethod, currentLabel, debugEnabled);
+
+                        XS.LiteralCode("shl dword [esp]");
                     }
                     else
                     {

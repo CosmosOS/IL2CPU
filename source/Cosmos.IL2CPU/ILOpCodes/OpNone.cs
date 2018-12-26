@@ -823,18 +823,18 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
-            if ((StackPopTypes[0] == typeof(IntPtr) || StackPopTypes[0] == typeof(UIntPtr)) &&
-                StackPopTypes[1].IsPointer)
+            if (ILOp.IsNativeInt(StackPopTypes[0])
+                && StackPopTypes[1].IsPointer)
             {
               StackPushTypes[0] = StackPopTypes[1];
               aSituationChanged = true;
               return;
             }
             if (OpCode == Code.Add &&
-                ((StackPopTypes[0] == typeof(IntPtr) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
-                 || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && StackPopTypes[1] == typeof(IntPtr))))
+                ((ILOp.IsNativeInt(StackPopTypes[0]) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
+                 || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && ILOp.IsNativeInt(StackPopTypes[1]))))
             {
-              if (StackPopTypes[0] == typeof(IntPtr))
+              if (ILOp.IsNativeInt(StackPopTypes[0]))
               {
                 StackPushTypes[0] = StackPopTypes[1];
               }
@@ -842,6 +842,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
               {
                 StackPushTypes[0] = StackPopTypes[0];
               }
+              aSituationChanged = true;
+              return;
+            }
+            if (OpCode == Code.Sub
+                && StackPopTypes[0].IsByRef
+                && StackPopTypes[1].IsByRef)
+            {
+              StackPushTypes[0] = typeof(IntPtr);
               aSituationChanged = true;
               return;
             }
