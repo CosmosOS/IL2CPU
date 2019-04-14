@@ -4,22 +4,6 @@
         <SignAssembly>True</SignAssembly>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' != 'True'">$(RepoRoot)build\IL2CPU.ruleset</CodeAnalysisRuleSet>
-        <CodeAnalysisRuleSet Condition="'$(IsTestProject)' == 'True'">$(RepoRoot)build\Tests.ruleset</CodeAnalysisRuleSet>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <RoslynAnalyzer Include="Microsoft.CodeAnalysis.Analyzers" />
-        <RoslynAnalyzer Include="Microsoft.CodeQuality.Analyzers" />
-        <RoslynAnalyzer Include="Microsoft.NetCore.Analyzers" />
-        <RoslynAnalyzer Include="Microsoft.NetFramework.Analyzers" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="@(RoslynAnalyzer)" PrivateAssets="All" />
-    </ItemGroup>
-
     <Import Project="build\Targets\Import.targets" />
 
 </Project>
