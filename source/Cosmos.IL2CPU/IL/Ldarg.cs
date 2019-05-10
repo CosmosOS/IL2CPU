@@ -129,7 +129,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Comment("Arg real size = " + xArgRealSize + " aligned size = " + xArgSize);
       if (IsIntegralType(xType) && xArgRealSize == 1 || xArgRealSize == 2)
       {
-        if (IsIntegerSigned(xType))
+        if (TypeIsSigned(xType))
         {
           XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: xDisplacement, size: (RegisterSize)(8 * xArgRealSize));
         }

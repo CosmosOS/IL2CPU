@@ -34,8 +34,7 @@ namespace Cosmos.IL2CPU
 
         public static void ThrowOverflow()
         {
-            string xError = "Arithmetic operation gets an overflow!";
-            Console.WriteLine(xError);
+            string xError = "Arithmetic operation or conversion causes an overflow!";
             throw new OverflowException(xError);
         }
 
@@ -43,7 +42,6 @@ namespace Cosmos.IL2CPU
         {
             throw new NotFiniteNumberException(offendingNumber);
         }
-
         public static void ThrowInvalidCastException() => throw new InvalidCastException();
     }
 
@@ -51,6 +49,9 @@ namespace Cosmos.IL2CPU
     public static class ExceptionHelperRefs
     {
         public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
+
+        public static readonly MethodInfo ThrowOverflowExceptionRef =
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowOverflow));
 
         public static readonly MethodInfo ThrowDivideByZeroExceptionRef =
             typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowDivideByZeroException));
