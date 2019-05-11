@@ -18,9 +18,12 @@ namespace Cosmos.IL2CPU.X86.IL
                     Assemble(Assembler, DebugEnabled);
                 }
 
-                public static void Assemble(Assembler aAssembler, bool debugEnabled)
+                public static void Assemble(Assembler aAssembler, bool debugEnabled, bool doNullReferenceCheck = true)
                 {
-                    DoNullReferenceCheck(aAssembler, debugEnabled, 4);
+                    if (doNullReferenceCheck)
+                    {
+                        DoNullReferenceCheck(aAssembler, debugEnabled, 4);
+                    }
 
                     XS.Add(ESP, 4);
                     XS.Pop(EAX);

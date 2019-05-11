@@ -25,7 +25,7 @@ namespace Cosmos.IL2CPU.X86.IL
     {
       //  stack     = index
       //  stack + 2 = array
-      // null reference check is done in ldlen
+      DoNullReferenceCheck(aAssembler, debugEnabled, 8);
 
       var xBaseLabel = GetLabel(aMethod, aOpCode);
       var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
@@ -33,7 +33,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Pop(EBX); //get Position _, array, 0, index -> _, array, 0
       XS.Push(ESP, true, 4); // _, array, 0 => _, array, 0, array
       XS.Push(ESP, true, 12); // _, array, 0, array => _, array, 0, array, 0
-      Ldlen.Assemble(aAssembler, debugEnabled); // _, array, 0, array, 0 -> _, array, 0, length
+      Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, array, 0 -> _, array, 0, length
       XS.Pop(EAX); //Length of array _, array, 0, length -> _, array, 0
       XS.Compare(EAX, EBX);
       XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
