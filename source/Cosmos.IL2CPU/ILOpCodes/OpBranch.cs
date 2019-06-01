@@ -184,6 +184,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
 
+          //EqualityComparer<> isn't detected as a class.
+          if (xValue1.IsGenericType &&
+              xValue2.IsGenericType)
+          {
+            return;
+          }
+
           if (xValue1.IsInterface && xValue1.IsAssignableFrom(xValue2) ||
               xValue2.IsInterface && xValue2.IsAssignableFrom(xValue1))
           {
