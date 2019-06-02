@@ -147,45 +147,55 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xValue1 == typeof(IntPtr) && xValue2 == typeof(IntPtr))
-          {
-            return;
-          }
-          if (xValue1 == typeof(bool) && xValue2 == typeof(bool))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(int) && xValue2 == typeof(IntPtr))
-              || (xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(UIntPtr) && xValue2 == typeof(byte*))
-              || (xValue1 == typeof(byte*) && xValue2 == typeof(UIntPtr)))
-          {
-            return;
-          }
-
-          if ((xValue1 == typeof(long) && xValue2 == typeof(ulong))
-              || (xValue1 == typeof(ulong) && xValue2 == typeof(long)))
-          {
-            return;
-          }
-
           if ((xValue1 == typeof(int) && xValue2 == typeof(bool))
-              || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
+            || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
           {
             return;
           }
 
-          if (xValue1.IsClass &&
-              xValue2.IsClass)
+          var xType1 = Type.GetTypeCode(xValue1.IsEnum ? Enum.GetUnderlyingType(xValue1) : xValue1);
+          var xType2 = Type.GetTypeCode(xValue2.IsEnum ? Enum.GetUnderlyingType(xValue2) : xValue2);
+
+          if ((xType1 == TypeCode.Boolean)
+            && (xType2 == TypeCode.Boolean))
           {
             return;
           }
-
-          if (xValue1.IsInterface && xValue1.IsAssignableFrom(xValue2) ||
-              xValue2.IsInterface && xValue2.IsAssignableFrom(xValue1))
+          if ((xType1 == TypeCode.Char)
+            && (xType2 == TypeCode.Char))
+          {
+            return;
+          }
+          if ((xType1 == TypeCode.SByte || xType1 == TypeCode.Byte)
+            && (xType2 == TypeCode.Byte || xType2 == TypeCode.SByte))
+          {
+            return;
+          }
+          if ((xType1 == TypeCode.Int16 || xType1 == TypeCode.UInt16)
+            && (xType2 == TypeCode.UInt16 || xType2 == TypeCode.Int16))
+          {
+            return;
+          }
+          //The TypeCode for IntPtr is Object
+          //The TypeCode for UIntPtr is Object
+          //The TypeCode for Byte* is Object
+          if ((xType1 == TypeCode.Int32 || xType1 == TypeCode.UInt32 || xType1 == TypeCode.Object)
+            && (xType2 == TypeCode.UInt32 || xType2 == TypeCode.Int32 || xType2 == TypeCode.Object))
+          {
+            return;
+          }
+          if ((xType1 == TypeCode.Int64 || xType1 == TypeCode.UInt64)
+            && (xType2 == TypeCode.UInt64 || xType2 == TypeCode.Int64))
+          {
+            return;
+          }
+          if ((xType1 == TypeCode.DateTime)
+            && (xType2 == TypeCode.DateTime))
+          {
+            return;
+          }
+          if ((xValue1.IsClass || xValue1.IsInterface)
+            && (xValue2.IsClass || xValue2.IsInterface))
           {
             return;
           }
