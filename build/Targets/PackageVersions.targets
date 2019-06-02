@@ -7,8 +7,4 @@
         <PackageReference Update="NUnit3TestAdapter" Version="$(NUnit3TestAdapterVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Update="@(RoslynAnalyzer)" Version="$(RoslynAnalyzersVersion)" />
-    </ItemGroup>
-
 </Project>
