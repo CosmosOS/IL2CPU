@@ -604,11 +604,14 @@ namespace Cosmos.IL2CPU
         public static bool TypeIsSigned(Type aType)
         {
           var name = aType.FullName;
-          return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
-            "System.Int32" == name || "System.Int64" == name;
+          //return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
+          //  "System.Int32" == name || "System.Int64" == name;
+
+      return "System.SByte" == name || "System.Int16" == name ||
+                  "System.Int32" == name || "System.Int64" == name;
     }
 
-        public static bool IsIntegralType(Type type)
+    public static bool IsIntegralType(Type type)
         {
             return type == typeof(byte) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)
