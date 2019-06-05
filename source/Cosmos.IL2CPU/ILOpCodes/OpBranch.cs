@@ -178,14 +178,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
 
-          if (xValue1.IsClass &&
-              xValue2.IsClass)
-          {
-            return;
-          }
-
-          if (xValue1.IsInterface && xValue1.IsAssignableFrom(xValue2) ||
-              xValue2.IsInterface && xValue2.IsAssignableFrom(xValue1))
+          if ((xValue1.IsClass || xValue1.IsInterface)
+            && (xValue2.IsClass || xValue2.IsInterface))
           {
             return;
           }
