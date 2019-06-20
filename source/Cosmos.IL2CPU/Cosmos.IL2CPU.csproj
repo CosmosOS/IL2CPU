@@ -18,7 +18,6 @@
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
         <PackageReference Include="XSharp" />
-        <PackageReference Include="XSharp.Assembler" />
     </ItemGroup>
 
     <ItemGroup>
