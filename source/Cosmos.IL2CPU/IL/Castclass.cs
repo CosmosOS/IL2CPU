@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
@@ -36,7 +35,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Push(xTypeID, isIndirect: true);
             XS.Push(Convert.ToUInt32(xType.Value.IsInterface));
 
-            MethodBase xMethodIsInstance = VTablesImplRefs.IsInstanceRef;
+            var xMethodIsInstance = VTablesImplRefs.IsInstanceRef;
 
             Call.DoExecute(Assembler, aMethod, xMethodIsInstance, aOpCode, xCurrentMethodLabel, xAfterIsInstanceCallLabel, DebugEnabled);
 

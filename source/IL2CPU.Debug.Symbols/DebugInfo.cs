@@ -1,14 +1,17 @@
-﻿using Dapper;
-using DapperExtensions;
-using DapperExtensions.Mapper;
-using DapperExtensions.Sql;
-using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using Microsoft.Data.Sqlite;
+
+using Dapper;
+using DapperExtensions;
+using DapperExtensions.Mapper;
+using DapperExtensions.Sql;
+
+using IL2CPU.Reflection;
+using IL2CPU.Reflection.Debug;
 
 namespace IL2CPU.Debug.Symbols
 {
@@ -322,36 +325,18 @@ namespace IL2CPU.Debug.Symbols
             BulkInsert("FIELD_INFOS", itemsToAdd, 2500, true);
         }
 
-        public class SequencePoint
-        {
-            public int Offset;
-            public string Document;
-            public int LineStart;
-            public int ColStart;
-            public long LineColStart
-            {
-                get { return ((long)LineStart << 32) + ColStart; }
-            }
-            public int LineEnd;
-            public int ColEnd;
-            public long LineColEnd
-            {
-                get { return ((long)LineEnd << 32) + ColEnd; }
-            }
-        }
-
         // This gets the Sequence Points.
         // Sequence Points are spots that identify what the compiler/debugger says is a spot
         // that a breakpoint can occur one. Essentially, an atomic source line in C#
-        public SequencePoint[] GetSequencePoints(MethodBase aMethod, bool aFilterHiddenLines = false)
+        public SequencePoint[] GetSequencePoints(MethodInfo aMethod, bool aFilterHiddenLines = false)
         {
-            return GetSequencePoints(aMethod.DeclaringType.Assembly.Location, aMethod.MetadataToken, aFilterHiddenLines);
+            return aMethod.DebugInfo?.SequencePoints.ToArray() ?? Array.Empty<SequencePoint>();
         }
 
-        public SequencePoint[] GetSequencePoints(string aAsmPathname, int aMethodToken, bool aFilterHiddenLines = false)
+        public SequencePoint[] GetSequencePoints(string assemblyPath, int metadataToken)
         {
-            var xSeqPoints = DebugSymbolReader.GetSequencePoints(aAsmPathname, aMethodToken);
-            return xSeqPoints.ToArray();
+            var context = MetadataContext.FromAssemblyPaths(new string[] { assemblyPath });
+            return GetSequencePoints(context.Assemblies.First().ManifestModule.ResolveMethod(metadataToken));
         }
 
         private List<Method> mMethods = new List<Method>();
@@ -366,10 +351,10 @@ namespace IL2CPU.Debug.Symbols
 
         // Quick look up of assemblies so we dont have to go to the database and compare by fullname.
         // This and other GUID lists contain only a few members, and save us from issuing a lot of selects to SQL.
-        public Dictionary<Assembly, long> AssemblyGUIDs = new Dictionary<Assembly, long>();
+        public Dictionary<AssemblyInfo, long> AssemblyGUIDs = new Dictionary<AssemblyInfo, long>();
         List<AssemblyFile> xAssemblies = new List<AssemblyFile>();
 
-        public void AddAssemblies(List<Assembly> aAssemblies, bool aFlush = false)
+        public void AddAssemblies(List<AssemblyInfo> aAssemblies, bool aFlush = false)
         {
             if (aAssemblies != null)
             {
@@ -379,7 +364,7 @@ namespace IL2CPU.Debug.Symbols
                     var xRow = new AssemblyFile()
                     {
                         ID = CreateId(),
-                        Pathname = xAsm.Location
+                        Pathname = xAsm.ManifestModule.Location
                     };
                     xAssemblies.Add(xRow);
 
@@ -651,11 +636,11 @@ namespace IL2CPU.Debug.Symbols
                     for (int i = 0; i < xSeqPoints.Count; i++)
                     {
                         xCodeOffsets[i] = xSeqPoints[i].Offset;
-                        xCodeDocuments[i] = xSeqPoints[i].Document;
-                        xCodeStartLines[i] = xSeqPoints[i].LineStart;
-                        xCodeStartColumns[i] = xSeqPoints[i].ColStart;
-                        xCodeEndLines[i] = xSeqPoints[i].LineEnd;
-                        xCodeEndColumns[i] = xSeqPoints[i].ColEnd;
+                        xCodeDocuments[i] = xSeqPoints[i].Document.Name;
+                        xCodeStartLines[i] = xSeqPoints[i].StartLine;
+                        xCodeStartColumns[i] = xSeqPoints[i].StartColumn;
+                        xCodeEndLines[i] = xSeqPoints[i].EndLine;
+                        xCodeEndColumns[i] = xSeqPoints[i].EndColumn;
                     }
 
                     if (xSymbols.Length == 0 && xSeqCount > 0)

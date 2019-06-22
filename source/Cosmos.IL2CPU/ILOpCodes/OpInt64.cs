@@ -1,19 +1,21 @@
 ﻿using System;
-using System.Reflection;
+
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpInt64 : ILOpCode
   {
-    public ulong Value { get; }
+    public long Value { get; }
 
-    public OpInt64(Code aOpCode, int aPos, int aNextPos, ulong aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpInt64(Code aOpCode, int aPos, int aNextPos, long aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -24,7 +26,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -35,14 +37,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
       switch (OpCode)
       {
         case Code.Ldc_I8:
-          StackPushTypes[0] = typeof (long);
+          StackPushTypes[0] = TypeOf(BclType.Int64);
           return;
         default:
           break;

@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
+
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {

@@ -1,19 +1,21 @@
 ﻿using System;
-using System.Reflection;
+
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpType : ILOpCode
   {
-    public Type Value { get; }
+    public TypeInfo Value { get; }
 
-    public OpType(Code aOpCode, int aPos, int aNextPos, Type aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpType(Code aOpCode, int aPos, int aNextPos, TypeInfo aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -52,7 +54,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -91,7 +93,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -104,12 +106,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           break;
         case Code.Ldelema:
           StackPopTypes[1] = Value.MakeArrayType();
-          StackPushTypes[0] = typeof(void*);
+          StackPushTypes[0] = TypeOf(BclType.Void).MakePointerType();
           return;
         case Code.Box:
           if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = TypeOf(typeof(Box<>)).MakeGenericType(Value);
           }
           else
           {
@@ -134,14 +136,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
           StackPushTypes[0] = Value;
           return;
         case Code.Isinst:
-          StackPopTypes[0] = typeof(object);
+          StackPopTypes[0] = TypeOf(BclType.Object);
           if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
+            StackPushTypes[0] = TypeOf(typeof(Box<>)).MakeGenericType(Value.GenericArguments[0]);
           }
           else if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = TypeOf(typeof(Box<>)).MakeGenericType(Value);
           }
           else
           {
@@ -149,13 +151,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Castclass:
-          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
+          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == TypeOf(typeof(Nullable<>)))
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
+            StackPushTypes[0] = TypeOf(typeof(Box<>)).MakeGenericType(Value.GenericArguments[0]);
           }
           else if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = TypeOf(typeof(Box<>)).MakeGenericType(Value);
           }
           else
           {
@@ -163,7 +165,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Sizeof:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = TypeOf(BclType.UInt32);
           return;
         default:
           break;

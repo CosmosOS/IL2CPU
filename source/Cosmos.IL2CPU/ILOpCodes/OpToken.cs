@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
+
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpToken : ILOpCode {
     public int Value { get; }
     public FieldInfo ValueField { get; }
-    public Type ValueType { get; }
+    public TypeInfo ValueType { get; }
 
     public bool ValueIsType
     {
@@ -38,7 +41,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         }
     }
 
-    public OpToken(Code aOpCode, int aPos, int aNextPos, int aValue, Module aModule, Type[] aTypeGenericArgs, Type[] aMethodGenericArgs, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpToken(Code aOpCode, int aPos, int aNextPos, int aValue,ModuleInfo aModule,
+      IReadOnlyList<TypeInfo> aTypeGenericArgs, IReadOnlyList<TypeInfo> aMethodGenericArgs, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion) {
       Value = aValue;
       if (ValueIsField)
@@ -52,7 +56,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
 
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -63,7 +67,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -74,7 +78,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -83,11 +87,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         case Code.Ldtoken:
           if (ValueIsField)
           {
-            StackPushTypes[0] = typeof (RuntimeFieldHandle);
+            StackPushTypes[0] = TypeOf(typeof(RuntimeFieldHandle));
           }
           else if (ValueIsType)
           {
-            StackPushTypes[0] = typeof (RuntimeTypeHandle);
+            StackPushTypes[0] = TypeOf(typeof(RuntimeTypeHandle));
           }
           else
           {

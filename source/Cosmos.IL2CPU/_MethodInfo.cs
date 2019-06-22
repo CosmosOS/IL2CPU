@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
-using System.Reflection;
+
 using IL2CPU.API.Attribs;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -9,9 +10,9 @@ namespace Cosmos.IL2CPU
     {
         public enum TypeEnum { Normal, Plug, NeedsPlug };
 
-        public MethodBase MethodBase { get; }
+        public MethodInfo MethodInfo { get; }
         public TypeEnum Type { get; }
-        public UInt32 UID { get; }
+        public uint UID { get; }
         public _MethodInfo PlugMethod { get; }
         public Type MethodAssembler { get; }
         public bool IsInlineAssembler { get; }
@@ -21,14 +22,15 @@ namespace Cosmos.IL2CPU
 
         public bool IsWildcard { get; set; }
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
+        public _MethodInfo(MethodInfo aMethodInfo, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler)
+            : this(aMethodInfo, aUID, aType, aPlugMethod, false)
         {
             MethodAssembler = aMethodAssembler;
         }
 
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod)
-            : this(aMethodBase, aUID, aType, aPlugMethod, false)
+        public _MethodInfo(MethodInfo aMethodInfo, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod)
+            : this(aMethodInfo, aUID, aType, aPlugMethod, false)
         {
             //MethodBase = aMethodBase;
             //UID = aUID;
@@ -36,21 +38,18 @@ namespace Cosmos.IL2CPU
             //PlugMethod = aPlugMethod;
         }
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod, bool isInlineAssembler)
+        public _MethodInfo(MethodInfo aMethodInfo, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, bool isInlineAssembler)
         {
-            MethodBase = aMethodBase;
+            MethodInfo = aMethodInfo;
             UID = aUID;
             Type = aType;
             PlugMethod = aPlugMethod;
             IsInlineAssembler = isInlineAssembler;
 
-            var attribs = aMethodBase.GetCustomAttributes<DebugStub>(false).ToList();
+            var attribs = aMethodInfo.GetCustomAttributes<DebugStub>(false).ToList();
             if (attribs.Any())
             {
-                DebugStub attrib = new DebugStub
-                                            {
-                                                Off = attribs[0].Off,
-                                            };
+                var attrib = new DebugStub { Off = attribs[0].Off };
                 DebugStubOff = attrib.Off;
             }
         }

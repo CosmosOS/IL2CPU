@@ -1,6 +1,6 @@
-﻿using Cosmos.IL2CPU.Extensions;
-using System;
-using System.Reflection;
+﻿using System;
+
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -8,13 +8,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
   {
     public ushort Value { get; }
 
-    public OpVar(Code aOpCode, int aPos, int aNextPos, ushort aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpVar(Code aOpCode, int aPos, int aNextPos, ushort aValue, ExceptionBlock aCurrentExceptionRegion)
         : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -31,7 +31,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -48,24 +48,33 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
       var xArgIndexCorrection = 0;
-      var xParams = aMethod.GetParameters();
-      var xLocals = aMethod.GetLocalVariables();
+      var xParamTypes = aMethod.ParameterTypes;
+      var xLocals = aMethod.MethodBody.LocalTypes;
       switch (OpCode)
       {
         case Code.Ldloc:
-          StackPushTypes[0] = xLocals[Value].LocalType;
+          StackPushTypes[0] = xLocals[Value];
+          if (StackPushTypes[0].IsPinned)
+          {
+            StackPushTypes[0] = StackPushTypes[0].GetElementType();
+          }
           if (StackPushTypes[0].IsEnum)
           {
             StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
           }
           return;
         case Code.Ldloca:
-          StackPushTypes[0] = xLocals[Value].LocalType.MakeByRefType();
+          StackPushTypes[0] = xLocals[Value];
+          if (StackPushTypes[0].IsPinned)
+          {
+            StackPushTypes[0] = StackPushTypes[0].GetElementType();
+          }
+          StackPushTypes[0] = StackPushTypes[0].MakeByReferenceType();
           return;
         case Code.Ldarg:
           if (!aMethod.IsStatic)
@@ -79,13 +88,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
               }
               else if (StackPushTypes[0].IsValueType)
               {
-                StackPushTypes[0] = StackPushTypes[0].MakeByRefType();
+                StackPushTypes[0] = StackPushTypes[0].MakeByReferenceType();
               }
               return;
             }
             xArgIndexCorrection = -1;
           }
-          StackPushTypes[0] = xParams[Value + xArgIndexCorrection].ParameterType;
+          StackPushTypes[0] = xParamTypes[Value + xArgIndexCorrection];
           if (StackPushTypes[0].IsEnum)
           {
             StackPushTypes[0] = StackPushTypes[0].GetEnumUnderlyingType();
@@ -98,14 +107,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
             {
               if (StackPushTypes[0].IsValueType)
               {
-                StackPushTypes[0] = StackPushTypes[0].MakeByRefType();
+                StackPushTypes[0] = StackPushTypes[0].MakeByReferenceType();
               }
               return;
             }
             xArgIndexCorrection = -1;
           }
-          StackPushTypes[0] = xParams[Value + xArgIndexCorrection].ParameterType;
-          StackPushTypes[0] = StackPushTypes[0].MakeByRefType();
+          StackPushTypes[0] = xParamTypes[Value + xArgIndexCorrection];
+          StackPushTypes[0] = StackPushTypes[0].MakeByReferenceType();
           return;
       }
     }

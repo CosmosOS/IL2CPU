@@ -1,20 +1,22 @@
 ﻿using System;
-using System.Reflection;
+
+using IL2CPU.Reflection;
+using static Cosmos.IL2CPU.TypeRefHelper;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpMethod : ILOpCode
   {
-    public MethodBase Value { get; set; }
+    public MethodInfo Value { get; set; }
     public uint ValueUID { get; set; }
 
-    public OpMethod(Code aOpCode, int aPos, int aNextPos, MethodBase aValue, _ExceptionRegionInfo aCurrentExceptionRegion)
+    public OpMethod(Code aOpCode, int aPos, int aNextPos, MethodInfo aValue, ExceptionBlock aCurrentExceptionRegion)
       : base(aOpCode, aPos, aNextPos, aCurrentExceptionRegion)
     {
       Value = aValue;
     }
 
-    public override int GetNumberOfStackPops(MethodBase aMethod)
+    public override int GetNumberOfStackPops(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -22,14 +24,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Callvirt:
           if (Value.IsStatic)
           {
-            return Value.GetParameters().Length;
+            return Value.ParameterTypes.Count;
           }
           else
           {
-            return Value.GetParameters().Length + 1;
+            return Value.ParameterTypes.Count + 1;
           }
         case Code.Newobj:
-          return Value.GetParameters().Length;
+          return Value.ParameterTypes.Count;
         case Code.Ldftn:
           return 0;
         case Code.Ldvirtftn:
@@ -39,7 +41,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    public override int GetNumberOfStackPushes(MethodBase aMethod)
+    public override int GetNumberOfStackPushes(MethodInfo aMethod)
     {
       switch (OpCode)
       {
@@ -63,7 +65,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
     }
 
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
+    protected override void DoInitStackAnalysis(MethodInfo aMethod)
     {
       base.DoInitStackAnalysis(aMethod);
 
@@ -102,7 +104,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           //  }
           break;
         case Code.Ldftn:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = TypeOf(BclType.IntPtr);
           return;
 
         default:

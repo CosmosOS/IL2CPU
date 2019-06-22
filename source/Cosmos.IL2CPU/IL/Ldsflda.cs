@@ -1,9 +1,6 @@
-using System;
-using System.Reflection;
-using System.Linq;
-
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 using XSharp;
 
@@ -24,10 +21,10 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, xFieldName, xOpCode.Value.DeclaringType, aOpCode);
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler assembler, _MethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
+    public static void DoExecute(XSharp.Assembler.Assembler assembler, _MethodInfo aMethod, string field, TypeInfo declaringType, ILOpCode aCurrentOpCode)
     {
       // call cctor:
-      var xCctor = (declaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? Array.Empty<ConstructorInfo>()).SingleOrDefault();
+      var xCctor = (declaringType.GetTypeInitializer());
       if (xCctor != null)
       {
         XS.Call(LabelName.Get(xCctor));
