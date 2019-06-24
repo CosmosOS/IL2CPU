@@ -27,6 +27,28 @@ namespace Cosmos.IL2CPU.X86.IL
       //  stack + 2 = array
       DoNullReferenceCheck(aAssembler, debugEnabled, 8);
 
+      var xBaseLabel = GetLabel(aMethod, aOpCode);
+      var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
+      var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
+      XS.Pop(EBX); //get Position _, array, 0, index -> _, array, 0
+      XS.Push(ESP, true, 4); // _, array, 0 => _, array, 0, array
+      XS.Push(ESP, true, 12); // _, array, 0, array => _, array, 0, array, 0
+      Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, array, 0 -> _, array, 0, length
+      XS.Pop(EAX); //Length of array _, array, 0, length -> _, array, 0
+      XS.Compare(EAX, EBX);
+      XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
+
+      XS.Compare(EBX, 0);
+      XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
+
+      XS.Label(xIndexOutOfRangeExeptionLabel);
+      XS.Pop(EAX);
+      XS.Pop(EAX);
+      Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
+
+      XS.Label(xNoIndexOutOfRangeExeptionLabel);
+      XS.Push(EBX); //_, array, 0 -> _, array, 0, index
+
       // calculate element offset into array memory (including header)
       XS.Pop(EAX);
       XS.Set(EDX, aElementSize);

@@ -20,6 +20,8 @@ namespace Cosmos.IL2CPU
 
         public static void ThrowDivideByZeroException() => throw new DivideByZeroException();
 
+        public static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
+
         public static void ThrowInvalidOperation(string aError)
         {
             Console.WriteLine(aError);
@@ -60,5 +62,8 @@ namespace Cosmos.IL2CPU
 
         public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
             typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
+
+        public static readonly MethodInfo ThrowIndexOutOfRangeException =
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowIndexOutOfRangeException));
     }
 }
