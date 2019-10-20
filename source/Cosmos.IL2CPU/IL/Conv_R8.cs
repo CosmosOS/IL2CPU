@@ -33,7 +33,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    if (xSourceSize <= 2 || IsIntegerSigned(xSource))
+                    if (xSourceSize <= 2 || TypeIsSigned(xSource))
                     {
                         XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
                         XS.Sub(ESP, 4);
@@ -49,7 +49,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (!xSourceIsFloat)
                 {
-                    if (IsIntegerSigned(xSource))
+                    if (TypeIsSigned(xSource))
                     {
                         XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
                         XS.FPU.FloatStoreAndPop(ESP, isIndirect: true, size: RegisterSize.Long64);
