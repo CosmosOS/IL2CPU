@@ -1,7 +1,3 @@
-using System;
-
-using CPUx86 = XSharp.Assembler.x86;
-
 namespace Cosmos.IL2CPU.X86.IL
 {
   [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_I4)]
@@ -14,7 +10,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      ThrowNotImplementedException("Conv_Ovf_I4 is not yet implemented");
+      var xSource = aOpCode.StackPopTypes[0];
+      Conv_I4.DoExecute(SizeOfType(xSource), TypeIsFloat(xSource), true, true, Assembler, aMethod, aOpCode);
     }
   }
 }

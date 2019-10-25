@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (!xSourceIsFloat)
                 {
-                    if (xSourceSize <= 2 || IsIntegerSigned(xSource))
+                    if (xSourceSize <= 2 || TypeIsSigned(xSource))
                     {
                         XS.SSE.ConvertSI2SS(XMM0, ESP, sourceIsIndirect: true);
                         XS.SSE.MoveSS(ESP, XMM0, destinationIsIndirect: true);
@@ -48,7 +48,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    if (IsIntegerSigned(xSource))
+                    if (TypeIsSigned(xSource))
                     {
                         /*
                          * Again there is no SSE instruction in x86 to do this conversion as we need a 64 Bit register to do this! So we are forced

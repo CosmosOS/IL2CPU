@@ -23,7 +23,7 @@ namespace Cosmos.IL2CPU.X86.IL
       var xStackCount = (int)GetStackCountForLocal(aMethod, xVar.LocalType);
       var xEBPOffset = (int)GetEBPOffsetForLocal(aMethod, xOpVar.Value);
       var xSize = SizeOfType(xVar.LocalType);
-      bool xSigned = IsIntegerSigned(xVar.LocalType);
+      bool xSigned = TypeIsSigned(xVar.LocalType);
 
       XS.Comment("Local type = " + xVar.LocalType);
       XS.Comment("Local EBP offset = " + xEBPOffset);
