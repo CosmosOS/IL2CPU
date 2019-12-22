@@ -1319,6 +1319,7 @@ namespace Cosmos.IL2CPU
                         Ldarg(aFrom, xCurParamIdx + xCurParamOffset);
                         XS.Add(ESP, 4);
                         xExtraSpaceToSkipDueToObjectPointerAccess += 4;
+                        xCurParamIdx++;
                     }
                     else
                     {
