@@ -13,10 +13,11 @@ namespace IL2CPU.Compiler.Tests
     public class LdargTests
     {
         [Test]
-        [TestCase(0, 32)] // $this
-        [TestCase(1, 24)] // x
-        [TestCase(2, 20)] // y
-        // Color is 24 bytes
+        // Total args size                      - 16 bytes
+        [TestCase(0, 28)] // $this - 8 bytes
+        [TestCase(1, 20)] // x     - 4 bytes
+        [TestCase(2, 16)] // y     - 4 bytes
+        // Color is 24 bytes so                 - 8 bytes (extra)
         public void GetArgumentDisplacement_Instance_Color_This_Int_Int(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
@@ -25,10 +26,11 @@ namespace IL2CPU.Compiler.Tests
         }
 
         [Test]
-        [TestCase(0, 16)] // a
-        [TestCase(1, 12)] // b
-        [TestCase(2, 8)]  // c
-        //Void is 0
+        // Total args size                   - 12 bytes
+        [TestCase(0, 16)] // a  - 4 bytes
+        [TestCase(1, 12)] // b  - 4 bytes
+        [TestCase(2, 8)]  // c  - 4 bytes
+        // Void is 0 bytes so                - 0 bytes (extra)
         public void GetArgumentDisplacement_Static_Void_Int_Int_Int(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
@@ -37,11 +39,12 @@ namespace IL2CPU.Compiler.Tests
         }
 
         [Test]
-        [TestCase(0, 28)] // this
-        [TestCase(1, 20)] // a
-        [TestCase(2, 16)] // b
-        [TestCase(3, 12)] // c
-        //int is 4
+        // Total args size                       - 24 bytes
+        [TestCase(0, 28)] // this   - 8 bytes
+        [TestCase(1, 20)] // a      - 4 bytes
+        [TestCase(2, 16)] // b      - 4 bytes
+        [TestCase(3, 12)] // c      - 8 bytes
+        // Int is 4 bytes so                     - 0 bytes (extra)
         public void GetArgumentDisplacement_Instance_Int_Int_Int_Object(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
@@ -51,8 +54,9 @@ namespace IL2CPU.Compiler.Tests
 
 
         [Test]
-        [TestCase(0, 12)] // this
-        //void is 0
+        // Total args size                       - 8 bytes 
+        [TestCase(0, 12)] // this   - 8 bytes 
+        // Void is 0 bytes so                    - 0 bytes (extra)
         public void GetArgumentDisplacement_Instance_Method(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
@@ -62,8 +66,9 @@ namespace IL2CPU.Compiler.Tests
 
 
         [Test]
-        [TestCase(0, 12)] // a
-        //void is 0
+        // Total args size                  - 8 bytes
+        [TestCase(0, 12)] // a - 8 bytes
+        // Void is 0 bytes so               - 0 bytes (extra)
         public void GetArgumentDisplacement_Static_Object_Method(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
@@ -72,12 +77,23 @@ namespace IL2CPU.Compiler.Tests
         }
 
         [Test]
-        [TestCase(0, 28)] // this
-        //Struct is 24
-        public void GetArgumentDisplacement_Struc24_Instance_Method(int aIndex, int aExpected)
+        [TestCase(0, 28)] // $this - 8 bytes
+        // Struct24 is 24 bytes so              - 16 bytes (extra)
+        public void GetArgumentDisplacement_Instance_Struct24_Method(int aIndex, int aExpected)
         {
             var xDeclaringType = typeof(TestMethods);
-            var xMethod = xDeclaringType.GetMethod("Struct24_Instance_Method");
+            var xMethod = xDeclaringType.GetMethod("Instance_Struct24_Method");
+            RunTest(aIndex, aExpected, xDeclaringType, xMethod);
+        }
+
+        [Test]
+        [TestCase(0, 28)] // $this  - 8 bytes
+        [TestCase(1, 20)] // a      - 4 bytes
+        // Struct24 is 24 bytes so               - 12 bytes (extra)
+        public void GetArgumentDisplacement_Instance_Struct24_Int_Method(int aIndex, int aExpected)
+        {
+            var xDeclaringType = typeof(TestMethods);
+            var xMethod = xDeclaringType.GetMethod("Instance_Struct24_Int_Method");
             RunTest(aIndex, aExpected, xDeclaringType, xMethod);
         }
 
@@ -114,12 +130,17 @@ namespace IL2CPU.Compiler.Tests
 
         }
 
-        public object Static_Void_Object_Method(object a)
+        public static object Static_Void_Object_Method(object a)
         {
             return a;
         }
 
-        public Struct24 Struct24_Instance_Method()
+        public Struct24 Instance_Struct24_Method()
+        {
+            return new Struct24();
+        }
+
+        public Struct24 Instance_Struct24_Int_Method(int a)
         {
             return new Struct24();
         }
