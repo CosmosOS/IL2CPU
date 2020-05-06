@@ -22,50 +22,50 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(Assembler, aMethod, xOpVar.Value);
     }
 
-        /// <summary>
-        /// <para>This methods gives the full displacement for an argument. Arguments are in "reverse" order:
-        /// <code>public static int Add(int a, int b)</code>
-        /// In this situation, argument b is at EBP+8, argument A is at EBP+12
-        /// </para>
-        /// <para>
-        /// After the method returns, the return value is on the stack. This means, that when the return size is larger than the
-        /// total argument size, we need to reserve extra stack:
-        /// <code>public static Int64 Convert(int value)</code>
-        /// In this situation, argument <code>value</code> is at EBP+12
-        /// </para>
-        /// </summary>
-        /// <param name="aMethod"></param>
-        /// <param name="aIndex"></param>
-        /// <returns></returns>
-        public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aIndex)
-        {
-            var xMethodBase = aMethod.MethodBase;
-            if (aMethod.PluggedMethod != null)
-            {
-                xMethodBase = aMethod.PluggedMethod.MethodBase;
-            }
-            var xMethodInfo = xMethodBase as MethodInfo;
-            var xDeclaringType = xMethodBase.DeclaringType; // Is this correct? 
-
-            Type xReturnType = null;
-            if (xMethodInfo != null)
-            {
-              xReturnType = xMethodInfo.ReturnType;
-            }
-
-            bool xIsStatic = aMethod.MethodBase.IsStatic;
-            var xParameterTypes = xMethodBase.GetParameters().Select(p => p.ParameterType).ToArray();
-
-            return GetArgumentDisplacement(aIndex, xDeclaringType, xParameterTypes, xReturnType, xIsStatic);
-        }
-
-      public static int GetArgumentDisplacement(ushort aIndex, Type aDeclaringType, Type[] aParameterTypes, Type aReturnType, bool aIsStatic)
+    /// <summary>
+    /// <para>This methods gives the full displacement for an argument. Arguments are in "reverse" order:
+    /// <code>public static int Add(int a, int b)</code>
+    /// In this situation, argument b is at EBP+8, argument A is at EBP+12
+    /// </para>
+    /// <para>
+    /// After the method returns, the return value is on the stack. This means, that when the return size is larger than the
+    /// total argument size, we need to reserve extra stack:
+    /// <code>public static Int64 Convert(int value)</code>
+    /// In this situation, argument <code>value</code> is at EBP+12
+    /// </para>
+    /// </summary>
+    /// <param name="aMethod"></param>
+    /// <param name="aIndex"></param>
+    /// <returns></returns>
+    public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aIndex)
+    {
+      var xMethodBase = aMethod.MethodBase;
+      if (aMethod.PluggedMethod != null)
       {
-        uint xReturnSize = 0;
-        if (aReturnType != null)
-        {
-          xReturnSize = Align(SizeOfType(aReturnType), 4);
-        }
+        xMethodBase = aMethod.PluggedMethod.MethodBase;
+      }
+      var xMethodInfo = xMethodBase as MethodInfo;
+      var xDeclaringType = xMethodBase.DeclaringType;
+
+      Type xReturnType = null;
+      if (xMethodInfo != null)
+      {
+        xReturnType = xMethodInfo.ReturnType;
+      }
+
+      bool xIsStatic = aMethod.MethodBase.IsStatic;
+      var xParameterTypes = xMethodBase.GetParameters().Select(p => p.ParameterType).ToArray();
+
+      return GetArgumentDisplacement(aIndex, xDeclaringType, xParameterTypes, xReturnType, xIsStatic);
+    }
+
+    public static int GetArgumentDisplacement(ushort aIndex, Type aDeclaringType, Type[] aParameterTypes, Type aReturnType, bool aIsStatic)
+    {
+      uint xReturnSize = 0;
+      if (aReturnType != null)
+      {
+        xReturnSize = Align(SizeOfType(aReturnType), 4);
+      }
 
       uint xOffset = 8;
       var xCorrectedOpValValue = aIndex;
@@ -76,18 +76,27 @@ namespace Cosmos.IL2CPU.X86.IL
       }
       var xParams = aParameterTypes;
 
-        uint xArgSize = 0;
-        foreach (var xParam in xParams)
+      uint xArgSize = 0;
+      foreach (var xParam in xParams)
+      {
+        xArgSize += Align(SizeOfType(xParam), 4);
+      }
+      if (!aIsStatic)
+      {
+        // Add $this pointer
+        if (aDeclaringType.IsValueType)
         {
-            xArgSize += Align(SizeOfType(xParam), 4);
+          // value types get a reference passed to the actual value, so pointer:
+          xArgSize += 4;
         }
-        if (!aIsStatic)
+        else
         {
-            xArgSize += 4; // add $this pointer
+          xArgSize += Align(SizeOfType(aDeclaringType), 4);
         }
+      }
 
-        uint xCurArgSize;
-        if (aIndex == 0 && !aIsStatic)
+      uint xCurArgSize;
+      if (aIndex == 0 && !aIsStatic)
       {
         // return the this parameter, which is not in .GetParameters()
         if (aDeclaringType.IsValueType)
@@ -105,11 +114,6 @@ namespace Cosmos.IL2CPU.X86.IL
           var xSize = Align(SizeOfType(xParams[i]), 4);
           xOffset += xSize;
         }
-        if (xReturnSize > xArgSize)
-        {
-          uint xExtraSize = xReturnSize - xCurArgSize;
-          xOffset += xExtraSize;
-        }
 
       }
       else
@@ -121,14 +125,14 @@ namespace Cosmos.IL2CPU.X86.IL
           var xSize = Align(SizeOfType(xParams[i]), 4);
           xOffset += xSize;
         }
-
-        if (xReturnSize > xArgSize)
-        {
-          uint xExtraSize = xReturnSize - xArgSize;
-          xOffset += xExtraSize;
-        }
       }
-        return (int)(xOffset + xCurArgSize - 4);
+      if (xReturnSize > xArgSize)
+      {
+        uint xExtraSize = xReturnSize - xArgSize;
+        xOffset += xExtraSize;
+      }
+
+      return (int)(xOffset + xCurArgSize - 4);
 
     }
 
