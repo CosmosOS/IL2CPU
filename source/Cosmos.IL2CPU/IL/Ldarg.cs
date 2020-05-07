@@ -1,5 +1,7 @@
 using Cosmos.IL2CPU.ILOpCodes;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using XSharp;
 using static XSharp.XSRegisters;
@@ -33,9 +35,9 @@ namespace Cosmos.IL2CPU.X86.IL
     /// </para>
     /// </summary>
     /// <param name="aMethod"></param>
-    /// <param name="aParam"></param>
+    /// <param name="aIndex"></param>
     /// <returns></returns>
-    public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aParam)
+    public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aIndex)
     {
       var xMethodBase = aMethod.MethodBase;
       if (aMethod.PluggedMethod != null)
@@ -43,78 +45,95 @@ namespace Cosmos.IL2CPU.X86.IL
         xMethodBase = aMethod.PluggedMethod.MethodBase;
       }
       var xMethodInfo = xMethodBase as MethodInfo;
-      uint xReturnSize = 0;
+      var xDeclaringType = xMethodBase.DeclaringType;
+
+      Type xReturnType = null;
       if (xMethodInfo != null)
       {
-        xReturnSize = Align(SizeOfType(xMethodInfo.ReturnType), 4);
+        xReturnType = xMethodInfo.ReturnType;
       }
+
+      bool xIsStatic = aMethod.MethodBase.IsStatic;
+      var xParameterTypes = xMethodBase.GetParameters().Select(p => p.ParameterType).ToArray();
+
+      return GetArgumentDisplacement(aIndex, xDeclaringType, xParameterTypes, xReturnType, xIsStatic);
+    }
+
+    public static int GetArgumentDisplacement(ushort aIndex, Type aDeclaringType, Type[] aParameterTypes, Type aReturnType, bool aIsStatic)
+    {
+      uint xReturnSize = 0;
+      if (aReturnType != null)
+      {
+        xReturnSize = Align(SizeOfType(aReturnType), 4);
+      }
+
       uint xOffset = 8;
-      var xCorrectedOpValValue = aParam;
-      if (!aMethod.MethodBase.IsStatic && aParam > 0)
+      var xCorrectedOpValValue = aIndex;
+      if (!aIsStatic && aIndex > 0)
       {
         // if the method has a $this, the OpCode value includes the this at index 0, but GetParameters() doesnt include the this
         xCorrectedOpValValue -= 1;
       }
-      var xParams = xMethodBase.GetParameters();
-      if (aParam == 0 && !xMethodBase.IsStatic)
+      var xParams = aParameterTypes;
+
+      uint xArgSize = 0;
+      foreach (var xParam in xParams)
+      {
+        xArgSize += Align(SizeOfType(xParam), 4);
+      }
+      if (!aIsStatic)
+      {
+        // Add $this pointer
+        if (aDeclaringType.IsValueType)
+        {
+          // value types get a reference passed to the actual value, so pointer:
+          xArgSize += 4;
+        }
+        else
+        {
+          xArgSize += Align(SizeOfType(aDeclaringType), 4);
+        }
+      }
+
+      uint xCurArgSize;
+      if (aIndex == 0 && !aIsStatic)
       {
         // return the this parameter, which is not in .GetParameters()
-        uint xCurArgSize;
-        if (xMethodBase.DeclaringType.IsValueType)
+        if (aDeclaringType.IsValueType)
         {
           // value types get a reference passed to the actual value, so pointer:
           xCurArgSize = 4;
         }
         else
         {
-          xCurArgSize = Align(SizeOfType(xMethodBase.DeclaringType), 4);
-        }
-        uint xArgSize = 0;
-        foreach (var xParam in xParams)
-        {
-          xArgSize += Align(SizeOfType(xParam.ParameterType), 4);
-        }
-        if (!xMethodBase.IsStatic)
-        {
-          xArgSize += 4; // add $this pointer
-        }
-        for (int i = xParams.Length - 1; i >= aParam; i--)
-        {
-          var xSize = Align(SizeOfType(xParams[i].ParameterType), 4);
-          xOffset += xSize;
-        }
-        if (xReturnSize > xArgSize)
-        {
-          uint xExtraSize = xReturnSize - xCurArgSize;
-          xOffset += xExtraSize;
+          xCurArgSize = Align(SizeOfType(aDeclaringType), 4);
         }
 
-        return (int)(xOffset + xCurArgSize - 4);
+        for (int i = xParams.Length - 1; i >= aIndex; i--)
+        {
+          var xSize = Align(SizeOfType(xParams[i]), 4);
+          xOffset += xSize;
+        }
+
       }
       else
       {
+        xCurArgSize = Align(SizeOfType(xParams[xCorrectedOpValValue]), 4);
+
         for (int i = xParams.Length - 1; i > xCorrectedOpValValue; i--)
         {
-          var xSize = Align(SizeOfType(xParams[i].ParameterType), 4);
+          var xSize = Align(SizeOfType(xParams[i]), 4);
           xOffset += xSize;
         }
-        var xCurArgSize = Align(SizeOfType(xParams[xCorrectedOpValValue].ParameterType), 4);
-        uint xArgSize = 0;
-        foreach (var xParam in xParams)
-        {
-          xArgSize += Align(SizeOfType(xParam.ParameterType), 4);
-        }
-        if (!xMethodBase.IsStatic)
-        {
-          xArgSize += 4; // add $this pointer
-        }
-        if (xReturnSize > xArgSize)
-        {
-          uint xExtraSize = xReturnSize - xArgSize;
-          xOffset += xExtraSize;
-        }
-        return (int)(xOffset + xCurArgSize - 4);
       }
+      if (xReturnSize > xArgSize)
+      {
+        uint xExtraSize = xReturnSize - xArgSize;
+        xOffset += xExtraSize;
+      }
+
+      return (int)(xOffset + xCurArgSize - 4);
+
     }
 
     public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
