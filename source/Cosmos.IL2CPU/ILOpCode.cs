@@ -393,6 +393,7 @@ namespace Cosmos.IL2CPU
                 || ((StackPopTypes[i] == typeof(ushort)) || (StackPopTypes[i] == typeof(short)))
                 || ((StackPopTypes[i] == typeof(uint)) || (StackPopTypes[i] == typeof(int)))
                 || ((StackPopTypes[i] == typeof(ulong)) || (StackPopTypes[i] == typeof(long)))
+                || (StackPopTypes[i].IsEnum)
                 || ((StackPopTypes[i] == typeof(UIntPtr)) || (StackPopTypes[i] == typeof(IntPtr)))))
         {
           StackPopTypes[i] = xActualStackItem;
