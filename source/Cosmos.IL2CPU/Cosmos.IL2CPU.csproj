@@ -26,6 +26,7 @@
         <ProjectReference Include="..\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
+        <ProjectReference Include="..\IL2CPU.Runtime\IL2CPU.Runtime.csproj" />
     </ItemGroup>
 
 </Project>

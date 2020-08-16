@@ -10,6 +10,7 @@ using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using IL2CPU.Runtime;
 
 namespace Cosmos.IL2CPU
 {
@@ -138,6 +139,11 @@ namespace Cosmos.IL2CPU
             /*else*/
             if (!mItems.Contains(aItem))
             {
+                if (aItem is TypeInfo xType && xType.BaseType == typeof(System.Array))
+                {
+                    Queue(typeof(Vector<>).MakeGenericType(xType.GetElementType()), xType, "SZ Array");
+                }
+
                 if (mLogEnabled)
                 {
                     LogMapPoint(aSrc, aSrcType, aItem);
@@ -249,6 +255,13 @@ namespace Cosmos.IL2CPU
             // register system types:
             Queue(typeof(Array), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+
+            // VMT
+            Queue(typeof(Vector<>).MakeGenericType(typeof(VTable)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(byte)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(char)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(uint)), null, "Explicit Entry");
+
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
@@ -312,6 +325,13 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+
+            // VMT
+            Queue(typeof(Vector<>).MakeGenericType(typeof(VTable)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(byte)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(char)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(uint)), null, "Explicit Entry");
+
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
 
@@ -554,7 +574,8 @@ namespace Cosmos.IL2CPU
                                 }
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
-                                  && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
+                                  && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
+                                  && !(xType == typeof(Array) && xVirtMethod.DeclaringType.IsGenericType))
                             {
                                 var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
@@ -646,9 +667,14 @@ namespace Cosmos.IL2CPU
                         {
                             Queue(((ILOpCodes.OpMethod)xOpCode).Value, aMethod, "Call", sourceItem);
                         }
-                        else if (xOpCode is ILOpCodes.OpType)
+                        else if (xOpCode is ILOpCodes.OpType xOpType)
                         {
                             Queue(((ILOpCodes.OpType)xOpCode).Value, aMethod, "OpCode Value");
+
+                            if (xOpCode.OpCode == ILOpCode.Code.Newarr)
+                            {
+                                Queue(typeof(Vector<>).MakeGenericType(xOpType.Value), aMethod, "Newarr Vector");
+                            }
                         }
                         else if (xOpCode is ILOpCodes.OpField xOpField)
                         {
@@ -736,7 +762,8 @@ namespace Cosmos.IL2CPU
                 }
                 if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface)
                 {
-                    if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
+                    if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType)
+                        && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
                     {
                         var xIntfMapping = aType.GetInterfaceMap(xVirt.DeclaringType);
                         if ((xIntfMapping.InterfaceMethods != null) && (xIntfMapping.TargetMethods != null))
