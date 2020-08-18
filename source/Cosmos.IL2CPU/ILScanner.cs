@@ -110,7 +110,6 @@ namespace Cosmos.IL2CPU
                 throw new ArgumentNullException(nameof(aItem));
             }
 
-            var xMemInfo = aItem as MemberInfo;
             //TODO: fix this, as each label/symbol should also contain an assembly specifier.
 
             //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
@@ -260,6 +259,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Vector<>).MakeGenericType(typeof(VTable)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(byte)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(char)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(int)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(uint)), null, "Explicit Entry");
 
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
@@ -330,6 +330,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Vector<>).MakeGenericType(typeof(VTable)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(byte)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(char)), null, "Explicit Entry");
+            Queue(typeof(Vector<>).MakeGenericType(typeof(int)), null, "Explicit Entry");
             Queue(typeof(Vector<>).MakeGenericType(typeof(uint)), null, "Explicit Entry");
 
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
@@ -575,7 +576,7 @@ namespace Cosmos.IL2CPU
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
-                                  && !(xType == typeof(Array) && xVirtMethod.DeclaringType.IsGenericType))
+                                  && !(xType.BaseType == typeof(Array) && xVirtMethod.DeclaringType.IsGenericType))
                             {
                                 var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);

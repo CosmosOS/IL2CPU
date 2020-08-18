@@ -1,4 +1,4 @@
-//#define VMT_DEBUG
+#define VMT_DEBUG
 //#define COSMOSDEBUG
 
 using System;
@@ -26,6 +26,7 @@ using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
+using IL2CPU.Runtime;
 
 namespace Cosmos.IL2CPU
 {
@@ -62,7 +63,21 @@ namespace Cosmos.IL2CPU
         {
             Assembler = CreateAssembler(aComPort);
             mLogDir = Path.GetDirectoryName(assemblerLogFile);
-            mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
+            for (int count = 0; count < 10; count++)
+            {
+                try
+                {
+                    mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
+                    break;
+                }
+                catch (Exception)
+                {
+                    if(count == 9)
+                    {
+                        throw;
+                    }
+                }
+            }
             InitILOps();
         }
 
@@ -952,6 +967,7 @@ namespace Cosmos.IL2CPU
                     }
                     else
                     {
+                        //This might have to be removed
                         for (int t = 0; t < aTypesSet.Count; t++)
                         {
                             // todo: optimize check
@@ -961,6 +977,11 @@ namespace Cosmos.IL2CPU
                                 xBaseIndex = (int)aGetTypeID(xItem);
                                 break;
                             }
+                        }
+                        if (xType.IsGenericType && xType.GetGenericTypeDefinition() == typeof(Vector<>))
+                        {
+                            xBaseIndex = (int)aGetTypeID(typeof(Array));
+
                         }
                     }
                     if (xBaseIndex == null)

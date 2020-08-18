@@ -57,17 +57,17 @@ namespace Cosmos.IL2CPU.X86.IL
             // arguments, but only self. If so can calculate without calculating all fields
             // Might have to go to old data structure for the offset...
             // Can we add this method info somehow to the data passed in?
-            // mThisOffset = mTargetMethodInfo.Arguments[0].Offset;
+            // xThisOffset = mTargetMethodInfo.Arguments[0].Offset;
 
             XS.Comment("ThisOffset = " + xThisOffset);
 
             if (IsReferenceType(xPopType))
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, (int)xThisOffset + 4);
+                DoNullReferenceCheck(Assembler, debugEnabled, xThisOffset + 4);
             }
             else
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, (int)xThisOffset);
+                DoNullReferenceCheck(Assembler, debugEnabled, xThisOffset);
             }
 
             if (!String.IsNullOrEmpty(xNormalAddress))
@@ -84,7 +84,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 /*
                 * On the stack now:
                 * $esp                 Params
-                * $esp + mThisOffset   This
+                * $esp + xThisOffset   This
                 */
                 if ((xPopType.IsPointer) || (xPopType.IsByRef))
                 {
@@ -94,7 +94,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    XS.Set(EAX, ESP, sourceDisplacement: (int)xThisOffset + 4);
+                    XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 4);
                     XS.Push(EAX, isIndirect: true);
                 }
 
@@ -117,7 +117,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 /*
                  * On the stack now:
                  * $esp                 Params
-                 * $esp + mThisOffset   This
+                 * $esp + xThisOffset   This
                  */
                 XS.Pop(ECX);
 
@@ -128,7 +128,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp + 0              Params
-                    * $esp + mThisOffset    This
+                    * $esp + xThisOffset    This
                     */
                     // we need to see if $this is a boxed object, and if so, we need to unbox it
                     XS.Set(EAX, ESP, sourceDisplacement: (int)xThisOffset + 4);
@@ -137,7 +137,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   This
+                    * $esp + xThisOffset   This
                     *
                     * ECX contains the method to call
                     * EAX contains the type pointer (not the handle!!)
@@ -147,7 +147,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   This
+                    * $esp + xThisOffset   This
                     *
                     * ECX contains the method to call
                     * EAX contains the type pointer (not the handle!!)
@@ -178,7 +178,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   Pointer to address inside box
+                    * $esp + xThisOffset   Pointer to address inside box
                     *
                     * ECX contains the method to call
                     */

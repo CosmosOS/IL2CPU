@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 
 using IL2CPU.API;
-
+using IL2CPU.Runtime;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
       uint xSize = SizeOfType(xType.Value);
 
       //TODO cache it to reduce calculation
-      string xTypeID = GetTypeIDLabel(typeof(Array));
+      string xTypeID = GetTypeIDLabel(typeof(Vector<>).MakeGenericType(xType.Value));
       MethodBase xCtor = typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
       string xCtorName = LabelName.Get(xCtor);
 
@@ -36,7 +36,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Push(EAX);
       XS.Set(EDX, xSize);
       XS.Multiply(EDX); // total element size
-      XS.Add(EAX, ObjectUtils.FieldDataOffset + 4); // total srray size
+      XS.Add(EAX, ObjectUtils.FieldDataOffset + 4); // total array size
       XS.Push(EAX);
       XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
       XS.Label(".AfterAlloc");
