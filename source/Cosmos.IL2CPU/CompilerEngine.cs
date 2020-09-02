@@ -172,6 +172,12 @@ namespace Cosmos.IL2CPU
                         }
 
                         xAsm.Assembler.Initialize();
+
+                        if (mSettings.DebugMode != DebugMode.IL)
+                        {
+                            xAsm.Assembler.EmitAsmLabels = false;
+                        }
+
                         using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext)))
                         {
                             xScanner.LogException = LogException;

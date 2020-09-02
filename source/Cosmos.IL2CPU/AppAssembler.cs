@@ -168,16 +168,16 @@ namespace Cosmos.IL2CPU
                 // if StackCorruption detection is active, we're also going to emit a stack overflow detection
                 XS.Set(EAX, "Before_Kernel_Stack");
                 XS.Compare(EAX, ESP);
-                XS.Jump(ConditionalTestEnum.LessThan, mCurrentMethodLabel + ".StackOverflowCheck_End");
+                XS.Jump(ConditionalTestEnum.LessThan, ".StackOverflowCheck_End");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
-                XS.Call(mCurrentMethodLabel + ".StackOverflowCheck_GetAddress");
-                XS.Label(mCurrentMethodLabel + ".StackOverflowCheck_GetAddress");
+                XS.Call(".StackOverflowCheck_GetAddress");
+                XS.Label(".StackOverflowCheck_GetAddress");
                 XS.Pop(EAX);
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackOverflowEvent]);
                 XS.Halt();
-                XS.Label(mCurrentMethodLabel + ".StackOverflowCheck_End");
+                XS.Label(".StackOverflowCheck_End");
             }
 
             mCurrentMethodLabelEndGuid = DebugInfo.CreateId();
@@ -1444,8 +1444,13 @@ namespace Cosmos.IL2CPU
 
         private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint)
         {
+            if (DebugMode == DebugMode.Source)
+            {
+                Assembler.EmitAsmLabels = false;
+            }
+
             string xLabel = TmpPosLabel(aMethod, aOpCode);
-            Assembler.CurrentIlLabel = xLabel;
+            Label.LastFullLabel = xLabel;
             XS.Label(xLabel);
 
             if (aMethod.MethodBase.DeclaringType != typeof(VTablesImpl))
@@ -1458,7 +1463,10 @@ namespace Cosmos.IL2CPU
                 }
                 finally
                 {
-                    Assembler.EmitAsmLabels = true;
+                    if (DebugMode == DebugMode.IL)
+                    {
+                        Assembler.EmitAsmLabels = true;
+                    }
                 }
             }
 
