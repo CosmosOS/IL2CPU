@@ -419,6 +419,7 @@ namespace Cosmos.IL2CPU
       {
         throw new Exception("Error interpreting stacktypes for " + this, E);
       }
+
       foreach (var xPushItem in StackPushTypes)
       {
         aStack.Push(xPushItem);
@@ -431,7 +432,7 @@ namespace Cosmos.IL2CPU
     /// </summary>
     protected virtual void DoInterpretStackTypes(ref bool aSituationChanged)
     {
-      //
+      // This is implemented by different groups of op codes
     }
 
     protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
