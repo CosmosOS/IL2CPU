@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -206,14 +205,15 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Bge_Un:
         case Code.Beq:
         case Code.Bne_Un:
-        case Code.Br:
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
-          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
-          break;
         case Code.Leave:
           InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
           base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
-
+          break;
+        case Code.Br: //An unconditional branch will never not branch, so we dont interpret stack if we didnt branch (as done for other branches)
+                      // Otherwise, this can lead to bugs, as the opcode after an unconditional branch is reached via a jump with a different stack, than the one
+                      // in the block ending with the unconditional branch before.
+                      // Can be reproduced by trying to compile this code: `char c2 = (c <= 'Z' && c >= 'A') ? ((char)(c - 65 + 97)) : c;`
+          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth);
           break;
         default:
           throw new NotImplementedException("OpCode " + OpCode);
