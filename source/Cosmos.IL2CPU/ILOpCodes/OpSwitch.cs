@@ -72,7 +72,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       throw new Exception("Wrong type: " + StackPopTypes[0].FullName);
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<int> branchTargetsToCheck)
+    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
     {
       foreach (var xTarget in BranchLocations)
       {

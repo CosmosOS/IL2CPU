@@ -189,7 +189,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<int> branchTargetsToCheck)
+    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
     {
       switch (OpCode)
       {

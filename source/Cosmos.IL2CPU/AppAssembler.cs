@@ -497,7 +497,7 @@ namespace Cosmos.IL2CPU
                     bool emitINT3 = true;
                     DebugInfo.SequencePoint xPreviousSequencePoint = null;
                     var xCurrentGroup = new List<ILOpCode>();
-                    var branchTargetsToCheck = new List<int>();
+                    var branchTargetsToCheck = new List<(int position, Stack<Type> stack)>();
                     CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
                     foreach (var xRawOpcode in aOpCodes)
                     {
@@ -515,10 +515,11 @@ namespace Cosmos.IL2CPU
                     {
                         InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
                     }
+                    xCurrentGroup.Clear();
 
                     while (branchTargetsToCheck.Count > 0)
                     {
-                        int checking = branchTargetsToCheck[0];
+                        int checking = branchTargetsToCheck[0].position;
                         CompilerHelpers.Debug($"AppAssembler: Checking branch target: {checking}");
 
                         foreach (var xRawOpcode in aOpCodes.Where(aOC => aOC.Position >= checking))
@@ -531,8 +532,15 @@ namespace Cosmos.IL2CPU
                                 break;
                             }
                         }
-                        InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, true);
-                        xCurrentGroup.Clear();
+                        if(xCurrentGroup.Count != 0) // Its zero when this is testing the instruction following the last instruction, which doesnt exist
+                        {
+                            InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, true, branchTargetsToCheck[0].stack);
+                            xCurrentGroup.Clear();
+                        }
+                        else
+                        {
+                            branchTargetsToCheck.RemoveAll(t => t.position == checking);
+                        }
                     }
 
                     EmitInstructions(aMethod, aOpCodes, ref emitINT3);
@@ -701,7 +709,8 @@ namespace Cosmos.IL2CPU
         /// reliably able to tell what sizes are involved in certain actions.
         /// </summary>
         /// <param name="aCurrentGroup"></param>
-        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<int> branchTargetsToCheck, bool continueChecking)
+        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<(int position, Stack<Type> stack)> branchTargetsToCheck,
+            bool continueChecking, Stack<Type> previousStack = null)
         {
             var xNeedsInterpreting = true;
             // see if we need to interpret the instructions at all.
@@ -746,7 +755,7 @@ namespace Cosmos.IL2CPU
                 }
 
                 var xMaxInterpreterRecursionDepth = 25000;
-                var xCurStack = new Stack<Type>();
+                var xCurStack = previousStack ?? new Stack<Type>();
                 var xSituationChanged = false;
                 aCurrentGroup.First().InterpretStackTypes(xGroupILByILOffset, xCurStack, ref xSituationChanged, xMaxInterpreterRecursionDepth, branchTargetsToCheck);
                 if (!xSituationChanged)
