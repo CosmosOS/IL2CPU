@@ -456,11 +456,6 @@ namespace Cosmos.IL2CPU
                     throw new Exception("Method needs plug, but no plug was assigned.");
                 }
 
-                if (aMethod.MethodBase.Name == "InitializeArray")
-                {
-                    ;
-                }
-
                 // todo: MtW: how to do this? we need some extra space.
                 //		see ConstructLabel for extra info
                 if (aMethod.UID > 0x00FFFFFF)
@@ -532,7 +527,7 @@ namespace Cosmos.IL2CPU
                                 break;
                             }
                         }
-                        if(xCurrentGroup.Count != 0) // Its zero when this is testing the instruction following the last instruction, which doesnt exist
+                        if (xCurrentGroup.Count != 0) // Its zero when this is testing the instruction following the last instruction, which doesnt exist
                         {
                             InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, true, branchTargetsToCheck[0].stack);
                             xCurrentGroup.Clear();
@@ -740,11 +735,14 @@ namespace Cosmos.IL2CPU
                     // Situation not resolved. Now give error with first offset needing types:
                     foreach (var xOp in aCurrentGroup)
                     {
-                        foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
+                        if (xOp.Processed)
                         {
-                            if (xStackEntry == null)
+                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
                             {
-                                throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
+                                if (xStackEntry == null)
+                                {
+                                    throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
+                                }
                             }
                         }
                     }
@@ -763,12 +761,14 @@ namespace Cosmos.IL2CPU
                     // nothing changed, now give error with first offset needing types:
                     foreach (var xOp in aCurrentGroup)
                     {
-
-                        foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
+                        if (xOp.Processed)
                         {
-                            if (xStackEntry == null)
+                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
                             {
-                                throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
+                                if (xStackEntry == null)
+                                {
+                                    throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
+                                }
                             }
                         }
                     }
@@ -776,12 +776,15 @@ namespace Cosmos.IL2CPU
                 xNeedsInterpreting = false;
                 foreach (var xOp in aCurrentGroup)
                 {
-                    foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
+                    if (xOp.Processed)
                     {
-                        if (xStackEntry == null)
+                        foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
                         {
-                            xNeedsInterpreting = true;
-                            break;
+                            if (xStackEntry == null)
+                            {
+                                xNeedsInterpreting = true;
+                                break;
+                            }
                         }
                     }
                     if (xNeedsInterpreting)
@@ -790,13 +793,17 @@ namespace Cosmos.IL2CPU
                     }
                 }
             }
+            // We might return later to this group if a jump goes here
             foreach (var xOp in aCurrentGroup)
             {
-                foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
+                if (xOp.Processed)
                 {
-                    if (xStackEntry == null)
+                    foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
                     {
-                        throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
+                        if (xStackEntry == null)
+                        {
+                            throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
+                        }
                     }
                 }
             }
