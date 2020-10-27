@@ -19,9 +19,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public static void Assemble(Assembler aAssembler, uint aElementSize, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
     {
-      // stack     == the new value
-      // stack + 1 == the index
-      // stack + 2 == the array
       DoNullReferenceCheck(aAssembler, debugEnabled, (int)(8 + Align(aElementSize, 4)));
 
       uint xStackSize = aElementSize;
@@ -33,14 +30,14 @@ namespace Cosmos.IL2CPU.X86.IL
       var xBaseLabel = GetLabel(aMethod, aOpCode);
       var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
       var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
-      XS.Push(ESP, true, 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
+      XS.Push(ESP, displacement: 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
       XS.Push(0); // _, array, 0, index, value * n, array => _, array, 0, index, value * n, array, 0
       Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, index, value * n, array, 0 -> _, array, 0, index, value * n, length
       XS.Pop(EAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
       XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
-      XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
+      XS.Jump(CPUx86.ConditionalTestEnum.LessThan, xIndexOutOfRangeExeptionLabel);
 
-      XS.Compare(EBX, 0);
+      XS.Compare(EAX, 0);
       XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 
       XS.Label(xIndexOutOfRangeExeptionLabel);
