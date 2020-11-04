@@ -35,7 +35,7 @@ namespace Cosmos.IL2CPU.X86.IL
       Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, index, value * n, array, 0 -> _, array, 0, index, value * n, length
       XS.Pop(EAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
       XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
-      XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
+      XS.Jump(CPUx86.ConditionalTestEnum.LessThan, xIndexOutOfRangeExeptionLabel);
 
       XS.Compare(EAX, 0);
       XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
