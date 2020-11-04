@@ -79,6 +79,14 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Set(ECX, BX, destinationIsIndirect: true);
             break;
           }
+        case 3:
+          {
+            new Comment(aAssembler, "Start 3 word");
+            XS.Pop(EBX);
+            XS.And(EBX, 0xFFFFFF); // Only take the value of the lower three bytes
+            XS.Set(ECX, EBX, destinationIsIndirect: true);
+            break;
+          }
         case 0:
           {
             break;
