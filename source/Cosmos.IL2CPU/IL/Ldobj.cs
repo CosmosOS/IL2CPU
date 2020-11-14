@@ -32,7 +32,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Pop(EAX);
             var xObjSize = SizeOfType(type);
 
-            if(xObjSize < 4 && IsIntegerSigned(type))
+            if(xObjSize < 4 && TypeIsSigned(type))
             {
               if(xObjSize == 1)
               {

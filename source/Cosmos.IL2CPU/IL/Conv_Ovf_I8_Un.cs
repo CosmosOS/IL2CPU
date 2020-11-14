@@ -1,6 +1,3 @@
-using System;
-
-
 namespace Cosmos.IL2CPU.X86.IL
 {
 	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_I8_Un)]
@@ -10,36 +7,11 @@ namespace Cosmos.IL2CPU.X86.IL
 		{
 		}
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
-      throw new NotImplementedException();
-    }
-
-    
-		// using System;
-		// using System.IO;
-		// 
-		// 
-		// using CPU = XSharp.Assembler.x86;
-		// 
-		// namespace Cosmos.IL2CPU.IL.X86 {
-		// 	[XSharp.Assembler.OpCode(OpCodeEnum.Conv_Ovf_I8_Un)]
-		// 	public class Conv_Ovf_I8_Un: Op {
-		//         private string mNextLabel;
-		// 	    private string mCurLabel;
-		// 	    private uint mCurOffset;
-		// 	    private MethodInformation mMethodInformation;
-		// 		public Conv_Ovf_I8_Un(ILReader aReader, MethodInformation aMethodInfo)
-		// 			: base(aReader, aMethodInfo) {
-		//              mMethodInformation = aMethodInfo;
-		// 		    mCurOffset = aReader.Position;
-		// 		    mCurLabel = IL.Op.GetInstructionLabel(aReader);
-		//             mNextLabel = IL.Op.GetInstructionLabel(aReader.NextPosition);
-		// 		}
-		// 		public override void DoAssemble() {
-		//             EmitNotImplementedException(Assembler, GetServiceProvider(), "Conv_Ovf_I8_Un: This has not been implemented at all yet!", mCurLabel, mMethodInformation, mCurOffset, mNextLabel);
-		// 		}
-		// 	}
-		// }
-		
+		public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode) {
+			var xSource = aOpCode.StackPopTypes[0];
+			var xSourceSize = SizeOfType(xSource);
+			var xSourceIsFloat = TypeIsFloat(xSource);
+			Conv_Ovf_I8.DoExecute(xSourceSize, false, Assembler, aMethod, aOpCode);
+		}
 	}
 }

@@ -1,4 +1,5 @@
 using System.Linq;
+using CPUx86 = XSharp.Assembler.x86;
 
 using Cosmos.IL2CPU.ILOpCodes;
 using IL2CPU.API;
@@ -15,12 +16,36 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public static void Assemble(XSharp.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled)
+    public static void Assemble(XSharp.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled, _MethodInfo aMethod, ILOpCode aOpCode)
     {
       XS.Comment("Arraytype: " + aOpType.StackPopTypes.Last().FullName);
       XS.Comment("Size: " + aElementSize);
 
       DoNullReferenceCheck(aAssembler, debugEnabled, 8);
+
+      //Do check for index out of range
+      var xBaseLabel = GetLabel(aMethod, aOpCode);
+      var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
+      var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
+      XS.Pop(EBX); //get Position _, array, 0, index -> _, array, 0
+      XS.Push(ESP, true, 4); // _, array, 0 => _, array, 0, array
+      XS.Push(ESP, true, 12); // _, array, 0, array => _, array, 0, array, 0
+      Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, array, 0 -> _, array, 0, length
+      XS.Pop(EAX); //Length of array _, array, 0, length -> _, array, 0
+      XS.Compare(EAX, EBX);
+      XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
+
+      XS.Compare(EBX, 0);
+      XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
+
+      XS.Label(xIndexOutOfRangeExeptionLabel);
+      XS.Pop(EAX);
+      XS.Pop(EAX);
+      Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
+
+      XS.Label(xNoIndexOutOfRangeExeptionLabel);
+      XS.Push(EBX); //_, array, 0 -> _, array, 0, index
+
       // calculate element offset into array memory (including header)
       XS.Pop(EAX);
       XS.Set(EDX, aElementSize);
@@ -39,47 +64,7 @@ namespace Cosmos.IL2CPU.X86.IL
     {
       var xOpType = (OpType)aOpCode;
       var xSize = SizeOfType(xOpType.Value);
-      Assemble(Assembler, xOpType, xSize, DebugEnabled);
+      Assemble(Assembler, xOpType, xSize, DebugEnabled, aMethod, aOpCode);
     }
-
-
-    // using System;
-    // using System.IO;
-    //
-    //
-    // using CPU = XSharp.Assembler.x86;
-    // using CPUx86 = XSharp.Assembler.x86;
-    // using Cosmos.IL2CPU.X86;
-    // using Cosmos.IL2CPU.Compiler;
-    //
-    // namespace Cosmos.IL2CPU.IL.X86 {
-    // 	[XSharp.Assembler.OpCode(OpCodeEnum.Ldelema)]
-    // 	public class Ldelema: Op {
-    //         private Type mType;
-    // 		public Ldelema(ILReader aReader, MethodInformation aMethodInfo)
-    // 			: base(aReader, aMethodInfo) {
-    // 			mType= aReader.OperandValueType;
-    // 		}
-    //
-    // 		public static void Assemble(CPU.Assembler aAssembler, uint aElementSize) {
-    // 			aAssembler.Stack.Pop();
-    // 			aAssembler.Stack.Pop();
-    // 			aAssembler.Stack.Push(new StackContent(4, typeof(uint)));
-    //             XS.Pop(XSRegisters.EAX);
-    //             XS.Mov(XSRegisters.EDX, aElementSize);
-    // 			XS.Multiply(XSRegisters.EDX);
-    //             new CPUx86.Add { DestinationReg = CPUx86.Registers.EAX, SourceValue = (uint)(ObjectImpl.FieldDataOffset + 4) };
-    //             XS.Pop(XSRegisters.EDX);
-    //             XS.Add(XSRegisters.EDX, XSRegisters.CPUx86.Registers.EAX);
-    //             XS.Push(XSRegisters.EDX);
-    // 		}
-    //
-    // 		public override void DoAssemble() {
-    //             var xElementSize = GetService<IMetaDataInfoService>().SizeOfType(mType);
-    // 			Assemble(Assembler, xElementSize);
-    // 		}
-    // 	}
-    // }
-
   }
 }

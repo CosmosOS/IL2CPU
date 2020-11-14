@@ -77,8 +77,9 @@ namespace IL2CPU.API
             /*const string xIllegalChars = "&.,+$<>{}-`\'/\\ ()[]*!=_";
             foreach (char c in xIllegalChars) {
               xSB.Replace(c.ToString(), "");
-            }*/
+            }*/ 
             xName = xName.Replace("[]", "array");
+            xName = xName.Replace("<>", "anonymousType");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
 

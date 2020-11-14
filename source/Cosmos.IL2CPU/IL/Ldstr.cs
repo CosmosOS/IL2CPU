@@ -21,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             var xOpString = aOpCode as OpString;
             string xDataName = GetContentsArrayName(xOpString.Value);
-            XS.Comment("String Value: " + xOpString.Value.Replace("\r", "\\r").Replace("\n", "\\n"));
+            XS.Comment("String Value: \"" + xOpString.Value.Replace("\r", "\\r").Replace("\n", "\\n") + "\"");
             XS.Push(xDataName);
             XS.Push(0);
 

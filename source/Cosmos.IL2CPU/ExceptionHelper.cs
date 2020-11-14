@@ -20,6 +20,8 @@ namespace Cosmos.IL2CPU
 
         public static void ThrowDivideByZeroException() => throw new DivideByZeroException();
 
+        public static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
+
         public static void ThrowInvalidOperation(string aError)
         {
             Console.WriteLine(aError);
@@ -34,8 +36,7 @@ namespace Cosmos.IL2CPU
 
         public static void ThrowOverflow()
         {
-            string xError = "Arithmetic operation gets an overflow!";
-            Console.WriteLine(xError);
+            string xError = "Arithmetic operation or conversion causes an overflow!";
             throw new OverflowException(xError);
         }
 
@@ -43,7 +44,6 @@ namespace Cosmos.IL2CPU
         {
             throw new NotFiniteNumberException(offendingNumber);
         }
-
         public static void ThrowInvalidCastException() => throw new InvalidCastException();
     }
 
@@ -51,6 +51,9 @@ namespace Cosmos.IL2CPU
     public static class ExceptionHelperRefs
     {
         public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
+
+        public static readonly MethodInfo ThrowOverflowExceptionRef =
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowOverflow));
 
         public static readonly MethodInfo ThrowDivideByZeroExceptionRef =
             typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowDivideByZeroException));
@@ -60,5 +63,8 @@ namespace Cosmos.IL2CPU
 
         public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
             typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
+
+        public static readonly MethodInfo ThrowIndexOutOfRangeException =
+            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowIndexOutOfRangeException));
     }
 }

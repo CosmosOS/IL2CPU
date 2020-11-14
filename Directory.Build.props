@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <NoWarn>CS1572;CS1573;CS1574;CS1591;$(NoWarn)</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <!--
             This property sets the suffix for local builds.
             For example, if the value of this property is '100', the version will be x.y.z-localbuild100.
@@ -24,7 +28,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <CommonVersion>0.1.0-build7</CommonVersion>
+        <CommonVersion>0.1.0-build37</CommonVersion>
         <XSharpVersion>0.1.0-build521</XSharpVersion>
     </PropertyGroup>
 

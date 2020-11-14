@@ -71,7 +71,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     || xFieldType == typeof(bool)
                     || xFieldType == typeof(char))
                 {
-                    if (IsIntegerSigned(xFieldType))
+                    if (TypeIsSigned(xFieldType))
                     {
                         XS.MoveSignExtend(EAX, ESP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
                         XS.Push(EAX);

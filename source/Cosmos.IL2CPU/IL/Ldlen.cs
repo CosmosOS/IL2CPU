@@ -1,3 +1,4 @@
+using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -14,7 +15,15 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            DoNullReferenceCheck(Assembler, DebugEnabled, 4);
+            Assemble(Assembler, DebugEnabled);
+        }
+
+        public static void Assemble(Assembler aAssembler, bool debugEnabled, bool doNullReferenceCheck = true)
+        {
+            if (doNullReferenceCheck)
+            {
+                DoNullReferenceCheck(aAssembler, debugEnabled, 4);
+            }
 
             XS.Add(ESP, 4);
             XS.Pop(EAX);

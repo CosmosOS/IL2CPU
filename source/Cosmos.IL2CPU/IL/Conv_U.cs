@@ -31,7 +31,7 @@ namespace Cosmos.IL2CPU.X86.IL
             else
             {
                 // todo: for x64, this should be Conv_U8, maybe create a common method for all conv.u ops?
-                Conv_U4.DoExecute(SizeOfType(xSource), TypeIsFloat(xSource));
+                Conv_U4.DoExecute(SizeOfType(xSource), TypeIsFloat(xSource), TypeIsSigned(xSource), false, Assembler, aMethod, aOpCode);
             }
         }
     }

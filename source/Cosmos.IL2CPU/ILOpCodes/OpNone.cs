@@ -1093,11 +1093,18 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (!StackPopTypes[0].IsByRef)
+          if (!StackPopTypes[0].IsByRef && !StackPopTypes[0].IsPointer)
           {
             throw new Exception("Invalid ref type: " + StackPopTypes[0].FullName);
           }
-          StackPushTypes[0] = StackPopTypes[0].GetElementType();
+          if (StackPopTypes[0].IsPointer)
+          {
+            StackPushTypes[0] = typeof(object);
+          }
+          else
+          {
+            StackPushTypes[0] = StackPopTypes[0].GetElementType();
+          }
           aSituationChanged = true;
           break;
       }
