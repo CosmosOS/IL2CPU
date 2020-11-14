@@ -79,12 +79,9 @@ namespace IL2CPU.API
               xSB.Replace(c.ToString(), "");
             }*/ 
             xName = xName.Replace("[]", "array");
-            xName = xName.Replace("<>", "anonymousType");
+            xName = xName.Replace("<>", "compilergenerated");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
-
-            // replace <> before, as it's used as a prefix for compiler generated classes (need to investigate more)
-            xName = xName.Replace("<>", "compilergenerated");
 
             xName = IllegalCharsReplace.Replace(xName, string.Empty);
 
