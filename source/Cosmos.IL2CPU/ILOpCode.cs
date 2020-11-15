@@ -362,6 +362,12 @@ namespace Cosmos.IL2CPU
         }
       }
 
+      // if we are entering a try block, add the finally block to the points we need to also analyse
+      if (CurrentExceptionRegion != null && CurrentExceptionRegion.TryOffset == Position)
+      {
+        branchTargetsToCheck.Add((CurrentExceptionRegion.HandlerLength + CurrentExceptionRegion.HandlerOffset, new Stack<Type>(aStack.Reverse())));
+      }
+
       // if current instruction is the first instruction of a catch statement, "push" the exception type now
       if (CurrentExceptionRegion != null && CurrentExceptionRegion.HandlerOffset == Position)
       {
@@ -424,6 +430,7 @@ namespace Cosmos.IL2CPU
       {
         aStack.Push(xPushItem);
       }
+
       DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
     }
 
