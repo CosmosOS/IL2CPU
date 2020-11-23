@@ -10,6 +10,7 @@ using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
 {
@@ -76,10 +77,13 @@ namespace Cosmos.IL2CPU
 
         protected Dictionary<object, List<LogItem>> mLogMap;
 
-        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver)
+        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver, Action<Exception> aLogException, Action<string> aLogWarning)
         {
             mAsmblr = aAsmblr;
             mReader = new ILReader();
+
+            LogException = aLogException;
+            LogWarning = aLogWarning;
 
             mPlugManager = new PlugManager(LogException, LogWarning, typeResolver);
         }
@@ -104,12 +108,13 @@ namespace Cosmos.IL2CPU
 
         protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, string sourceItem = null)
         {
+            CompilerHelpers.Debug($"Enqueing: {aItem.Name} from {aSrc}");
             if (aItem == null)
             {
                 throw new ArgumentNullException(nameof(aItem));
             }
 
-            var xMemInfo = aItem as MemberInfo;
+            var xMemInfo = aItem;
             //TODO: fix this, as each label/symbol should also contain an assembly specifier.
 
             //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
@@ -584,7 +589,6 @@ namespace Cosmos.IL2CPU
             if (!aIsPlug && !xIsDynamicMethod)
             {
                 // Check to see if method is plugged, if it is we don't scan body
-
                 xPlug = mPlugManager.ResolvePlug(aMethod, xParamTypes);
                 if (xPlug != null)
                 {
@@ -620,7 +624,7 @@ namespace Cosmos.IL2CPU
                         + "Native code encountered, plug required." + Environment.NewLine
                                         + "  DO NOT REPORT THIS AS A BUG." + Environment.NewLine
                                         + "  Please see http://www.gocosmos.org/docs/plugs/missing/" + Environment.NewLine
-                        + "  Need plug for: " + LabelName.GetFullName(aMethod) + "." + Environment.NewLine
+                        + "  Need plug for: " + LabelName.GetFullName(aMethod) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)) + " ). " + Environment.NewLine
                         + "  Called from :" + Environment.NewLine + sourceItem + Environment.NewLine);
                 }
 
@@ -897,6 +901,10 @@ namespace Cosmos.IL2CPU
             {
                 if (xItem is MethodBase xMethod)
                 {
+                    if (xMethod.Name == "get_IsSupported")
+                    {
+                        int x = 0;
+                    }
                     var xParams = xMethod.GetParameters();
                     var xParamTypes = xParams.Select(q => q.ParameterType).ToArray();
                     var xPlug = mPlugManager.ResolvePlug(xMethod, xParamTypes);

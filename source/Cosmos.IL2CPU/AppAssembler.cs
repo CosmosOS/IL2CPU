@@ -173,6 +173,7 @@ namespace Cosmos.IL2CPU
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".StackOverflowCheck_GetAddress");
                 XS.Label(".StackOverflowCheck_GetAddress");
+                XS.Exchange(BX, BX);
                 XS.Pop(EAX);
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackOverflowEvent]);

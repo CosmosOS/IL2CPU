@@ -737,7 +737,24 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
-
+            if (StackPopTypes[0] == typeof(sbyte) && StackPopTypes[1] == typeof(sbyte))
+            {
+              StackPushTypes[0] = typeof(sbyte);
+              aSituationChanged = true;
+              return;
+            }
+            if (StackPopTypes[0] == typeof(sbyte*) && StackPopTypes[1] == typeof(UIntPtr))
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
+            if (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(UIntPtr))
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
             if (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(ushort) ||
                 StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(byte))
             {
@@ -772,6 +789,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if (StackPopTypes[0] == typeof(char) && StackPopTypes[1] == typeof(ushort))
+            {
+              StackPushTypes[0] = typeof(ushort);
+              aSituationChanged = true;
+              return;
+            }
             if (StackPopTypes[0] == typeof(long) && StackPopTypes[1] == typeof(long))
             {
               StackPushTypes[0] = typeof(long);
@@ -802,7 +825,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
-
+            if (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(UIntPtr))
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
             if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(sbyte))
              || (StackPopTypes[0] == typeof(sbyte) && StackPopTypes[1] == typeof(int)))
             {
@@ -967,6 +995,18 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (xTypeValue == typeof(short) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
+            aSituationChanged = true;
+            return;
+          }
+          if (xTypeValue == typeof(UIntPtr) && xTypeShift == typeof(int))
+          {
+            StackPushTypes[0] = typeof(UIntPtr);
+            aSituationChanged = true;
+            return;
+          }
+          if (xTypeValue == typeof(char*) && xTypeShift == typeof(int))
+          {
+            StackPushTypes[0] = typeof(char*);
             aSituationChanged = true;
             return;
           }

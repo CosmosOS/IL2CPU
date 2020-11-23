@@ -82,6 +82,7 @@ namespace IL2CPU.API
             xName = xName.Replace("<>", "compilergenerated");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
+            xName = xName.Replace("|", "sLine");
 
             xName = IllegalCharsReplace.Replace(xName, string.Empty);
 

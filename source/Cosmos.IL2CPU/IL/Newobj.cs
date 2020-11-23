@@ -189,7 +189,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         var getLengthMethod = typeof(ReadOnlySpan<char>).GetProperty("Length").GetMethod;
                         Call.DoExecute(aAssembler, aMethod, getLengthMethod, xMethod, currentLabel, debugEnabled);
 
-                        XS.LiteralCode("shl dword [esp]");
+                        // XS.LiteralCode("shl dword [esp]"); - no idea what this is supposed to do, is invalid asm
                     }
                     else
                     {

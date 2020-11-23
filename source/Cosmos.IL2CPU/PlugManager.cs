@@ -75,6 +75,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xAsm in assemblies)
             {
+                LogWarning("Loading plugs from assembly: " + xAsm.FullName);
                 // Find all classes marked as a Plug
                 foreach (var xPlugType in xAsm.GetTypes())
                 {
@@ -565,7 +566,7 @@ namespace Cosmos.IL2CPU
                     for (int i = 0; i < xAMethodPara.Length; i++)
                     {
                         int correctIndex = aMethod.IsStatic ? i : i + 1;
-                        if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType)
+                        if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
                             return null;
                         }

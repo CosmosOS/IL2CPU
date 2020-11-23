@@ -178,10 +178,8 @@ namespace Cosmos.IL2CPU
                             xAsm.Assembler.EmitAsmLabels = false;
                         }
 
-                        using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext)))
+                        using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext), LogException, LogWarning))
                         {
-                            xScanner.LogException = LogException;
-                            xScanner.LogWarning = LogWarning;
                             CompilerHelpers.DebugEvent += LogMessage;
                             if (mSettings.EnableLogging)
                             {
