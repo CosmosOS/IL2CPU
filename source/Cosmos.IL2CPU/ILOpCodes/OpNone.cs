@@ -580,6 +580,20 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int*))
+              || (StackPopTypes[0] == typeof(int*) && StackPopTypes[1] == typeof(UIntPtr)))
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
+            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int*))
+              || (StackPopTypes[0] == typeof(int*) && StackPopTypes[1] == typeof(UIntPtr)))
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
             if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(uint*))
               || (StackPopTypes[0] == typeof(uint*) && StackPopTypes[1] == typeof(UIntPtr)))
             {
@@ -873,16 +887,21 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
-            if (OpCode == Code.Sub
-                && StackPopTypes[0].IsByRef
+            if ((StackPopTypes[0].IsByRef || StackPopTypes[0] == typeof(IntPtr))
                 && StackPopTypes[1].IsByRef)
             {
               StackPushTypes[0] = typeof(IntPtr);
               aSituationChanged = true;
               return;
             }
-
-            throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1]));
+            if (StackPopTypes[0] == typeof(UIntPtr)
+                && StackPopTypes[1].IsByRef)
+            {
+              StackPushTypes[0] = typeof(UIntPtr);
+              aSituationChanged = true;
+              return;
+            }
+            throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' {3} not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1], StackPopTypes[1].IsByRef));
           }
           break;
         case Code.Localloc:

@@ -58,7 +58,7 @@ namespace Cosmos.IL2CPU.X86.IL
             // Might have to go to old data structure for the offset...
             // Can we add this method info somehow to the data passed in?
             // mThisOffset = mTargetMethodInfo.Arguments[0].Offset;
-
+            XS.Comment("Method: " + aTargetMethod.Name);
             XS.Comment("ThisOffset = " + xThisOffset);
 
             if (IsReferenceType(xPopType))
