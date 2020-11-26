@@ -16,7 +16,7 @@ indent_size = 2
 indent_size = 2
 
 [IL/*.cs]
-indent_size = 2
+indent_size = 4
 
 [IL/Call.cs]
 indent_size = 4

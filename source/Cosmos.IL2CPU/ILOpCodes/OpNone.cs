@@ -159,6 +159,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Volatile:
           return 0;
         case Code.Endfinally:
+        case Code.Endfilter:
           return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
@@ -301,6 +302,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Volatile:
           return 0;
         case Code.Endfinally:
+        case Code.Endfilter:
           return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");

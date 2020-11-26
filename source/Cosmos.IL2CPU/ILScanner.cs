@@ -625,7 +625,9 @@ namespace Cosmos.IL2CPU
                                         + "  DO NOT REPORT THIS AS A BUG." + Environment.NewLine
                                         + "  Please see http://www.gocosmos.org/docs/plugs/missing/" + Environment.NewLine
                         + "  Need plug for: " + LabelName.GetFullName(aMethod) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)) + " ). " + Environment.NewLine
-                        + "  Called from :" + Environment.NewLine + sourceItem + Environment.NewLine);
+                        + "  Static: " + aMethod.IsStatic + Environment.NewLine
+                        + "  Assembly: " + aMethod.DeclaringType.Assembly.FullName + Environment.NewLine
+                        + "  Called from:" + Environment.NewLine + sourceItem + Environment.NewLine);
                 }
 
                 //TODO: As we scan each method, we could update or put in a new list
