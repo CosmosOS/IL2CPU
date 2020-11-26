@@ -253,6 +253,7 @@ namespace Cosmos.IL2CPU
 
             // register system types:
             Queue(typeof(Array), null, "Explicit Entry");
+            Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
@@ -560,6 +561,14 @@ namespace Cosmos.IL2CPU
                                     Queue(xNewMethod, aMethod, "Virtual Downscan");
                                 }
                             }
+                            else if((xType.BaseType == typeof(Array) && xVirtMethod.DeclaringType.IsGenericType))
+                            {
+                                var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
+                                foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                                {
+                                    Queue(xMethod.MakeGenericMethod(new Type[] { xType }), aMethod, "SzArrayHelper");
+                                }
+                            }
                             else if (xVirtMethod.DeclaringType.IsInterface
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType))
                             {
@@ -742,7 +751,15 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
-                if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface)
+                if ((aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
+                {
+                    var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
+                    foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                    {
+                        Queue(xMethod.MakeGenericMethod(new Type[] { aType }), xVirt, "Virtual SzArrayHelper");
+                    }
+                }
+                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface)
                 {
                     if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
                     {
@@ -903,10 +920,6 @@ namespace Cosmos.IL2CPU
             {
                 if (xItem is MethodBase xMethod)
                 {
-                    if (xMethod.Name == "get_IsSupported")
-                    {
-                        int x = 0;
-                    }
                     var xParams = xMethod.GetParameters();
                     var xParamTypes = xParams.Select(q => q.ParameterType).ToArray();
                     var xPlug = mPlugManager.ResolvePlug(xMethod, xParamTypes);
