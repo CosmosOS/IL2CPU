@@ -568,7 +568,15 @@ namespace Cosmos.IL2CPU
                         int correctIndex = aMethod.IsStatic ? i : i + 1;
                         if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
-                            return null;
+                            // Allow explicit overwriting of types by signature in case we have to hide internal enum behind uint etc
+                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)))
+                            {
+
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                     }
                     if (xResult.Name == "Ctor" && aMethod.Name == ".ctor")
