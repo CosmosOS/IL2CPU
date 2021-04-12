@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
     {
       Value = aValue;
     }
-
+    // Why are we duplicating code here?
     public override int GetNumberOfStackPops(MethodBase aMethod)
     {
       switch (OpCode)
@@ -25,6 +25,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           return 0;
         case Code.Stloc:
         case Code.Starg:
+        case Code.Dup:
           return 1;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
@@ -43,6 +44,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Ldarg:
         case Code.Ldarga:
           return 1;
+        case Code.Dup:
+          return 2;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }

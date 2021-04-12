@@ -15,6 +15,7 @@ using IL2CPU.Debug.Symbols;
 using XSharp;
 using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU
 {
@@ -91,6 +92,7 @@ namespace Cosmos.IL2CPU
         protected static void Jump_Exception(_MethodInfo aMethod)
         {
             // todo: port to numeric labels
+            XS.Exchange(BX, BX);
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
         }
 
@@ -456,12 +458,13 @@ namespace Cosmos.IL2CPU
                     switch (aCurrentOpCode.CurrentExceptionRegion.Kind)
                     {
                         case ExceptionRegionKind.Catch:
-                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                            break;
                         case ExceptionRegionKind.Finally:
                             xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
                             break;
                         case ExceptionRegionKind.Filter:
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.FilterOffset);
+                            break;
+
                         case ExceptionRegionKind.Fault:
                         default:
                             {
@@ -495,8 +498,8 @@ namespace Cosmos.IL2CPU
                     aCleanup();
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
-                          GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
+                        XS.Exchange(BX, BX);
+                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
@@ -507,8 +510,7 @@ namespace Cosmos.IL2CPU
                 {
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
-                          GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
+                        XS.Jump(CPU.ConditionalTestEnum.NotEqual, GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
@@ -603,17 +605,17 @@ namespace Cosmos.IL2CPU
 
         public static bool TypeIsSigned(Type aType)
         {
-          var name = aType.FullName;
-          //return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
-          //  "System.Int32" == name || "System.Int64" == name;
+            var name = aType.FullName;
+            //return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
+            //  "System.Int32" == name || "System.Int64" == name;
 
-      return "System.SByte" == name || "System.Int16" == name ||
-                  "System.Int32" == name || "System.Int64" == name;
-    }
+            return "System.SByte" == name || "System.Int16" == name ||
+                        "System.Int32" == name || "System.Int64" == name;
+        }
 
-    public static bool IsIntegralType(Type type)
+        public static bool IsIntegralType(Type type)
         {
-            return type == typeof(byte) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
+            return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)
                    || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
         }

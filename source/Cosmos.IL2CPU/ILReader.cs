@@ -23,7 +23,7 @@ namespace Cosmos.IL2CPU
         {
             LoadOpCodes();
         }
-        
+
         protected void LoadOpCodes()
         {
             foreach (var xField in typeof(OpCodes).GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public))
@@ -48,6 +48,18 @@ namespace Cosmos.IL2CPU
             {
                 throw new Exception("Branch jumps outside method.");
             }
+        }
+
+        public static bool IsMethodOverwritten(MethodBase aMethod)
+        {
+            if (aMethod.DeclaringType.Name == "TypeImpl")
+            {
+                if (aMethod.Name == "CreateRuntimeTypeHandle")
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public List<ILOpCode> ProcessMethod(MethodBase aMethod)
@@ -129,6 +141,7 @@ namespace Cosmos.IL2CPU
                 xMethodGenArgs = aMethod.GetGenericArguments();
             }
 
+
             #region ByReference Intrinsic
 
             if (aMethod.DeclaringType.IsGenericType
@@ -191,6 +204,37 @@ namespace Cosmos.IL2CPU
                 return xResult;
             }
 
+            #endregion
+
+
+            #region RuntimeTypeHandle
+
+            if (aMethod.DeclaringType.Name == "TypeImpl")
+            {
+                if (aMethod.Name == "CreateRuntimeTypeHandle")
+                {
+                    // we are manually coding in il here since we have to call a internal method on an internal class
+                    var runtimeType = Type.GetType("System.RuntimeType");
+                    xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 0, 1, 0, null) {
+                        StackPopTypes = Array.Empty<Type>(),
+                        StackPushTypes = new[] { runtimeType },
+                    });
+                    var runtimeTypeHandle = Type.GetType("System.RuntimeTypeHandle");
+                    var ctor = runtimeTypeHandle.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { runtimeType }, null);
+                    xResult.Add(new ILOpCodes.OpMethod(ILOpCode.Code.Newobj, 1, 2, ctor, null)
+                    {
+                        StackPopTypes = new[] { runtimeType },
+                        StackPushTypes = new[] { runtimeTypeHandle },
+                    });
+                    xResult.Add(new ILOpCodes.OpNone(ILOpCode.Code.Ret, 2, 3, null)
+                    {
+                        StackPopTypes = Array.Empty<Type>(),
+                        StackPushTypes = Array.Empty<Type>(),
+                    });
+
+                    return xResult;
+                }   
+            }
             #endregion
 
             #region ArrayPool ("hacked" generic plug)
@@ -583,6 +627,7 @@ namespace Cosmos.IL2CPU
                 xILOpCode.InitStackAnalysis(aMethod);
                 xResult.Add(xILOpCode);
             }
+
             return xResult;
         }
 

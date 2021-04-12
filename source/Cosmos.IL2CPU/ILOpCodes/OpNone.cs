@@ -907,6 +907,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if(StackPopTypes[0] == typeof(int) && StackPopTypes[1].IsByRef)
+            {
+              StackPushTypes[0] = typeof(int).MakeByRefType();
+              aSituationChanged = true;
+              return;
+            }
             throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' {3} not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1], StackPopTypes[1].IsByRef));
           }
           break;

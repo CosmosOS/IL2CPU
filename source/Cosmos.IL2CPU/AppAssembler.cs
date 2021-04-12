@@ -62,6 +62,7 @@ namespace Cosmos.IL2CPU
         {
             Assembler = CreateAssembler(aComPort);
             mLogDir = Path.GetDirectoryName(assemblerLogFile);
+            Directory.CreateDirectory(Path.GetDirectoryName(assemblerLogFile));
             mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
             InitILOps();
         }
@@ -253,7 +254,7 @@ namespace Cosmos.IL2CPU
 
                         var xSize = ILOp.Align(ILOp.SizeOfType(xLocals[i].LocalType), 4);
                         XS.Comment(String.Format("Local {0}, Size {1}", i, xSize));
-                        for (int j = 0; j < xSize / 4; j++)
+                        for (int j = 0; j < xSize / 4; j++) //TODO: Can this be done shorter?
                         {
                             XS.Push(0);
                         }
@@ -399,6 +400,7 @@ namespace Cosmos.IL2CPU
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".MethodFooterStackCorruptionCheck_Break_on_location");
                 XS.Label(xLabelExc + ".MethodFooterStackCorruptionCheck_Break_on_location");
+                XS.Exchange(BX, BX);
                 XS.Pop(ECX);
                 XS.Push(EAX);
                 XS.Push(EBX);
@@ -495,18 +497,26 @@ namespace Cosmos.IL2CPU
                     var xCurrentGroup = new List<ILOpCode>();
                     var branchTargetsToCheck = new List<(int position, Stack<Type> stack)>();
                     CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
-                    foreach (var xRawOpcode in aOpCodes)
+                    if (ILReader.IsMethodOverwritten(aMethod.MethodBase))
                     {
-                        var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
-                        // detect if we're at a new statement.
-                        if (xSP != null && xCurrentGroup.Count > 0)
+                        foreach (var xRawOpcode in aOpCodes)
                         {
-                            InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
-                            xCurrentGroup.Clear();
-                            xPreviousSequencePoint = xSP;
+                            var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
+                            // detect if we're at a new statement.
+                            if (xSP != null && xCurrentGroup.Count > 0)
+                            {
+                                InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
+                                xCurrentGroup.Clear();
+                                xPreviousSequencePoint = xSP;
+                            }
+                            xCurrentGroup.Add(xRawOpcode);
                         }
-                        xCurrentGroup.Add(xRawOpcode);
                     }
+                    else
+                    {
+                        xCurrentGroup.AddRange(aOpCodes);
+                    }
+
                     if (xCurrentGroup.Count > 0)
                     {
                         InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
@@ -578,6 +588,7 @@ namespace Cosmos.IL2CPU
         private void EmitInstructions(_MethodInfo aMethod, List<ILOpCode> aCurrentGroup, ref bool emitINT3)
         {
             BeforeEmitInstructions(aMethod, aCurrentGroup);
+
             var xFirstInstruction = true;
             foreach (var xOpCode in aCurrentGroup)
             {
@@ -668,23 +679,10 @@ namespace Cosmos.IL2CPU
                 #endregion
 
                 var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
-                    (
-                        (
-                            (
-                                xCurrentExceptionRegion.HandlerOffset > 0
-                                && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position
-                            )
-                            ||
-                            (
-                                xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter)
-                                && xCurrentExceptionRegion.FilterOffset > 0
-                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position
-                            )
-                        )
-                        &&
-                        xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch
-                     );
-
+                    (((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
+                            || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
+                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
+                        && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch);
                 if (xNeedsExceptionPush)
                 {
                     Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
@@ -705,47 +703,23 @@ namespace Cosmos.IL2CPU
         /// reliably able to tell what sizes are involved in certain actions.
         /// </summary>
         /// <param name="aCurrentGroup"></param>
-        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<(int position, Stack<Type> stack)> branchTargetsToCheck,
+        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck,
             bool continueChecking, Stack<Type> previousStack = null)
         {
             var xNeedsInterpreting = true;
-            // see if we need to interpret the instructions at all.
-            foreach (var xOp in aCurrentGroup)
-            {
-                foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                {
-                    if (xStackEntry == null)
-                    {
-                        xNeedsInterpreting = true;
-                        break;
-                    }
-                }
-                if (xNeedsInterpreting)
-                {
-                    break;
-                }
-            }
             var xIteration = 0;
             var xGroupILByILOffset = aCurrentGroup.ToDictionary(i => i.Position);
             while (xNeedsInterpreting)
             {
                 ILOpCode.ILInterpretationDebugLine(() => String.Format("--------- New Interpretation iteration (xIteration = {0})", xIteration));
                 xIteration++;
+                // Situation not resolved. Now give error with first offset needing types:
                 if (xIteration > 20)
                 {
-                    // Situation not resolved. Now give error with first offset needing types:
-                    foreach (var xOp in aCurrentGroup)
+                    var (required, xOp) = RequiresInterpreting(aCurrentGroup);
+                    if (required)
                     {
-                        if (xOp.Processed)
-                        {
-                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                            {
-                                if (xStackEntry == null)
-                                {
-                                    throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
-                                }
-                            }
-                        }
+                        throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
                     }
                 }
                 if (!continueChecking)
@@ -753,61 +727,44 @@ namespace Cosmos.IL2CPU
                     aCurrentGroup.ForEach(i => i.Processed = false);
                 }
 
-                var xMaxInterpreterRecursionDepth = 25000;
                 var xCurStack = previousStack ?? new Stack<Type>();
                 var xSituationChanged = false;
-                aCurrentGroup.First().InterpretStackTypes(xGroupILByILOffset, xCurStack, ref xSituationChanged, xMaxInterpreterRecursionDepth, branchTargetsToCheck);
+                aCurrentGroup.First().InterpretStackTypes(xGroupILByILOffset, xCurStack, ref xSituationChanged, 25000, aBranchTargetsToCheck);
                 if (!xSituationChanged)
                 {
                     // nothing changed, now give error with first offset needing types:
-                    foreach (var xOp in aCurrentGroup)
+                    var (required, xOp) = RequiresInterpreting(aCurrentGroup);
+                    if (required)
                     {
-                        if (xOp.Processed)
-                        {
-                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                            {
-                                if (xStackEntry == null)
-                                {
-                                    throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
-                                }
-                            }
-                        }
+                        throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
                     }
                 }
-                xNeedsInterpreting = false;
-                foreach (var xOp in aCurrentGroup)
-                {
-                    if (xOp.Processed)
-                    {
-                        foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                        {
-                            if (xStackEntry == null)
-                            {
-                                xNeedsInterpreting = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (xNeedsInterpreting)
-                    {
-                        break;
-                    }
-                }
+                (xNeedsInterpreting, _) = RequiresInterpreting(aCurrentGroup);
             }
             // We might return later to this group if a jump goes here
+            {
+                var (required, xOp) = RequiresInterpreting(aCurrentGroup);
+                if (required)
+                {
+                    throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
+                }
+            }
+        }
+
+        private static (bool, ILOpCode) RequiresInterpreting(List<ILOpCode> aCurrentGroup)
+        {
             foreach (var xOp in aCurrentGroup)
             {
-                if (xOp.Processed)
+                foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
                 {
-                    foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
+                    if (xStackEntry == null)
                     {
-                        if (xStackEntry == null)
-                        {
-                            throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
-                        }
+                        return (true, xOp);
                     }
                 }
             }
+
+            return (false, null);
         }
 
         private void InitILOps()

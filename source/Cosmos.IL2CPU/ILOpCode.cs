@@ -293,9 +293,9 @@ namespace Cosmos.IL2CPU
     /// <param name="aMethod"></param>
     public abstract int GetNumberOfStackPushes(MethodBase aMethod);
 
-    public Type[] StackPopTypes { get; private set; }
+    public Type[] StackPopTypes { get; set; }
 
-    public Type[] StackPushTypes { get; private set; }
+    public Type[] StackPushTypes { get; set; }
 
     internal void InitStackAnalysis(MethodBase aMethod)
     {
@@ -367,9 +367,15 @@ namespace Cosmos.IL2CPU
       {
         branchTargetsToCheck.Add((CurrentExceptionRegion.HandlerOffset, new Stack<Type>(aStack.Reverse())));
       }
+      // if we are entering a filter block, add the catch block to the points we need to also analyse
+      if (CurrentExceptionRegion != null && CurrentExceptionRegion.FilterOffset == Position && CurrentExceptionRegion.FilterOffset != 0)
+      {
+        branchTargetsToCheck.Add((CurrentExceptionRegion.HandlerOffset, new Stack<Type>(aStack.Reverse())));
+      }
 
-      // if current instruction is the first instruction of a catch statement, "push" the exception type now
-      if (CurrentExceptionRegion != null && CurrentExceptionRegion.HandlerOffset == Position)
+      // if current instruction is the first instruction of a filter or catch statement, "push" the exception type now
+      if (CurrentExceptionRegion != null && (CurrentExceptionRegion.HandlerOffset == Position ||
+        (CurrentExceptionRegion.FilterOffset == Position && CurrentExceptionRegion.FilterOffset != 0)))
       {
         if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)
         {
@@ -379,8 +385,7 @@ namespace Cosmos.IL2CPU
 
       if (StackPopTypes.Length > aStack.Count)
       {
-        throw new Exception(
-          String.Format("OpCode {0} tries to pop more stuff from analytical stack than there is!", this));
+        throw new Exception(String.Format("OpCode {0} tries to pop more stuff from analytical stack than there is!", this));
       }
 
       for (int i = 0; i < StackPopTypes.Length; i++)
@@ -431,7 +436,10 @@ namespace Cosmos.IL2CPU
         aStack.Push(xPushItem);
       }
 
-      DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+      if (this.OpCode != Code.Endfilter)
+      {
+        DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+      }
     }
 
     /// <summary>
