@@ -31,6 +31,17 @@ namespace Cosmos.IL2CPU
             return mTypes[aObjectType].BaseTypeIdentifier;
         }
 
+        public static uint GetSize(uint aObjectType)
+        {
+            if (aObjectType >= mTypes.Length)
+            {
+                EnableDebug = true;
+                DebugAndHalt("Requested GetSize for invalid aObjectType: " + aObjectType);
+                throw new IndexOutOfRangeException();
+            }
+            return mTypes[aObjectType].Size;
+        }
+
         public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
         {
             if (aObjectType == 0)
@@ -82,19 +93,22 @@ namespace Cosmos.IL2CPU
             return false;
         }
 
-        public static void SetTypeInfo(int aType, uint aBaseType, uint aInterfaceCount, uint[] aInterfaceIndexes,
+        public static void SetTypeInfo(int aType, uint aBaseType, uint aSize, uint aInterfaceCount, uint[] aInterfaceIndexes,
           uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
           uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes)
         {
-            mTypes[aType].BaseTypeIdentifier = aBaseType;
-            mTypes[aType].InterfaceCount = aInterfaceCount;
-            mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
-            mTypes[aType].MethodCount = aMethodCount;
-            mTypes[aType].MethodIndexes = aMethodIndexes;
-            mTypes[aType].MethodAddresses = aMethodAddresses;
-            mTypes[aType].InterfaceMethodCount = aInterfaceMethodCount;
-            mTypes[aType].InterfaceMethodIndexes = aInterfaceMethodIndexes;
-            mTypes[aType].TargetMethodIndexes = aTargetMethodIndexes;
+            var vTable = new VTable();
+            vTable.BaseTypeIdentifier = aBaseType;
+            vTable.Size = aSize;
+            vTable.InterfaceCount = aInterfaceCount;
+            vTable.InterfaceIndexes = aInterfaceIndexes;
+            vTable.MethodCount = aMethodCount;
+            vTable.MethodIndexes = aMethodIndexes;
+            vTable.MethodAddresses = aMethodAddresses;
+            vTable.InterfaceMethodCount = aInterfaceMethodCount;
+            vTable.InterfaceMethodIndexes = aInterfaceMethodIndexes;
+            vTable.TargetMethodIndexes = aTargetMethodIndexes;
+            mTypes[aType] = vTable;
         }
 
         public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
@@ -250,6 +264,8 @@ namespace Cosmos.IL2CPU
     public struct VTable
     {
         public uint BaseTypeIdentifier;
+
+        public uint Size;
 
         public uint InterfaceCount;
         public uint[] InterfaceIndexes;

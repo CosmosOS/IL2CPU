@@ -16,7 +16,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            XS.Exchange(BX, BX);
             // we have object on stack, so type, address and want only the type to remain
             DoNullReferenceCheck(Assembler, true, 0);
             XS.Pop(EAX);
