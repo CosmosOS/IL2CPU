@@ -116,7 +116,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           else if (Value.DeclaringType.IsValueType && !Value.DeclaringType.IsPrimitive)
           {
-            expectedType = typeof(void*);
+           expectedType = typeof(void*);
+          }
+          if (StackPopTypes[1] == typeof(void*))
+          {
+            
+            return;
           }
           if (StackPopTypes[1] == expectedType ||
               StackPopTypes[1] == Value.FieldType)
@@ -183,6 +188,10 @@ namespace Cosmos.IL2CPU.ILOpCodes
         // throw new Exception("Wrong Poptype encountered!");
         case Code.Stsfld:
           if (StackPopTypes[0] == null)
+          {
+            return;
+          }
+          if(StackPopTypes[0] == typeof(void*))
           {
             return;
           }
