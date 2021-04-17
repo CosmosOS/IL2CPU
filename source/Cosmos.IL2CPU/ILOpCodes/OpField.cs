@@ -151,7 +151,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
 
-          if (ILOp.IsIntegralType(Value.FieldType) && ILOp.IsIntegralType(StackPopTypes[0]))
+          if ((ILOp.IsNativeInt(Value.FieldType) || ILOp.IsIntegralType(Value.FieldType)) &&
+            (ILOp.IsIntegralType(StackPopTypes[1]) || ILOp.IsNativeInt(StackPopTypes[1])))
           {
             return;
           }
