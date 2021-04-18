@@ -114,10 +114,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             expectedType = expectedType.GetEnumUnderlyingType();
           }
-          else if (Value.DeclaringType.IsValueType && !Value.DeclaringType.IsPrimitive)
-          {
-           expectedType = typeof(void*);
-          }
           if (StackPopTypes[1] == typeof(void*))
           {
             
@@ -128,8 +124,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (ILOp.IsIntegralType(expectedType) &&
-              ILOp.IsIntegralType(StackPopTypes[1]))
+          if ((ILOp.IsNativeInt(Value.FieldType) || ILOp.IsIntegralType(Value.FieldType)) &&
+            (ILOp.IsIntegralType(StackPopTypes[1]) || ILOp.IsNativeInt(StackPopTypes[1])))
           {
             return;
           }
