@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
     {
       Value = aValue;
     }
-    // Why are we duplicating code here?
+
     public override int GetNumberOfStackPops(MethodBase aMethod)
     {
       switch (OpCode)

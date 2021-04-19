@@ -251,7 +251,10 @@ namespace Cosmos.IL2CPU
 
         private AppAssembler GetAppAssembler(byte debugCom)
         {
-            return new AppAssembler(debugCom, Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog));
+            var assemblerLogFile = Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog);
+            Directory.CreateDirectory(Path.GetDirectoryName(assemblerLogFile));
+            var mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
+            return new AppAssembler(new CosmosAssembler(debugCom), mLog);
         }
 
         #region Gen2

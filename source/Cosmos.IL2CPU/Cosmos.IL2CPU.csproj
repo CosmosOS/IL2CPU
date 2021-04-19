@@ -5,11 +5,16 @@
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <!--<IsPackable>True</IsPackable>-->
         <NoWarn>CA1707;CA1716;$(NoWarn)</NoWarn>
+        <Platforms>AnyCPU;x86</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <PlatformTarget>x86</PlatformTarget>
         <!--If we dont specify this we can accidently load x64 assemblies which has slight difference in paddings for example in RawArrayData-->
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+      <PlatformTarget>x86</PlatformTarget>
     </PropertyGroup>
     
     <ItemGroup>
@@ -23,7 +28,6 @@
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-        <PackageReference Include="XSharp" />
     </ItemGroup>
 
     <ItemGroup>

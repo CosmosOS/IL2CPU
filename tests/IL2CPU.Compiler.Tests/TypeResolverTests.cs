@@ -18,7 +18,7 @@ namespace IL2CPU.Compiler.Tests
 
             Assert.Throws<NullReferenceException>(() => typeResolver.ResolveType("TypeResolverTests"));
         }
-
+        
         [Test]
         public void ResolveType_ForFullTypeNameWithoutAssemblyPublicKeyToken_WorksForStrongNameSignedAssembly()
         {

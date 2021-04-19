@@ -5,10 +5,15 @@
         <OutputType>Exe</OutputType>
         <PackageDescription>IL2CPU compiler.</PackageDescription>
         <DevelopmentDependency>True</DevelopmentDependency>
+        <Platforms>AnyCPU;x86</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <PlatformTarget>x86</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+      <PlatformTarget>x86</PlatformTarget>
     </PropertyGroup>
     
     <ItemGroup>

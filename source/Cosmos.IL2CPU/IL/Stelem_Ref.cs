@@ -27,23 +27,23 @@ namespace Cosmos.IL2CPU.X86.IL
         xStackSize += 4 - xStackSize % 4;
       }
       // Do index out of range check
-      var xBaseLabel = GetLabel(aMethod, aOpCode);
-      var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
-      var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
-      XS.Push(ESP, displacement: 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
-      XS.Push(0); // _, array, 0, index, value * n, array => _, array, 0, index, value * n, array, 0
-      Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, index, value * n, array, 0 -> _, array, 0, index, value * n, length
-      XS.Pop(EAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
-      XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
-      XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
+      //var xBaseLabel = GetLabel(aMethod, aOpCode);
+      //var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
+      //var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
+      //XS.Push(ESP, displacement: 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
+      //XS.Push(0); // _, array, 0, index, value * n, array => _, array, 0, index, value * n, array, 0
+      //Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, index, value * n, array, 0 -> _, array, 0, index, value * n, length
+      //XS.Pop(EAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
+      //XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
+      //XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
 
-      XS.Compare(EAX, 0);
-      XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
+      //XS.Compare(EAX, 0);
+      //XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 
-      XS.Label(xIndexOutOfRangeExeptionLabel);
-      Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
+      //XS.Label(xIndexOutOfRangeExeptionLabel);
+      //Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
 
-      XS.Label(xNoIndexOutOfRangeExeptionLabel);
+      //XS.Label(xNoIndexOutOfRangeExeptionLabel);
 
       // calculate element offset into array memory (including header)
       XS.Set(EAX, ESP, sourceDisplacement: (int)xStackSize); // the index

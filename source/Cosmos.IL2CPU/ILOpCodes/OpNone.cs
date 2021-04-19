@@ -907,7 +907,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
-            if(StackPopTypes[0] == typeof(int) && StackPopTypes[1].IsByRef)
+            if (StackPopTypes[0] == typeof(int) && StackPopTypes[1].IsByRef)
             {
               StackPushTypes[0] = typeof(int).MakeByRefType();
               aSituationChanged = true;

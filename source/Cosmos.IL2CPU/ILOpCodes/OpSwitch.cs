@@ -78,7 +78,23 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       {
         base.InterpretInstruction(xTarget, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
       }
+      // switch allows fall through
       base.DoInterpretNextInstructionStackTypes(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+    }
+
+    public override List<(bool newGroup, int Position)> GetNextOpCodePositions()
+    {
+      var Positions = new List<(bool, int)>();
+
+      foreach (var xTarget in BranchLocations)
+      {
+        Positions.Add((true, xTarget));
+      }
+
+      // switch allows fall through. see ecma-355 I.12.4.2.8.1 Fall Through
+      Positions.Add((false, NextPosition));
+
+      return Positions;
     }
   }
 }

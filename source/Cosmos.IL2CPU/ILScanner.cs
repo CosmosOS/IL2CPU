@@ -339,7 +339,7 @@ namespace Cosmos.IL2CPU
 
         /// This method changes the opcodes. Changes are:
         /// * inserting the ValueUID for method ops.
-        private void ProcessInstructions(List<ILOpCode> aOpCodes)
+        public void ProcessInstructions(List<ILOpCode> aOpCodes) // to remove -------
         {
             foreach (var xOpCode in aOpCodes)
             {
