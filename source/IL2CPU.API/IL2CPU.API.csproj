@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <PackageDescription>IL2CPU API.</PackageDescription>
         <IsPackable>True</IsPackable>
         <NoWarn>CA1707;$(NoWarn)</NoWarn>
-        <Platforms>AnyCPU;x86</Platforms>
     </PropertyGroup>
 
 </Project>

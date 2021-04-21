@@ -5,18 +5,8 @@
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <!--<IsPackable>True</IsPackable>-->
         <NoWarn>CA1707;CA1716;$(NoWarn)</NoWarn>
-        <Platforms>AnyCPU;x86</Platforms>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <PlatformTarget>x86</PlatformTarget>
-        <!--If we dont specify this we can accidently load x64 assemblies which has slight difference in paddings for example in RawArrayData-->
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-      <PlatformTarget>x86</PlatformTarget>
-    </PropertyGroup>
-    
     <ItemGroup>
         <InternalsVisibleTo Include="IL2CPU.Compiler.Tests" Key="IL2CPU" />
     </ItemGroup>
