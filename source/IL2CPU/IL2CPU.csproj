@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <OutputType>Exe</OutputType>
-        <RuntimeIdentifier>win-x86</RuntimeIdentifier>
         <PackageDescription>IL2CPU compiler.</PackageDescription>
         <DevelopmentDependency>True</DevelopmentDependency>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
