@@ -830,6 +830,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if (ILOp.IsIntegralType(StackPopTypes[0]) && ILOp.IsIntegralType(StackPopTypes[1]))
+            {
+              StackPushTypes[0] = StackPopTypes[0]; //todo: figure out which one we actually want
+              aSituationChanged = true;
+              return;
+            }
             if ((ILOp.IsIntegralType(StackPopTypes[0]) && ILOp.IsNativeInt(StackPopTypes[1])) || (ILOp.IsIntegralType(StackPopTypes[1]) && ILOp.IsNativeInt(StackPopTypes[0])))
             {
               if (ILOp.IsIntegralType(StackPopTypes[0]))
