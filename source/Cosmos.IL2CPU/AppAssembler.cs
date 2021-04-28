@@ -26,6 +26,7 @@ using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
+using Cosmos.IL2CPU.MethodAnalysis;
 
 namespace Cosmos.IL2CPU
 {
@@ -252,7 +253,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        internal DebugInfo.SequencePoint[] GenerateDebugSequencePoints(_MethodInfo aMethod, DebugMode aDebugMode)
+        public DebugInfo.SequencePoint[] GenerateDebugSequencePoints(_MethodInfo aMethod, DebugMode aDebugMode)
         {
             if (aDebugMode == DebugMode.Source)
             {
@@ -283,7 +284,7 @@ namespace Cosmos.IL2CPU
                 }
                 return mSequences;
             }
-            return null;
+            return new DebugInfo.SequencePoint[0];
         }
 
         private void MethodEnd(_MethodInfo aMethod)
@@ -497,59 +498,10 @@ namespace Cosmos.IL2CPU
             /* We group opcodes together by logical statement. Each statement will have its logical stack cleared.
             * Also, this lets us do optimizations later on.
             */
-            var xCurrentGroup = new List<ILOpCode>();
-            var branchTargetsToCheck = new List<(int position, Stack<Type> stack)>();
             CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
-            if (ILReader.IsMethodOverwritten(aMethod.MethodBase))
-            {
-                foreach (var xRawOpcode in aOpCodes)
-                {
-                    var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
-                    // detect if we're at a new statement.
-                    if (xSP != null && xCurrentGroup.Count > 0)
-                    {
-                        InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
-                        xCurrentGroup.Clear();
-                    }
-                    xCurrentGroup.Add(xRawOpcode);
-                }
-            }
-            else
-            {
-                xCurrentGroup.AddRange(aOpCodes);
-            }
+            var method = new ILMethod(aOpCodes, mSequences);
 
-            if (xCurrentGroup.Count > 0)
-            {
-                InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
-            }
-            xCurrentGroup.Clear();
-
-            while (branchTargetsToCheck.Count > 0)
-            {
-                int checking = branchTargetsToCheck[0].position;
-                CompilerHelpers.Debug($"AppAssembler: Checking branch target: {checking}");
-
-                foreach (var xRawOpcode in aOpCodes.Where(aOC => aOC.Position >= checking))
-                {
-                    var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
-                    xCurrentGroup.Add(xRawOpcode);
-                    // detect if we're at a new statement.
-                    if (xSP != null && xCurrentGroup.Count > 0)
-                    {
-                        break;
-                    }
-                }
-                if (xCurrentGroup.Count != 0) // Its zero when this is testing the instruction following the last instruction, which doesnt exist
-                {
-                    InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, true, branchTargetsToCheck[0].stack);
-                    xCurrentGroup.Clear();
-                }
-                else
-                {
-                    branchTargetsToCheck.RemoveAll(t => t.position == checking);
-                }
-            }
+            method.Analyse();
         }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -689,75 +641,6 @@ namespace Cosmos.IL2CPU
                 //mLog.WriteLine( " end: " + Stack.Count.ToString() );
             }
             AfterEmitInstructions(aMethod, aCurrentGroup);
-        }
-
-        /// <summary>
-        /// This method takes care of "interpreting" the instructions per group (statement). This is necessary to
-        /// reliably able to tell what sizes are involved in certain actions.
-        /// </summary>
-        /// <param name="aCurrentGroup"></param>
-        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck,
-            bool continueChecking, Stack<Type> previousStack = null)
-        {
-            var xNeedsInterpreting = true;
-            var xIteration = 0;
-            var xGroupILByILOffset = aCurrentGroup.ToDictionary(i => i.Position);
-            while (xNeedsInterpreting)
-            {
-                ILOpCode.ILInterpretationDebugLine(() => String.Format("--------- New Interpretation iteration (xIteration = {0})", xIteration));
-                xIteration++;
-                // Situation not resolved. Now give error with first offset needing types:
-                if (xIteration > 20)
-                {
-                    var (required, xOp) = RequiresInterpreting(aCurrentGroup);
-                    if (required)
-                    {
-                        throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
-                    }
-                }
-                if (!continueChecking)
-                {
-                    aCurrentGroup.ForEach(i => i.Processed = false);
-                }
-
-                var xCurStack = previousStack ?? new Stack<Type>();
-                var xSituationChanged = false;
-                aCurrentGroup.First().InterpretStackTypes(xGroupILByILOffset, xCurStack, ref xSituationChanged, 25000, aBranchTargetsToCheck);
-                if (!xSituationChanged)
-                {
-                    // nothing changed, now give error with first offset needing types:
-                    var (required, xOp) = RequiresInterpreting(aCurrentGroup);
-                    if (required)
-                    {
-                        throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
-                    }
-                }
-                (xNeedsInterpreting, _) = RequiresInterpreting(aCurrentGroup);
-            }
-            // We might return later to this group if a jump goes here
-            {
-                var (required, xOp) = RequiresInterpreting(aCurrentGroup);
-                if (required)
-                {
-                    throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
-                }
-            }
-        }
-
-        private static (bool, ILOpCode) RequiresInterpreting(List<ILOpCode> aCurrentGroup)
-        {
-            foreach (var xOp in aCurrentGroup)
-            {
-                foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                {
-                    if (xStackEntry == null)
-                    {
-                        return (true, xOp);
-                    }
-                }
-            }
-
-            return (false, null);
         }
 
         private void InitILOps()

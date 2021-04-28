@@ -315,63 +315,9 @@ namespace Cosmos.IL2CPU
         internal bool Processed = false;
 
         public uint? StackOffsetBeforeExecution = null;
-
-        public void InterpretStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
+        public void DoStackAnalysis(Stack<Type> aStack, ref uint aStackOffset)
         {
-            branchTargetsToCheck.RemoveAll(t => t.position == Position);
-            if (Processed)
-            {
-                ILInterpretationDebugLine(() => String.Format("{0} skipped for reinterpretation", this));
-                return;
-            }
-            Processed = true;
-            ILInterpretationDebugLine(
-              () =>
-              {
-                  var sb = new StringBuilder();
-                  sb.AppendFormat("Interpreting {0}. StackCount = {1}. Contents: ", this, aStack.Count);
-                  foreach (var item in aStack)
-                  {
-                      if (item == null)
-                      {
-                          sb.Append("**NULL**, ");
-                      }
-                      else
-                      {
-                          sb.AppendFormat("{0}, ", item.FullName);
-                      }
-                  }
-                  return sb.ToString().Trim(',', ' ');
-              });
-            if (aMaxRecursionDepth == 0)
-            {
-                throw new Exception("Safety Error: MaxRecursionDepth reached!");
-            }
-
-            if (StackOffsetBeforeExecution == null)
-            {
-                StackOffsetBeforeExecution = 0;
-                foreach (var item in aStack)
-                {
-                    if (item == null)
-                    {
-                        StackOffsetBeforeExecution = null;
-                        break;
-                    }
-                    StackOffsetBeforeExecution += ILOp.Align(ILOp.SizeOfType(item), 4);
-                }
-            }
-
-            // if we are entering a try block, add the finally block to the points we need to also analyse
-            if (CurrentExceptionRegion != null && CurrentExceptionRegion.TryOffset == Position)
-            {
-                branchTargetsToCheck.Add((CurrentExceptionRegion.HandlerOffset, new Stack<Type>(aStack.Reverse())));
-            }
-            // if we are entering a filter block, add the catch block to the points we need to also analyse
-            if (CurrentExceptionRegion != null && CurrentExceptionRegion.FilterOffset == Position && CurrentExceptionRegion.FilterOffset != 0)
-            {
-                branchTargetsToCheck.Add((CurrentExceptionRegion.HandlerOffset, new Stack<Type>(aStack.Reverse())));
-            }
+            StackOffsetBeforeExecution = aStackOffset;
 
             // if current instruction is the first instruction of a filter or catch statement, "push" the exception type now
             if (CurrentExceptionRegion != null && (CurrentExceptionRegion.HandlerOffset == Position ||
@@ -379,125 +325,52 @@ namespace Cosmos.IL2CPU
             {
                 if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)
                 {
-                    aStack.Push(CurrentExceptionRegion.CatchType);
+                    aStack.Push(typeof(object));
+                    aStackOffset += ILOp.Align(ILOp.SizeOfType(typeof(object)), 4);
+                    Console.WriteLine("Pushing object");
                 }
             }
+
 
             if (StackPopTypes.Length > aStack.Count)
             {
                 throw new Exception(String.Format("OpCode {0} tries to pop more stuff from analytical stack than there is!", this));
             }
 
-            for (int i = 0; i < StackPopTypes.Length; i++)
-            {
-                var xActualStackItem = aStack.ElementAt(i);
-                if (xActualStackItem == null)
-                {
-                    continue;
-                }
-                if (StackPopTypes[i] == null)
-                {
-                    StackPopTypes[i] = xActualStackItem;
-                    aSituationChanged = true;
-                }
-                if ((StackPopTypes[i] != xActualStackItem)
-                    && (((StackPopTypes[i] == typeof(byte)) || (StackPopTypes[i] == typeof(sbyte)))
-                        || ((StackPopTypes[i] == typeof(ushort)) || (StackPopTypes[i] == typeof(short)))
-                        || ((StackPopTypes[i] == typeof(uint)) || (StackPopTypes[i] == typeof(int)))
-                        || ((StackPopTypes[i] == typeof(ulong)) || (StackPopTypes[i] == typeof(long)))
-                        || (StackPopTypes[i].IsEnum)
-                        || ((StackPopTypes[i] == typeof(UIntPtr)) || (StackPopTypes[i] == typeof(IntPtr)))))
-                {
-                    StackPopTypes[i] = xActualStackItem;
-                    aSituationChanged = true;
-                }
-                if (StackPopTypes[i] != xActualStackItem && !StackPopTypes[i].IsAssignableFrom(xActualStackItem)
-                    && !((StackPopTypes[i].IsPointer || StackPopTypes[i].IsByRef)
-                         && (xActualStackItem.IsPointer || xActualStackItem.IsByRef)))
-                {
-                    throw new Exception($"OpCode {this} tries to pop item at stack position {i} with type {StackPopTypes[i]}, but actual type is {xActualStackItem}");
-                }
-            }
-
+            var pos = 0;
             foreach (var xPopItem in StackPopTypes)
             {
-                aStack.Pop();
-            }
-            try
-            {
-                DoInterpretStackTypes(ref aSituationChanged);
-            }
-            catch (Exception E)
-            {
-                throw new Exception("Error interpreting stacktypes for " + this, E);
-            }
-            foreach (var xPushItem in StackPushTypes)
-            {
-                aStack.Push(xPushItem);
+                var popped = aStack.Pop();
+                Console.WriteLine($"Popping {popped}");
+
+                if (xPopItem is null)
+                {
+                    StackPopTypes[pos] = popped;
+                }
+                else if(xPopItem != popped && xPopItem.IsAssignableTo(popped))
+                {
+                    throw new Exception($"Tried to pop a {xPopItem} from the stack but found a {popped}");
+                }
+
+                aStackOffset -= ILOp.Align(ILOp.SizeOfType(popped), 4);
+
+                pos++;
             }
 
-            if (this.OpCode != Code.Endfilter)
+            DoInterpretStackTypes();
+
+            foreach (var xPushItem in StackPushTypes)
             {
-                DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+                Console.WriteLine($"Popping {xPushItem}");
+                aStack.Push(xPushItem);
+                aStackOffset += ILOp.Align(ILOp.SizeOfType(xPushItem), 4);
             }
         }
 
         /// <summary>
         /// Based on updated StackPopTypes, try to update
         /// </summary>
-        protected virtual void DoInterpretStackTypes(ref bool aSituationChanged)
-        {
-            //
-        }
-
-        protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged,
-            int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
-        {
-            if (aOpCodes.TryGetValue(NextPosition, out var xNextOpCode))
-            {
-                ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
-                InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
-            }
-            else
-            {
-                ILInterpretationDebugLine(() => $"- Adding {NextPosition} to check later");
-                aBranchTargetsToCheck.Add((NextPosition, new Stack<Type>(aStack.Reverse())));
-            }
-        }
-
-        protected virtual void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth,
-            List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
-        {
-            InterpretInstruction(NextPosition, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
-        }
-
-        protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth,
-            List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
-        {
-            if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
-            {
-                ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
-                InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
-            }
-            else
-            {
-                ILInterpretationDebugLine(() => $"- Adding {aPosition} to check later");
-                aBranchTargetsToCheck.Add((NextPosition, new Stack<Type>(aStack.Reverse())));
-            }
-        }
-
-        protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
-        {
-            if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
-            {
-                InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-            }
-        }
-
-        private void InterpretInstruction(ILOpCode xNextOpCode, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
-        {
-            xNextOpCode.InterpretStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth - 1, branchTargetsToCheck);
-        }
+        public abstract void DoInterpretStackTypes();
 
         [Conditional("COSMOSDEBUG")]
         public static void ILInterpretationDebugLine(Func<string> message)

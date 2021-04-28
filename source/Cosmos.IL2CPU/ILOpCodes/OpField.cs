@@ -98,9 +98,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
+    public override void DoInterpretStackTypes()
     {
-      base.DoInterpretStackTypes(ref aSituationChanged);
       switch (OpCode)
       {
         case Code.Stfld:

@@ -72,9 +72,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
     }
 
 
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
+    public override void DoInterpretStackTypes()
     {
-      base.DoInterpretStackTypes(ref aSituationChanged);
       // this method is supposed to deduct push types from pop types. Branch ops don't push, but we want to do checks here,
       // to help verify other code is right
       switch (OpCode)
@@ -180,37 +179,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
-    {
-      switch (OpCode)
-      {
-        case Code.Brtrue:
-        case Code.Brfalse:
-        case Code.Blt:
-        case Code.Blt_Un:
-        case Code.Ble:
-        case Code.Ble_Un:
-        case Code.Bgt:
-        case Code.Bgt_Un:
-        case Code.Bge:
-        case Code.Bge_Un:
-        case Code.Beq:
-        case Code.Bne_Un:
-        case Code.Leave:
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          break;
-        case Code.Br: //An unconditional branch will never not branch, so we dont interpret stack if we didnt branch (as done for other branches)
-                      // Otherwise, this can lead to bugs, as the opcode after an unconditional branch is reached via a jump with a different stack, than the one
-                      // in the block ending with the unconditional branch before.
-                      // Can be reproduced by trying to compile this code: `char c2 = (c <= 'Z' && c >= 'A') ? ((char)(c - 65 + 97)) : c;`
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          break;
-        default:
-          throw new NotImplementedException("OpCode " + OpCode);
-      }
-    }
-
     public override List<(bool newGroup, int Position)> GetNextOpCodePositions()
     {
       switch (OpCode)
@@ -228,7 +196,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Beq:
         case Code.Bne_Un:
         case Code.Leave:
-          return new List<(bool newGroup, int Position)> { (true, Value), (false, NextPosition) };
+          return new List<(bool newGroup, int Position)> { (true, Value), (true, NextPosition) }; // technically we dont need to have the second as true but this means we get the same blocks as in ilspy
         case Code.Br: //An unconditional branch will never not branch, so we dont interpret stack if we didnt branch (as done for other branches)
                       // Otherwise, this can lead to bugs, as the opcode after an unconditional branch is reached via a jump with a different stack, than the one
                       // in the block ending with the unconditional branch before.

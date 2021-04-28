@@ -419,7 +419,7 @@ namespace Cosmos.IL2CPU
                 // cleanup result values
                 for (int i = 0; i < aReturnSize / 4; i++)
                 {
-                    XS.Add(XSRegisters.ESP, 4);
+                    XS.Add(ESP, 4);
                 }
             }
 
@@ -433,7 +433,7 @@ namespace Cosmos.IL2CPU
                     // cleanup result values
                     for (int i = 0; i < xExtraStack / 4; i++)
                     {
-                        XS.Add(XSRegisters.ESP, 4);
+                        XS.Add(ESP, 4);
                     }
                 }
             }
@@ -490,7 +490,7 @@ namespace Cosmos.IL2CPU
             }
             else
             {
-                XS.Test(XSRegisters.ECX, 2);
+                XS.Test(ECX, 2);
 
                 if (aCleanup != null)
                 {
@@ -530,14 +530,14 @@ namespace Cosmos.IL2CPU
             if (debugEnabled)
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
-                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: stackOffsetToCheck);
+                XS.Compare(ESP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".NullCheck_GetCurrAddress");
                 XS.Label(".NullCheck_GetCurrAddress");
-                XS.Pop(XSRegisters.EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], XSRegisters.EAX, destinationIsIndirect: true);
+                XS.Pop(EAX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendNullRefEvent]);
                 //}
                 XS.Halt();
@@ -572,23 +572,23 @@ namespace Cosmos.IL2CPU
                 ?? ResolveField(fieldInfo.DeclaringType, fieldInfo.GetFullName(), !fieldInfo.IsStatic);
         }
 
-        protected static void CopyValue(XSRegisters.Register32 destination, int destinationDisplacement, XSRegisters.Register32 source, int sourceDisplacement, uint size)
+        protected static void CopyValue(Register32 destination, int destinationDisplacement, Register32 source, int sourceDisplacement, uint size)
         {
             for (int i = 0; i < (size / 4); i++)
             {
-                XS.Set(XSRegisters.EAX, source, sourceDisplacement: sourceDisplacement + (i * 4));
-                XS.Set(destination, XSRegisters.EAX, destinationDisplacement: destinationDisplacement + (i * 4));
+                XS.Set(EAX, source, sourceDisplacement: sourceDisplacement + (i * 4));
+                XS.Set(destination, EAX, destinationDisplacement: destinationDisplacement + (i * 4));
             }
             switch (size % 4)
             {
                 case 1:
-                    XS.Set(XSRegisters.AL, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, XSRegisters.AL,
+                    XS.Set(AL, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
+                    XS.Set(destination, AL,
                       destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
                     break;
                 case 2:
-                    XS.Set(XSRegisters.AX, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, XSRegisters.AX,
+                    XS.Set(AX, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
+                    XS.Set(destination, AX,
                       destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
                     break;
                 case 0:
