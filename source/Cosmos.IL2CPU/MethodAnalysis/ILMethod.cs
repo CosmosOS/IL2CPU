@@ -40,7 +40,6 @@ namespace Cosmos.IL2CPU.MethodAnalysis
 
                 foreach (var opcode in analysing.OpCodes)
                 {
-                    Console.WriteLine($"Working on {opcode}");
                     opcode.DoStackAnalysis(stack, ref stackOffset);
                 }
                 foreach (var c in analysing.PossibleContinuations )

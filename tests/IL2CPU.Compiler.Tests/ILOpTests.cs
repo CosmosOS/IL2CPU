@@ -7,15 +7,14 @@ using System.Runtime.InteropServices;
 using Moq;
 
 using Cosmos.IL2CPU;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace IL2CPU.Compiler.Tests
 {
-    [TestCategory(nameof(ILOp))]
-    [TestClass]
+    [TestFixture(TestOf = typeof(ILOp))]
     public class ILOpTests
     {
-        [TestMethod]
+        [Test]
         public void GetFieldsInfo_ForSequentialLayoutValueType_ReturnsCorrectOffsets()
         {
             var valueType = MockDefaultValueType(MockField(typeof(byte)), MockField(typeof(string)));
@@ -27,49 +26,49 @@ namespace IL2CPU.Compiler.Tests
             Assert.AreEqual(fieldsInfo[1].Offset, 4);
         }
 
-        //[TestMethod]
-        //public void GetFieldsInfo_ForSequentialLayoutValueTypeWithPackEqualTo2_ReturnsCorrectOffsets()
-        //{
-        //    var valueType = MockSequentialValueType(2, MockField(typeof(byte)), MockField(typeof(string)));
-        //    var fieldsInfo = ILOp.GetFieldsInfo(valueType, false);
+        [Test]
+        public void GetFieldsInfo_ForSequentialLayoutValueTypeWithPackEqualTo2_ReturnsCorrectOffsets()
+        {
+            var valueType = MockSequentialValueType(2, MockField(typeof(byte)), MockField(typeof(string)));
+            var fieldsInfo = ILOp.GetFieldsInfo(valueType, false);
 
-        //    Assert.That(fieldsInfo, Has.Count.EqualTo(2));
+            Assert.That(fieldsInfo, Has.Count.EqualTo(2));
 
-        //    Assert.That(fieldsInfo[0].Offset, Is.EqualTo(0));
-        //    Assert.That(fieldsInfo[1].Offset, Is.EqualTo(2));
-        //}
+            Assert.That(fieldsInfo[0].Offset, Is.EqualTo(0));
+            Assert.That(fieldsInfo[1].Offset, Is.EqualTo(2));
+        }
 
-        //[TestMethod]
-        //public void GetFieldsInfo_ForExplicitLayoutValueType_ReturnsCorrectOffsets()
-        //{
-        //    var valueType = MockExplicitValueType(MockField(typeof(byte), 3), MockField(typeof(string), 3));
-        //    var fieldsInfo = ILOp.GetFieldsInfo(valueType, false);
+        [Test]
+        public void GetFieldsInfo_ForExplicitLayoutValueType_ReturnsCorrectOffsets()
+        {
+            var valueType = MockExplicitValueType(MockField(typeof(byte), 3), MockField(typeof(string), 3));
+            var fieldsInfo = ILOp.GetFieldsInfo(valueType, false);
 
-        //    Assert.That(fieldsInfo, Has.Count.EqualTo(2));
+            Assert.That(fieldsInfo, Has.Count.EqualTo(2));
 
-        //    Assert.That(fieldsInfo[0].Offset, Is.EqualTo(3));
-        //    Assert.That(fieldsInfo[1].Offset, Is.EqualTo(3));
-        //}
+            Assert.That(fieldsInfo[0].Offset, Is.EqualTo(3));
+            Assert.That(fieldsInfo[1].Offset, Is.EqualTo(3));
+        }
 
-        //[TestMethod]
-        //public void GetFieldsInfo_ForColorStruct_ReturnsCorrectOffsets()
-        //{
-        //    var fieldsInfo = ILOp.GetFieldsInfo(typeof(Color), false);
+        [Test]
+        public void GetFieldsInfo_ForColorStruct_ReturnsCorrectOffsets()
+        {
+            var fieldsInfo = ILOp.GetFieldsInfo(typeof(Color), false);
 
-        //    Assert.That(fieldsInfo, Has.Count.EqualTo(4));
+            Assert.That(fieldsInfo, Has.Count.EqualTo(4));
 
-        //    Assert.That(fieldsInfo[0].Offset, Is.EqualTo(0));
-        //    Assert.That(fieldsInfo[1].Offset, Is.EqualTo(8));
-        //    Assert.That(fieldsInfo[2].Offset, Is.EqualTo(16));
-        //    Assert.That(fieldsInfo[3].Offset, Is.EqualTo(18));
-        //}
+            Assert.That(fieldsInfo[0].Offset, Is.EqualTo(0));
+            Assert.That(fieldsInfo[1].Offset, Is.EqualTo(8));
+            Assert.That(fieldsInfo[2].Offset, Is.EqualTo(16));
+            Assert.That(fieldsInfo[3].Offset, Is.EqualTo(18));
+        }
 
-        //[TestMethod]
-        //public void SizeOfType_ForColorStruct_Returns24()
-        //{
-        //    var size = ILOp.SizeOfType(typeof(Color));
-        //    Assert.That(size, Is.EqualTo(24));
-        //}
+        [Test]
+        public void SizeOfType_ForColorStruct_Returns24()
+        {
+            var size = ILOp.SizeOfType(typeof(Color));
+            Assert.That(size, Is.EqualTo(24));
+        }
 
         private Type MockDefaultValueType(params Mock<FieldInfo>[] fieldMocks) =>
             MockValueTypeFull(fieldMocks: fieldMocks);

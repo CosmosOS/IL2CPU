@@ -327,7 +327,6 @@ namespace Cosmos.IL2CPU
                 {
                     aStack.Push(typeof(object));
                     aStackOffset += ILOp.Align(ILOp.SizeOfType(typeof(object)), 4);
-                    Console.WriteLine("Pushing object");
                 }
             }
 
@@ -341,7 +340,6 @@ namespace Cosmos.IL2CPU
             foreach (var xPopItem in StackPopTypes)
             {
                 var popped = aStack.Pop();
-                Console.WriteLine($"Popping {popped}");
 
                 if (xPopItem is null)
                 {
@@ -361,7 +359,6 @@ namespace Cosmos.IL2CPU
 
             foreach (var xPushItem in StackPushTypes)
             {
-                Console.WriteLine($"Popping {xPushItem}");
                 aStack.Push(xPushItem);
                 aStackOffset += ILOp.Align(ILOp.SizeOfType(xPushItem), 4);
             }
