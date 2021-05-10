@@ -95,7 +95,7 @@ namespace Cosmos.IL2CPU
                 if (aMethod.MethodAssembler == null && !aMethod.IsInlineAssembler)
                 {
                     // the body of aMethod is getting emitted
-                    var xLocals = aMethod.MethodBase.GetLocalVariables();
+                    var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
                     for (int i = 0; i < xLocals.Count; i++)
                     {
                         XS.Comment(String.Format("Local {0} at EBP-{1}", i, ILOp.GetEBPOffsetForLocal(aMethod, i)));
