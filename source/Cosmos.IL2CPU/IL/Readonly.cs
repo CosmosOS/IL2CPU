@@ -14,7 +14,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            throw new NotImplementedException();
+            XS.Comment("Readonly - for now do nothing");
+            XS.Noop();
         }
     }
 }
