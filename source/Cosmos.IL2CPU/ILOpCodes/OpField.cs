@@ -114,17 +114,18 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             expectedType = expectedType.GetEnumUnderlyingType();
           }
-          else if (Value.DeclaringType.IsValueType && !Value.DeclaringType.IsPrimitive)
+          if (StackPopTypes[1] == typeof(void*))
           {
-            expectedType = typeof(void*);
+            
+            return;
           }
           if (StackPopTypes[1] == expectedType ||
               StackPopTypes[1] == Value.FieldType)
           {
             return;
           }
-          if (ILOp.IsIntegralType(expectedType) &&
-              ILOp.IsIntegralType(StackPopTypes[1]))
+          if ((ILOp.IsNativeInt(Value.FieldType) || ILOp.IsIntegralType(Value.FieldType)) &&
+            (ILOp.IsIntegralType(StackPopTypes[1]) || ILOp.IsNativeInt(StackPopTypes[1])))
           {
             return;
           }
@@ -188,7 +189,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           if(StackPopTypes[0] == typeof(void*))
           {
-          return;
+            return;
           }
           expectedType = Value.FieldType;
           if (expectedType.IsEnum)

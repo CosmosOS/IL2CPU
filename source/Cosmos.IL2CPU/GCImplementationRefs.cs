@@ -8,6 +8,7 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase AllocNewObjectRef;
         public static readonly MethodBase IncRefCountRef;
         public static readonly MethodBase DecRefCountRef;
+        public static readonly MethodBase InitRef;
 
         static GCImplementationRefs()
         {

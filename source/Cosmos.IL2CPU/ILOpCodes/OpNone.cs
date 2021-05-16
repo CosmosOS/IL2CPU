@@ -830,6 +830,25 @@ namespace Cosmos.IL2CPU.ILOpCodes
               aSituationChanged = true;
               return;
             }
+            if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
+            {
+              StackPushTypes[0] = StackPopTypes[0]; //todo: figure out which one we actually want
+              aSituationChanged = true;
+              return;
+            }
+            if ((ILOp.IsIntegralType(StackPopTypes[0]) && ILOp.IsNativeInt(StackPopTypes[1])) || (ILOp.IsIntegralType(StackPopTypes[1]) && ILOp.IsNativeInt(StackPopTypes[0])))
+            {
+              if (ILOp.IsIntegralType(StackPopTypes[0]))
+              {
+                StackPushTypes[0] = StackPopTypes[0];
+              }
+              else
+              {
+                StackPushTypes[0] = StackPopTypes[1];
+              }
+              aSituationChanged = true;
+              return;
+            }
             if (OpCode == Code.Add &&
                 ((StackPopTypes[0] == typeof(IntPtr) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
                  || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && StackPopTypes[1] == typeof(IntPtr))))
