@@ -93,7 +93,6 @@ namespace Cosmos.IL2CPU
         protected static void Jump_Exception(_MethodInfo aMethod)
         {
             // todo: port to numeric labels
-            XS.Exchange(BX, BX);
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
         }
 

@@ -112,7 +112,7 @@ namespace IL2CPU.API
             {
                 return aType.FullName;
             }
-            StringBuilder xSB = new StringBuilder(256);
+            var xSB = new StringBuilder(256);
             if (aType.IsArray)
             {
                 xSB.Append(GetFullName(aType.GetElementType()));
@@ -147,6 +147,11 @@ namespace IL2CPU.API
             else
             {
                 xSB.Append(aType.FullName);
+            }
+
+            if(aType.Name == "SR" || aType.Name == "PathInternal") //TODO:  we need to deal with this more generally
+            {
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
             }
 
             return xSB.ToString();
