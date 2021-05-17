@@ -138,6 +138,10 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
+          if(StackPopTypes[0] == typeof(void*))
+          {
+          return;
+          }
           expectedType = Value.FieldType;
           if (expectedType.IsEnum)
           {
