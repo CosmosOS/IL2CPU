@@ -40,11 +40,16 @@ namespace Cosmos.IL2CPU.MethodAnalysis
 
                 foreach (var opcode in analysing.OpCodes)
                 {
+                    if(opcode.CurrentExceptionRegion != null && opcode.CurrentExceptionRegion.TryOffset == opcode.Position)
+                    {
+                        analysing.PossibleContinuations.First(c => c.StartPosition == opcode.CurrentExceptionRegion.HandlerOffset).StartStack = new Stack<Type>(analysing.StartStack.Reverse());
+                    }
+
                     opcode.DoStackAnalysis(stack, ref stackOffset);
                 }
                 foreach (var c in analysing.PossibleContinuations )
                 {
-                    c.StartStack = stack;
+                    c.StartStack = new Stack<Type>(stack.Reverse());
                 }
             }
         }

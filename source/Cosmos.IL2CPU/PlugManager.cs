@@ -44,7 +44,7 @@ namespace Cosmos.IL2CPU
 
         private TypeResolver _typeResolver;
 
-        private Orvid.Collections.SkipList<MethodBase> ResolvedPlugs = new Orvid.Collections.SkipList<MethodBase>();
+        private Dictionary<string, MethodBase> ResolvedPlugs = new Dictionary<string, MethodBase>();
 
         private static string BuildMethodKeyName(MethodBase m)
         {
@@ -534,7 +534,7 @@ namespace Cosmos.IL2CPU
                             if (xAttrib?.Signature != null)
                             {
                                 var xName = DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod));
-                                if (String.Equals(xName, xAttrib.Signature, StringComparison.OrdinalIgnoreCase))
+                                if (String.Equals(xName.Replace("_", ""), xAttrib.Signature.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
                                 {
                                     xResult = xSigMethod;
                                     break;
@@ -661,7 +661,7 @@ namespace Cosmos.IL2CPU
         public MethodBase ResolvePlug(MethodBase aMethod, Type[] aParamTypes)
         {
             var xMethodKey = BuildMethodKeyName(aMethod);
-            if (ResolvedPlugs.Contains(xMethodKey, out var xResult))
+            if (ResolvedPlugs.TryGetValue(xMethodKey, out var xResult))
             {
                 return xResult;
             }
@@ -741,19 +741,10 @@ namespace Cosmos.IL2CPU
                     }
                 }
 
-                ResolvedPlugs.Add(xMethodKey, xResult);
+                ResolvedPlugs[xMethodKey] = xResult;
 
                 return xResult;
             }
-        }
-
-        public void Clean()
-        {
-            mPlugImpls = new Dictionary<Type, List<Type>>();
-            mPlugImplsInhrt = new Dictionary<Type, List<Type>>();
-            mPlugFields = new Dictionary<Type, IDictionary<string, PlugField>>();
-
-            ResolvedPlugs = new Orvid.Collections.SkipList<MethodBase>();
         }
     }
 }

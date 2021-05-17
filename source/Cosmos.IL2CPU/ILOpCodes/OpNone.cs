@@ -563,305 +563,37 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (!StackPopTypes.Contains(null))
           {
             // PopTypes set, but PushType not yet, so fill it.
-
-            if (StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(bool))
-            {
-              StackPushTypes[0] = typeof(bool);
-              return;
-            }
-
-            if ((StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(Int32)) ||
-              (StackPopTypes[0] == typeof(Int32) && StackPopTypes[1] == typeof(bool)))
-            {
-              StackPushTypes[0] = typeof(Int32);
-              return;
-            }
-
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(uint*))
-              || (StackPopTypes[0] == typeof(uint*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(uint*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int*))
-              || (StackPopTypes[0] == typeof(int*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int*))
-              || (StackPopTypes[0] == typeof(int*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(uint*))
-              || (StackPopTypes[0] == typeof(uint*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(uint*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(uint)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(char*))
-                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(char*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(char*))
-                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(char*);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(uint))
-              || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(UIntPtr))
-              || (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(IntPtr))
-              || (StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(IntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(uint))
-              || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(ushort))
-              || (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(short)))
-            {
-              StackPushTypes[0] = typeof(short);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(byte))
-             || (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(short))
-             || (StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(long) && StackPopTypes[1] == typeof(ulong))
-             || (StackPopTypes[0] == typeof(ulong) && StackPopTypes[1] == typeof(long)))
-            {
-              StackPushTypes[0] = typeof(long);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(ushort))
-             || (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(uint))
-             || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(byte)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(uint))
-            || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(ushort)))
-            {
-              StackPushTypes[0] = typeof(uint);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(char))
-             || (StackPopTypes[0] == typeof(char) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(UIntPtr))
-             || (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(IntPtr))
-            {
-              StackPushTypes[0] = typeof(IntPtr);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(uint))
-            {
-              StackPushTypes[0] = typeof(uint);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(char))
-            {
-              StackPushTypes[0] = typeof(uint);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(byte))
-            {
-              StackPushTypes[0] = typeof(byte);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(sbyte) && StackPopTypes[1] == typeof(sbyte))
-            {
-              StackPushTypes[0] = typeof(sbyte);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(sbyte*) && StackPopTypes[1] == typeof(UIntPtr))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(UIntPtr))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(ushort) ||
-                StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(byte))
-            {
-              StackPushTypes[0] = typeof(ushort);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(int))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(bool))
-             || (StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(int)))
-
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(ushort))
-            {
-              StackPushTypes[0] = typeof(ushort);
-              return;
-            }
-            //Changed
-            if (StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(short))
-            {
-              StackPushTypes[0] = typeof(short);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(char) && StackPopTypes[1] == typeof(ushort))
-            {
-              StackPushTypes[0] = typeof(ushort);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(long) && StackPopTypes[1] == typeof(long))
-            {
-              StackPushTypes[0] = typeof(long);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(ulong) && StackPopTypes[1] == typeof(ulong))
-            {
-              StackPushTypes[0] = typeof(ulong);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Double) && StackPopTypes[1] == typeof(Double))
-            {
-              StackPushTypes[0] = typeof(Double);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Single) && StackPopTypes[1] == typeof(Single))
-            {
-              StackPushTypes[0] = typeof(Single);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Char) && StackPopTypes[1] == typeof(Char))
-            {
-              StackPushTypes[0] = typeof(Char);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(UIntPtr))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(sbyte))
-             || (StackPopTypes[0] == typeof(sbyte) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              return;
-            }
-            if (StackPopTypes[0] == StackPopTypes[1] && StackPopTypes[0].IsPointer)
+            if(StackPopTypes[0] == StackPopTypes[1])
             {
               StackPushTypes[0] = StackPopTypes[0];
               return;
             }
-            if (StackPopTypes[0] == typeof(int) &&
-                StackPopTypes[1].IsPointer)
+
+            if (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
             {
-              StackPushTypes[0] = StackPopTypes[1];
+              StackPushTypes[0] = typeof(int);
               return;
             }
-            if (ILOp.IsNativeInt(StackPopTypes[0])
-                && StackPopTypes[1].IsPointer)
+
+            if (ILOp.IsLongBasedType(StackPopTypes[0]) && ILOp.IsLongBasedType(StackPopTypes[1]))
             {
-              StackPushTypes[0] = StackPopTypes[1];
+              StackPushTypes[0] = typeof(long);
               return;
             }
-            if (OpCode == Code.Add &&
-                ((ILOp.IsNativeInt(StackPopTypes[0]) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
-                 || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && ILOp.IsNativeInt(StackPopTypes[1]))))
+
+            if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
             {
-              if (ILOp.IsNativeInt(StackPopTypes[0]))
-              {
-                StackPushTypes[0] = StackPopTypes[1];
-              }
-              else
-              {
-                StackPushTypes[0] = StackPopTypes[0];
-              }
+              StackPushTypes[0] = typeof(uint*);
               return;
             }
-            if ((StackPopTypes[0].IsByRef || StackPopTypes[0] == typeof(IntPtr))
-                && StackPopTypes[1].IsByRef)
+
+            if ((ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
+                 || (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1])))
             {
-              StackPushTypes[0] = typeof(IntPtr);
+              StackPushTypes[0] = typeof(uint*);
               return;
             }
-            if (StackPopTypes[0] == typeof(UIntPtr)
-                && StackPopTypes[1].IsByRef)
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              return;
-            }
-            if (StackPopTypes[0] == typeof(int) && StackPopTypes[1].IsByRef)
-            {
-              StackPushTypes[0] = typeof(int).MakeByRefType();
-              return;
-            }
+            
             throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' {3} not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1], StackPopTypes[1].IsByRef));
           }
           break;
@@ -1003,10 +735,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           break;
         case Code.Dup:
-          if (StackPushTypes[0] != null && StackPushTypes[1] != null)
-          {
-            return;
-          }
           if (StackPopTypes[0] != null)
           {
             StackPushTypes[0] = StackPopTypes[0];
@@ -1015,11 +743,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Stind_I1:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
@@ -1029,11 +753,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           break;
         case Code.Stind_I2:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
@@ -1043,11 +763,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           break;
         case Code.Stind_I4:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
@@ -1057,24 +773,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           break;
         case Code.Stind_I8:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsLongBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
-          {
-            throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
-          }
           break;
         case Code.Stind_I:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
           if (!ILOp.IsIntegralTypeOrPointer(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);

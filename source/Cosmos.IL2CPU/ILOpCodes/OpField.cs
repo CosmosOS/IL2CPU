@@ -93,7 +93,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             StackPopTypes[0] = StackPopTypes[0].MakeByRefType();
           }
-          StackPushTypes[0] = ILOp.IsNativeInt(StackPopTypes[0]) ? StackPopTypes[0] : Value.FieldType.MakeByRefType();
+          StackPushTypes[0] = ILOp.IsPointer(StackPopTypes[0]) ? StackPopTypes[0] : Value.FieldType.MakeByRefType();
           return;
       }
     }
@@ -103,78 +103,31 @@ namespace Cosmos.IL2CPU.ILOpCodes
       switch (OpCode)
       {
         case Code.Stfld:
-          if (StackPopTypes[1] == null)
-          {
-            return;
-          }
-          var expectedType = Value.FieldType;
+          // pop type 0 is value and pop type 1 is object
 
+          var expectedType = Value.FieldType;
 
           if (expectedType.IsEnum)
           {
             expectedType = expectedType.GetEnumUnderlyingType();
           }
 
-          if (StackPopTypes[0] == typeof(void*))
+          if (expectedType.IsAssignableFrom(StackPopTypes[0]))
           {
             return;
           }
 
-          //if (StackPopTypes[1] == expectedType || StackPopTypes[1] == Value.FieldType)
-          //{
-          //  return;
-          //}
-          //else if (Value.DeclaringType.IsValueType && !Value.DeclaringType.IsPrimitive)
-          //{
-          //  expectedType = typeof(void*);
-          //}
-
-
-          if (StackPopTypes[1] == typeof(NullRef))
+          if(ILOp.IsObject(expectedType) && ILOp.IsObject(StackPopTypes[0]))
           {
             return;
           }
 
-          //if (expectedType.IsAssignableFrom(StackPopTypes[1]))
-          //{
-          //  return;
-          //}
-
-          if (StackPopTypes[0] == null)
+          if (ILOp.IsPointer(expectedType) && ILOp.IsPointer(StackPopTypes[0]))
           {
             return;
           }
 
-          if (Value.FieldType.IsAssignableFrom(StackPopTypes[0]))
-          {
-            return;
-          }
-
-          if ((ILOp.IsNativeInt(Value.FieldType) || ILOp.IsIntegralType(Value.FieldType)) &&
-            (ILOp.IsIntegralType(StackPopTypes[1]) || ILOp.IsNativeInt(StackPopTypes[1])))
-          {
-            return;
-          }
-
-          if (Value.FieldType == typeof(bool) && ILOp.IsIntegralType(StackPopTypes[0]))
-          {
-            return;
-          }
-
-          if (Value.FieldType.IsEnum)
-          {
-            if (ILOp.IsIntegralType(StackPopTypes[0]))
-            {
-              return;
-            }
-          }
-
-          if (ILOp.IsPointer(Value.FieldType) && ILOp.IsPointer(StackPopTypes[0]))
-          {
-            return;
-          }
-
-          if (ILOp.IsReferenceType(Value.FieldType) && StackPopTypes[0] == typeof(NullRef))
+          if (ILOp.IsIntegerBasedType(expectedType) && ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             return;
           }
@@ -195,8 +148,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (ILOp.IsIntegralType(expectedType) &&
-              ILOp.IsIntegralType(StackPopTypes[0]))
+          if (ILOp.IsIntegerBasedType(expectedType) &&
+              ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             return;
           }

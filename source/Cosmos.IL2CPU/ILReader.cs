@@ -50,18 +50,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public static bool IsMethodOverwritten(MethodBase aMethod)
-        {
-            if (aMethod.DeclaringType.Name == "TypeImpl")
-            {
-                if (aMethod.Name == "CreateRuntimeTypeHandle")
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         public List<ILOpCode> ProcessMethod(MethodBase aMethod)
         {
             var xResult = new List<ILOpCode>();
@@ -69,6 +57,17 @@ namespace Cosmos.IL2CPU
             var xBody = aMethod.GetMethodBody();
             var xModule = aMethod.Module;
 
+            // Cache for use in field and method resolution
+            Type[] xTypeGenArgs = Type.EmptyTypes;
+            Type[] xMethodGenArgs = Type.EmptyTypes;
+            if (aMethod.DeclaringType.IsGenericType)
+            {
+                xTypeGenArgs = aMethod.DeclaringType.GetGenericArguments();
+            }
+            if (aMethod.IsGenericMethod)
+            {
+                xMethodGenArgs = aMethod.GetGenericArguments();
+            }
 
             #region Unsafe Intrinsic
 
@@ -129,18 +128,6 @@ namespace Cosmos.IL2CPU
 
             #endregion
 
-            // Cache for use in field and method resolution
-            Type[] xTypeGenArgs = Type.EmptyTypes;
-            Type[] xMethodGenArgs = Type.EmptyTypes;
-            if (aMethod.DeclaringType.IsGenericType)
-            {
-                xTypeGenArgs = aMethod.DeclaringType.GetGenericArguments();
-            }
-            if (aMethod.IsGenericMethod)
-            {
-                xMethodGenArgs = aMethod.GetGenericArguments();
-            }
-
 
             #region ByReference Intrinsic
 
@@ -193,7 +180,6 @@ namespace Cosmos.IL2CPU
             }
 
             #endregion
-
 
             #region RuntimeTypeHandle
 
@@ -262,6 +248,36 @@ namespace Cosmos.IL2CPU
                 if (aMethod.Name == ".cctor")
                 {
                     var op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 0, 1, null);
+                    op.InitStackAnalysis(aMethod);
+
+                    xResult.Add(op);
+
+                    return xResult;
+                }
+            }
+
+            #endregion
+
+            #region RuntimeHelpers
+
+            if (aMethod.DeclaringType.FullName == "System.Runtime.CompilerServices.RuntimeHelpers")
+            {
+                if (aMethod.Name == "IsBitwiseEquatable")
+                {
+                    // This is a generic method so we emit true or false depending on the type
+                    ILOpCode op;
+                    if (ILOp.IsIntegralTypeOrPointer(xMethodGenArgs[0]))
+                    {
+                        op = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, 0, 1, 1, null);
+                    }
+                    else
+                    {
+                        op = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, 0, 1, 1, null);
+                    }
+                    op.InitStackAnalysis(aMethod);
+                    xResult.Add(op);
+
+                    op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 1, 2, null);
                     op.InitStackAnalysis(aMethod);
 
                     xResult.Add(op);

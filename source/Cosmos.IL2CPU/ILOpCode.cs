@@ -320,7 +320,7 @@ namespace Cosmos.IL2CPU
             StackOffsetBeforeExecution = aStackOffset;
 
             // if current instruction is the first instruction of a filter or catch statement, "push" the exception type now
-            if (CurrentExceptionRegion != null && (CurrentExceptionRegion.HandlerOffset == Position ||
+            if (CurrentExceptionRegion  != null && (CurrentExceptionRegion.HandlerOffset == Position ||
               (CurrentExceptionRegion.FilterOffset == Position && CurrentExceptionRegion.FilterOffset != 0)))
             {
                 if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)

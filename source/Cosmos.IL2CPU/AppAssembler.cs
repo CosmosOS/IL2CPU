@@ -297,13 +297,11 @@ namespace Cosmos.IL2CPU
             {
                 xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
             }
+
             var xMethodLabel = ILOp.GetLabel(aMethod);
-            //if (aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
-            {
-                XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
-                XS.Comment("Following code is for debugging. Adjust accordingly!");
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
-            }
+            XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
+            XS.Comment("Following code is for debugging. Adjust accordingly!");
+            XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
 
             XS.Set(ECX, 0);
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
@@ -353,6 +351,7 @@ namespace Cosmos.IL2CPU
                 }
                 // extra stack space is the space reserved for example when a "public static int TestMethod();" method is called, 4 bytes is pushed, to make room for result;
             }
+            // Handle exception code here
             var xLabelExc = xMethodLabel + EndOfMethodLabelNameException;
             XS.Label(xLabelExc);
             if (aMethod.MethodAssembler == null && aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
@@ -406,7 +405,7 @@ namespace Cosmos.IL2CPU
             {
                 xRetSize = 0;
             }
-            new Return { DestinationValue = (uint)xRetSize };
+            XS.Return(xRetSize);
 
             // Final, after all code. Points to op AFTER method.
             XS.Label("GUID_" + aMethod.EndMethodID.ToString());
@@ -435,7 +434,7 @@ namespace Cosmos.IL2CPU
 
         public void ProcessMethod(_MethodInfo aMethod, List<ILOpCode> aOpCodes)
         {
-            if(aMethod.MethodBase.Name == "ExecuteCallbackHandlers" || aMethod.MethodBase.Name == "ReadAllBytesUnknownLength")
+            if (aMethod.MethodBase.Name == "ExecuteCallbackHandlers" || aMethod.MethodBase.Name == "ReadAllBytesUnknownLength")
             {
                 int x = 0;
             }
@@ -494,13 +493,8 @@ namespace Cosmos.IL2CPU
              *   -- C# Debug builds automatically insert NOPs at these locations (otherwise NOP is not used)
              *   -- So only insert an INT3 when we are about to insert a NOP that came from IL code
              */
-
-            /* We group opcodes together by logical statement. Each statement will have its logical stack cleared.
-            * Also, this lets us do optimizations later on.
-            */
             CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
             var method = new ILMethod(aOpCodes, mSequences);
-
             method.Analyse();
         }
 
@@ -516,16 +510,6 @@ namespace Cosmos.IL2CPU
 #pragma warning restore CA1822 // Mark members as static
         {
             // do optimizations
-
-            //if (Assembler.Stack.Count > 0)
-            //{
-            //    if (mDebugStackErrors)
-            //    {
-            //        Console.WriteLine("StackCorruption in Analytical stack:");
-            //        Console.WriteLine("- Method: {0}", aMethod.MethodBase.GetFullName());
-            //        Console.WriteLine("- Last ILOpCode offset: {0}", aCurrentGroup.Last().Position.ToString("X"));
-            //    }
-            //}
         }
 
         //private static bool mDebugStackErrors = true;
@@ -673,11 +657,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private static void Move(string aDestLabelName, int aValue)
-        {
-            XS.Set(aDestLabelName, (uint)aValue, destinationIsIndirect: true, size: RegisterSize.Int32);
-        }
-
         private static void Push(uint aValue)
         {
             XS.Push(aValue);
@@ -792,10 +771,10 @@ namespace Cosmos.IL2CPU
                 xVmtDebugOutput.WriteStartDocument();
                 xVmtDebugOutput.WriteStartElement("VMT");
 #endif
-                //Push((uint)aTypesSet.Count);
-                foreach (var xType in aTypesSet)
-                {
-                    uint xTypeID = aGetTypeID(xType);
+            //Push((uint)aTypesSet.Count);
+            foreach (var xType in aTypesSet)
+            {
+                uint xTypeID = aGetTypeID(xType);
 #if VMT_DEBUG
                     xVmtDebugOutput.WriteStartElement("Type");
                     xVmtDebugOutput.WriteAttributeString("TypeId", xTypeID.ToString());
@@ -806,166 +785,166 @@ namespace Cosmos.IL2CPU
                     xVmtDebugOutput.WriteAttributeString("Name", xType.FullName);
 #endif
 
-                    var xEmittedMethods = GetEmittedMethods(xType, aMethodsSet);
-                    var xEmittedInterfaceMethods = GetEmittedInterfaceMethods(xType, aMethodsSet);
+                var xEmittedMethods = GetEmittedMethods(xType, aMethodsSet);
+                var xEmittedInterfaceMethods = GetEmittedInterfaceMethods(xType, aMethodsSet);
 
-                    int? xBaseIndex = null;
-                    if (xType.BaseType == null)
+                int? xBaseIndex = null;
+                if (xType.BaseType == null)
+                {
+                    xBaseIndex = (int)xTypeID;
+                }
+                else
+                {
+                    for (int t = 0; t < aTypesSet.Count; t++)
                     {
-                        xBaseIndex = (int)xTypeID;
-                    }
-                    else
-                    {
-                        for (int t = 0; t < aTypesSet.Count; t++)
+                        // todo: optimize check
+                        var xItem = aTypesSet.Skip(t).First();
+                        if (xItem.ToString() == xType.BaseType.ToString())
                         {
-                            // todo: optimize check
-                            var xItem = aTypesSet.Skip(t).First();
-                            if (xItem.ToString() == xType.BaseType.ToString())
-                            {
-                                xBaseIndex = (int)aGetTypeID(xItem);
-                                break;
-                            }
+                            xBaseIndex = (int)aGetTypeID(xItem);
+                            break;
                         }
                     }
-                    if (xBaseIndex == null)
-                    {
-                        throw new Exception("Base type not found!");
-                    }
+                }
+                if (xBaseIndex == null)
+                {
+                    throw new Exception("Base type not found!");
+                }
 
-                    // Set type info
-                    string xTypeName = $"{LabelName.GetFullName(xType)} ASM_IS__{xType.Assembly.GetName().Name}";
-                    xTypeName = DataMember.FilterStringForIncorrectChars(xTypeName);
+                // Set type info
+                string xTypeName = $"{LabelName.GetFullName(xType)} ASM_IS__{xType.Assembly.GetName().Name}";
+                xTypeName = DataMember.FilterStringForIncorrectChars(xTypeName);
 
-                    // Type ID
-                    string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
-                    Move(xDataName, (int)xTypeID);
-                    XS.DataMember(xDataName, xTypeID);
-                    Push(xTypeID);
+                // Type ID
+                string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
+                XS.Set(xDataName, (uint)xTypeID, destinationIsIndirect: true, size: RegisterSize.Int32);
+                XS.DataMember(xDataName, xTypeID);
+                Push(xTypeID);
 
-                    // Base Type ID
-                    Push((uint)xBaseIndex.Value);
+                // Base Type ID
+                Push((uint)xBaseIndex.Value);
 
-                    // Size
-                    Push(ILOp.SizeOfType(xType));
+                // Size
+                Push(ILOp.SizeOfType(xType));
 
-                    // Interface Count
-                    var xInterfaces = xType.GetInterfaces();
-                    Push((uint)xInterfaces.Length);
-                    xData = AllocateEmptyArray(xInterfaces.Length, sizeof(uint), xArrayTypeID);
-                    // Interface Indexes Array
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceIndexesArray";
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                    Push(xDataName);
-                    Push(0);
+                // Interface Count
+                var xInterfaces = xType.GetInterfaces();
+                Push((uint)xInterfaces.Length);
+                xData = AllocateEmptyArray(xInterfaces.Length, sizeof(uint), xArrayTypeID);
+                // Interface Indexes Array
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceIndexesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                Push(xDataName);
+                Push(0);
 
-                    // Method array
-                    xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
-                    // Method Count
-                    Push((uint)xEmittedMethods.Count);
-                    // Method Indexes Array
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                    Push(xDataName);
-                    Push(0);
-                    // Method Addresses Array
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodAddressesArray";
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                    Push(xDataName);
-                    Push(0);
+                // Method array
+                xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
+                // Method Count
+                Push((uint)xEmittedMethods.Count);
+                // Method Indexes Array
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                Push(xDataName);
+                Push(0);
+                // Method Addresses Array
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodAddressesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                Push(xDataName);
+                Push(0);
 
-                    // Interface methods
-                    xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
-                    // Interface method count
-                    Push((uint)xEmittedInterfaceMethods.Count);
-                    // Interface method indexes array
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceMethodIndexesArray";
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                    Push(xDataName);
-                    Push(0);
-                    // Target method indexes array
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__TargetMethodIndexesArray";
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                    Push(xDataName);
-                    Push(0);
+                // Interface methods
+                xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
+                // Interface method count
+                Push((uint)xEmittedInterfaceMethods.Count);
+                // Interface method indexes array
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceMethodIndexesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                Push(xDataName);
+                Push(0);
+                // Target method indexes array
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__TargetMethodIndexesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                Push(xDataName);
+                Push(0);
 
-                    // Full type name
-                    xDataName = $"____SYSTEM____TYPE___{xTypeName}";
-                    int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.FullName}");
-                    xData = AllocateEmptyArray(xDataByteCount, 2, xArrayTypeID);
-                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                // Full type name
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}";
+                int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.FullName}");
+                xData = AllocateEmptyArray(xDataByteCount, 2, xArrayTypeID);
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
 
-                    Call(VTablesImplRefs.SetTypeInfoRef);
+                Call(VTablesImplRefs.SetTypeInfoRef);
 
-                    for (int j = 0; j < xInterfaces.Length; j++)
-                    {
-                        var xInterface = xInterfaces[j];
-                        var xInterfaceTypeId = aGetTypeID(xInterface);
+                for (int j = 0; j < xInterfaces.Length; j++)
+                {
+                    var xInterface = xInterfaces[j];
+                    var xInterfaceTypeId = aGetTypeID(xInterface);
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Interface");
                         xVmtDebugOutput.WriteAttributeString("Id", xInterfaceTypeId.ToString());
                         xVmtDebugOutput.WriteAttributeString("Name", xInterface.GetFullName());
                         xVmtDebugOutput.WriteEndElement();
 #endif
-                        Push(xTypeID);
-                        Push((uint)j);
-                        Push(xInterfaceTypeId);
-                        Call(VTablesImplRefs.SetInterfaceInfoRef);
-                    }
+                    Push(xTypeID);
+                    Push((uint)j);
+                    Push(xInterfaceTypeId);
+                    Call(VTablesImplRefs.SetInterfaceInfoRef);
+                }
 
-                    for (int j = 0; j < xEmittedMethods.Count; j++)
-                    {
-                        var xMethod = xEmittedMethods[j];
-                        var xMethodUID = aGetMethodUID(xMethod);
+                for (int j = 0; j < xEmittedMethods.Count; j++)
+                {
+                    var xMethod = xEmittedMethods[j];
+                    var xMethodUID = aGetMethodUID(xMethod);
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Method");
                         xVmtDebugOutput.WriteAttributeString("Id", xMethodUID.ToString());
                         xVmtDebugOutput.WriteAttributeString("Name", xMethod.GetFullName());
                         xVmtDebugOutput.WriteEndElement();
 #endif
-                        if (!xType.IsInterface)
-                        {
-                            Push(xTypeID);
-                            Push((uint)j);
-                            Push(xMethodUID);
-                            if (xMethod.IsAbstract)
-                            {
-                                // abstract methods dont have bodies, oiw, are not emitted
-                                Push(0);
-                            }
-                            else
-                            {
-                                Push(ILOp.GetLabel(xMethod));
-                            }
-
-                            Call(VTablesImplRefs.SetMethodInfoRef);
-                        }
-                    }
-
-                    for (int j = 0; j < xEmittedInterfaceMethods.Count; j++)
+                    if (!xType.IsInterface)
                     {
-                        var xMethod = xEmittedInterfaceMethods.ElementAt(j);
-                        var xInterfaceMethodUID = aGetMethodUID(xMethod.InterfaceMethod);
-                        var xTargetMethodUID = aGetMethodUID(xMethod.TargetMethod);
+                        Push(xTypeID);
+                        Push((uint)j);
+                        Push(xMethodUID);
+                        if (xMethod.IsAbstract)
+                        {
+                            // abstract methods dont have bodies, oiw, are not emitted
+                            Push(0);
+                        }
+                        else
+                        {
+                            Push(ILOp.GetLabel(xMethod));
+                        }
+
+                        Call(VTablesImplRefs.SetMethodInfoRef);
+                    }
+                }
+
+                for (int j = 0; j < xEmittedInterfaceMethods.Count; j++)
+                {
+                    var xMethod = xEmittedInterfaceMethods.ElementAt(j);
+                    var xInterfaceMethodUID = aGetMethodUID(xMethod.InterfaceMethod);
+                    var xTargetMethodUID = aGetMethodUID(xMethod.TargetMethod);
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("InterfaceMethod");
                         xVmtDebugOutput.WriteAttributeString("InterfaceMethodId", xInterfaceMethodUID.ToString());
                         xVmtDebugOutput.WriteAttributeString("TargetMethodId", xTargetMethodUID.ToString());
                         xVmtDebugOutput.WriteEndElement();
 #endif
-                        if (!xType.IsInterface)
-                        {
-                            Push(xTypeID);
-                            Push((uint)j);
-                            Push(xInterfaceMethodUID);
-                            Push(xTargetMethodUID);
+                    if (!xType.IsInterface)
+                    {
+                        Push(xTypeID);
+                        Push((uint)j);
+                        Push(xInterfaceMethodUID);
+                        Push(xTargetMethodUID);
 
-                            Call(VTablesImplRefs.SetInterfaceMethodInfoRef);
-                        }
+                        Call(VTablesImplRefs.SetInterfaceMethodInfoRef);
                     }
+                }
 #if VMT_DEBUG
                     xVmtDebugOutput.WriteEndElement(); // type
 #endif
-                }
+            }
 #if VMT_DEBUG
                 xVmtDebugOutput.WriteEndElement(); // types
                 xVmtDebugOutput.WriteEndDocument();

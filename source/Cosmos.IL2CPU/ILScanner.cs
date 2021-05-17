@@ -46,7 +46,7 @@ namespace Cosmos.IL2CPU
         // other unused assemblies. So instead we collect a list of assemblies as we scan.
         internal List<Assembly> mUsedAssemblies = new List<Assembly>();
 
-        protected OurHashSet<MemberInfo> mItems = new OurHashSet<MemberInfo>();
+        protected HashSet<MemberInfo> mItems = new HashSet<MemberInfo>(new MemberInfoComparer());
         protected List<object> mItemsList = new List<object>();
 
         // Contains items to be scanned, both types and methods
@@ -86,6 +86,8 @@ namespace Cosmos.IL2CPU
             LogWarning = aLogWarning;
 
             mPlugManager = new PlugManager(LogException, LogWarning, typeResolver);
+
+            VTablesImplRefs.GetTypeId = GetTypeUID; // we need this to figure out which ids object, valuetype and enum have in the vmt
         }
 
         public bool EnableLogging(string aPathname)
@@ -114,7 +116,6 @@ namespace Cosmos.IL2CPU
                 throw new ArgumentNullException(nameof(aItem));
             }
 
-            var xMemInfo = aItem;
             //TODO: fix this, as each label/symbol should also contain an assembly specifier.
 
             //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
@@ -242,6 +243,7 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -345,7 +347,8 @@ namespace Cosmos.IL2CPU
             {
                 if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
-                    xOpMethod.Value = (MethodBase)mItems.GetItemInList(xOpMethod.Value);
+                    mItems.TryGetValue(xOpMethod.Value, out MemberInfo value);
+                    xOpMethod.Value = (MethodBase)(value ?? xOpMethod.Value);
                     xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }
             }

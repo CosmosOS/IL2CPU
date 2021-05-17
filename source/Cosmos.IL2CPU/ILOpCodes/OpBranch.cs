@@ -86,7 +86,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (ILOp.IsIntegralType(xPopType))
+          if (ILOp.IsIntegerBasedType(xPopType) || ILOp.IsLongBasedType(xPopType))
           {
             return;
           }
@@ -120,49 +120,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Bgt_Un:
           var xValue1 = StackPopTypes[0];
           var xValue2 = StackPopTypes[1];
-          if (xValue1 == null || xValue2 == null)
-          {
-            return;
-          }
-          if (ILOp.IsIntegralTypeOrPointer(xValue1) && ILOp.IsIntegralTypeOrPointer(xValue2))
-          {
-            return;
-          }
-          if (xValue1 == typeof(float) && xValue2 == typeof(float))
-          {
-            return;
-          }
-          if (xValue1 == typeof(double) && xValue2 == typeof(double))
-          {
-            return;
-          }
-          if (xValue1 == typeof(IntPtr) && xValue2 == typeof(IntPtr))
-          {
-            return;
-          }
-          if (xValue1 == typeof(bool) && xValue2 == typeof(bool))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(int) && xValue2 == typeof(IntPtr))
-              || (xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(UIntPtr) && xValue2 == typeof(byte*))
-              || (xValue1 == typeof(byte*) && xValue2 == typeof(UIntPtr)))
-          {
-            return;
-          }
 
-          if ((xValue1 == typeof(long) && xValue2 == typeof(ulong))
-              || (xValue1 == typeof(ulong) && xValue2 == typeof(long)))
-          {
-            return;
-          }
-
-          if ((xValue1 == typeof(int) && xValue2 == typeof(bool))
-              || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
+          if (ILOp.IsSameValueType(xValue1, xValue2))
           {
             return;
           }

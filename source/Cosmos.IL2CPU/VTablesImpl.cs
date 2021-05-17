@@ -212,6 +212,39 @@ namespace Cosmos.IL2CPU
             throw new Exception("Cannot find virtual method!");
         }
 
+        // For a certain type and virtual method, find which type defines the virtual method actually used
+        public static uint GetDeclaringTypeOfMethodForType(uint aType, uint aMethodId)
+        {
+            var xCurrentType = aType;
+            do
+            {
+                var xCurrentTypeInfo = mTypes[xCurrentType];
+
+                for (int i = 0; i < xCurrentTypeInfo.MethodIndexes.Length; i++)
+                {
+                    if (xCurrentTypeInfo.MethodIndexes[i] == aMethodId)
+                    {
+                        return xCurrentType;
+                    }
+                }
+                if (xCurrentType == xCurrentTypeInfo.BaseTypeIdentifier)
+                {
+                    Debug("Ultimate base type already found!");
+                    break;
+                }
+                xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
+            }
+            while (true);
+
+            EnableDebug = true;
+            DebugHex("Type", aType);
+            DebugHex("MethodId", aMethodId);
+            Debug("Not FOUND Declaring TYPE!");
+            Debugger.DoBochsBreak();
+            Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
+            while (true) ;
+        }
+
         public static uint GetMethodAddressForInterfaceType(uint aType, uint aInterfaceMethodId)
         {
             if (aType > 0xFFFF)

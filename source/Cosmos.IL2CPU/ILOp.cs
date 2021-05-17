@@ -16,6 +16,7 @@ using XSharp;
 using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
+using Cosmos.IL2CPU.ILOpCodes;
 
 namespace Cosmos.IL2CPU
 {
@@ -498,7 +499,6 @@ namespace Cosmos.IL2CPU
                     aCleanup();
                     if (xJumpTo == null)
                     {
-                        XS.Exchange(BX, BX);
                         XS.Jump(CPU.ConditionalTestEnum.NotEqual,GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
@@ -533,6 +533,7 @@ namespace Cosmos.IL2CPU
                 XS.Compare(ESP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
+                XS.Exchange(BX, BX);
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".NullCheck_GetCurrAddress");
                 XS.Label(".NullCheck_GetCurrAddress");
@@ -613,16 +614,37 @@ namespace Cosmos.IL2CPU
                         "System.Int32" == name || "System.Int64" == name;
         }
 
-        public static bool IsIntegralType(Type type)
+        /// <summary>
+        /// Check if the type is represented as a int by the CLI
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsIntegerBasedType(Type type)
         {
             return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
-                   || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)
+                   || type == typeof(int) || type == typeof(uint)
                    || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
         }
 
+        public static bool IsLongBasedType(Type type)
+        {
+            return type == typeof(long) || type == typeof(ulong);
+        }
+
+        public static bool IsSameValueType(Type aType, Type bType)
+        {
+            return (IsIntegerBasedType(aType) && IsIntegerBasedType(bType)) || (IsLongBasedType(aType) && IsLongBasedType(bType))
+                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float))));
+        }
+
+        /// <summary>
+        /// Is the type a numeric type or a pointer
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static bool IsIntegralTypeOrPointer(Type type)
         {
-            return IsIntegralType(type) || type.IsPointer || type.IsByRef;
+            return IsIntegerBasedType(type) || IsLongBasedType(type) || type.IsPointer || type.IsByRef;
         }
 
         public static bool IsPointer(Type aPointer)
@@ -630,15 +652,22 @@ namespace Cosmos.IL2CPU
             return aPointer.IsPointer || aPointer.IsByRef || aPointer == typeof(IntPtr) || aPointer == typeof(UIntPtr);
         }
 
-        public static bool IsByRef(Type aType) => aType.IsByRef;
+        public static bool IsObject(Type aPointer)
+        {
+            return aPointer.IsAssignableTo(typeof(object)) || aPointer == typeof(NullRef);
+        }
 
-        public static bool IsNativeInt(Type aType) => aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
+        public static bool IsByRef(Type aType) => aType.IsByRef;
 
         public static uint SizeOfType(Type aType)
         {
             if (aType == null)
             {
                 throw new ArgumentNullException(nameof(aType));
+            }
+            if (aType.IsEnum)
+            {
+                aType.GetEnumUnderlyingType();
             }
             if (aType.IsPointer || aType.IsByRef)
             {
@@ -684,8 +713,6 @@ namespace Cosmos.IL2CPU
                     return 16;
                 case "System.Guid":
                     return 16;
-                case "System.Enum":
-                    return 4;
                 case "System.DateTime":
                     return 8;
             }
@@ -703,7 +730,7 @@ namespace Cosmos.IL2CPU
             {
                 return SizeOfType(aType.GetField("value__").FieldType);
             }
-            if (aType.IsValueType)
+            if (aType.IsValueType && aType != typeof(ValueType))
             {
                 // structs are stored in the stack, so stack size = storage size
                 return GetStorageSize(aType);

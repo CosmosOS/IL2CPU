@@ -41,6 +41,15 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                 var op = aMethod.Code[position];
                 exceptionRegion = op.CurrentExceptionRegion;
 
+                if (exceptionRegion != null && exceptionRegion.HandlerOffset == position)
+                {
+                    if (!groups.ContainsKey(position))
+                    {
+                        var item = new ILGroup(op);
+                        groups.Add(position, item);
+                    }
+                }
+
                 foreach (var future in op.GetNextOpCodePositions())
                 {
                     var (newGroup, Position) = future;
@@ -53,8 +62,12 @@ namespace Cosmos.IL2CPU.MethodAnalysis
 
                     if (!newGroup)
                     {
+                        // if this is the first operation in a try block we also want a new group
+                        newGroup = ((exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1));
                         // we still have to check if we want this group to have a debug point at this position
-                        newGroup = ((exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1)) || (sequenceLookup != null && sequenceLookup.Contains(Position));
+                        newGroup |= (sequenceLookup != null && sequenceLookup.Contains(Position));
+                        // also a new group if we reach the catch block
+                        newGroup |= exceptionRegion != null && exceptionRegion.HandlerOffset == Position;
                     }
 
 
@@ -80,6 +93,11 @@ namespace Cosmos.IL2CPU.MethodAnalysis
 
                     var done = true;
 
+                    if (analysing.CurrentExceptionRegion != null && analysing.CurrentExceptionRegion.TryOffset == analysing.Position)
+                    {
+                        opGroup.PossibleContinuations.Add(groups[analysing.CurrentExceptionRegion.HandlerOffset]);
+                    }
+
                     foreach (var future in analysing.GetNextOpCodePositions())
                     {
                         var (newGroup, Position) = future;
@@ -92,6 +110,7 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                         {
                             opGroup.PossibleContinuations.Add(groups[Position]);
                         }
+
                     }
 
                     if (done)

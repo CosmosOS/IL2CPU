@@ -7,9 +7,25 @@ using Cosmos.IL2CPU.MethodAnalysis;
 using NUnit.Framework;
 using System.Reflection;
 using System.Linq;
+using System.Collections;
 
 namespace IL2CPU.Compiler.Tests
 {
+    public class ExampleMethods
+    {
+        public void TestSimpleException()
+        {
+            try
+            {
+                throw new Exception("throw new Exception()");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught exception.");
+            }
+        }
+    }
+
     public class VoidTextWriter : TextWriter
     {
         public override void Write(string value) { }
@@ -24,6 +40,7 @@ namespace IL2CPU.Compiler.Tests
         [TestCase(typeof(string), "Clone", 1, null)]
         [TestCase(typeof(string), "IndexOf", 9, new[] { typeof(string), typeof(int), typeof(int), typeof(StringComparison) })]
         [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", 32, new[] { typeof(bool) })]
+        [TestCase(typeof(ExampleMethods), "TestSimpleException", new Type[0])]
         public void TestGenerateGroups(Type aType, string aMethodName, int aExpectedGroups, Type[] aArgs)
         {
             if (aArgs is null)
@@ -52,6 +69,9 @@ namespace IL2CPU.Compiler.Tests
         [TestCase(typeof(string), "Clone", null)]
         [TestCase(typeof(string), "IndexOf", new[] { typeof(string), typeof(int), typeof(int), typeof(StringComparison) })]
         [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", new[] { typeof(bool) })]
+        [TestCase(typeof(BitConverter), "GetBytes", new[] { typeof(long) })]
+        [TestCase(typeof(Hashtable), "Insert", new[] { typeof(object), typeof(object), typeof(bool) })]
+        [TestCase(typeof(ExampleMethods), "TestSimpleException", new Type[0])]
         public void TestStackAnalysis(Type aType, string aMethodName, Type[] aArgs)
         {
             if (aArgs is null)

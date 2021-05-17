@@ -8,6 +8,11 @@
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <Prefer32Bit>true</Prefer32Bit>
+      <PlatformTarget>x86</PlatformTarget>
+    </PropertyGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\Cosmos.IL2CPU\Cosmos.IL2CPU.csproj" />
     </ItemGroup>
