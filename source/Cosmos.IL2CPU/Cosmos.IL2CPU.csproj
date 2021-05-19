@@ -6,11 +6,6 @@
         <!--<IsPackable>True</IsPackable>-->
         <NoWarn>CA1707;CA1716;$(NoWarn)</NoWarn>
     </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <PlatformTarget>x86</PlatformTarget>
-    </PropertyGroup>
-
     <ItemGroup>
         <InternalsVisibleTo Include="IL2CPU.Compiler.Tests" Key="IL2CPU" />
     </ItemGroup>
