@@ -164,6 +164,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           return 0;
         case Code.Refanytype:
           return 1;
+        case Code.Initblk:
+          return 3;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
@@ -309,6 +311,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           return 0;
         case Code.Refanytype:
           return 1;
+        case Code.Initblk:
+          return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }

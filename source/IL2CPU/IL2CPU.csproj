@@ -6,7 +6,7 @@
         <PackageDescription>IL2CPU compiler.</PackageDescription>
         <DevelopmentDependency>True</DevelopmentDependency>
         <Platforms>AnyCPU</Platforms>
-      <Prefer32Bit>true</Prefer32Bit>
+        <Prefer32Bit>true</Prefer32Bit>
     </PropertyGroup>
 
     <ItemGroup>
