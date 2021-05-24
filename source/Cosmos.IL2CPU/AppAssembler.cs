@@ -405,7 +405,7 @@ namespace Cosmos.IL2CPU
             {
                 xRetSize = 0;
             }
-            XS.Return(xRetSize);
+            XS.Return((uint)xRetSize);
 
             // Final, after all code. Points to op AFTER method.
             XS.Label("GUID_" + aMethod.EndMethodID.ToString());
