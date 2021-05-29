@@ -751,7 +751,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int)) // can either be pointer or native int
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -761,7 +761,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -771,7 +771,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -781,13 +781,17 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          {
+            throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
+          }
           break;
         case Code.Stind_I:
           if (!ILOp.IsIntegralTypeOrPointer(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
