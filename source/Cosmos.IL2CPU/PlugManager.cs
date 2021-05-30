@@ -218,10 +218,11 @@ namespace Cosmos.IL2CPU
                                             }
 
                                             OK = true;
-                                            // Exact params match excl. pointers - there could be "null" types for statics since some could be pointers
+                                            // Exact params match incl. pointers - which shuld be "null" types for statics since some could be pointers
                                             for (int i = 0; i < posMethParamTypes.Length; i++)
                                             {
-                                                if ((posMethParamTypes[i] == null && xParamTypes[i] == null) || !posMethParamTypes[i].Equals(xParamTypes[i]))
+                                                if ((posMethParamTypes[i] == null && xParamTypes[i] != null) ||
+                                                    (posMethParamTypes[i] != null && !posMethParamTypes[i].Equals(xParamTypes[i])))
                                                 {
                                                     OK = false;
                                                     break;
