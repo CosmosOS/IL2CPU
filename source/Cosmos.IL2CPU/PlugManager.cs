@@ -570,7 +570,7 @@ namespace Cosmos.IL2CPU
                         if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
                             // Allow explicit overwriting of types by signature in case we have to hide internal enum behind uint etc
-                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)))
+                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)).Replace("_", ""))
                             {
 
                             }
