@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Moq;
-using NUnit.Framework;
 
 using Cosmos.IL2CPU;
+using NUnit.Framework;
 
 namespace IL2CPU.Compiler.Tests
 {
@@ -20,10 +20,10 @@ namespace IL2CPU.Compiler.Tests
             var valueType = MockDefaultValueType(MockField(typeof(byte)), MockField(typeof(string)));
             var fieldsInfo = ILOp.GetFieldsInfo(valueType, false);
 
-            Assert.That(fieldsInfo, Has.Count.EqualTo(2));
+            Assert.AreEqual(fieldsInfo.Count, 2);
 
-            Assert.That(fieldsInfo[0].Offset, Is.EqualTo(0));
-            Assert.That(fieldsInfo[1].Offset, Is.EqualTo(4));
+            Assert.AreEqual(fieldsInfo[0].Offset, 0);
+            Assert.AreEqual(fieldsInfo[1].Offset, 4);
         }
 
         [Test]

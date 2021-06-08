@@ -1,12 +1,3 @@
-using System;
-
-using IL2CPU.API;
-using Cosmos.IL2CPU.ILOpCodes;
-
-using XSharp;
-using XSharp.Assembler.x86;
-using static XSharp.XSRegisters;
-
 namespace Cosmos.IL2CPU.X86.IL
 {
     [OpCode(ILOpCode.Code.Unbox_Any)]
@@ -19,6 +10,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
+            if (IsReferenceType(((ILOpCodes.OpType)aOpCode).Value))
+            {
+                return;
+            }
+
             new Unbox(Assembler).Execute(aMethod, aOpCode);
             new Ldobj(Assembler).Execute(aMethod, aOpCode);
         }

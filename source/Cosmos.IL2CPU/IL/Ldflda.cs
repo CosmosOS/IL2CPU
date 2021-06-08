@@ -29,7 +29,6 @@ namespace Cosmos.IL2CPU.X86.IL
     {
       XS.Comment("Field: " + aField.Id);
       int xExtraOffset = 0;
-      var xType = aMethod.MethodBase.DeclaringType;
 
       bool xNeedsGC = aDeclaringType.IsClass && !aDeclaringType.IsValueType;
 
@@ -38,10 +37,7 @@ namespace Cosmos.IL2CPU.X86.IL
         xExtraOffset = 12;
       }
 
-      var xActualOffset = aField.Offset + xExtraOffset;
-      var xSize = aField.Size;
-      if ((!aTypeOnStack.IsPointer)
-          && (aDeclaringType.IsClass))
+      if ((!aTypeOnStack.IsPointer) && (aDeclaringType.IsClass))
       {
         DoNullReferenceCheck(Assembler, aDebugEnabled, 4);
         XS.Add(ESP, 4);
@@ -58,7 +54,7 @@ namespace Cosmos.IL2CPU.X86.IL
       else
       {
         XS.Pop(EAX);
-        XS.Add(EAX, (uint)(xActualOffset));
+        XS.Add(EAX, (uint)(aField.Offset + xExtraOffset));
         XS.Push(EAX);
       }
     }

@@ -79,9 +79,11 @@ namespace IL2CPU.API
               xSB.Replace(c.ToString(), "");
             }*/ 
             xName = xName.Replace("[]", "array");
-            xName = xName.Replace("<>", "anonymousType");
+            xName = xName.Replace("<>", "compilergenerated");
             xName = xName.Replace("[,]", "array");
             xName = xName.Replace("*", "pointer");
+            xName = xName.Replace("|", "sLine");
+
             xName = IllegalCharsReplace.Replace(xName, string.Empty);
 
             if (xName.Length > MaxLengthWithoutSuffix)
@@ -110,7 +112,7 @@ namespace IL2CPU.API
             {
                 return aType.FullName;
             }
-            StringBuilder xSB = new StringBuilder(256);
+            var xSB = new StringBuilder(256);
             if (aType.IsArray)
             {
                 xSB.Append(GetFullName(aType.GetElementType()));
@@ -131,13 +133,7 @@ namespace IL2CPU.API
             if (aType.IsGenericType && !aType.IsGenericTypeDefinition)
             {
                 xSB.Append(GetFullName(aType.GetGenericTypeDefinition()));
-            }
-            else
-            {
-                xSB.Append(aType.FullName);
-            }
-            if (aType.IsGenericType)
-            {
+
                 xSB.Append("<");
                 var xArgs = aType.GetGenericArguments();
                 for (int i = 0; i < xArgs.Length - 1; i++)
@@ -148,6 +144,16 @@ namespace IL2CPU.API
                 xSB.Append(GetFullName(xArgs.Last()));
                 xSB.Append(">");
             }
+            else
+            {
+                xSB.Append(aType.FullName);
+            }
+
+            if(aType.Name == "SR" || aType.Name == "PathInternal") //TODO:  we need to deal with this more generally
+            {
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+            }
+
             return xSB.ToString();
         }
 
@@ -187,9 +193,10 @@ namespace IL2CPU.API
                 xBuilder.Append("dynamic_method");
             }
             xBuilder.Append(".");
-            xBuilder.Append(aMethod.Name);
-            if (aMethod.IsGenericMethod || aMethod.IsGenericMethodDefinition)
+            if (aMethod.IsGenericMethod && !aMethod.IsGenericMethodDefinition)
             {
+                xBuilder.Append(xMethodInfo.GetGenericMethodDefinition().Name);
+
                 var xGenArgs = aMethod.GetGenericArguments();
                 if (xGenArgs.Length > 0)
                 {
@@ -202,6 +209,10 @@ namespace IL2CPU.API
                     xBuilder.Append(GetFullName(xGenArgs.Last()));
                     xBuilder.Append(">");
                 }
+            }
+            else
+            {
+                xBuilder.Append(aMethod.Name);
             }
             xBuilder.Append("(");
             var xParams = aMethod.GetParameters();

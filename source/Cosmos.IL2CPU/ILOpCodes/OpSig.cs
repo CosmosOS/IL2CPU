@@ -27,5 +27,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
     }
+
+    public override void DoInterpretStackTypes() { }
   }
 }

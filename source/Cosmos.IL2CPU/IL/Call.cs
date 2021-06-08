@@ -18,7 +18,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public static uint GetStackSizeToReservate(MethodBase aMethod, Type aType = null)
         {
-
             var xMethodInfo = aMethod as MethodInfo;
             uint xReturnSize = 0;
             if (xMethodInfo != null)

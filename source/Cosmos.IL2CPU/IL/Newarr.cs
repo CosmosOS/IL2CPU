@@ -36,7 +36,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Push(EAX);
       XS.Set(EDX, xSize);
       XS.Multiply(EDX); // total element size
-      XS.Add(EAX, ObjectUtils.FieldDataOffset + 4); // total srray size
+      XS.Add(EAX, ObjectUtils.FieldDataOffset + 4); // total array size
       XS.Push(EAX);
       XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
       XS.Label(".AfterAlloc");

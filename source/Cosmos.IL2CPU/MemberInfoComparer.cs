@@ -44,6 +44,15 @@ namespace Cosmos.IL2CPU
             return false;
         }
 
-        public int GetHashCode(MemberInfo obj) => obj.MetadataToken;
+        public int GetHashCode(MemberInfo aItem)
+        {
+            return (aItem.ToString() + GetDeclareTypeString(aItem)).GetHashCode();
+        }
+
+        private static string GetDeclareTypeString(MemberInfo item)
+        {
+            var xName = item.DeclaringType;
+            return xName == null ? String.Empty : xName.ToString();
+        }
     }
 }

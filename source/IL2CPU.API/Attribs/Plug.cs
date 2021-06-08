@@ -26,6 +26,9 @@ namespace IL2CPU.API.Attribs
 
         public Type Target { get; set; }
 
+        /// <summary>
+        /// TargetName can be used to load private/internal classes. It has the format "[Class name], [Assembly]"
+        /// </summary>
         public string TargetName { get; set; }
 
         public bool IsOptional{ get; set; }

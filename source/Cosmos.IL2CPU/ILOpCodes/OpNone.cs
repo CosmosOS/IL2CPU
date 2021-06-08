@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -159,7 +160,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Volatile:
           return 0;
         case Code.Endfinally:
+        case Code.Endfilter:
           return 0;
+        case Code.Refanytype:
+          return 1;
+        case Code.Initblk:
+          return 3;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
       }
@@ -301,6 +307,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Volatile:
           return 0;
         case Code.Endfinally:
+        case Code.Endfilter:
+          return 0;
+        case Code.Refanytype:
+          return 1;
+        case Code.Initblk:
           return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
@@ -529,9 +540,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
+    public override void DoInterpretStackTypes()
     {
-      base.DoInterpretStackTypes(ref aSituationChanged);
       switch (OpCode)
       {
         case Code.Add:
@@ -557,301 +567,42 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (!StackPopTypes.Contains(null))
           {
             // PopTypes set, but PushType not yet, so fill it.
-
-            if (StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(bool))
-            {
-              StackPushTypes[0] = typeof(bool);
-              aSituationChanged = true;
-              return;
-            }
-
-            if ((StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(Int32)) ||
-              (StackPopTypes[0] == typeof(Int32) && StackPopTypes[1] == typeof(bool)))
-            {
-              StackPushTypes[0] = typeof(Int32);
-              aSituationChanged = true;
-              return;
-            }
-
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(uint*))
-              || (StackPopTypes[0] == typeof(uint*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(uint*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(uint*))
-              || (StackPopTypes[0] == typeof(uint*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(uint*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(uint)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(byte*))
-              || (StackPopTypes[0] == typeof(byte*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(byte*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(char*))
-                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(char*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(char*))
-                || (StackPopTypes[0] == typeof(char*) && StackPopTypes[1] == typeof(UIntPtr)))
-            {
-              StackPushTypes[0] = typeof(char*);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(uint))
-              || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(UIntPtr))
-              || (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(IntPtr))
-              || (StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(IntPtr);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(uint))
-              || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(ushort))
-              || (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(short)))
-            {
-              StackPushTypes[0] = typeof(short);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(byte))
-             || (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(short))
-             || (StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(long) && StackPopTypes[1] == typeof(ulong))
-             || (StackPopTypes[0] == typeof(ulong) && StackPopTypes[1] == typeof(long)))
-            {
-              StackPushTypes[0] = typeof(long);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(ushort))
-             || (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(uint))
-             || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(byte)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(uint))
-            || (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(ushort)))
-            {
-              StackPushTypes[0] = typeof(uint);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(char))
-             || (StackPopTypes[0] == typeof(char) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(UIntPtr))
-             || (StackPopTypes[0] == typeof(UIntPtr) && StackPopTypes[1] == typeof(IntPtr)))
-            {
-              StackPushTypes[0] = typeof(UIntPtr);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(IntPtr) && StackPopTypes[1] == typeof(IntPtr))
-            {
-              StackPushTypes[0] = typeof(IntPtr);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(uint))
-            {
-              StackPushTypes[0] = typeof(uint);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(uint) && StackPopTypes[1] == typeof(char))
-            {
-              StackPushTypes[0] = typeof(uint);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(byte))
-            {
-              StackPushTypes[0] = typeof(byte);
-              aSituationChanged = true;
-              return;
-            }
-
-            if (StackPopTypes[0] == typeof(byte) && StackPopTypes[1] == typeof(ushort) ||
-                StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(byte))
-            {
-              StackPushTypes[0] = typeof(ushort);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(int))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(bool))
-             || (StackPopTypes[0] == typeof(bool) && StackPopTypes[1] == typeof(int)))
-
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(ushort) && StackPopTypes[1] == typeof(ushort))
-            {
-              StackPushTypes[0] = typeof(ushort);
-              aSituationChanged = true;
-              return;
-            }
-            //Changed
-            if (StackPopTypes[0] == typeof(short) && StackPopTypes[1] == typeof(short))
-            {
-              StackPushTypes[0] = typeof(short);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(long) && StackPopTypes[1] == typeof(long))
-            {
-              StackPushTypes[0] = typeof(long);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(ulong) && StackPopTypes[1] == typeof(ulong))
-            {
-              StackPushTypes[0] = typeof(ulong);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Double) && StackPopTypes[1] == typeof(Double))
-            {
-              StackPushTypes[0] = typeof(Double);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Single) && StackPopTypes[1] == typeof(Single))
-            {
-              StackPushTypes[0] = typeof(Single);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(Char) && StackPopTypes[1] == typeof(Char))
-            {
-              StackPushTypes[0] = typeof(Char);
-              aSituationChanged = true;
-              return;
-            }
-
-            if ((StackPopTypes[0] == typeof(int) && StackPopTypes[1] == typeof(sbyte))
-             || (StackPopTypes[0] == typeof(sbyte) && StackPopTypes[1] == typeof(int)))
-            {
-              StackPushTypes[0] = typeof(int);
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == StackPopTypes[1] && StackPopTypes[0].IsPointer)
+            if(StackPopTypes[0] == StackPopTypes[1])
             {
               StackPushTypes[0] = StackPopTypes[0];
-              aSituationChanged = true;
-              return;
-            }
-            if (StackPopTypes[0] == typeof(int) &&
-                StackPopTypes[1].IsPointer)
-            {
-              StackPushTypes[0] = StackPopTypes[1];
-              aSituationChanged = true;
-              return;
-            }
-            if ((StackPopTypes[0] == typeof(IntPtr) || StackPopTypes[0] == typeof(UIntPtr)) &&
-                StackPopTypes[1].IsPointer)
-            {
-              StackPushTypes[0] = StackPopTypes[1];
-              aSituationChanged = true;
-              return;
-            }
-            if (OpCode == Code.Add &&
-                ((StackPopTypes[0] == typeof(IntPtr) && (StackPopTypes[1].IsPointer || StackPopTypes[1].IsByRef))
-                 || ((StackPopTypes[0].IsPointer || StackPopTypes[0].IsByRef) && StackPopTypes[1] == typeof(IntPtr))))
-            {
-              if (StackPopTypes[0] == typeof(IntPtr))
-              {
-                StackPushTypes[0] = StackPopTypes[1];
-              }
-              else
-              {
-                StackPushTypes[0] = StackPopTypes[0];
-              }
-              aSituationChanged = true;
               return;
             }
 
-            throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1]));
+            if (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
+            {
+              StackPushTypes[0] = typeof(int);
+              return;
+            }
+
+            if (ILOp.IsLongBasedType(StackPopTypes[0]) && ILOp.IsLongBasedType(StackPopTypes[1]))
+            {
+              StackPushTypes[0] = typeof(long);
+              return;
+            }
+
+            if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
+            {
+              StackPushTypes[0] = typeof(uint*);
+              return;
+            }
+
+            if ((ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
+                 || (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1])))
+            {
+              StackPushTypes[0] = typeof(uint*);
+              return;
+            }
+            
+            throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' {3} not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1], StackPopTypes[1].IsByRef));
           }
           break;
         case Code.Localloc:
           StackPushTypes[0] = typeof(void*);
-          aSituationChanged = true;
           return;
         case Code.Stelem_I2:
           var xTypeValue = StackPopTypes[0];
@@ -881,85 +632,81 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (xTypeValue == typeof(int) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(byte) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(long) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(long);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(int) && xTypeShift == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(ushort) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(char) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(uint) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(long) && xTypeShift == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(long);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(IntPtr);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(IntPtr);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(ulong) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(ulong);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(sbyte) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
             return;
           }
           if (xTypeValue == typeof(short) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
-            aSituationChanged = true;
+            return;
+          }
+          if (xTypeValue == typeof(UIntPtr) && xTypeShift == typeof(int))
+          {
+            StackPushTypes[0] = typeof(UIntPtr);
+            return;
+          }
+          if (xTypeValue == typeof(char*) && xTypeShift == typeof(int))
+          {
+            StackPushTypes[0] = typeof(char*);
             return;
           }
           throw new NotImplementedException(String.Format("{0} with types {1} and {2} is not implemented!", OpCode, xTypeValue.FullName, xTypeShift.FullName));
@@ -978,7 +725,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
             throw new Exception("Ldelem Array type is not an array (Actual = " + xTypeArray.FullName + ")");
           }
           StackPushTypes[0] = xTypeArray.GetElementType();
-          aSituationChanged = true;
           break;
         case Code.Not:
         case Code.Neg:
@@ -989,89 +735,63 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (StackPopTypes[0] != null)
           {
             StackPushTypes[0] = StackPopTypes[0];
-            aSituationChanged = true;
             return;
           }
           break;
         case Code.Dup:
-          if (StackPushTypes[0] != null && StackPushTypes[1] != null)
-          {
-            return;
-          }
           if (StackPopTypes[0] != null)
           {
             StackPushTypes[0] = StackPopTypes[0];
             StackPushTypes[1] = StackPopTypes[0];
-            aSituationChanged = true;
             return;
           }
           return;
         case Code.Stind_I1:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int)) // can either be pointer or native int
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
           break;
         case Code.Stind_I2:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
           break;
         case Code.Stind_I4:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsIntegerBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
           break;
         case Code.Stind_I8:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
-          if (!ILOp.IsIntegralType(StackPopTypes[0]))
+          if (!ILOp.IsLongBasedType(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
           break;
         case Code.Stind_I:
-          if (StackPopTypes[1] == null || StackPopTypes[0] == null)
-          {
-            return;
-          }
           if (!ILOp.IsIntegralTypeOrPointer(StackPopTypes[0]))
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -1097,8 +817,19 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             StackPushTypes[0] = StackPopTypes[0].GetElementType();
           }
-          aSituationChanged = true;
           break;
+      }
+    }
+
+    public override List<(bool newGroup, int Position)> GetNextOpCodePositions()
+    {
+      switch (OpCode)
+      {
+        case Code.Ret:
+        case Code.Throw:
+          return new List<(bool newGroup, int Position)>();
+        default:
+          return new List<(bool newGroup, int Position)> { (false, NextPosition) };
       }
     }
   }

@@ -44,7 +44,7 @@ namespace Cosmos.IL2CPU
 
         private TypeResolver _typeResolver;
 
-        private Orvid.Collections.SkipList<MethodBase> ResolvedPlugs = new Orvid.Collections.SkipList<MethodBase>();
+        private Dictionary<string, MethodBase> ResolvedPlugs = new Dictionary<string, MethodBase>();
 
         private static string BuildMethodKeyName(MethodBase m)
         {
@@ -75,6 +75,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xAsm in assemblies)
             {
+                LogWarning("Loading plugs from assembly: " + xAsm.FullName);
                 // Find all classes marked as a Plug
                 foreach (var xPlugType in xAsm.GetTypes())
                 {
@@ -217,10 +218,11 @@ namespace Cosmos.IL2CPU
                                             }
 
                                             OK = true;
-                                            // Exact params match excl. pointers - there could be "null" types for statics since some could be pointers
+                                            // Exact params match incl. pointers - which shuld be "null" types for statics since some could be pointers
                                             for (int i = 0; i < posMethParamTypes.Length; i++)
                                             {
-                                                if ((posMethParamTypes[i] == null && xParamTypes[i] == null) || !posMethParamTypes[i].Equals(xParamTypes[i]))
+                                                if ((posMethParamTypes[i] == null && xParamTypes[i] != null) ||
+                                                    (posMethParamTypes[i] != null && !posMethParamTypes[i].Equals(xParamTypes[i])))
                                                 {
                                                     OK = false;
                                                     break;
@@ -251,7 +253,7 @@ namespace Cosmos.IL2CPU
                                             for (int i = 0; i < posMethParamTypes.Length && (i + offset) < xParamTypes.Length; i++)
                                             {
                                                 //Continue if current type is null i.e. was a pointer as that could be any type originally.
-                                                if (xParamTypes[i + offset] != null && !posMethParamTypes[i].Equals(xParamTypes[i + offset]))
+                                                if (xParamTypes[i + offset] != null && !xParamTypes[i + offset].Equals(posMethParamTypes[i]))
                                                 {
                                                     if (offset == 0)
                                                     {
@@ -533,7 +535,7 @@ namespace Cosmos.IL2CPU
                             if (xAttrib?.Signature != null)
                             {
                                 var xName = DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod));
-                                if (String.Equals(xName, xAttrib.Signature, StringComparison.OrdinalIgnoreCase))
+                                if (String.Equals(xName.Replace("_", ""), xAttrib.Signature.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
                                 {
                                     xResult = xSigMethod;
                                     break;
@@ -565,9 +567,17 @@ namespace Cosmos.IL2CPU
                     for (int i = 0; i < xAMethodPara.Length; i++)
                     {
                         int correctIndex = aMethod.IsStatic ? i : i + 1;
-                        if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType)
+                        if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
-                            return null;
+                            // Allow explicit overwriting of types by signature in case we have to hide internal enum behind uint etc
+                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)).Replace("_", ""))
+                            {
+
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                     }
                     if (xResult.Name == "Ctor" && aMethod.Name == ".ctor")
@@ -652,7 +662,7 @@ namespace Cosmos.IL2CPU
         public MethodBase ResolvePlug(MethodBase aMethod, Type[] aParamTypes)
         {
             var xMethodKey = BuildMethodKeyName(aMethod);
-            if (ResolvedPlugs.Contains(xMethodKey, out var xResult))
+            if (ResolvedPlugs.TryGetValue(xMethodKey, out var xResult))
             {
                 return xResult;
             }
@@ -732,19 +742,10 @@ namespace Cosmos.IL2CPU
                     }
                 }
 
-                ResolvedPlugs.Add(xMethodKey, xResult);
+                ResolvedPlugs[xMethodKey] = xResult;
 
                 return xResult;
             }
-        }
-
-        public void Clean()
-        {
-            mPlugImpls = new Dictionary<Type, List<Type>>();
-            mPlugImplsInhrt = new Dictionary<Type, List<Type>>();
-            mPlugFields = new Dictionary<Type, IDictionary<string, PlugField>>();
-
-            ResolvedPlugs = new Orvid.Collections.SkipList<MethodBase>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
@@ -22,7 +23,7 @@ namespace Cosmos.IL2CPU
         {
             LoadOpCodes();
         }
-        
+
         protected void LoadOpCodes()
         {
             foreach (var xField in typeof(OpCodes).GetFields(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public))
@@ -52,15 +53,9 @@ namespace Cosmos.IL2CPU
         public List<ILOpCode> ProcessMethod(MethodBase aMethod)
         {
             var xResult = new List<ILOpCode>();
+
             var xBody = aMethod.GetMethodBody();
             var xModule = aMethod.Module;
-            if (aMethod.DeclaringType.FullName == "System.Runtime.CompilerServices.Unsafe")
-            {
-                var xUnsafeMethod = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe")
-                     .GetMethod(aMethod.Name, Array.ConvertAll(aMethod.GetParameters(), p => p.ParameterType));
-                xBody = xUnsafeMethod.GetMethodBody();
-                xModule = xUnsafeMethod.Module;
-            }
 
             // Cache for use in field and method resolution
             Type[] xTypeGenArgs = Type.EmptyTypes;
@@ -73,6 +68,225 @@ namespace Cosmos.IL2CPU
             {
                 xMethodGenArgs = aMethod.GetGenericArguments();
             }
+
+            #region Unsafe Intrinsic
+
+            if (aMethod.DeclaringType.FullName == "Internal.Runtime.CompilerServices.Unsafe")
+            {
+                var xUnsafeType = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
+                var xUnsafeMethod = xUnsafeType.GetMethods()
+                    .Where(
+                        m => m.Name == aMethod.Name
+                        && m.GetGenericArguments().Length == aMethod.GetGenericArguments().Length
+                        && m.GetParameters().Length == aMethod.GetParameters().Length)
+                    .SingleOrDefault(
+                        m =>
+                        {
+                            var xParamTypes = Array.ConvertAll(m.GetParameters(), p => p.ParameterType);
+                            var xOriginalParamTypes = Array.ConvertAll(
+                                ((MethodInfo)aMethod).GetParameters(), p => p.ParameterType);
+
+                            for (int i = 0; i < xParamTypes.Length; i++)
+                            {
+                                var xParamType = xParamTypes[i];
+                                var xOriginalParamType = xOriginalParamTypes[i];
+
+                                while (xParamType.HasElementType)
+                                {
+                                    if (!xOriginalParamType.HasElementType)
+                                    {
+                                        return false;
+                                    }
+
+                                    if ((xParamType.IsArray && !xOriginalParamType.IsArray)
+                                        || (xParamType.IsByRef && !xOriginalParamType.IsByRef)
+                                        || (xParamType.IsPointer && !xOriginalParamType.IsPointer))
+                                    {
+                                        return false;
+                                    }
+
+                                    xParamType = xParamType.GetElementType();
+                                    xOriginalParamType = xOriginalParamType.GetElementType();
+                                }
+
+                                if (!xParamType.IsAssignableFrom(xOriginalParamType)
+                                    && (!xParamType.IsGenericParameter || (xParamType.HasElementType && !xParamType.IsArray)))
+                                {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        });
+
+                if (xUnsafeMethod != null)
+                {
+                    xBody = xUnsafeMethod.GetMethodBody();
+                    xModule = xUnsafeMethod.Module;
+                }
+            }
+
+            #endregion
+
+
+            #region ByReference Intrinsic
+
+            if (aMethod.DeclaringType.IsGenericType
+                && aMethod.DeclaringType.GetGenericTypeDefinition().FullName == "System.ByReference`1")
+            {
+                var valueField = aMethod.DeclaringType.GetField("_value", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                switch (aMethod.Name)
+                {
+                    case ".ctor":
+
+                        // push $this
+                        xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 0, 1, 0, null));
+
+                        // push value (arg 1)
+                        xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 1, 2, 1, null));
+
+                        // store value into $this._value
+                        xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 2, 8, valueField, null));
+
+                        // return
+                        xResult.Add(new ILOpCodes.OpNone(ILOpCode.Code.Ret, 8, 9, null));
+
+                        break;
+
+                    case "get_Value":
+
+                        // push $this
+                        xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 0, 1, 0, null));
+
+                        // push $this._value
+                        xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Ldfld, 1, 6, valueField, null));
+
+                        // return
+                        xResult.Add(new ILOpCodes.OpNone(ILOpCode.Code.Ret, 6, 7, null));
+
+                        break;
+
+                    default:
+                        throw new NotImplementedException($"ByReference intrinsic method '{aMethod}' not implemented!");
+                }
+
+                foreach (var op in xResult)
+                {
+                    op.InitStackAnalysis(aMethod);
+                }
+
+                return xResult;
+            }
+
+            #endregion
+
+            #region RuntimeTypeHandle
+
+            if(aMethod.DeclaringType.Name == "RuntimeType")
+            {
+                if(aMethod.Name == ".ctor")
+                {
+                    var op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 0, 1, null);
+                    op.InitStackAnalysis(aMethod);
+
+                    xResult.Add(op);
+
+                    return xResult;
+                }
+            }
+
+            if (aMethod.DeclaringType.Name == "TypeImpl")
+            {
+                if (aMethod.Name == "CreateRuntimeTypeHandle")
+                {
+                    // the idea of this method is to first create a RuntimeType object, set its handle and then create a RuntimeTypeHandle from it
+                    // we are manually coding in il here since we have to call a internal method on an internal class
+                    var runtimeType = Type.GetType("System.RuntimeType");
+                    var ctor = runtimeType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] {  }, null);
+                    xResult.Add(new ILOpCodes.OpMethod(ILOpCode.Code.Newobj, 0, 1, ctor, null) {
+                        StackPopTypes = Array.Empty<Type>(),
+                        StackPushTypes = new[] { runtimeType },
+                    });
+                    xResult.Add(new ILOpCodes.OpNone(ILOpCode.Code.Dup, 1, 2, null)
+                    {
+                        StackPopTypes = new[] { runtimeType },
+                        StackPushTypes = new[] { runtimeType, runtimeType }
+                    });
+                    xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 2, 3, 0, null) {
+                        StackPopTypes = Array.Empty<Type>(),
+                        StackPushTypes = new[] { typeof(int) },
+                    });
+                    var m_handle = runtimeType.GetField("m_handle", BindingFlags.Instance | BindingFlags.NonPublic);
+                    xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 3, 4, m_handle, null) {
+                        StackPopTypes = new[] {typeof(int), runtimeType},
+                        StackPushTypes = Array.Empty<Type>(),
+                    });
+                    var runtimeTypeHandle = Type.GetType("System.RuntimeTypeHandle");
+                    ctor = runtimeTypeHandle.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { runtimeType }, null);
+                    xResult.Add(new ILOpCodes.OpMethod(ILOpCode.Code.Newobj, 4, 5, ctor, null)
+                    {
+                        StackPopTypes = new[] { runtimeType },
+                        StackPushTypes = new[] { runtimeTypeHandle },
+                    });
+                    xResult.Add(new ILOpCodes.OpNone(ILOpCode.Code.Ret, 5, 6, null)
+                    {
+                        StackPopTypes = Array.Empty<Type>(),
+                        StackPushTypes = Array.Empty<Type>(),
+                    });
+
+                    return xResult;
+                }   
+            }
+            #endregion
+
+            #region ArrayPool ("hacked" generic plug)
+
+            if (aMethod.DeclaringType.IsGenericType
+                && aMethod.DeclaringType.GetGenericTypeDefinition().FullName == "System.Buffers.ArrayPool`1")
+            {
+                if (aMethod.Name == ".cctor")
+                {
+                    var op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 0, 1, null);
+                    op.InitStackAnalysis(aMethod);
+
+                    xResult.Add(op);
+
+                    return xResult;
+                }
+            }
+
+            #endregion
+
+            #region RuntimeHelpers
+
+            if (aMethod.DeclaringType.FullName == "System.Runtime.CompilerServices.RuntimeHelpers")
+            {
+                if (aMethod.Name == "IsBitwiseEquatable")
+                {
+                    // This is a generic method so we emit true or false depending on the type
+                    ILOpCode op;
+                    if (ILOp.IsIntegralTypeOrPointer(xMethodGenArgs[0]))
+                    {
+                        op = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, 0, 1, 1, null);
+                    }
+                    else
+                    {
+                        op = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, 0, 1, 1, null);
+                    }
+                    op.InitStackAnalysis(aMethod);
+                    xResult.Add(op);
+
+                    op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 1, 2, null);
+                    op.InitStackAnalysis(aMethod);
+
+                    xResult.Add(op);
+
+                    return xResult;
+                }
+            }
+
+            #endregion
 
             // Some methods return no body. Not sure why.. have to investigate
             // They arent abstracts or icalls...
@@ -446,6 +660,7 @@ namespace Cosmos.IL2CPU
                 xILOpCode.InitStackAnalysis(aMethod);
                 xResult.Add(xILOpCode);
             }
+
             return xResult;
         }
 
