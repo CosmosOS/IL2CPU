@@ -51,7 +51,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                aLogError(String.Format("Error occurred: " + e.ToString() + " at " + e.StackTrace));
+                aLogError(String.Format("Error occurred: " + e.ToString() + " at " + e.StackTrace ?? ""));
             }
 
             return Failed;
