@@ -601,6 +601,17 @@ namespace Cosmos.IL2CPU
             return !aType.IsValueType && !aType.IsPointer && !aType.IsByRef;
         }
 
+        /// <summary>
+        /// Checks if the type is a struct
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
+        public static bool IsStruct(Type aType)
+        {
+            return aType.IsValueType && !aType.Equals(typeof(string)) && !aType.Equals(typeof(decimal)) && !aType.IsEnum && !aType.IsPrimitive;
+        }
+    
+
         public static bool TypeIsSigned(Type aType)
         {
           var name = aType.FullName;

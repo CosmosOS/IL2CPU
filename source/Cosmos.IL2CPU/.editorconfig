@@ -13,7 +13,7 @@ indent_size = 2
 indent_size = 2
 
 [ILOp.cs]
-indent_size = 2
+indent_size = 4
 
 [IL/*.cs]
 indent_size = 2

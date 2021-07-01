@@ -71,36 +71,9 @@ namespace Cosmos.IL2CPU
     }
 
     public static void SetTypeInfo(
-      int aType, uint aBaseType, uint aInterfaceCount, uint[] aInterfaceIndexes,
-      uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
-      uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes)
+      int aType, uint aBaseType, uint aInterfaceCount, uint[] aInterfaceIndexes, uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
+      uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes)
     {
-      //DebugHex("SetTypeInfo - Type", (uint)aType);
-      //DebugHex("SetTypeInfo - BaseType", aBaseType);
-      //DebugHex("SetTypeInfo - InterfaceCount", aInterfaceCount);
-      //foreach (uint t in aInterfaceIndexes)
-      //{
-      //  DebugHex("SetTypeInfo - Interface Indexes", t);
-      //}
-      //DebugHex("SetTypeInfo - MethodCount", aMethodCount);
-      //foreach (uint t in aMethodIndexes)
-      //{
-      //  DebugHex("SetTypeInfo - Method Indexes", t);
-      //}
-      //foreach (uint t in aMethodAddresses)
-      //{
-      //  DebugHex("SetTypeInfo - Method Addresses", t);
-      //}
-      //DebugHex("SetTypeInfo - Interface Method Count", aInterfaceMethodCount);
-      //foreach (uint t in aMethodIndexes)
-      //{
-      //  DebugHex("SetTypeInfo - Interface Method IDs", t);
-      //}
-      //foreach (uint t in aMethodAddresses)
-      //{
-      //  DebugHex("SetTypeInfo - Target Method IDs", t);
-      //}
-
       mTypes[aType].BaseTypeIdentifier = aBaseType;
       mTypes[aType].InterfaceCount = aInterfaceCount;
       mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
@@ -110,14 +83,13 @@ namespace Cosmos.IL2CPU
       mTypes[aType].InterfaceMethodCount = aInterfaceMethodCount;
       mTypes[aType].InterfaceMethodIndexes = aInterfaceMethodIndexes;
       mTypes[aType].TargetMethodIndexes = aTargetMethodIndexes;
+      mTypes[aType].GCFieldCount = aGCFieldCount;
+      mTypes[aType].GCFieldOffsets = aGCFieldOffsets;
+      mTypes[aType].GCFieldTypes = aGCFieldTypes;
     }
 
     public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
     {
-      //DebugHex("SetInterfaceInfo - Type", (uint)aType);
-      //DebugHex("SetInterfaceInfo - InterfaceIndex", (uint)aInterfaceIndex);
-      //DebugHex("SetInterfaceInfo - InterfaceIdentifier", aInterfaceIdentifier);
-
       mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
 
       if (mTypes[aType].InterfaceIndexes[aInterfaceIndex] != aInterfaceIdentifier)
@@ -128,11 +100,6 @@ namespace Cosmos.IL2CPU
 
     public static void SetMethodInfo(int aType, int aMethodIndex, uint aMethodIdentifier, uint aMethodAddress)
     {
-      //DebugHex("SetMethodInfo - Type", (uint)aType);
-      //DebugHex("SetMethodInfo - MethodIndex", (uint)aMethodIndex);
-      //DebugHex("SetMethodInfo - MethodId", aMethodIdentifier);
-      //DebugHex("SetMethodInfo - MethodAddress", aMethodAddress);
-
       mTypes[aType].MethodIndexes[aMethodIndex] = aMethodIdentifier;
       mTypes[aType].MethodAddresses[aMethodIndex] = aMethodAddress;
 
@@ -144,11 +111,6 @@ namespace Cosmos.IL2CPU
 
     public static void SetInterfaceMethodInfo(int aType, int aMethodIndex, uint aInterfaceMethodId, uint aTargetMethodId)
     {
-      //DebugHex("SetInterfaceMethodInfo - Type", (uint)aType);
-      //DebugHex("SetInterfaceMethodInfo - MethodIndex", (uint)aMethodIndex);
-      //DebugHex("SetInterfaceMethodInfo - InterfaceMethodId", aInterfaceMethodId);
-      //DebugHex("SetInterfaceMethodInfo - TargetMethodId", aTargetMethodId);
-
       mTypes[aType].InterfaceMethodIndexes[aMethodIndex] = aInterfaceMethodId;
       mTypes[aType].TargetMethodIndexes[aMethodIndex] = aTargetMethodId;
     }
@@ -215,7 +177,7 @@ namespace Cosmos.IL2CPU
         }
         xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
       }
-      while (true) ;
+      while (true);
 
       EnableDebug = true;
       DebugHex("Type", aType);
@@ -273,9 +235,13 @@ namespace Cosmos.IL2CPU
       Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
       while (true) ;
     }
+
+    public static uint GetGCFieldCount(uint aType)
+    {
+      return mTypes[aType].GCFieldCount;
+    }
   }
 
-  [SuppressMessage("Design", "CA1051:Do not declare visible instance fields")]
   public struct VTable
   {
     public uint BaseTypeIdentifier;
@@ -290,5 +256,9 @@ namespace Cosmos.IL2CPU
     public uint InterfaceMethodCount;
     public uint[] InterfaceMethodIndexes;
     public uint[] TargetMethodIndexes;
+
+    public uint GCFieldCount; // Number of fields where objects are stored on the heap
+    public uint[] GCFieldOffsets;
+    public uint[] GCFieldTypes;
   }
 }

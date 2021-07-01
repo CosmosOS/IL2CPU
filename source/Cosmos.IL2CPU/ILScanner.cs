@@ -709,6 +709,12 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+            // Scam Fields so that we include those types
+            foreach (var field in aType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Queue(field.FieldType, aType, "Field Type");
+            }
+
             // For each new type, we need to scan for possible new virtuals
             // in our new type if its a descendant of something in
             // mVirtuals.

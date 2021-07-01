@@ -686,7 +686,7 @@ namespace Cosmos.IL2CPU
 
                 if (xNeedsExceptionPush)
                 {
-                    Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
+                    XS.Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
                     XS.Push(0);
                 }
 
@@ -844,24 +844,9 @@ namespace Cosmos.IL2CPU
             XS.Set(aDestLabelName, (uint)aValue, destinationIsIndirect: true, size: RegisterSize.Int32);
         }
 
-        private static void Push(uint aValue)
-        {
-            XS.Push(aValue);
-        }
-
-        private static void Push(string aLabelName, bool isIndirect = false)
-        {
-            XS.Push(aLabelName, isIndirect: isIndirect);
-        }
-
         private static void Call(MethodBase aMethod)
         {
             XS.Call(LabelName.Get(aMethod));
-        }
-
-        private static void Jump(string aLabelName)
-        {
-            XS.Jump(aLabelName);
         }
 
         private static _FieldInfo ResolveField(_MethodInfo method, string fieldId, bool aOnlyInstance)
@@ -1012,56 +997,90 @@ namespace Cosmos.IL2CPU
                 string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
                 Move(xDataName, (int)xTypeID);
                 XS.DataMember(xDataName, xTypeID);
-                Push(xTypeID);
+                XS.Push(xTypeID);
 
                 // Base Type ID
-                Push((uint)xBaseIndex.Value);
+                XS.Push((uint)xBaseIndex.Value);
 
                 // Interface Count
                 var xInterfaces = xType.GetInterfaces();
-                Push((uint)xInterfaces.Length);
+                XS.Push((uint)xInterfaces.Length);
                 xData = AllocateEmptyArray(xInterfaces.Length, sizeof(uint), xArrayTypeID);
                 // Interface Indexes Array
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceIndexesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                Push(xDataName);
-                Push(0);
+                XS.Push(xDataName);
+                XS.Push(0);
 
                 // Method array
                 xData = AllocateEmptyArray(xEmittedMethods.Count, sizeof(uint), xArrayTypeID);
                 // Method Count
-                Push((uint)xEmittedMethods.Count);
+                XS.Push((uint)xEmittedMethods.Count);
                 // Method Indexes Array
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodIndexesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                Push(xDataName);
-                Push(0);
+                XS.Push(xDataName);
+                XS.Push(0);
                 // Method Addresses Array
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__MethodAddressesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                Push(xDataName);
-                Push(0);
+                XS.Push(xDataName);
+                XS.Push(0);
 
                 // Interface methods
                 xData = AllocateEmptyArray(xEmittedInterfaceMethods.Count, sizeof(uint), xArrayTypeID);
                 // Interface method count
-                Push((uint)xEmittedInterfaceMethods.Count);
+                XS.Push((uint)xEmittedInterfaceMethods.Count);
                 // Interface method indexes array
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__InterfaceMethodIndexesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                Push(xDataName);
-                Push(0);
+                XS.Push(xDataName);
+                XS.Push(0);
                 // Target method indexes array
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__TargetMethodIndexesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
-                Push(xDataName);
-                Push(0);
+                XS.Push(xDataName);
+                XS.Push(0);
 
                 // Full type name
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}";
                 int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.FullName}");
                 xData = AllocateEmptyArray(xDataByteCount, 2, xArrayTypeID);
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+
+                //GC Information
+                var fields = xType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var gcFieldCount = fields.Where(f => !f.FieldType.IsValueType).Count();
+                XS.Push((uint)gcFieldCount);
+                var gCFieldOffsets = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
+                var gcFieldTypes = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
+                uint pos = 0;
+                uint offset = 0;
+                foreach (var field in fields)
+                {
+                    if (!field.FieldType.IsValueType)
+                    {
+                        var value = BitConverter.GetBytes(aGetTypeID(field.FieldType));
+                        for (var i = 0; i < 4; i++)
+                        {
+                            gcFieldTypes[4 * pos + i] = value[i];
+                        }
+                        value = BitConverter.GetBytes(offset);
+                        for (var i = 0; i < 4; i++)
+                        {
+                            gCFieldOffsets[4 * pos + i] = value[i];
+                        }
+                        pos++;
+                        offset += ILOp.Align(ILOp.SizeOfType(field.FieldType), 4);
+                    }
+                }
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldOffsetArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gCFieldOffsets));
+                XS.Push(xDataName);
+
+                xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldTypesArray";
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gcFieldTypes));
+                XS.Push(xDataName);
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 
@@ -1075,9 +1094,9 @@ namespace Cosmos.IL2CPU
                         xVmtDebugOutput.WriteAttributeString("Name", xInterface.GetFullName());
                         xVmtDebugOutput.WriteEndElement();
 #endif
-                    Push(xTypeID);
-                    Push((uint)j);
-                    Push(xInterfaceTypeId);
+                    XS.Push(xTypeID);
+                    XS.Push((uint)j);
+                    XS.Push(xInterfaceTypeId);
                     Call(VTablesImplRefs.SetInterfaceInfoRef);
                 }
 
@@ -1093,17 +1112,17 @@ namespace Cosmos.IL2CPU
 #endif
                     if (!xType.IsInterface)
                     {
-                        Push(xTypeID);
-                        Push((uint)j);
-                        Push(xMethodUID);
+                        XS.Push(xTypeID);
+                        XS.Push((uint)j);
+                        XS.Push(xMethodUID);
                         if (xMethod.IsAbstract)
                         {
                             // abstract methods dont have bodies, oiw, are not emitted
-                            Push(0);
+                            XS.Push(0);
                         }
                         else
                         {
-                            Push(ILOp.GetLabel(xMethod));
+                            XS.Push(ILOp.GetLabel(xMethod));
                         }
 
                         Call(VTablesImplRefs.SetMethodInfoRef);
@@ -1123,10 +1142,10 @@ namespace Cosmos.IL2CPU
 #endif
                     if (!xType.IsInterface)
                     {
-                        Push(xTypeID);
-                        Push((uint)j);
-                        Push(xInterfaceMethodUID);
-                        Push(xTargetMethodUID);
+                        XS.Push(xTypeID);
+                        XS.Push((uint)j);
+                        XS.Push(xInterfaceMethodUID);
+                        XS.Push(xTargetMethodUID);
 
                         Call(VTablesImplRefs.SetInterfaceMethodInfoRef);
                     }
