@@ -1089,7 +1089,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Invalid ref type: " + StackPopTypes[0].FullName);
           }
-          if(StackPopTypes[0] == typeof(void*))
+          if (StackPopTypes[0].IsPointer)
           {
             StackPushTypes[0] = typeof(object);
           }

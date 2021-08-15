@@ -14,7 +14,6 @@
 
     <ItemGroup>
         <PackageReference Include="Dapper.StrongName" Version="1.50.2" />
-        <PackageReference Include="DapperExtensions.StrongName" Version="1.50.2" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
         <PackageReference Include="Microsoft.DiaSymReader" Version="1.2.0" />
         <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" Version="1.4.0" />
@@ -23,6 +22,12 @@
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
         <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
         <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="DapperExtensions.StrongName">
+        <HintPath>..\..\..\Cosmos\Resources\Dependencies\Dapper\DapperExtensions.StrongName.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

@@ -316,8 +316,9 @@ namespace Cosmos.IL2CPU
 
     public uint? StackOffsetBeforeExecution = null;
 
-    public void InterpretStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    public void InterpretStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
     {
+      branchTargetsToCheck.RemoveAll(t => t.position == Position);
       if (Processed)
       {
         ILInterpretationDebugLine(() => String.Format("{0} skipped for reinterpretation", this));
@@ -423,7 +424,7 @@ namespace Cosmos.IL2CPU
       {
         aStack.Push(xPushItem);
       }
-      DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
+      DoInterpretNextInstructionStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
     }
 
     /// <summary>
@@ -434,40 +435,50 @@ namespace Cosmos.IL2CPU
       //
     }
 
-    protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected virtual void DoInterpretNextInstructionStackTypesIfNotYetProcessed(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
     {
       if (aOpCodes.TryGetValue(NextPosition, out var xNextOpCode))
       {
         ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
-        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
+        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
+      }
+      else
+      {
+        ILInterpretationDebugLine(() => $"- Adding {NextPosition} to check later");
+        aBranchTargetsToCheck.Add((NextPosition, new Stack<Type>(aStack.Reverse())));
       }
     }
 
-    protected virtual void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected virtual void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
     {
-      InterpretInstruction(NextPosition, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
+      InterpretInstruction(NextPosition, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
     }
 
-    protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected void InterpretInstructionIfNotYetProcessed(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> aBranchTargetsToCheck)
     {
       if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
         ILInterpretationDebugLine(() => String.Format("- Branching from {0} to {1}", this, xNextOpCode));
-        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
+        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, aBranchTargetsToCheck);
+      }
+      else
+      {
+        ILInterpretationDebugLine(() => $"- Adding {aPosition} to check later");
+        aBranchTargetsToCheck.Add((NextPosition, new Stack<Type>(aStack.Reverse())));
       }
     }
 
-    protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    protected void InterpretInstruction(int aPosition, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
     {
       if (aOpCodes.TryGetValue(aPosition, out var xNextOpCode))
       {
-        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth);
+        InterpretInstruction(xNextOpCode, aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
       }
     }
 
-    private void InterpretInstruction(ILOpCode xNextOpCode, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth)
+    private void InterpretInstruction(ILOpCode xNextOpCode, IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
     {
-      xNextOpCode.InterpretStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth - 1);
+      xNextOpCode.InterpretStackTypes(aOpCodes, aStack, ref aSituationChanged, aMaxRecursionDepth - 1, branchTargetsToCheck);
     }
 
     [Conditional("COSMOSDEBUG")]

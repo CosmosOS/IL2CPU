@@ -1,4 +1,3 @@
-
 using Cosmos.IL2CPU.ILOpCodes;
 
 namespace Cosmos.IL2CPU.X86.IL
@@ -17,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
       var xSize = SizeOfType(xOpType.Value);
       if (xOpType.Value.IsValueType && !xOpType.Value.IsPrimitive)
       {
-        Ldelema.Assemble(Assembler, xOpType, xSize, DebugEnabled);
+        Ldelema.Assemble(Assembler, xOpType, xSize, DebugEnabled, aMethod, aOpCode);
         Ldobj.DoAssemble(xOpType.Value);
         return;
       }
