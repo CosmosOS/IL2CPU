@@ -415,10 +415,7 @@ namespace Cosmos.IL2CPU
                 XS.Comment("Cleanup return");
 
                 // cleanup result values
-                for (int i = 0; i < aReturnSize / 4; i++)
-                {
-                    XS.Add(XSRegisters.ESP, 4);
-                }
+                XS.Add(XSRegisters.ESP, 4 * aReturnSize / 4);
             }
 
             if (aStackSizeBeforeCall > (aTotalArgumentSizeOfMethod))
@@ -429,10 +426,7 @@ namespace Cosmos.IL2CPU
                     XS.Comment("Cleanup extra stack");
 
                     // cleanup result values
-                    for (int i = 0; i < xExtraStack / 4; i++)
-                    {
-                        XS.Add(XSRegisters.ESP, 4);
-                    }
+                    XS.Add(XSRegisters.ESP, 4 * xExtraStack / 4);
                 }
             }
         }
@@ -477,7 +471,7 @@ namespace Cosmos.IL2CPU
                 //new CPU.Call("_CODE_REQUESTED_BREAK_");
                 if (xJumpTo == null)
                 {
-                    Jump_Exception(aMethodInfo);
+                    XS.Jump(GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                 }
                 else
                 {
@@ -603,15 +597,15 @@ namespace Cosmos.IL2CPU
 
         public static bool TypeIsSigned(Type aType)
         {
-          var name = aType.FullName;
-          //return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
-          //  "System.Int32" == name || "System.Int64" == name;
+            var name = aType.FullName;
+            //return "System.Char" == name || "System.SByte" == name || "System.Int16" == name ||
+            //  "System.Int32" == name || "System.Int64" == name;
 
-      return "System.SByte" == name || "System.Int16" == name ||
-                  "System.Int32" == name || "System.Int64" == name;
-    }
+            return "System.SByte" == name || "System.Int16" == name ||
+                        "System.Int32" == name || "System.Int64" == name;
+        }
 
-    public static bool IsIntegralType(Type type)
+        public static bool IsIntegralType(Type type)
         {
             return type == typeof(byte) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)

@@ -26,7 +26,6 @@ using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
-using IL2CPU.Runtime;
 
 namespace Cosmos.IL2CPU
 {
@@ -123,8 +122,6 @@ namespace Cosmos.IL2CPU
                         xIdxOffset++;
                     }
 
-                    string x = aMethod.MethodBase.Name;
-                    string y = aMethod.MethodBase.DeclaringType.Name;
                     var xParams = aMethod.MethodBase.GetParameters();
                     var xParamCount = (ushort)xParams.Length;
 
@@ -977,11 +974,6 @@ namespace Cosmos.IL2CPU
                                 xBaseIndex = (int)aGetTypeID(xItem);
                                 break;
                             }
-                        }
-                        if (xType.IsGenericType && xType.GetGenericTypeDefinition() == typeof(Vector<>))
-                        {
-                            xBaseIndex = (int)aGetTypeID(typeof(Array));
-
                         }
                     }
                     if (xBaseIndex == null)

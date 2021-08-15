@@ -162,14 +162,7 @@ namespace IL2CPU.Debug.Symbols
 
         public static IList<LocalVariableInfo> GetLocalVariableInfos(MethodBase aMethodBase)
         {
-            try
-            {
-                return aMethodBase.GetMethodBody().LocalVariables;
-            }
-            catch (Exception ex)
-            {
-                return new List<LocalVariableInfo>();
-            }
+            return aMethodBase.GetMethodBody()?.LocalVariables ?? new List<LocalVariableInfo>();
         }
 
         public static bool TryGetStaticFieldValue(Module aModule, int aMetadataToken, ref byte[] aBuffer)
