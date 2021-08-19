@@ -962,7 +962,7 @@ namespace Cosmos.IL2CPU
                 xVmtDebugOutput.WriteStartDocument();
                 xVmtDebugOutput.WriteStartElement("VMT");
 #endif
-            //Push((uint)aTypesSet.Count);
+            
             foreach (var xType in aTypesSet)
             {
                 uint xTypeID = aGetTypeID(xType);
@@ -1159,27 +1159,43 @@ namespace Cosmos.IL2CPU
             return xList;
         }
 
-        private static readonly List<(MethodBase, MethodBase)> EmptyEmittedInterfaceMethodsList =
-            new List<(MethodBase, MethodBase)>(0);
-
         private static IReadOnlyList<(MethodBase InterfaceMethod, MethodBase TargetMethod)> GetEmittedInterfaceMethods(
             Type aType, HashSet<MethodBase> aMethodSet)
         {
-            if (aType.IsInterface || aType.IsArray)
+            if (aType.IsInterface)
             {
-                return EmptyEmittedInterfaceMethodsList;
+                return new List<(MethodBase, MethodBase)>(0);
             }
 
+
             var xEmittedInterfaceMethods = new List<(MethodBase, MethodBase)>();
+
+            if (aType.IsArray)
+            {
+                var interfaces = new List<Type> { aType.GetInterface("IList"), aType.GetInterface("IEnumerable"), aType.GetInterface("ICollection") };
+
+                foreach (var xInterface in interfaces)
+                {
+                    foreach (var xMethod in xInterface.GetMethods())
+                    {
+                        var szArray = aMethodSet.Where(method => method.DeclaringType.IsGenericType
+                                                       && method.DeclaringType.GetGenericTypeDefinition() == typeof(SZArrayImpl<>)).ToList();
+                        var implementation = szArray.First(method => method.Name == xMethod.Name);
+                        xEmittedInterfaceMethods.Add((xMethod, implementation));
+                    }
+                }
+
+                return xEmittedInterfaceMethods;
+            }
 
             foreach (var xInterface in aType.GetInterfaces())
             {
                 var xInterfaceMap = aType.GetInterfaceMap(xInterface);
 
-                foreach (var xMethod in aMethodSet)
+                foreach (var xMethod in aMethodSet) // This loop seems optimizable
                 {
                     var xTargetMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
-                        m => MemberInfoComparer.Instance.Equals(m, xMethod) == true);
+                        m => MemberInfoComparer.Instance.Equals(m, xMethod));
 
                     if (xTargetMethod != null)
                     {

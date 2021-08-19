@@ -15,7 +15,7 @@
         <PackageReference Include="Cosmos.Build.Common" />
         <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.3" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
         <PackageReference Include="XSharp" />
     </ItemGroup>
@@ -26,7 +26,6 @@
         <ProjectReference Include="..\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
-        <ProjectReference Include="..\IL2CPU.Runtime\IL2CPU.Runtime.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 
 using IL2CPU.API;
-using IL2CPU.Runtime;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;

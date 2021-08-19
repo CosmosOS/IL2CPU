@@ -10,7 +10,6 @@ using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
-using IL2CPU.Runtime;
 
 namespace Cosmos.IL2CPU
 {
@@ -421,8 +420,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public int MethodCount => mMethodUIDs.Count;
-
         protected string LogItemText(object aItem)
         {
             if (aItem is MethodBase)
@@ -693,6 +690,17 @@ namespace Cosmos.IL2CPU
             CompilerHelpers.Debug($"ILScanner: ScanType");
             CompilerHelpers.Debug($"Type = '{aType}'");
 
+            // This is a bit overkill, most likely we dont need all these methods
+            // but I dont see a better way to do it easily
+            // so for generic interface methods on arrays, we just add all methods
+            if (aType.Name.Contains("SZArrayImpl"))
+            {
+                foreach (var xMethod in aType.GetMethods())
+                {
+                    Queue(xMethod, aType, "Generic Interface Method");
+                }
+            }
+
             // Add immediate ancestor type
             // We dont need to crawl up farther, when the BaseType is scanned
             // it will add its BaseType, and so on.
@@ -755,6 +763,12 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
+            }
+
+            if (aType.BaseType == typeof(Array))
+            {
+                Console.WriteLine("SZArray for " + aType.Name);
+                Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 
             foreach (var xInterface in aType.GetInterfaces())
