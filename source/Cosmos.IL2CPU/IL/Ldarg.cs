@@ -138,10 +138,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
     {
-      if(aMethod.MethodBase.DeclaringType.Name == "Array" && aMethod.MethodBase.Name == "get_Length")
-      {
-        int x = 0;
-      }
       var xDisplacement = GetArgumentDisplacement(aMethod, aParam);
       var xType = GetArgumentType(aMethod, aParam);
       uint xArgRealSize = SizeOfType(xType);
@@ -150,7 +146,6 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Comment("Arg idx = " + aParam);
       XS.Comment("Arg type = " + xType);
       XS.Comment("Arg real size = " + xArgRealSize + " aligned size = " + xArgSize);
-      XS.Comment("Max Arg Displacement = " + xDisplacement);
       if (IsIntegralType(xType) && xArgRealSize == 1 || xArgRealSize == 2)
       {
         if (TypeIsSigned(xType))
