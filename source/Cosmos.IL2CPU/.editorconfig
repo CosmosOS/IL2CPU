@@ -16,33 +16,12 @@ indent_size = 2
 indent_size = 4
 
 [IL/*.cs]
-indent_size = 2
-
-[IL/Call.cs]
-indent_size = 4
-
-[IL/Callvirt.cs]
-indent_size = 4
-
-[IL/Ldfld.cs]
-indent_size = 4
-
-[IL/Ldlen.cs]
-indent_size = 4
-
-[IL/Newobj.cs]
 indent_size = 4
 
 [AppAssembler.cs]
 indent_size = 4
 
-[CompilerExtensionBase.cs]
-indent_size = 4
-
 [CompilerEngine.cs]
-indent_size = 4
-
-[CompilerExtensionAttribute.cs]
 indent_size = 4
 
 [AppAssemblerRingsCheck.cs]
@@ -53,9 +32,3 @@ indent_size = 2
 
 [IL/Stelem_Ref.cs]
 indent_size = 2
-
-[IL/Isinst.cs]
-indent_size = 4
-
-[IL/Castclass.cs]
-indent_size = 4

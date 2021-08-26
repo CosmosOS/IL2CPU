@@ -27,10 +27,12 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpMethod.Value, xOpMethod.ValueUID, aOpCode, DebugEnabled);
         }
 
-        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool debugEnabled)
+        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID,
+            ILOpCode aOp, bool debugEnabled)
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
             Type xPopType = aOp.StackPopTypes.Last();
+            var isInterface = aTargetMethod.DeclaringType.IsInterface;
 
             string xNormalAddress = "";
             if (aTargetMethod.IsStatic || !aTargetMethod.IsVirtual || aTargetMethod.IsFinal)
@@ -53,12 +55,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 xThisOffset += (int)Align(SizeOfType(xItem.ParameterType), 4);
             }
 
-            // This is finding offset to self? It looks like we dont need offsets of other
-            // arguments, but only self. If so can calculate without calculating all fields
-            // Might have to go to old data structure for the offset...
-            // Can we add this method info somehow to the data passed in?
-            // xThisOffset = mTargetMethodInfo.Arguments[0].Offset;
-
+            XS.Comment($"Calling = {aTargetMethod.DeclaringType.FullName}.{aTargetMethod.Name}");
             XS.Comment("ThisOffset = " + xThisOffset);
 
             if (IsReferenceType(xPopType))
@@ -81,16 +78,17 @@ namespace Cosmos.IL2CPU.X86.IL
             }
             else
             {
+                var afterCall = xCurrentMethodLabel + ".AfterCall";
+
                 /*
                 * On the stack now:
                 * $esp                 Params
                 * $esp + xThisOffset   This
                 */
-                if ((xPopType.IsPointer) || (xPopType.IsByRef))
+                if (xPopType.IsPointer || xPopType.IsByRef)
                 {
                     xPopType = xPopType.GetElementType();
-                    string xTypeId = GetTypeIDLabel(xPopType);
-                    XS.Push(xTypeId, isIndirect: true);
+                    XS.Push(GetTypeIDLabel(xPopType), isIndirect: true);
                 }
                 else
                 {
@@ -98,9 +96,31 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Push(EAX, isIndirect: true);
                 }
 
+                // To handle generic interfaces on arrays, we need to check if the callvirt is for such an interface, in which case if the object
+                // the method is being called on is an array, we dont push the type array but rather an typed array (System.Array vs T[])
+
+                if (aTargetMethod.DeclaringType.IsGenericType
+                    && new string[] { "IList", "ICollection", "IEnumerable", "IReadOnlyList", "IReadOnlyCollection" }
+                        .Any(i => aTargetMethod.DeclaringType.Name.Contains(i)))
+                {
+                    isInterface = true;
+                    var notArrayLabel = xCurrentMethodLabel + ".NotArrayType";
+                    var endOfCheckLabel = xCurrentMethodLabel + ".AfterGenericArrayInterfaceCheck";
+                    XS.Pop(EAX); // EAX now contains type of object
+                    XS.Set(EBX, GetTypeIDLabel(typeof(Array)), sourceIsIndirect: true);
+                    XS.Compare(EAX, EBX);
+                    XS.Jump(CPU.ConditionalTestEnum.NotEqual, notArrayLabel);
+                    XS.Comment($"Set type to be {aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType().Name}");
+                    XS.Push(GetTypeIDLabel(aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType()), isIndirect: true);
+                    XS.Jump(endOfCheckLabel);
+                    XS.Label(notArrayLabel);
+                    XS.Push(EAX);
+                    XS.Label(endOfCheckLabel);
+                }
+
                 XS.Push(aTargetMethodUID);
 
-                if (aTargetMethod.DeclaringType.IsInterface)
+                if (isInterface)
                 {
                     XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef));
                 }
@@ -158,8 +178,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     var xHasParams = xThisOffset != 0;
                     var xNeedsExtraStackSize = xReturnSize >= xThisOffset + 8;
 
-                    if (xHasParams
-                        || !xNeedsExtraStackSize)
+                    if (xHasParams || !xNeedsExtraStackSize)
                     {
                         XS.Add(ESP, (uint)(xThisOffset + 4));
                     }
@@ -169,8 +188,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Push(ESP, displacement: -8);
                     }
 
-                    if (xHasParams
-                        && xNeedsExtraStackSize)
+                    if (xHasParams && xNeedsExtraStackSize)
                     {
                         XS.Sub(ESP, 4);
                     }
@@ -192,7 +210,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
 
                 XS.Call(ECX);
-                XS.Label(xCurrentMethodLabel + ".AfterNotBoxedThis");
+                XS.Label(afterCall);
             }
             EmitExceptionLogic(Assembler, aMethod, aOp, true,
                 delegate

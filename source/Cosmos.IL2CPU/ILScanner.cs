@@ -701,6 +701,12 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+            if (aType.IsGenericType && new string[] { "IList", "ICollection", "IEnumerable", "IReadOnlyList", "IReadOnlyCollection" }
+                        .Any(i => aType.Name.Contains(i)))
+            {
+                Queue(aType.GenericTypeArguments[0].MakeArrayType(), aType, "CallVirt of Generic Interface for Array");
+            }
+
             // Add immediate ancestor type
             // We dont need to crawl up farther, when the BaseType is scanned
             // it will add its BaseType, and so on.
@@ -767,7 +773,6 @@ namespace Cosmos.IL2CPU
 
             if (aType.BaseType == typeof(Array))
             {
-                Console.WriteLine("SZArray for " + aType.Name);
                 Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 

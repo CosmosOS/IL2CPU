@@ -5,7 +5,7 @@ namespace Cosmos.IL2CPU
 {
     public class SZArrayImpl<T>
     {
-        public static IEnumerator<T> GetEnumerator<T>(T[] aThis)
+        public static IEnumerator<T> GetEnumerator(T[] aThis)
         {
             foreach (var item in aThis)
             {
@@ -62,6 +62,7 @@ namespace Cosmos.IL2CPU
 
         public static int IndexOf(T[] aThis, T aValue)
         {
+        //Broken until net 5.0 call virt improvement ist merged
             for (int i = 0; i < aThis.Length; i++)
             {
                 if (aThis[i].Equals(aValue))
@@ -80,6 +81,26 @@ namespace Cosmos.IL2CPU
         public static void RemoveAt(T[] aThis, int aIndex)
         {
             throw new NotSupportedException();
+        }
+
+        public static bool get_IsFixedSize(T[] aThis)
+        {
+            return true;
+        }
+
+        public static void Remove(T[] aThis, T aValue)
+        {
+            throw new NotSupportedException();
+        }
+
+        public static object get_SyncRoot(T[] aThis)
+        {
+            throw new NotSupportedException();
+        }
+
+        public static bool get_IsSynchronized(T[] aThis)
+        {
+            return true;
         }
     }
 }

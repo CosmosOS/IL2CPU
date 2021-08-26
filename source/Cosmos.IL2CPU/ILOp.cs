@@ -136,26 +136,6 @@ namespace Cosmos.IL2CPU
             return xOffset;
         }
 
-        protected void ThrowNotImplementedException(string aMessage)
-        {
-            XS.Push(LdStr.GetContentsArrayName(aMessage));
-            new CPU.Call
-            {
-                DestinationLabel =
-                LabelName.Get(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented",
-                  BindingFlags.Static | BindingFlags.Public))
-            };
-        }
-
-        protected void ThrowOverflowException()
-        {
-            new CPU.Call
-            {
-                DestinationLabel =
-                LabelName.Get(typeof(ExceptionHelper).GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public))
-            };
-        }
-
         private static void DoGetFieldsInfo(Type aType, List<_FieldInfo> aFields, bool includeStatic)
         {
             var xCurList = new Dictionary<string, _FieldInfo>();

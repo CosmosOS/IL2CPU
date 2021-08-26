@@ -227,7 +227,6 @@ namespace Cosmos.IL2CPU
             DebugHex("Type", aType);
             DebugHex("InterfaceMethodId", aInterfaceMethodId);
             Debug("Not FOUND!");
-
             Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
             while (true) ;
         }
