@@ -20,7 +20,7 @@ nuget:
 
 build_script:
   - cmd: |
-      msbuild IL2CPU.sln /t:Restore;Build;Pack /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+      dotnet build /maxcpucount /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 artifacts:
   - path: 'artifacts\Debug\nupkg\*.nupkg'
