@@ -12,9 +12,9 @@
         <XSharpPackage Include="XSharp" ProjectPath="source\XSharp\XSharp.csproj" />
     </ItemGroup>
 
-    <!--<ItemGroup>
-        <InternalPackage Include="@(XSharpPackage)" Version="$(XSharpVersion)" RepoRoot="$(XSharpRepoRoot)" />
-    </ItemGroup>-->
+    <ItemGroup>
+        <InternalPackage Include="@(XSharpPackage)" Version="0.1.0-build*" RepoRoot="$(XSharpRepoRoot)" />
+    </ItemGroup>
 
     <ItemGroup>
         <_InternalPackageToExclude Include="@(InternalPackage)" Exclude="@(PackageReference)" />
