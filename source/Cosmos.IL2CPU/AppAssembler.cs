@@ -434,10 +434,6 @@ namespace Cosmos.IL2CPU
 
         public void ProcessMethod(_MethodInfo aMethod, List<ILOpCode> aOpCodes)
         {
-            if (aMethod.MethodBase.Name == "ExecuteCallbackHandlers" || aMethod.MethodBase.Name == "ReadAllBytesUnknownLength")
-            {
-                int x = 0;
-            }
             try
             {
                 // We check this here and not scanner as when scanner makes these

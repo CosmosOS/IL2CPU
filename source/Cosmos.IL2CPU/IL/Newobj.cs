@@ -219,7 +219,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                     else
                     {
-                        // You actually have to do something to implement a new ctor. For every ctor HAS newobj has to calculate the size of the string being allocated so that the GC can give enough space.
+                        // You actually have to do something to implement a new ctor. For every ctor, newobj has to calculate the size of the string being allocated so that the GC can give enough space.
                         // If this is not done, it will seem to work until a new object is allocated in the space after the string overwriting the string data. This may only happen for long enough strings i.e.
                         // strings with more than one character
                         throw new NotImplementedException();
@@ -266,10 +266,6 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                 }
 
-                if (constructor.DeclaringType == typeof(string) && xParams.Length == 1 && (xParams[0].ParameterType == typeof(char*)))
-                {
-                    //XS.Exchange(BX, BX);
-                }
                 XS.Call(LabelName.Get(constructor));
                 // should the complete error handling happen by ILOp.EmitExceptionLogic?
                 if (aMethod != null)
