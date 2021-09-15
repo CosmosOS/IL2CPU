@@ -21,7 +21,6 @@
 
     <ItemGroup>
         <ProjectReference Include="$(CosmosRepoRoot)source\Cosmos.Debug.Kernel\Cosmos.Debug.Kernel.csproj" />
-        <ProjectReference Include="$(XSharpRepoRoot)source\XSharp\XSharp\XSharp.csproj" />
         <ProjectReference Include="..\Cosmos.Core.DebugStub\Cosmos.Core.DebugStub.csproj" />
         <ProjectReference Include="..\IL2CPU.API\IL2CPU.API.csproj" />
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />

@@ -12,7 +12,6 @@ init:
     - cmd: |
         git clone https://github.com/CosmosOS/Common.git c:\Common --depth 1
         git clone https://github.com/CosmosOS/Cosmos.git c:\Cosmos --depth 1
-        git clone https://github.com/CosmosOS/XSharp.git c:\XSharp --depth 1
 
 nuget:
   account_feed: false
