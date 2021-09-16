@@ -1,8 +1,10 @@
-using IL2CPU.API;
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
 using System.Linq;
 using System.Reflection;
+
+using IL2CPU.API;
+using Cosmos.IL2CPU.ILOpCodes;
+
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -24,10 +26,10 @@ namespace Cosmos.IL2CPU.X86.IL
             string xCurrentLabel = GetLabel(aMethod, aOpCode);
             var xType = xMethod.Value.DeclaringType;
 
-            Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value);
+            Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value, DebugEnabled);
         }
 
-        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor)
+        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor, bool debugEnabled)
         {
             // call cctor:
             if (aMethod != null)
@@ -163,7 +165,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         xHasCalcSize = true;
                         XS.Push(ESP, isIndirect: true);
                     }
-                    else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
+                    else if (xParams.Length == 1 && (xParams[0].ParameterType == typeof(sbyte*)))
                     {
                         xHasCalcSize = true;
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
@@ -182,9 +184,45 @@ namespace Cosmos.IL2CPU.X86.IL
 
                         XS.Push(ECX);
                     }
+                    else if (xParams.Length == 1 && (xParams[0].ParameterType == typeof(char*)))
+                    {
+                        xHasCalcSize = true;
+                        /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
+                        // todo: does this actually work for empty strings?
+                        var xSByteCountLabel = currentLabel + ".SByteCount";
+
+                        //XS.Exchange(BX, BX);
+                        XS.Set(EAX, ESP, sourceIsIndirect: true);
+                        XS.Or(ECX, 0xFFFFFFFF);
+
+                        XS.Label(xSByteCountLabel);
+
+                        XS.Increment(EAX); // a char is two bytes
+                        XS.Increment(EAX);
+                        XS.Increment(ECX);
+                        XS.Set(EBX, EAX, sourceIsIndirect: true);
+                        XS.And(EBX, 0xFF); // Only compare the char
+                        XS.Compare(EBX, 0);
+                        XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
+
+                        //XS.ShiftLeft(ECX, 1); // every character needs two bytes
+                        XS.Push(ECX);
+                    }
+                    else if(xParams.Length == 1 && xParams[0].ParameterType == typeof(ReadOnlySpan<char>))
+                    {
+                        xHasCalcSize = true;
+                        // push the lenght of the span as well
+                        // ReadOnlySpan<char> in memory is a Pointer and Length, simply dup the length and multiply by 2 to get the length to allocate
+                        XS.Set(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: 4);
+                        XS.ShiftLeft(EAX, 1);
+                        XS.Push(EAX);
+                    }
                     else
                     {
-                        throw new NotImplementedException("In NewObj, a string ctor implementation is missing!");
+                        // You actually have to do something to implement a new ctor. For every ctor, newobj has to calculate the size of the string being allocated so that the GC can give enough space.
+                        // If this is not done, it will seem to work until a new object is allocated in the space after the string overwriting the string data. This may only happen for long enough strings i.e.
+                        // strings with more than one character
+                        throw new NotImplementedException();
                     }
                 }
                 #endregion Special string handling
@@ -227,7 +265,6 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Push(ESP, isIndirect: true, displacement: (int)(xSize + 8));
                     }
                 }
-
 
                 XS.Call(LabelName.Get(constructor));
                 // should the complete error handling happen by ILOp.EmitExceptionLogic?

@@ -76,6 +76,7 @@ namespace IL2CPU.Debug.Symbols
             mConnStr = string.Format("data source={0}", aPathname);
             // Use the SQLiteConnectionFactory as the default database connection
             // Do not open mConnection before mEntities.CreateDatabase
+            SQLitePCL.Batteries.Init();
             mConnection = new SqliteConnection(mConnStr);
 
             DapperExtensions.DapperExtensions.DefaultMapper = typeof(PluralizedAutoClassMapper<>);
