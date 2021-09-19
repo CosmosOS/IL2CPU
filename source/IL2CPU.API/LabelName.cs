@@ -154,6 +154,11 @@ namespace IL2CPU.API
                 return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
             }
 
+            if (aType.Name == "Error" || aType.Name == "GetEndOfFile")
+            {
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+            }
+
             return xSB.ToString();
         }
 
