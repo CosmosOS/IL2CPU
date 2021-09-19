@@ -190,7 +190,6 @@ namespace Cosmos.IL2CPU.X86.IL
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
                         // todo: does this actually work for empty strings?
                         var xSByteCountLabel = currentLabel + ".SByteCount";
-                        XS.Exchange(BX, BX);
 
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
                         XS.Or(ECX, 0xFFFFFFFF);
