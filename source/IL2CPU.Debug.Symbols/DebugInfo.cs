@@ -258,7 +258,7 @@ namespace IL2CPU.Debug.Symbols
                 foreach (var xFieldName in xItem.FieldNames)
                 {
                     var xRow = new FIELD_MAPPING();
-                    xRow.ID = CreateId();
+                    xRow.ID = CreateId;
                     xRow.TYPE_NAME = xItem.TypeName;
                     xRow.FIELD_NAME = xFieldName;
                     xItemsToAdd.Add(xRow);
@@ -315,7 +315,7 @@ namespace IL2CPU.Debug.Symbols
             {
                 if (!mLocalFieldInfoNames.Contains(xItem.NAME))
                 {
-                    xItem.ID = CreateId();
+                    xItem.ID = CreateId;
                     mLocalFieldInfoNames.Add(xItem.NAME);
                     itemsToAdd.Add(xItem);
                 }
@@ -379,7 +379,7 @@ namespace IL2CPU.Debug.Symbols
                 {
                     var xRow = new AssemblyFile()
                     {
-                        ID = CreateId(),
+                        ID = CreateId,
                         Pathname = xAsm.Location
                     };
                     xAssemblies.Add(xRow);
@@ -402,7 +402,7 @@ namespace IL2CPU.Debug.Symbols
                 {
                     var xRow = new Document()
                     {
-                        ID = CreateId(),
+                        ID = CreateId,
                         Pathname = aPathname
                     };
                     DocumentGUIDs.Add(aPathname, xRow.ID);
@@ -423,7 +423,7 @@ namespace IL2CPU.Debug.Symbols
         {
             foreach (var x in aSymbols)
             {
-                x.ID = CreateId();
+                x.ID = CreateId;
             }
             BulkInsert("MethodIlOps", aSymbols, 2500, aFlush);
         }
@@ -432,7 +432,7 @@ namespace IL2CPU.Debug.Symbols
         {
             foreach (var x in aInfos)
             {
-                x.ID = CreateId();
+                x.ID = CreateId;
             }
             BulkInsert("LOCAL_ARGUMENT_INFOS", aInfos, aFlush: true);
         }
@@ -825,10 +825,13 @@ namespace IL2CPU.Debug.Symbols
         /// Generates new id for the symbol.
         /// </summary>
         /// <returns>New value for the id.</returns>
-        public static long CreateId()
+        public static long CreateId
         {
-            mLastGuid++;
-            return mLastGuid;
+            get
+            {
+                mLastGuid++;
+                return mLastGuid;
+            }
         }
     }
 

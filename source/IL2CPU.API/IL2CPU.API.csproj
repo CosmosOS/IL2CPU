@@ -5,6 +5,7 @@
         <PackageDescription>IL2CPU API.</PackageDescription>
         <IsPackable>True</IsPackable>
         <NoWarn>CA1707;$(NoWarn)</NoWarn>
+        <Configurations>Debug;Release;TEST</Configurations>
     </PropertyGroup>
 
 </Project>

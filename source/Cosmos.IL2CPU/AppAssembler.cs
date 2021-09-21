@@ -139,11 +139,11 @@ namespace Cosmos.IL2CPU
 
             // We could use same GUID as MethodLabelStart, but its better to keep GUIDs unique globaly for items
             // so during debugging they can never be confused as to what they point to.
-            aMethod.DebugMethodUID = DebugInfo.CreateId();
+            aMethod.DebugMethodUID = DebugInfo.CreateId;
 
             // We issue a second label for GUID. This is increases label count, but for now we need a master label first.
             // We issue a GUID label to reduce amount of work and time needed to construct debugging DB.
-            aMethod.DebugMethodLabelUID = DebugInfo.CreateId();
+            aMethod.DebugMethodLabelUID = DebugInfo.CreateId;
             XS.Label("GUID_" + aMethod.DebugMethodLabelUID.ToString());
 
             Label.LastFullLabel = "METHOD_" + aMethod.DebugMethodLabelUID.ToString();
@@ -166,7 +166,7 @@ namespace Cosmos.IL2CPU
                 XS.Label(".StackOverflowCheck_End");
             }
 
-            aMethod.EndMethodID = DebugInfo.CreateId();
+            aMethod.EndMethodID = DebugInfo.CreateId;
 
             if (aMethod.MethodBase.IsStatic && aMethod.MethodBase is ConstructorInfo)
             {
@@ -529,8 +529,17 @@ namespace Cosmos.IL2CPU
                 }
                 mLog.Flush();
 
+                int? xLocalsSize = null;
+                //calculate local size once
+                if (aMethod.MethodBase != null)
+                {
+                    var xLocals = aMethod.MethodBase.GetLocalVariables();
+                    xLocalsSize = (from item in xLocals
+                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
+                }
+
                 //Only emit INT3 as per conditions above...
-                BeforeOp(aMethod, xOpCode, emitINT3, out var INT3Emitted, xFirstInstruction);
+                BeforeOp(aMethod, xOpCode, emitINT3, out var INT3Emitted, xFirstInstruction, xLocalsSize);
                 xFirstInstruction = false;
                 //Emit INT3 on the first non-NOP instruction immediately after a NOP
                 // - This is because TracePoints for NOP are automatically ignored in code called below this
@@ -1279,7 +1288,7 @@ namespace Cosmos.IL2CPU
         {
         }
 
-        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint)
+        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint, int? xLocalsSize)
         {
             if (DebugMode == DebugMode.Source)
             {
@@ -1304,9 +1313,6 @@ namespace Cosmos.IL2CPU
                 xMLSymbol.StackDiff = -1;
                 if (aMethod.MethodBase != null)
                 {
-                    var xLocals = aMethod.MethodBase.GetLocalVariables();
-                    var xLocalsSize = (from item in xLocals
-                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
                     xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
                     xStackDifference = (uint?)xMLSymbol.StackDiff;
                 }
