@@ -10,6 +10,7 @@ using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU
 {
@@ -45,7 +46,7 @@ namespace Cosmos.IL2CPU
         // other unused assemblies. So instead we collect a list of assemblies as we scan.
         internal List<Assembly> mUsedAssemblies = new List<Assembly>();
 
-        protected OurHashSet<MemberInfo> mItems = new OurHashSet<MemberInfo>();
+        protected HashSet<MemberInfo> mItems = new HashSet<MemberInfo>(new MemberInfoComparer());
         protected List<object> mItemsList = new List<object>();
 
         // Contains items to be scanned, both types and methods
@@ -76,12 +77,17 @@ namespace Cosmos.IL2CPU
 
         protected Dictionary<object, List<LogItem>> mLogMap;
 
-        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver)
+        public ILScanner(AppAssembler aAsmblr, TypeResolver typeResolver, Action<Exception> aLogException, Action<string> aLogWarning)
         {
             mAsmblr = aAsmblr;
             mReader = new ILReader();
 
+            LogException = aLogException;
+            LogWarning = aLogWarning;
+
             mPlugManager = new PlugManager(LogException, LogWarning, typeResolver);
+
+            VTablesImplRefs.GetTypeId = GetTypeUID; // we need this to figure out which ids object, valuetype and enum have in the vmt
         }
 
         public bool EnableLogging(string aPathname)
@@ -104,6 +110,7 @@ namespace Cosmos.IL2CPU
 
         protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, string sourceItem = null)
         {
+            CompilerHelpers.Debug($"Enqueing: {aItem.DeclaringType?.Name ?? ""}.{aItem.Name} from {aSrc}");
             if (aItem == null)
             {
                 throw new ArgumentNullException(nameof(aItem));
@@ -236,6 +243,7 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
+            Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
@@ -247,6 +255,7 @@ namespace Cosmos.IL2CPU
 
             // register system types:
             Queue(typeof(Array), null, "Explicit Entry");
+            Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
 
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
@@ -334,13 +343,14 @@ namespace Cosmos.IL2CPU
 
         /// This method changes the opcodes. Changes are:
         /// * inserting the ValueUID for method ops.
-        private void ProcessInstructions(List<ILOpCode> aOpCodes)
+        public void ProcessInstructions(List<ILOpCode> aOpCodes) // to remove -------
         {
             foreach (var xOpCode in aOpCodes)
             {
                 if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
-                    xOpMethod.Value = (MethodBase)mItems.GetItemInList(xOpMethod.Value);
+                    mItems.TryGetValue(xOpMethod.Value, out MemberInfo value);
+                    xOpMethod.Value = (MethodBase)(value ?? xOpMethod.Value);
                     xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }
             }
@@ -493,11 +503,7 @@ namespace Cosmos.IL2CPU
                     }
                     else
                     {
-                        xNewVirtMethod = xVirtType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                                                  .Where(method => method.Name == aMethod.Name
-                                                                   && method.GetParameters().Select(param => param.ParameterType)
-                                                                                            .SequenceEqual(xParamTypes))
-                                                  .SingleOrDefault();
+                        xNewVirtMethod = xVirtType.GetMethod(aMethod.Name, xParamTypes);
                         if (xNewVirtMethod != null)
                         {
                             if (!xNewVirtMethod.IsVirtual)
@@ -584,7 +590,6 @@ namespace Cosmos.IL2CPU
             if (!aIsPlug && !xIsDynamicMethod)
             {
                 // Check to see if method is plugged, if it is we don't scan body
-
                 xPlug = mPlugManager.ResolvePlug(aMethod, xParamTypes);
                 if (xPlug != null)
                 {
@@ -620,8 +625,10 @@ namespace Cosmos.IL2CPU
                         + "Native code encountered, plug required." + Environment.NewLine
                                         + "  DO NOT REPORT THIS AS A BUG." + Environment.NewLine
                                         + "  Please see http://www.gocosmos.org/docs/plugs/missing/" + Environment.NewLine
-                        + "  Need plug for: " + LabelName.GetFullName(aMethod) + "." + Environment.NewLine
-                        + "  Called from :" + Environment.NewLine + sourceItem + Environment.NewLine);
+                        + "  Need plug for: " + LabelName.GetFullName(aMethod) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)) + " ). " + Environment.NewLine
+                        + "  Static: " + aMethod.IsStatic + Environment.NewLine
+                        + "  Assembly: " + aMethod.DeclaringType.Assembly.FullName + Environment.NewLine
+                        + "  Called from:" + Environment.NewLine + sourceItem + Environment.NewLine);
                 }
 
                 //TODO: As we scan each method, we could update or put in a new list
@@ -725,6 +732,15 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+            if (aType.BaseType == typeof(Array))
+            {
+                var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
+                foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                {
+                    Queue(xMethod.MakeGenericMethod(new Type[] { aType.GetElementType() }), aType, "Virtual SzArrayHelper");
+                }
+            }
+
             // For each new type, we need to scan for possible new virtuals
             // in our new type if its a descendant of something in
             // mVirtuals.
@@ -753,7 +769,7 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
-                if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface)
+                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
                 {
                     if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType)
                         && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))

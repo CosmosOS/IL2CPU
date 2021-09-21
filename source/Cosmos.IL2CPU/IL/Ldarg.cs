@@ -146,7 +146,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Comment("Arg idx = " + aParam);
       XS.Comment("Arg type = " + xType);
       XS.Comment("Arg real size = " + xArgRealSize + " aligned size = " + xArgSize);
-      if (IsIntegralType(xType) && xArgRealSize == 1 || xArgRealSize == 2)
+      if (IsIntegerBasedType(xType) && xArgRealSize == 1 || xArgRealSize == 2)
       {
         if (TypeIsSigned(xType))
         {

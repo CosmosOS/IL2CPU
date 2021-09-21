@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
@@ -11,32 +12,55 @@ namespace Cosmos.IL2CPU
 
         public MethodBase MethodBase { get; }
         public TypeEnum Type { get; }
-        public UInt32 UID { get; }
+        //TODO: Figure out if we really need three different ids
+        public uint UID { get; }
+        public long DebugMethodUID { get; set; }
+        public long DebugMethodLabelUID { get; set; }
+        public long EndMethodID { get; set; }
+        public string MethodLabel { get; private set; }
+        /// <summary>
+        /// The method info for the method which plugs this one
+        /// </summary>
         public _MethodInfo PlugMethod { get; }
         public Type MethodAssembler { get; }
         public bool IsInlineAssembler { get; }
         public bool DebugStubOff { get; }
-        public _MethodInfo PluggedMethod { get; set; }
+
+        private _MethodInfo _PluggedMethod;
+        /// <summary>
+        /// Method which is plugged by this method
+        /// </summary>
+        public _MethodInfo PluggedMethod
+        {
+            get => _PluggedMethod; set
+            {
+                _PluggedMethod = value;
+                if (PluggedMethod != null)
+                {
+                    MethodLabel = "PLUG_FOR___" + LabelName.Get(PluggedMethod.MethodBase);
+                }
+                else
+                {
+                    MethodLabel = LabelName.Get(MethodBase);
+                }
+            }
+        }
         public uint LocalVariablesSize { get; set; }
 
         public bool IsWildcard { get; set; }
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
+        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
         {
             MethodAssembler = aMethodAssembler;
         }
 
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod)
+        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod)
             : this(aMethodBase, aUID, aType, aPlugMethod, false)
         {
-            //MethodBase = aMethodBase;
-            //UID = aUID;
-            //Type = aType;
-            //PlugMethod = aPlugMethod;
         }
 
-        public _MethodInfo(MethodBase aMethodBase, UInt32 aUID, TypeEnum aType, _MethodInfo aPlugMethod, bool isInlineAssembler)
+        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, bool isInlineAssembler)
         {
             MethodBase = aMethodBase;
             UID = aUID;
@@ -47,12 +71,14 @@ namespace Cosmos.IL2CPU
             var attribs = aMethodBase.GetCustomAttributes<DebugStub>(false).ToList();
             if (attribs.Any())
             {
-                DebugStub attrib = new DebugStub
-                                            {
-                                                Off = attribs[0].Off,
-                                            };
+                var attrib = new DebugStub
+                {
+                    Off = attribs[0].Off,
+                };
                 DebugStubOff = attrib.Off;
             }
+
+            MethodLabel = LabelName.Get(MethodBase);
         }
     }
 }

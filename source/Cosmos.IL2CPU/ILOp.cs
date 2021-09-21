@@ -15,6 +15,8 @@ using IL2CPU.Debug.Symbols;
 using XSharp;
 using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;
+using static XSharp.XSRegisters;
+using Cosmos.IL2CPU.ILOpCodes;
 
 namespace Cosmos.IL2CPU
 {
@@ -430,12 +432,13 @@ namespace Cosmos.IL2CPU
                     switch (aCurrentOpCode.CurrentExceptionRegion.Kind)
                     {
                         case ExceptionRegionKind.Catch:
-                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
-                            break;
                         case ExceptionRegionKind.Finally:
                             xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.HandlerOffset);
                             break;
                         case ExceptionRegionKind.Filter:
+                            xJumpTo = GetLabel(aMethodInfo, aCurrentOpCode.CurrentExceptionRegion.FilterOffset);
+                            break;
+
                         case ExceptionRegionKind.Fault:
                         default:
                             {
@@ -461,7 +464,7 @@ namespace Cosmos.IL2CPU
             }
             else
             {
-                XS.Test(XSRegisters.ECX, 2);
+                XS.Test(ECX, 2);
 
                 if (aCleanup != null)
                 {
@@ -469,8 +472,7 @@ namespace Cosmos.IL2CPU
                     aCleanup();
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
-                          GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
+                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
@@ -481,8 +483,7 @@ namespace Cosmos.IL2CPU
                 {
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,
-                          GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
+                        XS.Jump(CPU.ConditionalTestEnum.NotEqual, GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
@@ -502,14 +503,15 @@ namespace Cosmos.IL2CPU
             if (debugEnabled)
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
-                XS.Compare(XSRegisters.ESP, 0, destinationDisplacement: stackOffsetToCheck);
+                XS.Compare(ESP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
+                XS.Exchange(BX, BX);
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".NullCheck_GetCurrAddress");
                 XS.Label(".NullCheck_GetCurrAddress");
-                XS.Pop(XSRegisters.EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], XSRegisters.EAX, destinationIsIndirect: true);
+                XS.Pop(EAX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendNullRefEvent]);
                 //}
                 XS.Halt();
@@ -544,23 +546,23 @@ namespace Cosmos.IL2CPU
                 ?? ResolveField(fieldInfo.DeclaringType, fieldInfo.GetFullName(), !fieldInfo.IsStatic);
         }
 
-        protected static void CopyValue(XSRegisters.Register32 destination, int destinationDisplacement, XSRegisters.Register32 source, int sourceDisplacement, uint size)
+        protected static void CopyValue(Register32 destination, int destinationDisplacement, Register32 source, int sourceDisplacement, uint size)
         {
             for (int i = 0; i < (size / 4); i++)
             {
-                XS.Set(XSRegisters.EAX, source, sourceDisplacement: sourceDisplacement + (i * 4));
-                XS.Set(destination, XSRegisters.EAX, destinationDisplacement: destinationDisplacement + (i * 4));
+                XS.Set(EAX, source, sourceDisplacement: sourceDisplacement + (i * 4));
+                XS.Set(destination, EAX, destinationDisplacement: destinationDisplacement + (i * 4));
             }
             switch (size % 4)
             {
                 case 1:
-                    XS.Set(XSRegisters.AL, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, XSRegisters.AL,
+                    XS.Set(AL, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
+                    XS.Set(destination, AL,
                       destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
                     break;
                 case 2:
-                    XS.Set(XSRegisters.AX, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, XSRegisters.AX,
+                    XS.Set(AX, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
+                    XS.Set(destination, AX,
                       destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
                     break;
                 case 0:
@@ -585,16 +587,37 @@ namespace Cosmos.IL2CPU
                         "System.Int32" == name || "System.Int64" == name;
         }
 
-        public static bool IsIntegralType(Type type)
+        /// <summary>
+        /// Check if the type is represented as a int by the CLI
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsIntegerBasedType(Type type)
         {
-            return type == typeof(byte) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
-                   || type == typeof(int) || type == typeof(uint) || type == typeof(long) || type == typeof(ulong)
+            return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
+                   || type == typeof(int) || type == typeof(uint)
                    || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
         }
 
+        public static bool IsLongBasedType(Type type)
+        {
+            return type == typeof(long) || type == typeof(ulong);
+        }
+
+        public static bool IsSameValueType(Type aType, Type bType)
+        {
+            return (IsIntegerBasedType(aType) && IsIntegerBasedType(bType)) || (IsLongBasedType(aType) && IsLongBasedType(bType))
+                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float))));
+        }
+
+        /// <summary>
+        /// Is the type a numeric type or a pointer
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static bool IsIntegralTypeOrPointer(Type type)
         {
-            return IsIntegralType(type) || type.IsPointer || type.IsByRef;
+            return IsIntegerBasedType(type) || IsLongBasedType(type) || type.IsPointer || type.IsByRef;
         }
 
         public static bool IsPointer(Type aPointer)
@@ -602,15 +625,22 @@ namespace Cosmos.IL2CPU
             return aPointer.IsPointer || aPointer.IsByRef || aPointer == typeof(IntPtr) || aPointer == typeof(UIntPtr);
         }
 
-        public static bool IsByRef(Type aType) => aType.IsByRef;
+        public static bool IsObject(Type aPointer)
+        {
+            return aPointer.IsAssignableTo(typeof(object)) || aPointer == typeof(NullRef);
+        }
 
-        public static bool IsNativeInt(Type aType) => aType.IsPointer || aType == typeof(IntPtr) || aType == typeof(UIntPtr);
+        public static bool IsByRef(Type aType) => aType.IsByRef;
 
         public static uint SizeOfType(Type aType)
         {
             if (aType == null)
             {
                 throw new ArgumentNullException(nameof(aType));
+            }
+            if (aType.IsEnum)
+            {
+                aType.GetEnumUnderlyingType();
             }
             if (aType.IsPointer || aType.IsByRef)
             {
@@ -656,8 +686,6 @@ namespace Cosmos.IL2CPU
                     return 16;
                 case "System.Guid":
                     return 16;
-                case "System.Enum":
-                    return 4;
                 case "System.DateTime":
                     return 8;
             }
@@ -675,7 +703,7 @@ namespace Cosmos.IL2CPU
             {
                 return SizeOfType(aType.GetField("value__").FieldType);
             }
-            if (aType.IsValueType)
+            if (aType.IsValueType && aType != typeof(ValueType))
             {
                 // structs are stored in the stack, so stack size = storage size
                 return GetStorageSize(aType);

@@ -27,8 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xOpMethod.Value, xOpMethod.ValueUID, aOpCode, DebugEnabled);
         }
 
-        public static void DoExecute(Assembler Assembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID,
-            ILOpCode aOp, bool debugEnabled)
+        public static void DoExecute(Assembler aAssembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool aDebugEnabled)
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
             Type xPopType = aOp.StackPopTypes.Last();
@@ -55,16 +54,21 @@ namespace Cosmos.IL2CPU.X86.IL
                 xThisOffset += (int)Align(SizeOfType(xItem.ParameterType), 4);
             }
 
+            // This is finding offset to self? It looks like we dont need offsets of other
+            // arguments, but only self. If so can calculate without calculating all fields
+            // Might have to go to old data structure for the offset...
+            // Can we add this method info somehow to the data passed in?
+            // mThisOffset = mTargetMethodInfo.Arguments[0].Offset;
             XS.Comment($"Calling = {aTargetMethod.DeclaringType.FullName}.{aTargetMethod.Name}");
             XS.Comment("ThisOffset = " + xThisOffset);
 
             if (IsReferenceType(xPopType))
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, xThisOffset + 4);
+                DoNullReferenceCheck(aAssembler, aDebugEnabled, xThisOffset + 4);
             }
             else
             {
-                DoNullReferenceCheck(Assembler, debugEnabled, xThisOffset);
+                DoNullReferenceCheck(aAssembler, aDebugEnabled, xThisOffset);
             }
 
             if (!String.IsNullOrEmpty(xNormalAddress))
@@ -151,7 +155,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     * $esp + xThisOffset    This
                     */
                     // we need to see if $this is a boxed object, and if so, we need to unbox it
-                    XS.Set(EAX, ESP, sourceDisplacement: (int)xThisOffset + 4);
+                    XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 4);
                     XS.Compare(EAX, (int)ObjectUtils.InstanceTypeEnum.BoxedValueType, destinationIsIndirect: true, destinationDisplacement: 4, size: RegisterSize.Int32);
 
                     /*
@@ -164,6 +168,35 @@ namespace Cosmos.IL2CPU.X86.IL
                     */
                     XS.Jump(CPU.ConditionalTestEnum.NotEqual, xCurrentMethodLabel + ".NotBoxedThis");
 
+                    // we need to determine if we actually want to unbox the object, we do this here so the code isnt run too often
+                    if (aTargetMethod.DeclaringType.IsInterface)
+                    {
+                        // always unbox in this case
+                    }
+                    else
+                    {
+                        XS.Push(EAX); // we will need this eax again 
+                        XS.Push(ECX); // the call will trash ecx
+                        XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 12);
+                        XS.Push(EAX, isIndirect: true);
+
+                        XS.Push(aTargetMethodUID);
+
+                        XS.Call(LabelName.Get(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef));
+
+                        XS.Pop(EBX);
+                        XS.Pop(ECX); // recover after the call
+                        XS.Pop(EAX);
+
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(object)));
+                        XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(ValueType)));
+                        XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(Enum)));
+                        XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
+                    }
+
+
                     /*
                     * On the stack now:
                     * $esp                 Params
@@ -173,7 +206,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     * EAX contains the type pointer (not the handle!!)
                     */
                     XS.Add(EAX, ObjectUtils.FieldDataOffset);
-                    XS.Set(ESP, EAX, destinationDisplacement: (int)xThisOffset + 4);
+                    XS.Set(ESP, EAX, destinationDisplacement: xThisOffset + 4);
 
                     var xHasParams = xThisOffset != 0;
                     var xNeedsExtraStackSize = xReturnSize >= xThisOffset + 8;
@@ -200,9 +233,9 @@ namespace Cosmos.IL2CPU.X86.IL
                     *
                     * ECX contains the method to call
                     */
+                    XS.Label(xCurrentMethodLabel + ".NotBoxedThis");
                 }
 
-                XS.Label(xCurrentMethodLabel + ".NotBoxedThis");
 
                 if (xExtraStackSize > 0)
                 {
@@ -212,7 +245,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Call(ECX);
                 XS.Label(afterCall);
             }
-            EmitExceptionLogic(Assembler, aMethod, aOp, true,
+            EmitExceptionLogic(aAssembler, aMethod, aOp, true,
                 delegate
                 {
                     var xStackOffsetBefore = aOp.StackOffsetBeforeExecution.Value;
@@ -229,10 +262,9 @@ namespace Cosmos.IL2CPU.X86.IL
                         xResultSize += 4 - (xResultSize % 4);
                     }
 
-                    EmitExceptionCleanupAfterCall(Assembler, xResultSize, xStackOffsetBefore, xPopSize);
+                    EmitExceptionCleanupAfterCall(aAssembler, xResultSize, xStackOffsetBefore, xPopSize);
                 });
             XS.Label(xCurrentMethodLabel + ".NoExceptionAfterCall");
-            XS.Comment("Argument Count = " + xParameters.Length);
         }
     }
 }

@@ -81,25 +81,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
             }
           }
           break;
-        //  var xExtraOffset = 0;
-        //  if (!Value.IsStatic)
-        //  {
-        //    StackPopTypes[0] = Value.DeclaringType;
-        //    xExtraOffset++;
-        //  }
-        //  var xParams = Value.GetParameters();
-        //  for (int i = 0; i < xParams.Length; i++)
-        //  {
-        //    StackPopTypes[i + xExtraOffset] = xParams[i].ParameterType;
-        //  }
-        //  break;
         case Code.Newobj:
           StackPushTypes[0] = Value.DeclaringType;
-          //  xParams = Value.GetParameters();
-          //  for (int i = 0; i < xParams.Length; i++)
-          //  {
-          //    StackPopTypes[i] = xParams[i].ParameterType;
-          //  }
           break;
         case Code.Ldftn:
           StackPushTypes[0] = typeof(IntPtr);
@@ -109,5 +92,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           break;
       }
     }
+
+    public override void DoInterpretStackTypes() { }
   }
 }
