@@ -5,6 +5,7 @@
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <!--<IsPackable>True</IsPackable>-->
         <NoWarn>CA1707;CA1716;$(NoWarn)</NoWarn>
+        <Configurations>Debug;Release;TEST</Configurations>
     </PropertyGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="IL2CPU.Compiler.Tests" Key="IL2CPU" />
