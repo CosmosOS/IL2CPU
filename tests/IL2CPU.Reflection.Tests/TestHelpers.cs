@@ -20,10 +20,11 @@ namespace IL2CPU.Reflection.Tests
             var linqLib = typeof(BinaryExpression).Assembly.Location;
             var jsonLib = typeof(JObject).Assembly.Location;
             var stdLib = Assembly.Load("netstandard").Location;
+            var rt2Lib = Assembly.Load("System.Runtime").Location;
             var rflLib = Assembly.Load("System.Reflection.Primitives").Location;
             var ctx = new IsolatedAssemblyLoadContext(new[]
             {
-                baseLib, runtLib, stdLib, listLib, rflLib, jsonLib, conLib, iterLib, linqLib
+                baseLib, runtLib, stdLib, listLib, rflLib, jsonLib, conLib, iterLib, linqLib, rt2Lib
             });
             IsolatedAssemblyLoadContext.Default = ctx;
         }
