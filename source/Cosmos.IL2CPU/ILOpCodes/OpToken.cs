@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpToken : ILOpCode {
@@ -43,11 +44,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       Value = aValue;
       if (ValueIsField)
       {
-          ValueField = aModule.ResolveField(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueField = aModule.ResolveMyField(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
       if (ValueIsType)
       {
-          ValueType = aModule.ResolveType(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueType = aModule.ResolveMyType(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
 
     }

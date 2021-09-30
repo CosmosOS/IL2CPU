@@ -411,7 +411,7 @@ namespace Cosmos.IL2CPU
                                                  where item.Name == xSigMethod.Name
                                                  select item).SingleOrDefault();
                             }
-                            if (xTargetMethod == aMethod)
+                            if (xTargetMethod.IsSame(aMethod))
                             {
                                 xResult = xSigMethod;
                             }
@@ -528,7 +528,7 @@ namespace Cosmos.IL2CPU
                                     xTargetMethod = aTargetType.GetMethod(xSigMethod.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, xTypesStatic, null);
                                 }
                             }
-                            if (xTargetMethod == aMethod)
+                            if (xTargetMethod.IsSame(aMethod))
                             {
                                 xResult = xSigMethod;
                                 break;
@@ -571,7 +571,7 @@ namespace Cosmos.IL2CPU
                         if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
                             // Allow explicit overwriting of types by signature in case we have to hide internal enum behind uint etc
-                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)).Replace("_", ""))
+                            if(xResult.FetchCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)).Replace("_", ""))
                             {
 
                             }
