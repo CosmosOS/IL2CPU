@@ -392,7 +392,7 @@ namespace Cosmos.IL2CPU
                         // TODO: Only allow one, but this code for now takes the last one
                         // if there is more than one
                         xAttrib = null;
-                        foreach (PlugMethod x in xSigMethod.GetCustomAttributes(typeof(PlugMethod), false))
+                        foreach (PlugMethod x in xSigMethod.FetchCustomAttributes<PlugMethod>(false))
                         {
                             xAttrib = x;
                         }
@@ -433,7 +433,7 @@ namespace Cosmos.IL2CPU
                             var xActualParamCount = xParams.Length;
                             foreach (var xParam in xParams)
                             {
-                                if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                if (xParam.FetchCustomAttributes<FieldAccess>(false).Any())
                                 {
                                     xActualParamCount--;
                                 }
@@ -446,7 +446,7 @@ namespace Cosmos.IL2CPU
                             {
                                 xTypesInst = Array.Empty<Type>();
 
-                                var xReplaceType = xParams[0].GetCustomAttributes(typeof(FieldType), false).ToList();
+                                var xReplaceType = xParams[0].FetchCustomAttributes<FieldType>(false).ToList();
                                 if (xReplaceType.Any())
                                 {
                                     xTypesStatic[0] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
@@ -462,12 +462,12 @@ namespace Cosmos.IL2CPU
                                 var xCurIdx = 0;
                                 foreach (var xParam in xParams.Skip(1))
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.FetchCustomAttributes<FieldAccess>(false).Any())
                                     {
                                         continue;
                                     }
 
-                                    var xReplaceType = xParam.GetCustomAttributes(typeof(FieldType), false).ToList();
+                                    var xReplaceType = xParam.FetchCustomAttributes<FieldType>(false).ToList();
                                     if (xReplaceType.Any())
                                     {
                                         xTypesInst[xCurIdx] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
@@ -482,7 +482,7 @@ namespace Cosmos.IL2CPU
                                 xCurIdx = 0;
                                 foreach (var xParam in xParams)
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.FetchCustomAttributes<FieldAccess>(false).Any())
                                     {
                                         xCurIdx++;
                                         continue;
@@ -606,7 +606,7 @@ namespace Cosmos.IL2CPU
             {
                 // TODO: Only allow one, but this code for now takes the last one
                 // if there is more than one
-                foreach (PlugMethod x in xResult.GetCustomAttributes(typeof(PlugMethod), false))
+                foreach (PlugMethod x in xResult.FetchCustomAttributes<PlugMethod>(false))
                 {
                     xAttrib = x;
                 }

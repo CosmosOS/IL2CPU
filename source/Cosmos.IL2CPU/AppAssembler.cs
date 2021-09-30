@@ -27,6 +27,8 @@ using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
 using Cosmos.IL2CPU.MethodAnalysis;
+using IL2CPU.Reflection;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -1018,7 +1020,7 @@ namespace Cosmos.IL2CPU
 
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
-                var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
+                var xItemList = aField.FetchCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
                 object xItem = null;
                 if (xItemList.Any())
                 {
@@ -1081,7 +1083,7 @@ namespace Cosmos.IL2CPU
                         DebugSymbolReader.TryGetStaticFieldValue(aField.Module, aField.MetadataToken, ref xData);
                     }
 
-                    var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
+                    var xAsmLabelAttributes = aField.FetchCustomAttributes<AsmLabel>();
                     if (xAsmLabelAttributes.Count() > 0)
                     {
                         Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
@@ -1214,8 +1216,8 @@ namespace Cosmos.IL2CPU
             XS.Label(InitStringIDsLabel);
             XS.Push(EBP);
             XS.Set(EBP, ESP);
-            XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
-            XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
+            XS.Set(EAX, ILOp.GetTypeIDLabel(BaseTypes.String), sourceIsIndirect: true);
+            XS.Set(LabelName.GetStaticFieldName(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
                 LdStr.GetContentsArrayName(""), destinationDisplacement: 4);
 
             var xMemberId = 0;

@@ -634,7 +634,7 @@ namespace Cosmos.IL2CPU
 
         public static bool IsObject(Type aPointer)
         {
-            return aPointer.IsAssignableTo(typeof(object)) || aPointer == typeof(NullRef);
+            return aPointer.IsMyAssignableTo(typeof(object)) || aPointer == typeof(NullRef);
         }
 
         public static bool IsByRef(Type aType) => aType.IsByRef;
