@@ -7,6 +7,8 @@ using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU.X86.IL
 {
     /// <summary>
@@ -68,8 +70,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Add(ESP, xDeclaringTypeStackSize);
 
                 if ((xFieldInfo.Size < 4 && IsIntegerBasedType(xFieldType))
-                    || xFieldType == typeof(bool)
-                    || xFieldType == typeof(char))
+                    || xFieldType == BaseTypes.Boolean
+                    || xFieldType == BaseTypes.Char)
                 {
                     if (TypeIsSigned(xFieldType))
                     {

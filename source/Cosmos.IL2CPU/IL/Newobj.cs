@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
@@ -127,7 +127,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 // try calculating size:
                 if (constructor.DeclaringType == BaseTypes.String)
                 {
-                    if (xParams.Length == 1 && xParams[0].ParameterType == typeof(char[]))
+                    if (xParams.Length == 1 && xParams[0].ParameterType == Base.CharArray)
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceDisplacement: 4, sourceIsIndirect: true); // address
@@ -137,9 +137,9 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Push(EAX);
                     }
                     else if (xParams.Length == 3
-                             && (xParams[0].ParameterType == typeof(char[]) || xParams[0].ParameterType == typeof(char*))
-                             && xParams[1].ParameterType == typeof(int)
-                             && xParams[2].ParameterType == typeof(int))
+                             && (xParams[0].ParameterType == Base.CharArray || xParams[0].ParameterType == Base.CharStar)
+                             && xParams[1].ParameterType == BaseTypes.Int32
+                             && xParams[2].ParameterType == BaseTypes.Int32)
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
@@ -147,8 +147,8 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Push(EAX);
                     }
                     else if (xParams.Length == 2
-                             && xParams[0].ParameterType == typeof(char)
-                             && xParams[1].ParameterType == typeof(int))
+                             && xParams[0].ParameterType == BaseTypes.Char
+                             && xParams[1].ParameterType == BaseTypes.Int32)
                     {
                         xHasCalcSize = true;
                         XS.Set(EAX, ESP, sourceIsIndirect: true);
@@ -159,14 +159,14 @@ namespace Cosmos.IL2CPU.X86.IL
                      * TODO see if something is needed in stack / register to make them really work
                      */
                     else if (xParams.Length == 3
-                             && (xParams[0].ParameterType == typeof(sbyte*)
-                             && xParams[1].ParameterType == typeof(int)
-                             && xParams[2].ParameterType == typeof(int)))
+                             && (xParams[0].ParameterType == Base.SbyteStar
+                             && xParams[1].ParameterType == BaseTypes.Int32
+                             && xParams[2].ParameterType == BaseTypes.Int32))
                     {
                         xHasCalcSize = true;
                         XS.Push(ESP, isIndirect: true);
                     }
-                    else if (xParams.Length == 1 && (xParams[0].ParameterType == typeof(sbyte*)))
+                    else if (xParams.Length == 1 && (xParams[0].ParameterType == Base.SbyteStar))
                     {
                         xHasCalcSize = true;
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
@@ -185,7 +185,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                         XS.Push(ECX);
                     }
-                    else if (xParams.Length == 1 && (xParams[0].ParameterType == typeof(char*)))
+                    else if (xParams.Length == 1 && (xParams[0].ParameterType == Base.CharStar))
                     {
                         xHasCalcSize = true;
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
@@ -208,7 +208,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.ShiftLeft(ECX, 1); // every character needs two bytes
                         XS.Push(ECX);
                     }
-                    else if(xParams.Length == 1 && xParams[0].ParameterType == typeof(ReadOnlySpan<char>))
+                    else if(xParams.Length == 1 && xParams[0].ParameterType == Base.ReadOnlySpanChar)
                     {
                         xHasCalcSize = true;
                         // push the lenght of the span as well

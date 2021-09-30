@@ -1,5 +1,5 @@
 using System;
-
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
@@ -26,7 +26,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Add(ESP, 4);
 
-            var xIsNullable = xType.IsGenericType && xType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            var xIsNullable = xType.IsGenericType && xType.GetGenericTypeDefinition() == Base.Nullable;
 
             if (xIsNullable)
             {

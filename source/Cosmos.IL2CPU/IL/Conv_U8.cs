@@ -4,6 +4,8 @@ using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU.X86.IL
 {
     /// <summary>
@@ -31,7 +33,7 @@ namespace Cosmos.IL2CPU.X86.IL
       if (IsReferenceType(xSource))
       {
         // todo: Stop GC tracking
-        XS.Add(ESP, SizeOfType(typeof(UIntPtr)));
+        XS.Add(ESP, SizeOfType(BaseTypes.UIntPtr));
 
         // todo: x64
         XS.Pop(EAX);
