@@ -13,6 +13,7 @@ using IL2CPU.API.Attribs;
 using XSharp.Assembler;
 
 using IL2CPU.Reflection;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -250,23 +251,23 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowNotImplemented", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowInvalidOperation", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowArgumentOutOfRange", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
 
             // register system types:
             Queue(typeof(Array), null, "Explicit Entry");
             Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
-            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowIndexOutOfRangeException, null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             // Start from entry point of this program
             Queue(aStartMethod, null, "Entry Point");
@@ -323,9 +324,9 @@ namespace Cosmos.IL2CPU
             // Pull in Array constructor
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
-            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             ScanQueue();
             UpdateAssemblies();
@@ -349,7 +350,7 @@ namespace Cosmos.IL2CPU
             {
                 if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
-                    mItems.TryGetValue(xOpMethod.Value, out MemberInfo value);
+                    mItems.TryGetMyValue(xOpMethod.Value, out MemberInfo value);
                     xOpMethod.Value = (MethodBase)(value ?? xOpMethod.Value);
                     xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }

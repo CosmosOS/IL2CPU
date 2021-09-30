@@ -3,6 +3,7 @@ using XSharp.Assembler.x86;
 using XSharp;
 using static XSharp.XSRegisters;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
 
 /* Add.Ovf is signed integer addition with check for overflow */
 namespace Cosmos.IL2CPU.X86.IL
@@ -60,7 +61,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
           XS.Add(ESP, 4);
         }
-        Call.DoExecute(Assembler, aMethod, typeof(ExceptionHelper).GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public), aOpCode, GetLabel(aMethod, aOpCode), xSuccessLabel, DebugEnabled);
+        Call.DoExecute(Assembler, aMethod, Base.ExceptionHelper.GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public), aOpCode, GetLabel(aMethod, aOpCode), xSuccessLabel, DebugEnabled);
         XS.Label(xSuccessLabel);
       }
     }

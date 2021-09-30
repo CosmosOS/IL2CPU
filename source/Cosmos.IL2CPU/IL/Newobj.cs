@@ -9,6 +9,7 @@ using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -124,7 +125,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 #region Special string handling
                 // try calculating size:
-                if (constructor.DeclaringType == typeof(string))
+                if (constructor.DeclaringType == BaseTypes.String)
                 {
                     if (xParams.Length == 1 && xParams[0].ParameterType == typeof(char[]))
                     {
