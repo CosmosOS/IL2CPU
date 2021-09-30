@@ -5,23 +5,25 @@ namespace IL2CPU.Reflection
 {
     public static class StandardExtensions
     {
-        public static bool TryGetValue<T>(this ISet<T> set, T key, out T value)
+        public static bool TryGetMyValue<T>(this ISet<T> set, T equal, out T actual, IEqualityComparer<T> cmp = null)
         {
+            var equalHash = equal != null ? (cmp?.GetHashCode(equal) ?? equal.GetHashCode()) : 0;
             foreach (var item in set)
             {
-                if (item.ToString() == key.ToString())
+                var itemHash = item != null ? (cmp?.GetHashCode(item) ?? item.GetHashCode()) : 0;
+                if (equalHash == itemHash)
                 {
-                    value = item;
+                    actual = item;
                     return true;
                 }
             }
-            value = default;
+            actual = default;
             return false;
         }
 
-        public static bool IsAssignableTo(this Type target, Type source)
+        public static bool IsMyAssignableTo(this Type @this, Type targetType)
         {
-            return source.IsAssignableFrom(target);
+            return targetType != null && targetType.IsAssignableFrom(@this);
         }
     }
 }
