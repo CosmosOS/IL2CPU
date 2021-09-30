@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -46,7 +47,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Call:
         case Code.Callvirt:
           var methodInfo = Value as MethodInfo;
-          if (methodInfo != null && methodInfo.ReturnType != typeof(void))
+          if (methodInfo != null && methodInfo.ReturnType != BaseTypes.Void)
           {
             return 1;
           }
@@ -72,7 +73,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Call:
         case Code.Callvirt:
           var xMethodInfo = Value as MethodInfo;
-          if (xMethodInfo != null && xMethodInfo.ReturnType != typeof(void))
+          if (xMethodInfo != null && xMethodInfo.ReturnType != BaseTypes.Void)
           {
             StackPushTypes[0] = xMethodInfo.ReturnType;
             if (StackPushTypes[0].IsEnum)
@@ -85,7 +86,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           StackPushTypes[0] = Value.DeclaringType;
           break;
         case Code.Ldftn:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           return;
 
         default:

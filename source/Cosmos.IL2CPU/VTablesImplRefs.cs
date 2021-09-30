@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
@@ -22,7 +23,7 @@ namespace Cosmos.IL2CPU
 
         static VTablesImplRefs()
         {
-            VTablesImplDef = TypeofExtensions.Reload(typeof(VTablesImpl));
+            VTablesImplDef = Base.VTablesImpl;
             foreach (FieldInfo xField in typeof(VTablesImplRefs).GetFields())
             {
                 if (xField.Name.EndsWith("Ref"))

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
 
 using IL2CPU.API;
@@ -10,6 +10,8 @@ using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 using CPU = XSharp.Assembler.x86;
+
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -165,11 +167,11 @@ namespace Cosmos.IL2CPU.X86.IL
                         XS.Pop(ECX); // recover after the call
                         XS.Pop(EAX);
 
-                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(object)));
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(BaseTypes.Object));
                         XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
-                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(ValueType)));
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(Base.ValueType));
                         XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
-                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(typeof(Enum)));
+                        XS.Compare(EBX, VTablesImplRefs.GetTypeId(Base.Enum));
                         XS.Jump(CPU.ConditionalTestEnum.Equal, xCurrentMethodLabel + ".NotBoxedThis");
                     }
 
