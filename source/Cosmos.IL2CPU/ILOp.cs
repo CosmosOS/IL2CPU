@@ -17,6 +17,7 @@ using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
+using IL2CPU.Reflection;
 
 
 namespace Cosmos.IL2CPU

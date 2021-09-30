@@ -83,8 +83,9 @@ namespace Cosmos.IL2CPU.MethodAnalysis
             // Initialse the datastructure with the first opcode
 
             // Analyse op codes
-            foreach (var (_, opGroup) in groups)
+            foreach (var pair in groups)
             {
+                var opGroup = pair.Value;
                 while (true)
                 {
                     var analysing = opGroup.OpCodes.Last();
