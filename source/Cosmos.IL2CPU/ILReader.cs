@@ -617,7 +617,7 @@ namespace Cosmos.IL2CPU
                     // 32-bit metadata token.
                     case OperandType.InlineType:
                         {
-                            var xValue = xModule.ResolveType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.ResolveMyType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpType(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
