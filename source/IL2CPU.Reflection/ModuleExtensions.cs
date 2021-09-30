@@ -261,18 +261,28 @@ namespace IL2CPU.Reflection
             throw new InvalidOperationException(module + " " + metadataToken);
         }
 
-        public static MetadataReader GetReader(this Module module)
+        public static MetadataReader GetReader(this Module module, bool shouldThrow = true)
         {
-            return (MetadataReader)module.GetType()
+            var reader = (MetadataReader)module.GetType()
                 .GetProperty("Reader", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.GetValue(module);
+            if (reader == null && shouldThrow)
+            {
+                throw new InvalidOperationException(module.Assembly.Location);
+            }
+            return reader;
         }
 
-        public static MetadataLoadContext GetLoader(this Module module)
+        public static MetadataLoadContext GetLoader(this Module module, bool shouldThrow = true)
         {
-            return (MetadataLoadContext)module.GetType()
+            var loader = (MetadataLoadContext)module.GetType()
                 .GetProperty("Loader", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.GetValue(module);
+            if (loader == null && shouldThrow)
+            {
+                throw new InvalidOperationException(module.Assembly.Location);
+            }
+            return loader;
         }
 
         private static SomeTypeProvider GetProvider(Module module)
