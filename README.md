@@ -4,6 +4,9 @@
 
 IL2CPU is a compiler for .NET IL code to compile to assembly language for direct booting. IL2CPU creates NASM style assembly ready to assemble with [NASM](http://www.nasm.us/).
 
+# Roadmap
+Make the compiler cross-platform!
+
 # More Info
 Please refer to our website (http://www.il2cpu.net)
 
