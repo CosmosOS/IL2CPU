@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.Loader;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
     internal class TypeResolver
     {
-        private AssemblyLoadContext _assemblyLoadContext;
+        private IsolatedAssemblyLoadContext _assemblyLoadContext;
 
-        public TypeResolver(AssemblyLoadContext assemblyLoadContext)
+        public TypeResolver(IsolatedAssemblyLoadContext assemblyLoadContext)
         {
             _assemblyLoadContext = assemblyLoadContext ?? throw new ArgumentNullException(nameof(assemblyLoadContext));
         }

@@ -13,6 +13,7 @@ using Cosmos.Build.Common;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -35,7 +36,7 @@ namespace Cosmos.IL2CPU
 
         private ICompilerEngineSettings mSettings;
 
-        private AssemblyLoadContext _assemblyLoadContext;
+        private IsolatedAssemblyLoadContext _assemblyLoadContext;
 
         private Dictionary<MethodBase, int?> mBootEntries;
         private List<MemberInfo> mForceIncludes;
