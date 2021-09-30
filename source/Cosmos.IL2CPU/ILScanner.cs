@@ -12,6 +12,8 @@ using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using XSharp.Assembler;
 
+using IL2CPU.Reflection;
+
 namespace Cosmos.IL2CPU
 {
     public class ScannerQueueItem
@@ -586,7 +588,7 @@ namespace Cosmos.IL2CPU
 
             MethodBase xPlug = null;
             // Plugs may use plugs, but plugs won't be plugged over themself
-            var inl = aMethod.GetCustomAttribute<InlineAttribute>();
+            var inl = aMethod.FetchCustomAttribute<InlineAttribute>();
             if (!aIsPlug && !xIsDynamicMethod)
             {
                 // Check to see if method is plugged, if it is we don't scan body
@@ -836,7 +838,7 @@ namespace Cosmos.IL2CPU
 
             while (true)
             {
-                var xBaseDefinition = xBaseMethod.GetBaseDefinition();
+                var xBaseDefinition = xBaseMethod.GetMyBaseDefinition();
 
                 if (xBaseDefinition == xBaseMethod)
                 {

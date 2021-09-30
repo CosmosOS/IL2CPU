@@ -96,6 +96,7 @@ namespace Cosmos.IL2CPU
 
             _assemblyLoadContext = new IsolatedAssemblyLoadContext(
                 mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
+            IsolatedAssemblyLoadContext.Default = _assemblyLoadContext;
 
             TypeResolver = new TypeResolver(_assemblyLoadContext);
 

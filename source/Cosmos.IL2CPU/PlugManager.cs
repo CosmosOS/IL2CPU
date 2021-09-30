@@ -9,6 +9,7 @@ using IL2CPU.API;
 using IL2CPU.API.Attribs;
 
 using XSharp.Assembler;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -80,7 +81,7 @@ namespace Cosmos.IL2CPU
                 foreach (var xPlugType in xAsm.GetTypes())
                 {
                     // Foreach, it is possible there could be one plug class with mult plug targets
-                    foreach (var xAttrib in xPlugType.GetCustomAttributes<Plug>(false))
+                    foreach (var xAttrib in xPlugType.FetchCustomAttributes<Plug>(false))
                     {
                         var xTargetType = xAttrib.Target;
                         // If no type is specified, try to find by a specified name.
@@ -142,7 +143,7 @@ namespace Cosmos.IL2CPU
                     foreach (var xMethod in xImpl.GetMethods(BindingFlags.Public | BindingFlags.Static))
                     {
                         PlugMethod xAttrib = null;
-                        foreach (PlugMethod x in xMethod.GetCustomAttributes(typeof(PlugMethod), false))
+                        foreach (PlugMethod x in xMethod.FetchCustomAttributes<PlugMethod>(false))
                         {
                             xAttrib = x;
                         }
@@ -167,8 +168,8 @@ namespace Cosmos.IL2CPU
                                 // We also skip methods which do method access.
                                 if (xMethod.GetParameters().Where(x =>
                                 {
-                                    return x.GetCustomAttributes(typeof(FieldAccess)).Count() > 0
-                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Count() > 0;
+                                    return x.FetchCustomAttributes<FieldAccess>().Count() > 0
+                                           || x.FetchCustomAttributes<ObjectPointerAccess>().Count() > 0;
                                 }).Count() > 0)
                                 {
                                     OK = true;
@@ -316,7 +317,7 @@ namespace Cosmos.IL2CPU
 
                     #region PlugFields scan
 
-                    foreach (var xField in xImpl.GetCustomAttributes(typeof(PlugField), true).Cast<PlugField>())
+                    foreach (var xField in xImpl.FetchCustomAttributes<PlugField>(true))
                     {
                         if (!mPlugFields.TryGetValue(xPlug.Key, out var xFields))
                         {

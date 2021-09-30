@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 
 using Cosmos.IL2CPU.Extensions;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -565,7 +566,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineField:
                         {
-                            var xValue = xModule.ResolveField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.ResolveMyField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpField(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -574,7 +575,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineMethod:
                         {
-                            var xValue = xModule.ResolveMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.ResolveMyMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpMethod(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -587,7 +588,7 @@ namespace Cosmos.IL2CPU
                         break;
 
                     case OperandType.InlineString:
-                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.ResolveString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
+                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.ResolveMyString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
                         xPos = xPos + 4;
                         break;
 
