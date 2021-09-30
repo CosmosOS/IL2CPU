@@ -293,7 +293,7 @@ namespace IL2CPU.Reflection
 
         public static string ResolveMyString(this Module module, int metadataToken)
         {
-            var reader = GetReader(module);
+            var reader = GetReader(module, shouldThrow: false);
             var stringHandle = (UserStringHandle)MetadataTokens.Handle(metadataToken);
             if (reader == null)
             {
