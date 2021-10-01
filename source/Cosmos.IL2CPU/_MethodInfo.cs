@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU
 {
@@ -68,7 +70,7 @@ namespace Cosmos.IL2CPU
             PlugMethod = aPlugMethod;
             IsInlineAssembler = isInlineAssembler;
 
-            var attribs = aMethodBase.GetCustomAttributes<DebugStub>(false).ToList();
+            var attribs = aMethodBase.FetchCustomAttributes<DebugStub>(false).ToList();
             if (attribs.Any())
             {
                 var attrib = new DebugStub
