@@ -86,6 +86,7 @@ namespace Cosmos.IL2CPU.MethodAnalysis
             foreach (var pair in groups)
             {
                 var opGroup = pair.Value;
+
                 while (true)
                 {
                     var analysing = opGroup.OpCodes.Last();

@@ -38,7 +38,7 @@ namespace Cosmos.IL2CPU
                 {
                     Kind = ExceptionRegionKind.Filter;
                     FilterOffset = aExceptionClause.FilterOffset;
-                    CatchType = typeof(System.Exception); //TODO: Confirm that this is correct.
+                    CatchType = BaseTypes.Exception; //TODO: Confirm that this is correct.
                 }
                 else if (aExceptionClause.Flags.HasFlag(ExceptionHandlingClauseOptions.Finally))
                 {
