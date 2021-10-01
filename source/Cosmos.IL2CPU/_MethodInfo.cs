@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU
     {
         public enum TypeEnum { Normal, Plug, NeedsPlug };
 
-        public MethodBase MethodBase { get; }
+        public MethodBase MethodBase { get; internal set; }
         public TypeEnum Type { get; }
         //TODO: Figure out if we really need three different ids
         public uint UID { get; }

@@ -22,14 +22,17 @@ namespace Cosmos.IL2CPU.Extensions
         public override void AssembleNew(Assembler assembler, object methodInfo)
         {
             var method = _instance.GetType().GetMethod(nameof(AssembleNew));
+            if (methodInfo is _MethodInfo oldMethod)
+            {
+                var real = FindMethod(_context, oldMethod.MethodBase);
+                oldMethod.MethodBase = real;
+            }
             method.Invoke(_instance, new[] { assembler, methodInfo });
         }
 
         public static void DoInline(ZooLoadContext ctx, MethodBase method, object[] args)
         {
-            var found = FindType(ctx, method.DeclaringType);
-            var methods = found.GetMethods();
-            var real = methods.FirstOrDefault(m => m.MetadataToken == method.MetadataToken);
+            var real = FindMethod(ctx, method);
             real.Invoke(null, args);
         }
 
@@ -43,6 +46,14 @@ namespace Cosmos.IL2CPU.Extensions
             var types = dll.GetTypes();
             var found = types.FirstOrDefault(t => t.MetadataToken == type.MetadataToken);
             return found;
+        }
+
+        private static MethodBase FindMethod(AssemblyLoadContext ctx, MethodBase method)
+        {
+            var found = FindType(ctx, method.DeclaringType);
+            var methods = found.GetMethods();
+            var real = methods.FirstOrDefault(m => m.MetadataToken == method.MetadataToken);
+            return real;
         }
     }
 }
