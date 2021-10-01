@@ -817,7 +817,7 @@ namespace Cosmos.IL2CPU
             // Keys cant be null. If null, we just say ILScanner is the source
             if (aSrc == null)
             {
-                aSrc = typeof(ILScanner);
+                aSrc = Base.ILScanner;
             }
 
             var xLogItem = new LogItem

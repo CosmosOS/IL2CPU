@@ -48,5 +48,7 @@ namespace Cosmos.IL2CPU.Extensions
         public static Type VTable => Reload(typeof(VTable));
 
         public static Type ReferenceHelper => Reload(typeof(ReferenceHelper));
+
+        public static Type ILScanner => Reload(typeof(ILScanner));
     }
 }
