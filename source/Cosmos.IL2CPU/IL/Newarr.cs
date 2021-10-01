@@ -22,7 +22,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      ILOpCodes.OpType xType = (ILOpCodes.OpType)aOpCode;
+      var xType = (ILOpCodes.OpType)aOpCode;
 
       uint xSize = SizeOfType(xType.Value);
 

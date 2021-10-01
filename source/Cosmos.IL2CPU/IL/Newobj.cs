@@ -23,8 +23,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            OpMethod xMethod = (OpMethod)aOpCode;
-            string xCurrentLabel = GetLabel(aMethod, aOpCode);
+            var xMethod = (OpMethod)aOpCode;
+            var xCurrentLabel = GetLabel(aMethod, aOpCode);
             var xType = xMethod.Value.DeclaringType;
 
             Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value, DebugEnabled);
