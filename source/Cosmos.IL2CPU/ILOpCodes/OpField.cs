@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -70,7 +71,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Ldsflda:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           return;
         case Code.Ldfld:
           StackPushTypes[0] = Value.FieldType;
@@ -138,7 +139,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if(StackPopTypes[0] == typeof(void*))
+          if(StackPopTypes[0] == Base.VoidStar)
           {
           return;
           }
@@ -157,9 +158,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (expectedType == typeof(bool))
+          if (expectedType == BaseTypes.Boolean)
           {
-            if (StackPopTypes[0] == typeof(int))
+            if (StackPopTypes[0] == BaseTypes.Int32)
             {
               return;
             }
@@ -168,12 +169,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (StackPopTypes[0] == typeof(NullRef))
+          if (StackPopTypes[0] == Base.NullRef)
           {
             return;
           }
-          if ((StackPopTypes[0] == typeof(IntPtr)
-               || StackPopTypes[0] == typeof(UIntPtr))
+          if ((StackPopTypes[0] == BaseTypes.IntPtr
+               || StackPopTypes[0] == BaseTypes.UIntPtr)
               & expectedType.IsPointer)
           {
             return;
@@ -190,8 +191,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           if (StackPopTypes[0] == Value.DeclaringType.MakePointerType() ||
               StackPopTypes[0] == Value.DeclaringType.MakeByRefType() ||
-              StackPopTypes[0] == typeof(void*) ||
-              StackPopTypes[0] == typeof(IntPtr))
+              StackPopTypes[0] == Base.VoidStar ||
+              StackPopTypes[0] == BaseTypes.IntPtr)
           {
             return;
           }

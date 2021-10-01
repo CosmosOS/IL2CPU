@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpSwitch : ILOpCode {
     public int[] BranchLocations { get; }
@@ -60,11 +62,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         return;
       }
 
-      if (StackPopTypes[0] == typeof(int) ||
-          StackPopTypes[0] == typeof(uint) ||
-          StackPopTypes[0] == typeof(short) ||
-          StackPopTypes[0] == typeof(ushort) ||
-          StackPopTypes[0] == typeof(byte))
+      if (StackPopTypes[0] == BaseTypes.Int32 ||
+          StackPopTypes[0] == BaseTypes.UInt32 ||
+          StackPopTypes[0] == BaseTypes.Int16 ||
+          StackPopTypes[0] == BaseTypes.UInt16 ||
+          StackPopTypes[0] == BaseTypes.Byte)
       {
         return;
       }

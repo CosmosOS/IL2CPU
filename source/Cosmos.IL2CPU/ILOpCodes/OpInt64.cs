@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU.ILOpCodes
 {
   public class OpInt64 : ILOpCode
@@ -42,7 +44,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       switch (OpCode)
       {
         case Code.Ldc_I8:
-          StackPushTypes[0] = typeof (long);
+          StackPushTypes[0] = BaseTypes.Int64;
           return;
         default:
           break;

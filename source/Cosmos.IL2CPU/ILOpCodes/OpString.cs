@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpString : ILOpCode {
     public string Value { get; }
@@ -39,7 +41,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       switch (OpCode)
       {
         case Code.Ldstr:
-          StackPushTypes[0] = typeof (string);
+          StackPushTypes[0] = BaseTypes.String;
           break;
         default:
           break;
