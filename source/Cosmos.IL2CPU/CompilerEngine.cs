@@ -15,6 +15,8 @@ using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 using IL2CPU.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU
 {
     // http://blogs.msdn.com/b/visualstudio/archive/2010/07/06/debugging-msbuild-script-with-visual-studio.aspx
@@ -383,7 +385,7 @@ namespace Cosmos.IL2CPU
                             LogMessage("Boot Entry found: Name: " + xMethod + ", Entry Index: "
                                 + (xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "null"));
 
-                            if (xMethod.ReturnType != typeof(void))
+                            if (xMethod.ReturnType != BaseTypes.Void)
                             {
                                 throw new NotSupportedException(
                                     "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
