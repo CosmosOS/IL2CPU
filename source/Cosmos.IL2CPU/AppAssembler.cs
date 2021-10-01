@@ -131,7 +131,7 @@ namespace Cosmos.IL2CPU
             XS.Label(xMethodLabel);
 
             // Alternative asm labels for the method
-            var xAsmLabelAttributes = aMethod.MethodBase.GetCustomAttributes<AsmLabel>();
+            var xAsmLabelAttributes = aMethod.MethodBase.FetchCustomAttributes<AsmLabel>();
             foreach (var xAttribute in xAsmLabelAttributes)
             {
                 XS.Label(xAttribute.Label);
@@ -458,12 +458,12 @@ namespace Cosmos.IL2CPU
                 mLog.Flush();
                 if (aMethod.MethodAssembler != null)
                 {
-                    var xAssembler = (AssemblerMethod)Activator.CreateInstance(aMethod.MethodAssembler);
+                    var xAssembler = new ILAssemblerMethod(aMethod.MethodAssembler);
                     xAssembler.AssembleNew(Assembler, aMethod.PluggedMethod);
                 }
                 else if (aMethod.IsInlineAssembler)
                 {
-                    aMethod.MethodBase.Invoke(null, new object[aMethod.MethodBase.GetParameters().Length]);
+                    aMethod.MethodBase.ReInvoke(null, new object[aMethod.MethodBase.GetParameters().Length]);
                 }
                 else
                 {
