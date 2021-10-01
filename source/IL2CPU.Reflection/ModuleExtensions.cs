@@ -27,7 +27,8 @@ namespace IL2CPU.Reflection
             {
                 var allFields = module.GetTypes()
                     .SelectMany(t => t.GetFields(_All));
-                var metaField = allFields.FirstOrDefault(m => m.MetadataToken == metadataToken);
+                var metaField = allFields.FirstOrDefault(m => m.Module == module
+                                                              && m.MetadataToken == metadataToken);
                 if (metaField != null)
                 {
                     return metaField;
@@ -73,7 +74,8 @@ namespace IL2CPU.Reflection
                     .SelectMany(t => t.GetMethods(_All)
                         .Concat<MethodBase>(t.GetConstructors(_All))
                     );
-                var metaMethod = allMethods.FirstOrDefault(m => m.MetadataToken == metadataToken);
+                var metaMethod = allMethods.FirstOrDefault(m => m.Module == module
+                                                                && m.MetadataToken == metadataToken);
                 if (metaMethod != null)
                 {
                     return metaMethod;
@@ -231,7 +233,8 @@ namespace IL2CPU.Reflection
             if (typeHandle.Kind == HandleKind.TypeDefinition)
             {
                 var allTypes = module.GetTypes();
-                var metaType = allTypes.FirstOrDefault(m => m.MetadataToken == metadataToken);
+                var metaType = allTypes.FirstOrDefault(m => m.Module == module
+                                                            && m.MetadataToken == metadataToken);
                 if (metaType != null)
                 {
                     return metaType;
