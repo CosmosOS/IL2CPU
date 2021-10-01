@@ -159,6 +159,23 @@ namespace IL2CPU.Reflection.Tests
         }
 
         [Test]
+        public void ShouldFetchEdge()
+        {
+            var rtMember = typeof(WeirdTyping).GetMethod(nameof(WeirdTyping.DoEdgeCases));
+            var ilCode = ReadIL(rtMember);
+            Assert.AreEqual(25, ilCode.counter);
+            var loMember = TypeofExtensions.Reload<WeirdTyping>();
+
+            var methTokens = ilCode.reader.MethodTokens;
+            Assert.AreEqual(4, methTokens.Count);
+            for (var i = 0; i < methTokens.Count; i++)
+            {
+                var methToken = methTokens[i];
+                CheckResolve(rtMember, loMember, metaToken: methToken);
+            }
+        }
+
+        [Test]
         public void ShouldFetchComplex()
         {
             var rtMember = typeof(WeirdTyping).GetMethod(nameof(WeirdTyping.RenderComplex));

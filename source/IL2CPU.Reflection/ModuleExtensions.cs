@@ -140,6 +140,11 @@ namespace IL2CPU.Reflection
             {
                 method = owner.GetConstructor(flags, null, parmTypes, null);
             }
+            if (method != null && sig.Header.IsGeneric && !method.ContainsGenericParameters)
+            {
+                // No generic method found, although it was expected?!
+                method = null;
+            }
             if (method == null && sig.GenericParameterCount >= 1)
             {
                 var methods = owner.GetMethods(flags)

@@ -100,6 +100,13 @@ namespace IL2CPU.Reflection.Tests
 
         public class WeirdTyping
         {
+            public static string DoEdgeCases()
+            {
+                var array = new[] { 1, 2, 3, 4, 5 };
+                var index = Array.IndexOf(array, 3);
+                return index + " !";
+            }
+
             public static string RenderComplex()
             {
                 const int x = 119;
