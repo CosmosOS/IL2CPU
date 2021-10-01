@@ -1,4 +1,5 @@
 ﻿using System;
+using Cosmos.Core.DebugStub;
 using Cosmos.IL2CPU.ILOpCodes;
 using static IL2CPU.Reflection.TypeofExtensions;
 
@@ -45,5 +46,7 @@ namespace Cosmos.IL2CPU.Extensions
         public static Type RuntimeEngine => Reload(typeof(RuntimeEngine));
 
         public static Type VTable => Reload(typeof(VTable));
+
+        public static Type ReferenceHelper => Reload(typeof(ReferenceHelper));
     }
 }

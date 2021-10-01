@@ -392,13 +392,13 @@ namespace Cosmos.IL2CPU
                 }
                 else
                 {
-                    foreach (var xManifestName in typeof(ReferenceHelper).Assembly.GetManifestResourceNames())
+                    foreach (var xManifestName in Base.ReferenceHelper.Assembly.GetManifestResourceNames())
                     {
                         if (!xManifestName.EndsWith(".xs", StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
                         }
-                        using (var xStream = typeof(ReferenceHelper).Assembly.GetManifestResourceStream(xManifestName))
+                        using (var xStream = Base.ReferenceHelper.Assembly.GetManifestResourceStream(xManifestName))
                         {
                             using (var xReader = new StreamReader(xStream))
                             {
