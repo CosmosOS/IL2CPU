@@ -36,6 +36,20 @@ namespace IL2CPU.Reflection.Tests
             Assert.AreEqual(fullName, TypeExtensions.GetNestedName(type));
         }
 
+        [TestCase(typeof(string))]
+        [TestCase(typeof(List<string>))]
+        [TestCase(typeof(Dictionary<string, long>))]
+        [TestCase(typeof(Tuple<string, long, bool>))]
+        [TestCase(typeof(Tuple<string, long, bool, HashSet<Stack<DateTime>>>))]
+        public void ShouldReplaceLoad(Type type)
+        {
+            var fullName = type.FullName;
+            var replaced = TypeExtensions.ReplaceLoad(type);
+            Assert.AreEqual(fullName, replaced.FullName);
+            Assert.AreEqual("RuntimeModule", type.Module.GetType().Name);
+            Assert.AreEqual("EcmaModule", replaced.Module.GetType().Name);
+        }
+
         [Test]
         public void ShouldGetInterfaceMapStack()
         {
