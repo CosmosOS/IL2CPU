@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU
         {
             var typeResolver = CompilerEngine.TypeResolver;
 
-            Type xType = null;
+            Type xType;
             if (CompilerEngine.UseGen3Kernel)
             {
                 xType = typeResolver.ResolveType("Cosmos.CPU.x86.GCImplementation, Cosmos.CPU.x86", true);
