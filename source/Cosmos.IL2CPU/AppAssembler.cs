@@ -1126,7 +1126,7 @@ namespace Cosmos.IL2CPU
 
                     if (!aTo.IsWildcard)
                     {
-                        var xObjectPointerAccessAttrib = xParams[0].GetCustomAttribute<ObjectPointerAccess>(true);
+                        var xObjectPointerAccessAttrib = xParams[0].FetchCustomAttribute<ObjectPointerAccess>(true);
                         if (xObjectPointerAccessAttrib != null)
                         {
                             XS.Comment("Skipping the reference to the next object reference.");
@@ -1149,8 +1149,8 @@ namespace Cosmos.IL2CPU
                 var xOriginalParamsIdx = 0;
                 foreach (var xParam in xParams)
                 {
-                    var xFieldAccessAttrib = xParam.GetCustomAttribute<FieldAccess>(true);
-                    var xObjectPointerAccessAttrib = xParam.GetCustomAttribute<ObjectPointerAccess>(true);
+                    var xFieldAccessAttrib = xParam.FetchCustomAttribute<FieldAccess>(true);
+                    var xObjectPointerAccessAttrib = xParam.FetchCustomAttribute<ObjectPointerAccess>(true);
                     if (xFieldAccessAttrib != null)
                     {
                         // field access
