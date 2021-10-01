@@ -19,6 +19,7 @@ using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
+using Cosmos.IL2CPU.Interpret;
 using Cosmos.IL2CPU.X86.IL;
 
 using XSharp;
@@ -34,6 +35,8 @@ namespace Cosmos.IL2CPU
 {
     internal sealed class AppAssembler : IDisposable
     {
+        private static readonly ZooLoadContext loadCtx = new ZooLoadContext();
+
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
         private const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
@@ -458,12 +461,13 @@ namespace Cosmos.IL2CPU
                 mLog.Flush();
                 if (aMethod.MethodAssembler != null)
                 {
-                    var xAssembler = new ILAssemblerMethod(aMethod.MethodAssembler);
+                    var xAssembler = new ZooAssemblerMethod(loadCtx, aMethod.MethodAssembler);
                     xAssembler.AssembleNew(Assembler, aMethod.PluggedMethod);
                 }
                 else if (aMethod.IsInlineAssembler)
                 {
-                    aMethod.MethodBase.ReInvoke(null, new object[aMethod.MethodBase.GetParameters().Length]);
+                    var args = new object[aMethod.MethodBase.GetParameters().Length];
+                    ZooAssemblerMethod.DoInline(loadCtx, aMethod.MethodBase, args);
                 }
                 else
                 {
