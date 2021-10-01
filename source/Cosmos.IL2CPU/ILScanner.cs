@@ -257,9 +257,9 @@ namespace Cosmos.IL2CPU
             Queue(Base.ExceptionHelper.GetMethod("ThrowArgumentOutOfRange", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
 
             // register system types:
-            Queue(typeof(Array), null, "Explicit Entry");
-            Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
-            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(Base.Array, null, "Explicit Entry");
+            Queue(Base.Array.Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
+            Queue(Base.Array.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
@@ -322,7 +322,7 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
-            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(Base.Array.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
             Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
 
@@ -565,7 +565,7 @@ namespace Cosmos.IL2CPU
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
-                                  && (xType.BaseType != typeof(Array) || !xVirtMethod.DeclaringType.IsGenericType))
+                                  && (xType.BaseType != Base.Array || !xVirtMethod.DeclaringType.IsGenericType))
                             {
                                 var xInterfaceMap = xType.GetMyInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
@@ -718,9 +718,9 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            if (aType.BaseType == typeof(Array))
+            if (aType.BaseType == Base.Array)
             {
-                var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
+                var szArrayHelper = Base.Array.Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
                 foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
                     Queue(xMethod.MakeGenericMethod(new Type[] { aType.GetElementType() }), aType, "Virtual SzArrayHelper");
@@ -755,7 +755,7 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
-                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
+                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == Base.Array && xVirt.DeclaringType.IsGenericType))
                 {
                     if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
                     {
