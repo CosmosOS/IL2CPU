@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -104,12 +106,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
           break;
         case Code.Ldelema:
           StackPopTypes[1] = Value.MakeArrayType();
-          StackPushTypes[0] = typeof(void*);
+          StackPushTypes[0] = Base.VoidStar;
           return;
         case Code.Box:
           if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = Base.Box.MakeGenericType(Value);
           }
           else
           {
@@ -134,14 +136,14 @@ namespace Cosmos.IL2CPU.ILOpCodes
           StackPushTypes[0] = Value;
           return;
         case Code.Isinst:
-          StackPopTypes[0] = typeof(object);
-          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
+          StackPopTypes[0] = BaseTypes.Object;
+          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == Base.Nullable)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
+            StackPushTypes[0] = Base.Box.MakeGenericType(Value.GetGenericArguments()[0]);
           }
           else if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = Base.Box.MakeGenericType(Value);
           }
           else
           {
@@ -149,13 +151,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Castclass:
-          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == typeof(Nullable<>))
+          if (Value.IsGenericType && Value.GetGenericTypeDefinition() == Base.Nullable)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value.GetGenericArguments()[0]);
+            StackPushTypes[0] = Base.Box.MakeGenericType(Value.GetGenericArguments()[0]);
           }
           else if (Value.IsValueType)
           {
-            StackPushTypes[0] = typeof(Box<>).MakeGenericType(Value);
+            StackPushTypes[0] = Base.Box.MakeGenericType(Value);
           }
           else
           {
@@ -163,7 +165,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           return;
         case Code.Sizeof:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = BaseTypes.UInt32;
           return;
         default:
           break;

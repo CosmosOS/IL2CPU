@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
@@ -84,11 +85,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         case Code.Ldtoken:
           if (ValueIsField)
           {
-            StackPushTypes[0] = typeof (RuntimeFieldHandle);
+            StackPushTypes[0] = Base.RuntimeFieldHandle;
           }
           else if (ValueIsType)
           {
-            StackPushTypes[0] = typeof (RuntimeTypeHandle);
+            StackPushTypes[0] = Base.RuntimeTypeHandle;
           }
           else
           {

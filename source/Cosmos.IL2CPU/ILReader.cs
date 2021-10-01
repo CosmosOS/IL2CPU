@@ -8,6 +8,8 @@ using System.Reflection.Metadata;
 using Cosmos.IL2CPU.Extensions;
 using IL2CPU.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU
 {
     public class ILReader
@@ -216,11 +218,11 @@ namespace Cosmos.IL2CPU
                     });
                     xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 2, 3, 0, null) {
                         StackPopTypes = Array.Empty<Type>(),
-                        StackPushTypes = new[] { typeof(int) },
+                        StackPushTypes = new[] { BaseTypes.Int32 },
                     });
                     var m_handle = runtimeType.GetField("m_handle", BindingFlags.Instance | BindingFlags.NonPublic);
                     xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 3, 4, m_handle, null) {
-                        StackPopTypes = new[] {typeof(int), runtimeType},
+                        StackPopTypes = new[] {BaseTypes.Int32, runtimeType},
                         StackPushTypes = Array.Empty<Type>(),
                     });
                     var runtimeTypeHandle = Type.GetType("System.RuntimeTypeHandle");

@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using IL2CPU.Reflection;
 
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -326,8 +327,8 @@ namespace Cosmos.IL2CPU
             {
                 if (CurrentExceptionRegion.Kind != ExceptionRegionKind.Finally)
                 {
-                    aStack.Push(typeof(object));
-                    aStackOffset += ILOp.Align(ILOp.SizeOfType(typeof(object)), 4);
+                    aStack.Push(BaseTypes.Object);
+                    aStackOffset += ILOp.Align(ILOp.SizeOfType(BaseTypes.Object), 4);
                 }
             }
 
