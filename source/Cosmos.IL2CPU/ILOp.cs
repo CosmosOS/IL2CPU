@@ -168,7 +168,7 @@ namespace Cosmos.IL2CPU
                 xInfo.Field = xField;
 
                 var xFieldOffsetAttrib =
-                  xField.GetCustomAttributes<FieldOffsetAttribute>(true).FirstOrDefault();
+                  xField.FetchCustomAttributes<FieldOffsetAttribute>(true).FirstOrDefault();
                 if (xFieldOffsetAttrib != null)
                 {
                     xInfo.Offset = (uint)xFieldOffsetAttrib.Value;
@@ -310,7 +310,7 @@ namespace Cosmos.IL2CPU
                     foreach (var field in fields)
                     {
                         var fieldInfo = new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), type, field.FieldType);
-                        fieldInfo.Offset = (uint)(field.GetCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
+                        fieldInfo.Offset = (uint)(field.FetchCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
                         fieldInfo.Field = field;
 
                         fieldInfos.Add(fieldInfo);
