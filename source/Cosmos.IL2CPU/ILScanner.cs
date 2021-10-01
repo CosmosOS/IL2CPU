@@ -922,7 +922,7 @@ namespace Cosmos.IL2CPU
                     var xMethodType = _MethodInfo.TypeEnum.Normal;
                     Type xPlugAssembler = null;
                     _MethodInfo xPlugInfo = null;
-                    var xMethodInline = xMethod.GetCustomAttribute<InlineAttribute>();
+                    var xMethodInline = xMethod.FetchCustomAttribute<InlineAttribute>();
                     if (xMethodInline != null)
                     {
                         // inline assembler, shouldn't come here..
@@ -937,8 +937,8 @@ namespace Cosmos.IL2CPU
                     if (xPlug != null)
                     {
                         xMethodType = _MethodInfo.TypeEnum.NeedsPlug;
-                        xPlugAttrib = xPlug.GetCustomAttribute<PlugMethod>();
-                        var xInlineAttrib = xPlug.GetCustomAttribute<InlineAttribute>();
+                        xPlugAttrib = xPlug.FetchCustomAttribute<PlugMethod>();
+                        var xInlineAttrib = xPlug.FetchCustomAttribute<InlineAttribute>();
                         var xMethodIdPlug = mItemsList.IndexOf(xPlug);
                         if ((xMethodIdPlug == -1) && (xInlineAttrib == null))
                         {
@@ -996,7 +996,7 @@ namespace Cosmos.IL2CPU
                     }
                     else
                     {
-                        xPlugAttrib = xMethod.GetCustomAttribute<PlugMethod>();
+                        xPlugAttrib = xMethod.FetchCustomAttribute<PlugMethod>();
 
                         if (xPlugAttrib != null)
                         {
