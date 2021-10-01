@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Cosmos.IL2CPU.ILOpCodes;
 using static Cosmos.IL2CPU.ILOpCode;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.Extensions
 {

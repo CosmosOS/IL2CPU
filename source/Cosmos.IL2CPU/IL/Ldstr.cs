@@ -6,7 +6,7 @@ using System.Text;
 using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
-using Cosmos.IL2CPU.Extensions;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
