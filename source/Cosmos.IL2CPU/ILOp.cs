@@ -213,6 +213,12 @@ namespace Cosmos.IL2CPU
 
         public static List<_FieldInfo> GetFieldsInfo(Type aType, bool includeStatic)
         {
+            var loaded = aType.ReplaceLoad();
+            return GetFieldsInfoInt(loaded, includeStatic);
+        }
+
+        private static List<_FieldInfo> GetFieldsInfoInt(Type aType, bool includeStatic)
+        {
             if (aType.IsValueType)
             {
                 var fieldsInfo = GetValueTypeFieldsInfo(aType);

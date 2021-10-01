@@ -3,6 +3,7 @@ using System;
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
+using IL2CPU.Reflection;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
@@ -176,6 +177,12 @@ namespace Cosmos.IL2CPU.X86.IL
         }
 
         public static int GetFieldOffset(Type aDeclaringType, string aFieldId)
+        {
+            var loaded = aDeclaringType.ReplaceLoad();
+            return GetFieldOffsetInt(loaded, aFieldId);
+        }
+
+        private static int GetFieldOffsetInt(Type aDeclaringType, string aFieldId)
         {
             int xExtraOffset = 0;
             var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);

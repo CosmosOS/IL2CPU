@@ -93,5 +93,15 @@ namespace IL2CPU.Reflection
             }
             return fullName;
         }
+
+        public static Type ReplaceLoad(this Type type)
+        {
+            var loader = type.Module.GetLoader(shouldThrow: false);
+            if (loader == null)
+            {
+                type = TypeofExtensions.Reload(type);
+            }
+            return type;
+        }
     }
 }

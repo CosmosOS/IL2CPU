@@ -52,7 +52,10 @@ namespace Cosmos.IL2CPU.Extensions
         {
             var found = FindType(ctx, method.DeclaringType);
             var methods = found.GetMethods();
-            var real = methods.FirstOrDefault(m => m.MetadataToken == method.MetadataToken);
+            var constr = found.GetConstructors();
+            var real = methods
+                .Concat<MethodBase>(constr)
+                .FirstOrDefault(m => m.MetadataToken == method.MetadataToken);
             return real;
         }
     }
