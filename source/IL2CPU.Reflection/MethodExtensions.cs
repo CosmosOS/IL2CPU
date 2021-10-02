@@ -41,34 +41,34 @@ namespace IL2CPU.Reflection
             throw new InvalidOperationException(method + " " + type);
         }
 
-        public static string ToFullStr(this MethodBase method, bool withOwner = false)
+        public static string ToFullStr(this MethodBase method)
         {
             var builder = new StringBuilder();
-            if (method is MethodInfo method2)
+            if (method is MethodInfo normal)
             {
-                builder.Append(method2.ReturnType.FullName);
+                builder.Append(ToFullStr(normal.ReturnType));
                 builder.Append(" ");
             }
-            if (withOwner && method.DeclaringType != null)
+            if (method.DeclaringType != null)
             {
-                builder.Append(method.DeclaringType.FullName);
+                builder.Append(ToFullStr(method.DeclaringType));
                 builder.Append("::");
             }
             builder.Append(method.Name);
             builder.Append('(');
             var @params = String.Join(", ", method.GetParameters()
-                .Select(p => p.ParameterType.FullName + " " + p.Name));
+                .Select(p => ToFullStr(p.ParameterType) + " " + p.Name));
             builder.Append(@params);
             builder.Append(')');
             return builder.ToString();
         }
 
-        public static string ToFullStr(this FieldInfo field, bool withOwner = false)
+        public static string ToFullStr(this FieldInfo field)
         {
             var builder = new StringBuilder();
-            builder.Append(field.FieldType.FullName);
+            builder.Append(ToFullStr(field.FieldType));
             builder.Append(" ");
-            if (withOwner && field.DeclaringType != null)
+            if (field.DeclaringType != null)
             {
                 builder.Append(ToFullStr(field.DeclaringType));
                 builder.Append("::");
@@ -77,13 +77,10 @@ namespace IL2CPU.Reflection
             return builder.ToString();
         }
 
-        private static string ToFullStr(Type type)
+        public static string ToFullStr(this Type type)
         {
-            if (type.IsNested)
-            {
-                return ToFullStr(type.DeclaringType) + "+" + type.Name;
-            }
-            return type.FullName;
+            var fullName = type.FullName;
+            return fullName;
         }
 
         public static bool IsSame(this MethodBase first, MethodBase second)

@@ -248,11 +248,11 @@ namespace IL2CPU.Reflection.Tests
                 : throw new InvalidOperationException(loMember.ToString());
 
             if (isType)
-                Assert.AreEqual(((Type)rtResolved).FullName, ((Type)loResolved).FullName);
+                Assert.AreEqual(((Type)rtResolved).ToFullStr(), ((Type)loResolved).ToFullStr());
             else if (isMethod)
-                Assert.AreEqual(((MethodBase)rtResolved).ToFullStr(true), ((MethodBase)loResolved).ToFullStr(true));
+                Assert.AreEqual(((MethodBase)rtResolved).ToFullStr(), ((MethodBase)loResolved).ToFullStr());
             else
-                Assert.AreEqual(((FieldInfo)rtResolved).ToFullStr(true), ((FieldInfo)loResolved).ToFullStr(true));
+                Assert.AreEqual(((FieldInfo)rtResolved).ToFullStr(), ((FieldInfo)loResolved).ToFullStr());
         }
     }
 }
