@@ -37,6 +37,8 @@ namespace IL2CPU.Reflection
                 .Where(m => CompareParams(m, types))
                 .OfType<MethodInfo>()
                 .Where(m => m.ReturnType == _sig.ReturnType)
+                .Where(m => m.ContainsGenericParameters == _sig.Header.IsGeneric
+                            && m.GetGenericArguments().Length == _sig.GenericParameterCount)
                 .ToArray();
             if (maybe.Length == 1)
                 return maybe[0];

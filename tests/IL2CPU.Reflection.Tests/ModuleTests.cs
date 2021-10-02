@@ -163,15 +163,31 @@ namespace IL2CPU.Reflection.Tests
         {
             var rtMember = typeof(WeirdTyping).GetMethod(nameof(WeirdTyping.DoEdgeCases));
             var ilCode = ReadIL(rtMember);
-            Assert.AreEqual(25, ilCode.counter);
+            Assert.AreEqual(217, ilCode.counter);
             var loMember = TypeofExtensions.Reload<WeirdTyping>();
 
+            var fieldTokens = ilCode.reader.FieldTokens;
+            Assert.AreEqual(8, fieldTokens.Count);
+            for (var i = 0; i < fieldTokens.Count; i++)
+            {
+                var fieldToken = fieldTokens[i];
+                CheckResolve(rtMember.DeclaringType.GetField(nameof(WeirdTyping.Marker)), loMember, metaToken: fieldToken);
+            }
+
             var methTokens = ilCode.reader.MethodTokens;
-            Assert.AreEqual(4, methTokens.Count);
+            Assert.AreEqual(24, methTokens.Count);
             for (var i = 0; i < methTokens.Count; i++)
             {
                 var methToken = methTokens[i];
                 CheckResolve(rtMember, loMember, metaToken: methToken);
+            }
+
+            var typeTokens = ilCode.reader.TypeTokens;
+            Assert.AreEqual(4, typeTokens.Count);
+            for (var i = 0; i < typeTokens.Count; i++)
+            {
+                var typeToken = typeTokens[i];
+                CheckResolve(rtMember.DeclaringType, loMember, metaToken: typeToken);
             }
         }
 
@@ -234,9 +250,9 @@ namespace IL2CPU.Reflection.Tests
             if (isType)
                 Assert.AreEqual(((Type)rtResolved).FullName, ((Type)loResolved).FullName);
             else if (isMethod)
-                Assert.AreEqual(((MethodBase)rtResolved).ToFullStr(), ((MethodBase)loResolved).ToFullStr());
+                Assert.AreEqual(((MethodBase)rtResolved).ToFullStr(true), ((MethodBase)loResolved).ToFullStr(true));
             else
-                Assert.AreEqual(rtResolved?.ToString(), loResolved?.ToString());
+                Assert.AreEqual(((FieldInfo)rtResolved).ToFullStr(true), ((FieldInfo)loResolved).ToFullStr(true));
         }
     }
 }

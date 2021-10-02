@@ -136,7 +136,7 @@ namespace IL2CPU.Reflection
                 var multi = new MultipleReturnTypeBinder(sig, ctx);
                 method = owner.GetMethod(name, flags, multi, parmTypes, null);
             }
-            if (method == null)
+            if (method == null && IsConstructor(name))
             {
                 method = owner.GetConstructor(flags, null, parmTypes, null);
             }
@@ -166,6 +166,11 @@ namespace IL2CPU.Reflection
                 method = AsGeneric((MethodInfo)method, ctx);
             }
             return method;
+        }
+
+        private static bool IsConstructor(string name)
+        {
+            return name == ".ctor" || name == ".cctor";
         }
 
         private static MethodInfo AsGeneric(MethodInfo method, SomeGenerics ctx)

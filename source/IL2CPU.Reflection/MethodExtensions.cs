@@ -63,6 +63,29 @@ namespace IL2CPU.Reflection
             return builder.ToString();
         }
 
+        public static string ToFullStr(this FieldInfo field, bool withOwner = false)
+        {
+            var builder = new StringBuilder();
+            builder.Append(field.FieldType.FullName);
+            builder.Append(" ");
+            if (withOwner && field.DeclaringType != null)
+            {
+                builder.Append(ToFullStr(field.DeclaringType));
+                builder.Append("::");
+            }
+            builder.Append(field.Name);
+            return builder.ToString();
+        }
+
+        private static string ToFullStr(Type type)
+        {
+            if (type.IsNested)
+            {
+                return ToFullStr(type.DeclaringType) + "+" + type.Name;
+            }
+            return type.FullName;
+        }
+
         public static bool IsSame(this MethodBase first, MethodBase second)
         {
             if (first == null || second == null)

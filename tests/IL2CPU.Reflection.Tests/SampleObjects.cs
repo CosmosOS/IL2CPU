@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace IL2CPU.Reflection.Tests
@@ -100,11 +100,50 @@ namespace IL2CPU.Reflection.Tests
 
         public class WeirdTyping
         {
+            private class SuperDuper<T>
+            {
+                public T PublicField;
+
+                internal int OtherField;
+
+                public R GetSomething<R>(T arg) => default;
+
+                public T GetNothing() => default;
+
+                public void ExecuteMe<S>() where S : Enum
+                {
+                    OtherField = OtherField + 1;
+                    PublicField = (T)(object)23;
+                }
+
+                public void ExecuteMe()
+                {
+                    OtherField = OtherField + 2;
+                    PublicField = default;
+                }
+            }
+
+            public bool Marker;
+
             public static string DoEdgeCases()
             {
                 var array = new[] { 1, 2, 3, 4, 5 };
                 var index = Array.IndexOf(array, 3);
-                return index + " !";
+                var obj = new SuperDuper<UInt32>();
+                var pub = obj.PublicField + 2;
+                obj.OtherField = (int)pub;
+                var sth = obj.GetSomething<string>(3);
+                var good = obj.GetNothing() + "?";
+                obj.ExecuteMe<OpCodeType>();
+                var tmp1 = String.Empty;
+                var tmp2 = Math.PI;
+                obj.ExecuteMe();
+                IStrongBox box1 = new StrongBox<uint>();
+                var tmp3 = box1.Value + " " + ((StrongBox<uint>)box1).Value;
+                var vt1 = ValueTuple.Create('1', 2, true);
+                var tmp4 = vt1.Item1 + " " + vt1.Item2 + " " + vt1.Item3;
+                var vt2 = ValueTuple.Create(UInt32.MaxValue);
+                return index + " ! " + sth + " ? " + good + " / " + tmp1 + " " + tmp2 + " " + tmp3 + " " + tmp4 + " " + vt2.Item1;
             }
 
             public static string RenderComplex()
