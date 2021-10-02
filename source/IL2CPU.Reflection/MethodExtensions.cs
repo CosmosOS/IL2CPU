@@ -7,8 +7,8 @@ namespace IL2CPU.Reflection
 {
     public static class MethodExtensions
     {
-        private static readonly BindingFlags _all = BindingFlags.Instance | BindingFlags.Static |
-                                                    BindingFlags.NonPublic | BindingFlags.Public;
+        private static readonly BindingFlags _This = BindingFlags.Public | BindingFlags.NonPublic |
+                                                 BindingFlags.Instance;
 
         public static MethodInfo GetMyBaseDefinition(this MethodInfo method)
         {
@@ -26,9 +26,25 @@ namespace IL2CPU.Reflection
             {
                 return method;
             }
-            var maybe = type.GetMethods(_all)
-                .Where(m => m.Name == method.Name && m.GetParameters().Length == method.GetParameters().Length)
-                .ToArray();
+            var name = method.Name;
+            var para = method.GetParameters();
+            var types = para.Select(p => p.ParameterType).ToArray();
+            MethodInfo[] maybe;
+            try
+            {
+                var exact = type.GetMethod(name, _This, null, types, null);
+                maybe = exact == null ? Array.Empty<MethodInfo>() : new[] { exact };
+            }
+            catch (AmbiguousMatchException)
+            {
+                maybe = Array.Empty<MethodInfo>();
+            }
+            if (maybe.Length == 0)
+            {
+                maybe = type.GetMethods(_This)
+                    .Where(m => m.Name == method.Name && m.GetParameters().Length == method.GetParameters().Length)
+                    .ToArray();
+            }
             if (maybe.Length == 0)
             {
                 return method;
