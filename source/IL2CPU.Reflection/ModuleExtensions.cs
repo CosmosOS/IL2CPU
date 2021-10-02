@@ -116,6 +116,10 @@ namespace IL2CPU.Reflection
                 ctx.MethodParameters = methTypes.ToArray();
                 var baseToken = owner.Method.GetHashCode();
                 var baseMeth = ResolveMyMethod(module, baseToken, ctx.TypeParameters, ctx.MethodParameters);
+                if (baseMeth.IsGenericMethodDefinition && baseMeth is MethodInfo bm)
+                {
+                    baseMeth = bm.MakeGenericMethod(ctx.MethodParameters);
+                }
                 return baseMeth;
             }
             throw new InvalidOperationException(module + " " + metadataToken);
