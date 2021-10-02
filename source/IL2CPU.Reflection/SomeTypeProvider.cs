@@ -49,7 +49,7 @@ namespace IL2CPU.Reflection
                 var par = genericContext.MethodParameters[index];
                 return par;
             }
-            return null;
+            return _types.FakeGenericArg(index);
         }
 
         public Type GetGenericTypeParameter(SomeGenerics genericContext, int index)
@@ -59,7 +59,7 @@ namespace IL2CPU.Reflection
                 var par = genericContext.TypeParameters[index];
                 return par;
             }
-            return null;
+            return _types.FakeGenericArg(index);
         }
 
         public Type GetModifiedType(Type modifier, Type unmodifiedType, bool isRequired)
