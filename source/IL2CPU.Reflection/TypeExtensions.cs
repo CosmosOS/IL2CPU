@@ -76,6 +76,14 @@ namespace IL2CPU.Reflection
             return r;
         }
 
+        public static Type FakeGenericArg(this IBaseTypeSystem types, int index)
+        {
+            var fakeName = typeof(Tuple<,,,,,,>).FullName;
+            var fake = types.TypedReference.Module.GetType(fakeName);
+            var arg = fake.GetGenericArguments()[index];
+            return arg;
+        }
+
         public static string GetNestedName(this Type type)
         {
             string fullName;
