@@ -997,7 +997,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xInterface in aType.GetInterfaces())
             {
-                var xInterfaceMap = aType.GetInterfaceMap(xInterface);
+                var xInterfaceMap = aType.GetMyInterfaceMap(xInterface);
 
                 foreach (var xMethod in aMethodSet)
                 {
