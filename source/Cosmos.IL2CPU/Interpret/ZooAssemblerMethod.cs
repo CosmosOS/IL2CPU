@@ -44,7 +44,7 @@ namespace Cosmos.IL2CPU.Extensions
             var codeLoc = GetCodeLocation(type);
             var dll = ctx.LoadFromAssemblyPath(codeLoc);
             var types = dll.GetTypes();
-            var found = types.FirstOrDefault(t => t.MetadataToken == type.MetadataToken);
+            var found = types.First(t => t.MetadataToken == type.MetadataToken);
             return found;
         }
 
@@ -55,7 +55,7 @@ namespace Cosmos.IL2CPU.Extensions
             var constr = found.GetConstructors();
             var real = methods
                 .Concat<MethodBase>(constr)
-                .FirstOrDefault(m => m.MetadataToken == method.MetadataToken);
+                .First(m => m.MetadataToken == method.MetadataToken);
             return real;
         }
     }
