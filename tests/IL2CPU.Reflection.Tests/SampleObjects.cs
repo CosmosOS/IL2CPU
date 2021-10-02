@@ -125,6 +125,22 @@ namespace IL2CPU.Reflection.Tests
 
             public bool Marker;
 
+            public static IEnumerator<T> GetEnumerator<T>()
+            {
+                T[] array = new T[5];
+                int num = array.Length;
+                if (num != 0)
+                {
+                    return new List<T>.Enumerator();
+                }
+
+                var self = GetEnumerator<ulong>();
+                self.MoveNext();
+                var val = self.Current;
+                Console.WriteLine(val);
+                return (IEnumerator<T>)(object)self;
+            }
+
             public static string DoEdgeCases()
             {
                 var array = new[] { 1, 2, 3, 4, 5 };

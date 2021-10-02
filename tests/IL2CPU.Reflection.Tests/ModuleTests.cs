@@ -159,6 +159,36 @@ namespace IL2CPU.Reflection.Tests
         }
 
         [Test]
+        public void ShouldFetchGenerics()
+        {
+            var rtMember = typeof(WeirdTyping).GetMethod(nameof(WeirdTyping.GetEnumerator));
+            var ilCode = ReadIL(rtMember);
+            Assert.AreEqual(48, ilCode.counter);
+            var loMember = TypeofExtensions.Reload<WeirdTyping>();
+
+            var sys = BaseTypeSystem.BaseTypes;
+            var rtGenMeth = rtMember.GetGenericArguments();
+            var loGenMeth = rtGenMeth.Select(r => sys.FakeGenericArg(0)).ToArray();
+
+            var methTokens = ilCode.reader.MethodTokens;
+            Assert.AreEqual(4, methTokens.Count);
+            for (var i = 0; i < methTokens.Count; i++)
+            {
+                var methToken = methTokens[i];
+                CheckResolve(rtMember, loMember, metaToken: methToken);
+            }
+
+            var typeTokens = ilCode.reader.TypeTokens;
+            Assert.AreEqual(4, typeTokens.Count);
+            for (var i = 0; i < typeTokens.Count; i++)
+            {
+                var typeToken = typeTokens[i];
+                CheckResolve(rtMember.DeclaringType, loMember, metaToken: typeToken,
+                    rtMethArgs: rtGenMeth, loMethArgs: loGenMeth);
+            }
+        }
+
+        [Test]
         public void ShouldFetchEdge()
         {
             var rtMember = typeof(WeirdTyping).GetMethod(nameof(WeirdTyping.DoEdgeCases));
