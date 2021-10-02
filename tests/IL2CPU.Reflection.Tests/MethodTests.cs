@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using static IL2CPU.Reflection.Tests.SampleObjects;
@@ -86,11 +87,16 @@ namespace IL2CPU.Reflection.Tests
         [TestCase(typeof(DerivedClass), nameof(DerivedClass.Method1))]
         [TestCase(typeof(DerivedClass), nameof(DerivedClass.Method2))]
         [TestCase(typeof(DerivedClass), nameof(DerivedClass.Method3))]
-        public void ShouldGetBaseDefinition(Type rtType, string methodName)
+        [TestCase(typeof(ASCIIEncoding), nameof(ASCIIEncoding.GetByteCount), 1)]
+        public void ShouldGetBaseDefinition(Type rtType, string methodName, int? count = null)
         {
-            var rtParmMethod = rtType.GetMethods().FirstOrDefault(m => m.Name == methodName);
+            var rtParmMethod = rtType.GetMethods().FirstOrDefault(
+                m => m.Name == methodName && (count == null || m.GetParameters().Length == count)
+            );
             var rtRealMethod = rtParmMethod?.GetBaseDefinition();
-            var loParmMethod = TypeofExtensions.Reload(rtType).GetMethods().FirstOrDefault(m => m.Name == methodName);
+            var loParmMethod = TypeofExtensions.Reload(rtType).GetMethods().FirstOrDefault(
+                m => m.Name == methodName && (count == null || m.GetParameters().Length == count)
+            );
             var loRealMethod = loParmMethod?.GetMyBaseDefinition();
             var rt = rtRealMethod?.ToFullStr();
             var lo = loRealMethod?.ToFullStr();
