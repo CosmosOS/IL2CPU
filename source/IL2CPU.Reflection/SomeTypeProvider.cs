@@ -150,11 +150,11 @@ namespace IL2CPU.Reflection
             return type;
         }
 
-        public Type GetTypeFromSpecification(MetadataReader reader, SomeGenerics genericContext,
+        public Type GetTypeFromSpecification(MetadataReader reader, SomeGenerics ctx,
             TypeSpecificationHandle handle, byte rawTypeKind)
         {
             var token = MetadataTokens.GetToken(handle);
-            var type = _module.ResolveMyType(token);
+            var type = _module.ResolveMyType(token, ctx.TypeParameters, ctx.MethodParameters);
             return type;
         }
     }
