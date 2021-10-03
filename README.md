@@ -38,11 +38,11 @@ cd source/IL2CPU
 
 dotnet run ResponseFile:./example.rsp
 
-# Prepare Debian Linux/Ubuntu:
+## Prepare Debian/Ubuntu:
 
 sudo apt-get install nasm binutils mkisofs qemu-system-x86
 
-# Do the rest and boot the kernel:
+## Do the rest and boot the kernel:
 
 ./pack.sh ExampleKernel
 
