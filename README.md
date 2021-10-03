@@ -6,11 +6,11 @@ IL2CPU is a compiler for .NET IL code to compile to assembly language for direct
 
 # Steps
 
-1) Create and change to folder:
+## Create and change to folder:
 
 cd ~/Git/CosmosRepo
 
-2) Check it out:
+## Check it out:
 
 git clone https://github.com/CosmosOS/Common.git --depth=1
 
@@ -18,13 +18,13 @@ git clone https://github.com/CosmosOS/Cosmos.git --depth=1
 
 git clone https://github.com/xafero/IL2CPU.git --depth=1
 
-3) Build the compiler:
+## Build the compiler:
 
 cd IL2CPU
 
 dotnet build
 
-4) Run the tests:
+## Run the tests:
 
 cd tests/IL2CPU.Reflection.Tests
 
@@ -32,7 +32,7 @@ dotnet test
 
 cd ../..
 
-5) Run the compiler:
+## Run the compiler:
 
 cd source/IL2CPU
 
