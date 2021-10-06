@@ -350,7 +350,7 @@ namespace Cosmos.IL2CPU
             {
                 if (xOpCode is ILOpCodes.OpMethod xOpMethod)
                 {
-                    mItems.TryGetMyValue(xOpMethod.Value, out MemberInfo value, mItems.Comparer);
+                    mItems.TryGetValue(xOpMethod.Value, out MemberInfo value);
                     xOpMethod.Value = (MethodBase)(value ?? xOpMethod.Value);
                     xOpMethod.ValueUID = GetMethodUID(xOpMethod.Value);
                 }

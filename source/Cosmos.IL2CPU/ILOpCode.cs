@@ -347,7 +347,7 @@ namespace Cosmos.IL2CPU
                 {
                     StackPopTypes[pos] = popped;
                 }
-                else if(xPopItem != popped && xPopItem.IsMyAssignableTo(popped))
+                else if(xPopItem != popped && xPopItem.IsAssignableTo(popped))
                 {
                     throw new Exception($"Tried to pop a {xPopItem} from the stack but found a {popped}");
                 }
