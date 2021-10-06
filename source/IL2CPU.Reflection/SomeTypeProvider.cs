@@ -69,6 +69,8 @@ namespace IL2CPU.Reflection
             {
                 case "System.Runtime.CompilerServices.IsVolatile":
                     return unmodifiedType;
+                case "System.Runtime.InteropServices.InAttribute":
+                    return unmodifiedType;
                 default:
                     throw new NotImplementedException(mod);
             }

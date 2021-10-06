@@ -76,7 +76,8 @@ namespace Cosmos.IL2CPU
 
             if (aMethod.DeclaringType.FullName == "Internal.Runtime.CompilerServices.Unsafe")
             {
-                var xUnsafeType = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
+                var rtUnsafeType = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
+                var xUnsafeType = TypeofExtensions.Reload(rtUnsafeType);
                 var xUnsafeMethod = xUnsafeType.GetMethods()
                     .Where(
                         m => m.Name == aMethod.Name

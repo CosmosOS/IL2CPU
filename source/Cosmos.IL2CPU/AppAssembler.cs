@@ -649,7 +649,7 @@ namespace Cosmos.IL2CPU
             {
                 if (xType.IsSubclassOf(aAssemblerBaseOp))
                 {
-                    var xAttribs = xType.GetCustomAttributes<OpCodeAttribute>(false);
+                    var xAttribs = xType.FetchCustomAttributes<OpCodeAttribute>(false);
                     foreach (var xAttrib in xAttribs)
                     {
                         var xOpCode = (ushort)xAttrib.OpCode;
