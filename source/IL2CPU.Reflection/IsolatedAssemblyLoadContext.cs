@@ -70,16 +70,22 @@ namespace IL2CPU.Reflection
 
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)
         {
-            var ass = base.Resolve(context, assemblyName);
-            if (ass == null)
+            var asmbl = base.Resolve(context, assemblyName);
+            if (asmbl == null)
             {
                 var assemblyIdentity = new AssemblyIdentity(assemblyName);
                 if (_assemblies.ContainsKey(assemblyIdentity))
                 {
-                    ass = _assemblies[assemblyIdentity].Value;
+                    asmbl = _assemblies[assemblyIdentity].Value;
+                }
+                else
+                {
+                    var path = Assembly.Load(assemblyName).Location;
+                    LoadOrAddByPath(path);
+                    asmbl = _assemblies[assemblyIdentity].Value;
                 }
             }
-            return ass;
+            return asmbl;
         }
     }
 }
