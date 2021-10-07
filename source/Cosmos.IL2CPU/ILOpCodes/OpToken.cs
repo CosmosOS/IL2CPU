@@ -45,11 +45,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       Value = aValue;
       if (ValueIsField)
       {
-          ValueField = aModule.ResolveMyField(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueField = aModule.RetrieveField(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
       if (ValueIsType)
       {
-          ValueType = aModule.ResolveMyType(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueType = aModule.RetrieveType(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
 
     }

@@ -19,7 +19,7 @@ namespace IL2CPU.Reflection
         private static readonly BindingFlags _This = BindingFlags.Public | BindingFlags.NonPublic |
                                                               BindingFlags.Instance;
 
-        public static FieldInfo ResolveMyField(this Module module, int metadataToken,
+        public static FieldInfo RetrieveField(this Module module, int metadataToken,
             Type[] genTypeArgs = null, Type[] genMethArgs = null)
         {
             var fieldHandle = MetadataTokens.Handle(metadataToken);
@@ -64,7 +64,7 @@ namespace IL2CPU.Reflection
             throw new InvalidOperationException(module + " " + metadataToken);
         }
 
-        public static MethodBase ResolveMyMethod(this Module module, int metadataToken,
+        public static MethodBase RetrieveMethod(this Module module, int metadataToken,
             Type[] genTypeArgs = null, Type[] genMethArgs = null)
         {
             var methodHandle = MetadataTokens.Handle(metadataToken);
@@ -115,7 +115,7 @@ namespace IL2CPU.Reflection
                 var methTypes = owner.DecodeSignature(GetProvider(module), ctx);
                 ctx.MethodParameters = methTypes.ToArray();
                 var baseToken = owner.Method.GetHashCode();
-                var baseMeth = ResolveMyMethod(module, baseToken, ctx.TypeParameters, ctx.MethodParameters);
+                var baseMeth = RetrieveMethod(module, baseToken, ctx.TypeParameters, ctx.MethodParameters);
                 if (baseMeth.IsGenericMethodDefinition && baseMeth is MethodInfo bm)
                 {
                     baseMeth = bm.MakeGenericMethod(ctx.MethodParameters);
@@ -225,7 +225,7 @@ namespace IL2CPU.Reflection
                 if (ownerScope.Kind == HandleKind.TypeReference || ownerScope.Kind == HandleKind.TypeSpecification)
                 {
                     var scoped = MetadataTokens.GetToken(ownerScope);
-                    var parentType = ResolveMyType(module, scoped, ctx.TypeParameters, ctx.MethodParameters);
+                    var parentType = RetrieveType(module, scoped, ctx.TypeParameters, ctx.MethodParameters);
                     var nestedFqn = parentType.FullName + '+' + ownerFqn.TrimStart('.');
                     var arName = parentType.Assembly.GetName();
                     return (nestedFqn, arName, null);
@@ -240,7 +240,7 @@ namespace IL2CPU.Reflection
             throw new InvalidOperationException(entity.Kind + " ?");
         }
 
-        public static Type ResolveMyType(this Module module, int metadataToken,
+        public static Type RetrieveType(this Module module, int metadataToken,
             Type[] genTypeArgs = null, Type[] genMethArgs = null)
         {
             var typeHandle = MetadataTokens.Handle(metadataToken);
@@ -308,7 +308,7 @@ namespace IL2CPU.Reflection
             return provider;
         }
 
-        public static string ResolveMyString(this Module module, int metadataToken)
+        public static string RetrieveString(this Module module, int metadataToken)
         {
             var reader = GetReader(module, shouldThrow: false);
             var stringHandle = (UserStringHandle)MetadataTokens.Handle(metadataToken);

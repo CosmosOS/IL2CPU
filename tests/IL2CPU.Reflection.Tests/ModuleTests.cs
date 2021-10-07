@@ -69,8 +69,8 @@ namespace IL2CPU.Reflection.Tests
             Assert.AreEqual(13, ilCode.counter);
             var stringToken = ilCode.reader.StringTokens.Single();
             var loMember = TypeofExtensions.Reload(typeof(JToken));
-            var rtStr = ModuleExtensions.ResolveMyString(rtMember.Module, stringToken);
-            var loStr = ModuleExtensions.ResolveMyString(loMember.Module, stringToken);
+            var rtStr = ModuleExtensions.RetrieveString(rtMember.Module, stringToken);
+            var loStr = ModuleExtensions.RetrieveString(loMember.Module, stringToken);
             Assert.AreEqual("The parent is missing.", rtStr);
             Assert.AreEqual("The parent is missing.", loStr);
         }
@@ -272,9 +272,9 @@ namespace IL2CPU.Reflection.Tests
                 : throw new InvalidOperationException(rtMember.ToString());
 
             var loModule = loMember.Module;
-            var loResolved = isType ? loModule.ResolveMyType(token, loTypeArgs, loMethArgs)
-                : isField ? (MemberInfo)loModule.ResolveMyField(token, loTypeArgs, loMethArgs)
-                : isMethod ? loModule.ResolveMyMethod(token, loTypeArgs, loMethArgs)
+            var loResolved = isType ? loModule.RetrieveType(token, loTypeArgs, loMethArgs)
+                : isField ? (MemberInfo)loModule.RetrieveField(token, loTypeArgs, loMethArgs)
+                : isMethod ? loModule.RetrieveMethod(token, loTypeArgs, loMethArgs)
                 : throw new InvalidOperationException(loMember.ToString());
 
             if (isType)

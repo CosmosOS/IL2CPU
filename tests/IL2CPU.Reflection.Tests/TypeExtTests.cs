@@ -110,7 +110,7 @@ namespace IL2CPU.Reflection.Tests
             var loRType = TypeofExtensions.Reload<TImpl>();
             var loIType = TypeofExtensions.Reload<TIntf>();
             var rtMap = Try(() => rtRType.GetInterfaceMap(rtIType));
-            var loMap = Try(() => loRType.GetMyInterfaceMap(loIType));
+            var loMap = Try(() => loRType.FetchInterfaceMap(loIType));
             var rtRMethods = rtMap.TargetMethods?.Select(t => t.ToFullStr()).ToArray();
             var rtIMethods = rtMap.InterfaceMethods?.Select(t => t.ToFullStr()).ToArray();
             var loRMethods = loMap.TargetMethods?.Select(t => t.ToFullStr()).ToArray();

@@ -141,14 +141,14 @@ namespace IL2CPU.Reflection
         public Type GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind)
         {
             var token = MetadataTokens.GetToken(handle);
-            var type = _module.ResolveMyType(token);
+            var type = _module.RetrieveType(token);
             return type;
         }
 
         public Type GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
         {
             var token = MetadataTokens.GetToken(handle);
-            var type = _module.ResolveMyType(token);
+            var type = _module.RetrieveType(token);
             return type;
         }
 
@@ -156,7 +156,7 @@ namespace IL2CPU.Reflection
             TypeSpecificationHandle handle, byte rawTypeKind)
         {
             var token = MetadataTokens.GetToken(handle);
-            var type = _module.ResolveMyType(token, ctx.TypeParameters, ctx.MethodParameters);
+            var type = _module.RetrieveType(token, ctx.TypeParameters, ctx.MethodParameters);
             return type;
         }
     }

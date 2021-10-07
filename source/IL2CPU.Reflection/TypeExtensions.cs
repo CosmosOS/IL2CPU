@@ -12,7 +12,7 @@ namespace IL2CPU.Reflection
         private static readonly BindingFlags _all = BindingFlags.Instance |
                                                     BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static InterfaceMapping GetMyInterfaceMap(this Type target, Type interfaceType)
+        public static InterfaceMapping FetchInterfaceMap(this Type target, Type interfaceType)
         {
             if (!interfaceType.IsInterface || !target.GetInterfaces().Contains(interfaceType))
             {
@@ -30,7 +30,7 @@ namespace IL2CPU.Reflection
                     return new
                     {
                         typeToken = MetadataTokens.GetToken(i.Type),
-                        intf = mod.ResolveMyMethod(MetadataTokens.GetToken(i.MethodDeclaration), args),
+                        intf = mod.RetrieveMethod(MetadataTokens.GetToken(i.MethodDeclaration), args),
                         real = MetadataTokens.GetToken(i.MethodBody)
                     };
                 })

@@ -97,7 +97,7 @@ namespace IL2CPU.Reflection.Tests
             var loParmMethod = TypeofExtensions.Reload(rtType).GetMethods().FirstOrDefault(
                 m => m.Name == methodName && (count == null || m.GetParameters().Length == count)
             );
-            var loRealMethod = loParmMethod?.GetMyBaseDefinition();
+            var loRealMethod = loParmMethod?.FetchBaseDefinition();
             var rt = rtRealMethod?.ToFullStr();
             var lo = loRealMethod?.ToFullStr();
             Assert.AreEqual(rt, lo);

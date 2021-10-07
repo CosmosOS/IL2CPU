@@ -42,7 +42,7 @@ namespace IL2CPU.Reflection
                     {
                         if (mParm.Member is MethodInfo mMInfo)
                         {
-                            var baseMethod = mMInfo.GetMyBaseDefinition();
+                            var baseMethod = mMInfo.FetchBaseDefinition();
                             if (baseMethod != mMInfo)
                             {
                                 var baseParam = baseMethod.GetParameters()
@@ -56,7 +56,7 @@ namespace IL2CPU.Reflection
                     {
                         if (mMethod is MethodInfo mMInfo)
                         {
-                            var baseMethod = mMInfo.GetMyBaseDefinition();
+                            var baseMethod = mMInfo.FetchBaseDefinition();
                             if (baseMethod != mMInfo)
                                 items = items.Concat(FetchCustomAttributes(baseMethod, type, true)).ToArray();
                         }

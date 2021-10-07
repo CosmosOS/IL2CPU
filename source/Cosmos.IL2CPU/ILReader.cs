@@ -569,7 +569,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineField:
                         {
-                            var xValue = xModule.ResolveMyField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpField(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -578,7 +578,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineMethod:
                         {
-                            var xValue = xModule.ResolveMyMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpMethod(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -591,7 +591,7 @@ namespace Cosmos.IL2CPU
                         break;
 
                     case OperandType.InlineString:
-                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.ResolveMyString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
+                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.RetrieveString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
                         xPos = xPos + 4;
                         break;
 
@@ -620,7 +620,7 @@ namespace Cosmos.IL2CPU
                     // 32-bit metadata token.
                     case OperandType.InlineType:
                         {
-                            var xValue = xModule.ResolveMyType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpType(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;

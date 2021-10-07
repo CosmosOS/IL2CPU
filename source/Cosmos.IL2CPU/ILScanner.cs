@@ -567,7 +567,7 @@ namespace Cosmos.IL2CPU
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
                                   && (xType.BaseType != Base.Array || !xVirtMethod.DeclaringType.IsGenericType))
                             {
-                                var xInterfaceMap = xType.GetMyInterfaceMap(xVirtMethod.DeclaringType);
+                                var xInterfaceMap = xType.FetchInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
 
                                 if (xMethodIndex != -1)
@@ -759,7 +759,7 @@ namespace Cosmos.IL2CPU
                 {
                     if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
                     {
-                        var xIntfMapping = aType.GetMyInterfaceMap(xVirt.DeclaringType);
+                        var xIntfMapping = aType.FetchInterfaceMap(xVirt.DeclaringType);
                         if ((xIntfMapping.InterfaceMethods != null) && (xIntfMapping.TargetMethods != null))
                         {
                             var xIdx = Array.IndexOf(xIntfMapping.InterfaceMethods, xVirt);
@@ -839,7 +839,7 @@ namespace Cosmos.IL2CPU
 
             while (true)
             {
-                var xBaseDefinition = xBaseMethod.GetMyBaseDefinition();
+                var xBaseDefinition = xBaseMethod.FetchBaseDefinition();
 
                 if (xBaseDefinition == xBaseMethod)
                 {

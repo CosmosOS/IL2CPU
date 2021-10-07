@@ -10,13 +10,13 @@ namespace IL2CPU.Reflection
         private static readonly BindingFlags _This = BindingFlags.Public | BindingFlags.NonPublic |
                                                  BindingFlags.Instance;
 
-        public static MethodInfo GetMyBaseDefinition(this MethodInfo method)
+        public static MethodInfo FetchBaseDefinition(this MethodInfo method)
         {
             var declType = method.DeclaringType;
-            return GetMyBaseDefinition(method, declType?.BaseType);
+            return FetchBaseDefinition(method, declType?.BaseType);
         }
 
-        private static MethodInfo GetMyBaseDefinition(this MethodInfo method, Type type)
+        private static MethodInfo FetchBaseDefinition(this MethodInfo method, Type type)
         {
             if (type == null)
             {
@@ -52,7 +52,7 @@ namespace IL2CPU.Reflection
             if (maybe.Length == 1)
             {
                 var @base = maybe.Single();
-                return GetMyBaseDefinition(@base, type.BaseType);
+                return FetchBaseDefinition(@base, type.BaseType);
             }
             throw new InvalidOperationException(method + " " + type);
         }
