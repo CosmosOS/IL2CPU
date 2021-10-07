@@ -35,7 +35,7 @@ namespace Cosmos.IL2CPU
 {
     internal sealed class AppAssembler : IDisposable
     {
-        private static readonly ZooLoadContext loadCtx = new ZooLoadContext();
+        private static readonly ProxyLoadContext loadCtx = new ProxyLoadContext();
 
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
@@ -461,13 +461,13 @@ namespace Cosmos.IL2CPU
                 mLog.Flush();
                 if (aMethod.MethodAssembler != null)
                 {
-                    var xAssembler = new ZooAssemblerMethod(loadCtx, aMethod.MethodAssembler);
+                    var xAssembler = new ProxyAssemblerMethod(loadCtx, aMethod.MethodAssembler);
                     xAssembler.AssembleNew(Assembler, aMethod.PluggedMethod);
                 }
                 else if (aMethod.IsInlineAssembler)
                 {
                     var args = new object[aMethod.MethodBase.GetParameters().Length];
-                    ZooAssemblerMethod.DoInline(loadCtx, aMethod.MethodBase, args);
+                    ProxyAssemblerMethod.DoInline(loadCtx, aMethod.MethodBase, args);
                 }
                 else
                 {

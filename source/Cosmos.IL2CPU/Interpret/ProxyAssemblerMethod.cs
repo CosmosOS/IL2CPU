@@ -2,17 +2,16 @@
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Cosmos.IL2CPU.Interpret;
 using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU.Extensions
+namespace Cosmos.IL2CPU.Interpret
 {
-    internal class ZooAssemblerMethod : AssemblerMethod
+    internal class ProxyAssemblerMethod : AssemblerMethod
     {
-        private readonly ZooLoadContext _context;
+        private readonly ProxyLoadContext _context;
         private readonly object _instance;
 
-        public ZooAssemblerMethod(ZooLoadContext ctx, Type type)
+        public ProxyAssemblerMethod(ProxyLoadContext ctx, Type type)
         {
             _context = ctx;
             var found = FindType(ctx, type);
@@ -30,7 +29,7 @@ namespace Cosmos.IL2CPU.Extensions
             method.Invoke(_instance, new[] { assembler, methodInfo });
         }
 
-        public static void DoInline(ZooLoadContext ctx, MethodBase method, object[] args)
+        public static void DoInline(ProxyLoadContext ctx, MethodBase method, object[] args)
         {
             var real = FindMethod(ctx, method);
             real.Invoke(null, args);

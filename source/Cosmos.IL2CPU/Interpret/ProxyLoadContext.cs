@@ -7,11 +7,11 @@ using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.Interpret
 {
-    internal class ZooLoadContext : AssemblyLoadContext
+    internal class ProxyLoadContext : AssemblyLoadContext
     {
         private readonly IDictionary<string, Assembly> _assemblies;
 
-        public ZooLoadContext()
+        public ProxyLoadContext()
         {
             _assemblies = new SortedDictionary<string, Assembly>();
         }
