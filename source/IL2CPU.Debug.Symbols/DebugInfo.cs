@@ -76,6 +76,10 @@ namespace IL2CPU.Debug.Symbols
             mConnStr = string.Format("data source={0}", aPathname);
             // Use the SQLiteConnectionFactory as the default database connection
             // Do not open mConnection before mEntities.CreateDatabase
+            var xDir = IntPtr.Size == 4 ? "x86" : "x64";
+            Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
+            String.Join(";", Environment.GetEnvironmentVariable("PATH"),
+                    Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes\\win-{xDir}\\native")));
             SQLitePCL.Batteries.Init();
             mConnection = new SqliteConnection(mConnStr);
 
