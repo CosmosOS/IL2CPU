@@ -67,7 +67,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 XS.Add(ESP, xDeclaringTypeStackSize);
 
-                if ((xFieldInfo.Size < 4 && IsIntegralType(xFieldType))
+                if ((xFieldInfo.Size < 4 && IsIntegerBasedType(xFieldType))
                     || xFieldType == typeof(bool)
                     || xFieldType == typeof(char))
                 {

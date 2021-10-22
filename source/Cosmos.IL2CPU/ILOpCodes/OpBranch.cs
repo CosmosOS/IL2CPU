@@ -71,20 +71,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInitStackAnalysis(MethodBase aMethod)
-    {
-      base.DoInitStackAnalysis(aMethod);
 
-      switch (OpCode)
-      {
-        default:
-          break;
-      }
-    }
-
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
+    public override void DoInterpretStackTypes()
     {
-      base.DoInterpretStackTypes(ref aSituationChanged);
       // this method is supposed to deduct push types from pop types. Branch ops don't push, but we want to do checks here,
       // to help verify other code is right
       switch (OpCode)
@@ -97,7 +86,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (ILOp.IsIntegralType(xPopType))
+          if (ILOp.IsIntegerBasedType(xPopType) || ILOp.IsLongBasedType(xPopType))
           {
             return;
           }
@@ -131,49 +120,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Bgt_Un:
           var xValue1 = StackPopTypes[0];
           var xValue2 = StackPopTypes[1];
-          if (xValue1 == null || xValue2 == null)
-          {
-            return;
-          }
-          if (ILOp.IsIntegralTypeOrPointer(xValue1) && ILOp.IsIntegralTypeOrPointer(xValue2))
-          {
-            return;
-          }
-          if (xValue1 == typeof(float) && xValue2 == typeof(float))
-          {
-            return;
-          }
-          if (xValue1 == typeof(double) && xValue2 == typeof(double))
-          {
-            return;
-          }
-          if (xValue1 == typeof(IntPtr) && xValue2 == typeof(IntPtr))
-          {
-            return;
-          }
-          if (xValue1 == typeof(bool) && xValue2 == typeof(bool))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(int) && xValue2 == typeof(IntPtr))
-              || (xValue1 == typeof(IntPtr) && xValue2 == typeof(int)))
-          {
-            return;
-          }
-          if ((xValue1 == typeof(UIntPtr) && xValue2 == typeof(byte*))
-              || (xValue1 == typeof(byte*) && xValue2 == typeof(UIntPtr)))
-          {
-            return;
-          }
 
-          if ((xValue1 == typeof(long) && xValue2 == typeof(ulong))
-              || (xValue1 == typeof(ulong) && xValue2 == typeof(long)))
-          {
-            return;
-          }
-
-          if ((xValue1 == typeof(int) && xValue2 == typeof(bool))
-              || (xValue1 == typeof(bool) && xValue2 == typeof(int)))
+          if (ILOp.IsSameValueType(xValue1, xValue2))
           {
             return;
           }
@@ -190,7 +138,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
       }
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
+    public override List<(bool newGroup, int Position)> GetNextOpCodePositions()
     {
       switch (OpCode)
       {
@@ -207,15 +155,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Beq:
         case Code.Bne_Un:
         case Code.Leave:
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          base.DoInterpretNextInstructionStackTypesIfNotYetProcessed(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          break;
+          return new List<(bool newGroup, int Position)> { (true, Value), (true, NextPosition) }; // technically we dont need to have the second as true but this means we get the same blocks as in ilspy
         case Code.Br: //An unconditional branch will never not branch, so we dont interpret stack if we didnt branch (as done for other branches)
                       // Otherwise, this can lead to bugs, as the opcode after an unconditional branch is reached via a jump with a different stack, than the one
                       // in the block ending with the unconditional branch before.
                       // Can be reproduced by trying to compile this code: `char c2 = (c <= 'Z' && c >= 'A') ? ((char)(c - 65 + 97)) : c;`
-          InterpretInstructionIfNotYetProcessed(Value, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
-          break;
+          return new List<(bool newGroup, int Position)> { (true, Value) };
         default:
           throw new NotImplementedException("OpCode " + OpCode);
       }

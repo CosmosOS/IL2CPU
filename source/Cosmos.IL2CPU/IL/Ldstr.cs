@@ -30,11 +30,11 @@ namespace Cosmos.IL2CPU.X86.IL
             // We also need to change the debugstub to fix this then.
             #region Debug verification
             var xFields = GetFieldsInfo(typeof(string), false).Where(i => !i.IsStatic).ToArray();
-            if (xFields[0].Id != "System.Int32 System.String.m_stringLength" || xFields[0].Offset != 0)
+            if (xFields[0].Id != "System.Int32 System.String._stringLength" || xFields[0].Offset != 0)
             {
                 throw new Exception("Fields changed!");
             }
-            if (xFields[1].Id != "System.Char System.String.m_firstChar" || xFields[1].Offset != 4)
+            if (xFields[1].Id != "System.Char System.String._firstChar" || xFields[1].Offset != 4)
             {
                 throw new Exception("Fields changed!");
             }

@@ -26,6 +26,7 @@ using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
+using Cosmos.IL2CPU.MethodAnalysis;
 
 namespace Cosmos.IL2CPU
 {
@@ -39,36 +40,23 @@ namespace Cosmos.IL2CPU
         private ILOp[] mILOpsHi = new ILOp[256];
         public bool ShouldOptimize = false;
         public DebugInfo DebugInfo { get; set; }
-        private string mLogDir;
         private TextWriter mLog;
         private Dictionary<string, ModuleDefinition> mLoadedModules = new Dictionary<string, ModuleDefinition>();
-        private DebugInfo.SequencePoint[] mSequences = Array.Empty<DebugInfo.SequencePoint>();
         public TraceAssemblies TraceAssemblies;
         public bool DebugEnabled = false;
         public bool StackCorruptionDetection = false;
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel;
         public DebugMode DebugMode;
         public bool IgnoreDebugStubAttribute;
-        private static HashSet<string> mDebugLines = new HashSet<string>();
         private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         public readonly CosmosAssembler Assembler;
-        //
-        private string mCurrentMethodLabel;
-        private long mCurrentMethodLabelEndGuid;
-        private long mCurrentMethodGuid;
 
-        public AppAssembler(int aComPort, string assemblerLogFile)
+        public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog)
         {
-            Assembler = CreateAssembler(aComPort);
-            mLogDir = Path.GetDirectoryName(assemblerLogFile);
-            mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
+            Assembler = aAssembler;
+            mLog = aLog;
             InitILOps();
-        }
-
-        private CosmosAssembler CreateAssembler(int aComPort)
-        {
-            return new CosmosAssembler(aComPort);
         }
 
         public void Dispose()
@@ -88,47 +76,45 @@ namespace Cosmos.IL2CPU
             XS.Comment("Type: " + aMethod.MethodBase.DeclaringType);
             XS.Comment("Name: " + aMethod.MethodBase.Name);
             XS.Comment("Plugged: " + (aMethod.PlugMethod == null ? "No" : "Yes"));
-            // for now:
-            var shouldIncludeArgAndLocalsComment = true;
-            if (shouldIncludeArgAndLocalsComment)
+
+            #region Document locals, arguments and return value
+            if (aMethod.MethodAssembler == null && !aMethod.IsInlineAssembler)
             {
-                if (aMethod.MethodAssembler == null && !aMethod.IsInlineAssembler)
+                // the body of aMethod is getting emitted
+                var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
+                for (int i = 0; i < xLocals.Count; i++)
                 {
-                    // the body of aMethod is getting emitted
-                    var xLocals = aMethod.MethodBase.GetLocalVariables();
-                    for (int i = 0; i < xLocals.Count; i++)
-                    {
-                        XS.Comment(String.Format("Local {0} at EBP-{1}", i, ILOp.GetEBPOffsetForLocal(aMethod, i)));
-                    }
+                    XS.Comment(String.Format("Local {0} at EBP-{1}", i, ILOp.GetEBPOffsetForLocal(aMethod, i)));
+                }
 
-                    var xIdxOffset = 0u;
-                    if (!aMethod.MethodBase.IsStatic)
-                    {
-                        XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
-                        xIdxOffset++;
-                    }
+                var xIdxOffset = 0u;
+                if (!aMethod.MethodBase.IsStatic)
+                {
+                    XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
+                    xIdxOffset++;
+                }
 
-                    string x = aMethod.MethodBase.Name;
-                    string y = aMethod.MethodBase.DeclaringType.Name;
-                    var xParams = aMethod.MethodBase.GetParameters();
-                    var xParamCount = (ushort)xParams.Length;
+                string x = aMethod.MethodBase.Name;
+                string y = aMethod.MethodBase.DeclaringType.Name;
+                var xParams = aMethod.MethodBase.GetParameters();
+                var xParamCount = (ushort)xParams.Length;
 
-                    for (ushort i = 0; i < xParamCount; i++)
-                    {
-                        var xOffset = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
-                        var xSize = ILOp.SizeOfType(xParams[i].ParameterType);
-                        // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
-                        XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, (xIdxOffset + i)));
-                    }
+                for (ushort i = 0; i < xParamCount; i++)
+                {
+                    var xOffset = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
+                    var xSize = ILOp.SizeOfType(xParams[i].ParameterType);
+                    // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
+                    XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, (xIdxOffset + i)));
+                }
 
-                    var xMethodInfo = aMethod.MethodBase as MethodInfo;
-                    if (xMethodInfo != null)
-                    {
-                        var xSize = ILOp.Align(ILOp.SizeOfType(xMethodInfo.ReturnType), 4);
-                        XS.Comment(String.Format("Return size: {0}", xSize));
-                    }
+                var xMethodInfo = aMethod.MethodBase as MethodInfo;
+                if (xMethodInfo != null)
+                {
+                    var xSize = ILOp.Align(ILOp.SizeOfType(xMethodInfo.ReturnType), 4);
+                    XS.Comment(String.Format("Return size: {0}", xSize));
                 }
             }
+            #endregion
 
             // Issue label that is used for calls etc.
             string xMethodLabel;
@@ -153,15 +139,14 @@ namespace Cosmos.IL2CPU
 
             // We could use same GUID as MethodLabelStart, but its better to keep GUIDs unique globaly for items
             // so during debugging they can never be confused as to what they point to.
-            mCurrentMethodGuid = DebugInfo.CreateId();
+            aMethod.DebugMethodUID = DebugInfo.CreateId;
 
             // We issue a second label for GUID. This is increases label count, but for now we need a master label first.
             // We issue a GUID label to reduce amount of work and time needed to construct debugging DB.
-            var xLabelGuid = DebugInfo.CreateId();
-            new Label("GUID_" + xLabelGuid.ToString());
+            aMethod.DebugMethodLabelUID = DebugInfo.CreateId;
+            XS.Label("GUID_" + aMethod.DebugMethodLabelUID.ToString());
 
-            mCurrentMethodLabel = "METHOD_" + xLabelGuid.ToString();
-            Label.LastFullLabel = mCurrentMethodLabel;
+            Label.LastFullLabel = "METHOD_" + aMethod.DebugMethodLabelUID.ToString();
 
             if (DebugEnabled && StackCorruptionDetection)
             {
@@ -173,6 +158,7 @@ namespace Cosmos.IL2CPU
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".StackOverflowCheck_GetAddress");
                 XS.Label(".StackOverflowCheck_GetAddress");
+                XS.Exchange(BX, BX);
                 XS.Pop(EAX);
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackOverflowEvent]);
@@ -180,7 +166,7 @@ namespace Cosmos.IL2CPU
                 XS.Label(".StackOverflowCheck_End");
             }
 
-            mCurrentMethodLabelEndGuid = DebugInfo.CreateId();
+            aMethod.EndMethodID = DebugInfo.CreateId;
 
             if (aMethod.MethodBase.IsStatic && aMethod.MethodBase is ConstructorInfo)
             {
@@ -200,40 +186,9 @@ namespace Cosmos.IL2CPU
             XS.Push(EBP);
             XS.Set(EBP, ESP);
 
-            if (DebugMode == DebugMode.Source)
-            {
-                // Would be nice to use xMethodSymbols.GetSourceStartEnd but we cant
-                // because its not implemented by the unmanaged code underneath.
-                //
-                // This doesnt seem right to store as a field, but old code had it that way so we
-                // continue using a field for now.
-                mSequences = DebugInfo.GetSequencePoints(aMethod.MethodBase, true);
-                if (mSequences.Length > 0)
-                {
-                    DebugInfo.AddDocument(mSequences[0].Document);
-
-                    var xMethod = new Method();
-                    xMethod.ID = mCurrentMethodGuid;
-                    xMethod.TypeToken = aMethod.MethodBase.DeclaringType.GetMetadataToken();
-                    xMethod.MethodToken = aMethod.MethodBase.MetadataToken;
-                    xMethod.LabelStartID = xLabelGuid;
-                    xMethod.LabelEndID = mCurrentMethodLabelEndGuid;
-                    xMethod.LabelCall = xMethodLabel;
-                    if (DebugInfo.AssemblyGUIDs.TryGetValue(aMethod.MethodBase.DeclaringType.Assembly, out var xAssemblyFileID))
-                    {
-                        xMethod.AssemblyFileID = xAssemblyFileID;
-                    }
-                    xMethod.DocumentID = DebugInfo.DocumentGUIDs[mSequences[0].Document.ToLower()];
-                    xMethod.LineColStart = ((long)mSequences[0].LineStart << 32) + mSequences[0].ColStart;
-                    xMethod.LineColEnd = ((long)(mSequences[mSequences.Length - 1].LineEnd) << 32) + mSequences[mSequences.Length - 1].ColEnd;
-                    DebugInfo.AddMethod(xMethod);
-                }
-            }
-
             if (aMethod.MethodAssembler == null && aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
             {
                 // the body of aMethod is getting emitted
-                var xLocalsOffset = mLocals_Arguments_Infos.Count;
                 aMethod.LocalVariablesSize = 0;
                 var xLocals = aMethod.MethodBase.GetLocalVariables();
                 for (int i = 0; i < xLocals.Count; i++)
@@ -252,7 +207,7 @@ namespace Cosmos.IL2CPU
 
                         var xSize = ILOp.Align(ILOp.SizeOfType(xLocals[i].LocalType), 4);
                         XS.Comment(String.Format("Local {0}, Size {1}", i, xSize));
-                        for (int j = 0; j < xSize / 4; j++)
+                        for (int j = 0; j < xSize / 4; j++) //TODO: Can this be done shorter?
                         {
                             XS.Push(0);
                         }
@@ -298,6 +253,40 @@ namespace Cosmos.IL2CPU
             }
         }
 
+        public DebugInfo.SequencePoint[] GenerateDebugSequencePoints(_MethodInfo aMethod, DebugMode aDebugMode)
+        {
+            if (aDebugMode == DebugMode.Source)
+            {
+                // Would be nice to use xMethodSymbols.GetSourceStartEnd but we cant
+                // because its not implemented by the unmanaged code underneath.
+                DebugInfo.SequencePoint[] mSequences = DebugInfo.GetSequencePoints(aMethod.MethodBase, true);
+                if (mSequences.Length > 0)
+                {
+                    DebugInfo.AddDocument(mSequences[0].Document);
+
+                    var xMethod = new Method
+                    {
+                        ID = aMethod.DebugMethodUID,
+                        TypeToken = aMethod.MethodBase.DeclaringType.GetMetadataToken(),
+                        MethodToken = aMethod.MethodBase.MetadataToken,
+                        LabelStartID = aMethod.DebugMethodLabelUID,
+                        LabelEndID = aMethod.EndMethodID,
+                        LabelCall = aMethod.MethodLabel
+                    };
+                    if (DebugInfo.AssemblyGUIDs.TryGetValue(aMethod.MethodBase.DeclaringType.Assembly, out var xAssemblyFileID))
+                    {
+                        xMethod.AssemblyFileID = xAssemblyFileID;
+                    }
+                    xMethod.DocumentID = DebugInfo.DocumentGUIDs[mSequences[0].Document.ToLower()];
+                    xMethod.LineColStart = ((long)mSequences[0].LineStart << 32) + mSequences[0].ColStart;
+                    xMethod.LineColEnd = ((long)(mSequences[mSequences.Length - 1].LineEnd) << 32) + mSequences[mSequences.Length - 1].ColEnd;
+                    DebugInfo.AddMethod(xMethod);
+                }
+                return mSequences;
+            }
+            return new DebugInfo.SequencePoint[0];
+        }
+
         private void MethodEnd(_MethodInfo aMethod)
         {
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
@@ -308,13 +297,11 @@ namespace Cosmos.IL2CPU
             {
                 xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
             }
+
             var xMethodLabel = ILOp.GetLabel(aMethod);
-            //if (aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
-            {
-                XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
-                XS.Comment("Following code is for debugging. Adjust accordingly!");
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
-            }
+            XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
+            XS.Comment("Following code is for debugging. Adjust accordingly!");
+            XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
 
             XS.Set(ECX, 0);
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
@@ -364,6 +351,7 @@ namespace Cosmos.IL2CPU
                 }
                 // extra stack space is the space reserved for example when a "public static int TestMethod();" method is called, 4 bytes is pushed, to make room for result;
             }
+            // Handle exception code here
             var xLabelExc = xMethodLabel + EndOfMethodLabelNameException;
             XS.Label(xLabelExc);
             if (aMethod.MethodAssembler == null && aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
@@ -398,6 +386,7 @@ namespace Cosmos.IL2CPU
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".MethodFooterStackCorruptionCheck_Break_on_location");
                 XS.Label(xLabelExc + ".MethodFooterStackCorruptionCheck_Break_on_location");
+                XS.Exchange(BX, BX);
                 XS.Pop(ECX);
                 XS.Push(EAX);
                 XS.Push(EBX);
@@ -416,11 +405,10 @@ namespace Cosmos.IL2CPU
             {
                 xRetSize = 0;
             }
-            WriteDebug(aMethod.MethodBase, (uint)xRetSize, X86.IL.Call.GetStackSizeToReservate(aMethod.MethodBase));
-            new Return { DestinationValue = (uint)xRetSize };
+            XS.Return((uint)xRetSize);
 
             // Final, after all code. Points to op AFTER method.
-            new Label("GUID_" + mCurrentMethodLabelEndGuid.ToString());
+            XS.Label("GUID_" + aMethod.EndMethodID.ToString());
         }
 
         public void FinalizeDebugInfo()
@@ -477,66 +465,8 @@ namespace Cosmos.IL2CPU
                 }
                 else
                 {
-                    // now emit the actual assembler code for this method.
-
-                    //Conditions under which we should emit an INT3 instead of a plceholder NOP:
-                    /* - First instruction in a Method / Loop / If / Else etc.
-                 *   -- In essence, whenever there is a opening {
-                 *   -- C# Debug builds automatically insert NOPs at these locations (otherwise NOP is not used)
-                 *   -- So only insert an INT3 when we are about to insert a NOP that came from IL code
-                 */
-
-                    /* We group opcodes together by logical statement. Each statement will have its logical stack cleared.
-                 * Also, this lets us do optimizations later on.
-                 */
-                    bool emitINT3 = true;
-                    DebugInfo.SequencePoint xPreviousSequencePoint = null;
-                    var xCurrentGroup = new List<ILOpCode>();
-                    var branchTargetsToCheck = new List<(int position, Stack<Type> stack)>();
-                    CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
-                    foreach (var xRawOpcode in aOpCodes)
-                    {
-                        var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
-                        // detect if we're at a new statement.
-                        if (xSP != null && xCurrentGroup.Count > 0)
-                        {
-                            InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
-                            xCurrentGroup.Clear();
-                            xPreviousSequencePoint = xSP;
-                        }
-                        xCurrentGroup.Add(xRawOpcode);
-                    }
-                    if (xCurrentGroup.Count > 0)
-                    {
-                        InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, false);
-                    }
-                    xCurrentGroup.Clear();
-
-                    while (branchTargetsToCheck.Count > 0)
-                    {
-                        int checking = branchTargetsToCheck[0].position;
-                        CompilerHelpers.Debug($"AppAssembler: Checking branch target: {checking}");
-
-                        foreach (var xRawOpcode in aOpCodes.Where(aOC => aOC.Position >= checking))
-                        {
-                            var xSP = mSequences.FirstOrDefault(q => q.Offset == xRawOpcode.Position && q.LineStart != 0xFEEFEE);
-                            xCurrentGroup.Add(xRawOpcode);
-                            // detect if we're at a new statement.
-                            if (xSP != null && xCurrentGroup.Count > 0)
-                            {
-                                break;
-                            }
-                        }
-                        if (xCurrentGroup.Count != 0) // Its zero when this is testing the instruction following the last instruction, which doesnt exist
-                        {
-                            InterpretInstructionsToDetermineStackTypes(xCurrentGroup, branchTargetsToCheck, true, branchTargetsToCheck[0].stack);
-                            xCurrentGroup.Clear();
-                        }
-                        else
-                        {
-                            branchTargetsToCheck.RemoveAll(t => t.position == checking);
-                        }
-                    }
+                    var emitINT3 = true;
+                    AnalyseMethodOpCodes(aMethod, aOpCodes);
 
                     EmitInstructions(aMethod, aOpCodes, ref emitINT3);
                 }
@@ -546,6 +476,22 @@ namespace Cosmos.IL2CPU
             {
                 throw new Exception("Error compiling method '" + aMethod.MethodBase.GetFullName() + "': " + E.ToString(), E);
             }
+        }
+
+        public void AnalyseMethodOpCodes(_MethodInfo aMethod, List<ILOpCode> aOpCodes)
+        {
+            var mSequences = GenerateDebugSequencePoints(aMethod, DebugMode); // TODO: Maybe control the DebugeMode to reduce methods debug symbols are generated for
+                                                                              // now emit the actual assembler code for this method.
+
+            //Conditions under which we should emit an INT3 instead of a plceholder NOP:
+            /* - First instruction in a Method / Loop / If / Else etc.
+             *   -- In essence, whenever there is a opening {
+             *   -- C# Debug builds automatically insert NOPs at these locations (otherwise NOP is not used)
+             *   -- So only insert an INT3 when we are about to insert a NOP that came from IL code
+             */
+            CompilerHelpers.Debug($"AppAssembler: Method: {aMethod.MethodBase.GetFullName()}");
+            var method = new ILMethod(aOpCodes, mSequences);
+            method.Analyse();
         }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -560,16 +506,6 @@ namespace Cosmos.IL2CPU
 #pragma warning restore CA1822 // Mark members as static
         {
             // do optimizations
-
-            //if (Assembler.Stack.Count > 0)
-            //{
-            //    if (mDebugStackErrors)
-            //    {
-            //        Console.WriteLine("StackCorruption in Analytical stack:");
-            //        Console.WriteLine("- Method: {0}", aMethod.MethodBase.GetFullName());
-            //        Console.WriteLine("- Last ILOpCode offset: {0}", aCurrentGroup.Last().Position.ToString("X"));
-            //    }
-            //}
         }
 
         //private static bool mDebugStackErrors = true;
@@ -577,6 +513,7 @@ namespace Cosmos.IL2CPU
         private void EmitInstructions(_MethodInfo aMethod, List<ILOpCode> aCurrentGroup, ref bool emitINT3)
         {
             BeforeEmitInstructions(aMethod, aCurrentGroup);
+
             var xFirstInstruction = true;
             foreach (var xOpCode in aCurrentGroup)
             {
@@ -592,8 +529,17 @@ namespace Cosmos.IL2CPU
                 }
                 mLog.Flush();
 
+                int? xLocalsSize = null;
+                //calculate local size once
+                if (aMethod.MethodBase != null)
+                {
+                    var xLocals = aMethod.MethodBase.GetLocalVariables();
+                    xLocalsSize = (from item in xLocals
+                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
+                }
+
                 //Only emit INT3 as per conditions above...
-                BeforeOp(aMethod, xOpCode, emitINT3, out var INT3Emitted, xFirstInstruction);
+                BeforeOp(aMethod, xOpCode, emitINT3, out var INT3Emitted, xFirstInstruction, xLocalsSize);
                 xFirstInstruction = false;
                 //Emit INT3 on the first non-NOP instruction immediately after a NOP
                 // - This is because TracePoints for NOP are automatically ignored in code called below this
@@ -667,23 +613,10 @@ namespace Cosmos.IL2CPU
                 #endregion
 
                 var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
-                    (
-                        (
-                            (
-                                xCurrentExceptionRegion.HandlerOffset > 0
-                                && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position
-                            )
-                            ||
-                            (
-                                xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter)
-                                && xCurrentExceptionRegion.FilterOffset > 0
-                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position
-                            )
-                        )
-                        &&
-                        xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch
-                     );
-
+                    (((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
+                            || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
+                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
+                        && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch);
                 if (xNeedsExceptionPush)
                 {
                     Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
@@ -697,116 +630,6 @@ namespace Cosmos.IL2CPU
                 //mLog.WriteLine( " end: " + Stack.Count.ToString() );
             }
             AfterEmitInstructions(aMethod, aCurrentGroup);
-        }
-
-        /// <summary>
-        /// This method takes care of "interpreting" the instructions per group (statement). This is necessary to
-        /// reliably able to tell what sizes are involved in certain actions.
-        /// </summary>
-        /// <param name="aCurrentGroup"></param>
-        private static void InterpretInstructionsToDetermineStackTypes(List<ILOpCode> aCurrentGroup, List<(int position, Stack<Type> stack)> branchTargetsToCheck,
-            bool continueChecking, Stack<Type> previousStack = null)
-        {
-            var xNeedsInterpreting = true;
-            // see if we need to interpret the instructions at all.
-            foreach (var xOp in aCurrentGroup)
-            {
-                foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                {
-                    if (xStackEntry == null)
-                    {
-                        xNeedsInterpreting = true;
-                        break;
-                    }
-                }
-                if (xNeedsInterpreting)
-                {
-                    break;
-                }
-            }
-            var xIteration = 0;
-            var xGroupILByILOffset = aCurrentGroup.ToDictionary(i => i.Position);
-            while (xNeedsInterpreting)
-            {
-                ILOpCode.ILInterpretationDebugLine(() => String.Format("--------- New Interpretation iteration (xIteration = {0})", xIteration));
-                xIteration++;
-                if (xIteration > 20)
-                {
-                    // Situation not resolved. Now give error with first offset needing types:
-                    foreach (var xOp in aCurrentGroup)
-                    {
-                        if (xOp.Processed)
-                        {
-                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                            {
-                                if (xStackEntry == null)
-                                {
-                                    throw new Exception($"Safety exception. Handled {xIteration} iterations. Instruction needing info: {xOp}");
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!continueChecking)
-                {
-                    aCurrentGroup.ForEach(i => i.Processed = false);
-                }
-
-                var xMaxInterpreterRecursionDepth = 25000;
-                var xCurStack = previousStack ?? new Stack<Type>();
-                var xSituationChanged = false;
-                aCurrentGroup.First().InterpretStackTypes(xGroupILByILOffset, xCurStack, ref xSituationChanged, xMaxInterpreterRecursionDepth, branchTargetsToCheck);
-                if (!xSituationChanged)
-                {
-                    // nothing changed, now give error with first offset needing types:
-                    foreach (var xOp in aCurrentGroup)
-                    {
-                        if (xOp.Processed)
-                        {
-                            foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                            {
-                                if (xStackEntry == null)
-                                {
-                                    throw new Exception("After interpreting stack types, nothing changed! (First instruction needing types = " + xOp + ")");
-                                }
-                            }
-                        }
-                    }
-                }
-                xNeedsInterpreting = false;
-                foreach (var xOp in aCurrentGroup)
-                {
-                    if (xOp.Processed)
-                    {
-                        foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                        {
-                            if (xStackEntry == null)
-                            {
-                                xNeedsInterpreting = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (xNeedsInterpreting)
-                    {
-                        break;
-                    }
-                }
-            }
-            // We might return later to this group if a jump goes here
-            foreach (var xOp in aCurrentGroup)
-            {
-                if (xOp.Processed)
-                {
-                    foreach (var xStackEntry in xOp.StackPopTypes.Concat(xOp.StackPushTypes))
-                    {
-                        if (xStackEntry == null)
-                        {
-                            throw new Exception(String.Format("Instruction '{0}' has not been fully analysed yet!", xOp));
-                        }
-                    }
-                }
-            }
         }
 
         private void InitILOps()
@@ -839,11 +662,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private static void Move(string aDestLabelName, int aValue)
-        {
-            XS.Set(aDestLabelName, (uint)aValue, destinationIsIndirect: true, size: RegisterSize.Int32);
-        }
-
         private static void Push(uint aValue)
         {
             XS.Push(aValue);
@@ -857,11 +675,6 @@ namespace Cosmos.IL2CPU
         private static void Call(MethodBase aMethod)
         {
             XS.Call(LabelName.Get(aMethod));
-        }
-
-        private static void Jump(string aLabelName)
-        {
-            XS.Jump(aLabelName);
         }
 
         private static _FieldInfo ResolveField(_MethodInfo method, string fieldId, bool aOnlyInstance)
@@ -931,13 +744,12 @@ namespace Cosmos.IL2CPU
 
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
 
-        public void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
+        public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Label(InitVMTCodeLabel);
             XS.Push(EBP);
             XS.Set(EBP, ESP);
-            mSequences = Array.Empty<DebugInfo.SequencePoint>();
 
             var xTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xTheName = LabelName.GetStaticFieldName(xTypesFieldRef);
@@ -1010,12 +822,15 @@ namespace Cosmos.IL2CPU
 
                 // Type ID
                 string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
-                Move(xDataName, (int)xTypeID);
+                XS.Set(xDataName, (uint)xTypeID, destinationIsIndirect: true, size: RegisterSize.Int32);
                 XS.DataMember(xDataName, xTypeID);
                 Push(xTypeID);
 
                 // Base Type ID
                 Push((uint)xBaseIndex.Value);
+
+                // Size
+                Push(ILOp.SizeOfType(xType));
 
                 // Interface Count
                 var xInterfaces = xType.GetInterfaces();
@@ -1375,11 +1190,6 @@ namespace Cosmos.IL2CPU
             MethodEnd(aFrom);
         }
 
-        private static void WriteDebug(MethodBase aMethod, uint aSize, uint aSize2)
-        {
-            var xLine = String.Format("{0}\t{1}\t{2}", LabelName.GetFullName(aMethod), aSize, aSize2);
-        }
-
         // These are all temp functions until we move to the new assembler.
         // They are used to clean up the old assembler slightly while retaining compatibiltiy for now
         public static string TmpPosLabel(_MethodInfo aMethod, int aOffset)
@@ -1445,7 +1255,7 @@ namespace Cosmos.IL2CPU
             Assembler.WriteDebugVideo("Now create the kernel class");
             if (!CompilerEngine.UseGen3Kernel)
             {
-                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint);
+                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint, DebugEnabled);
                 Assembler.WriteDebugVideo("Kernel class created");
             }
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";
@@ -1478,7 +1288,7 @@ namespace Cosmos.IL2CPU
         {
         }
 
-        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint)
+        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint, int? xLocalsSize)
         {
             if (DebugMode == DebugMode.Source)
             {
@@ -1503,14 +1313,11 @@ namespace Cosmos.IL2CPU
                 xMLSymbol.StackDiff = -1;
                 if (aMethod.MethodBase != null)
                 {
-                    var xLocals = aMethod.MethodBase.GetLocalVariables();
-                    var xLocalsSize = (from item in xLocals
-                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
                     xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
                     xStackDifference = (uint?)xMLSymbol.StackDiff;
                 }
                 xMLSymbol.IlOffset = aOpCode.Position;
-                xMLSymbol.MethodID = mCurrentMethodGuid;
+                xMLSymbol.MethodID = aMethod.DebugMethodUID;
 
                 mSymbols.Add(xMLSymbol);
                 DebugInfo.AddSymbols(mSymbols);
@@ -1525,7 +1332,7 @@ namespace Cosmos.IL2CPU
                 var xINT3Label = new INT3Label
                 {
                     LabelName = xLabel,
-                    MethodID = mCurrentMethodGuid,
+                    MethodID = aMethod.DebugMethodUID,
                     LeaveAsINT3 = INT3Emitted
                 };
                 mINT3Labels.Add(xINT3Label);
@@ -1568,6 +1375,7 @@ namespace Cosmos.IL2CPU
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(xLabel + ".StackCorruptionCheck_GetAddress");
                 XS.Label(xLabel + ".StackCorruptionCheck_GetAddress");
+                XS.Exchange(BX, BX);
                 XS.Pop(EAX);
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackCorruptedEvent]);
