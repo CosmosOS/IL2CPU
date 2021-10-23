@@ -14,13 +14,10 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      // MtW: for now, disable this instruction. To me, it's unclear in what context it's being used.
-      uint mObjSize = 0;
+      Type mType = ((ILOpCodes.OpType)aOpCode).Value;
+      uint mObjSize = SizeOfType(mType);
 
-      Type mType = ((Cosmos.IL2CPU.ILOpCodes.OpType)aOpCode).Value;
-      mObjSize = SizeOfType(mType);
-
-      XS.Pop(XSRegisters.EAX);
+      XS.Pop(EAX);
       for (int i = 0; i < (mObjSize / 4); i++)
       {
         XS.Set(EAX, 0, destinationDisplacement: i * 4, size: RegisterSize.Int32);
