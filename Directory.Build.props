@@ -29,7 +29,6 @@
 
     <PropertyGroup>
         <CommonVersion>0.1.0-build37</CommonVersion>
-        <XSharpVersion>0.1.0-build521</XSharpVersion>
     </PropertyGroup>
 
     <Import Project="build\Targets\Import.props" />

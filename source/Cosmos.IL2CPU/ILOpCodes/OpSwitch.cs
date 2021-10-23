@@ -51,9 +51,8 @@ namespace Cosmos.IL2CPU.ILOpCodes {
     /// <summary>
     /// Based on updated StackPopTypes, try to update
     /// </summary>
-    protected override void DoInterpretStackTypes(ref bool aSituationChanged)
+    public override void DoInterpretStackTypes()
     {
-      base.DoInterpretStackTypes(ref aSituationChanged);
       // no switch necessary, there's only 1 instruction using this type.
 
       if (StackPopTypes[0] == null)
@@ -72,13 +71,19 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       throw new Exception("Wrong type: " + StackPopTypes[0].FullName);
     }
 
-    protected override void DoInterpretNextInstructionStackTypes(IDictionary<int, ILOpCode> aOpCodes, Stack<Type> aStack, ref bool aSituationChanged, int aMaxRecursionDepth, List<(int position, Stack<Type> stack)> branchTargetsToCheck)
+    public override List<(bool newGroup, int Position)> GetNextOpCodePositions()
     {
+      var Positions = new List<(bool, int)>();
+
       foreach (var xTarget in BranchLocations)
       {
-        base.InterpretInstruction(xTarget, aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+        Positions.Add((true, xTarget));
       }
-      base.DoInterpretNextInstructionStackTypes(aOpCodes, new Stack<Type>(aStack.Reverse()), ref aSituationChanged, aMaxRecursionDepth, branchTargetsToCheck);
+
+      // switch allows fall through. see ecma-355 I.12.4.2.8.1 Fall Through
+      Positions.Add((true, NextPosition));
+
+      return Positions;
     }
   }
 }

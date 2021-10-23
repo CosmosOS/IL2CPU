@@ -249,9 +249,9 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataEndIfDefined());
 
             // graphics info fields
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeModeInfoAddr", Int32.MaxValue));
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeControlInfoAddr", Int32.MaxValue));
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeMode", Int32.MaxValue));
+            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeModeInfoAddr", System.Int32.MaxValue));
+            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeControlInfoAddr", System.Int32.MaxValue));
+            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeMode", System.Int32.MaxValue));
 
             // memory
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));

@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define COSMOSDEBUG
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 using Cosmos.Debug.Kernel;
@@ -17,6 +18,28 @@ namespace Cosmos.IL2CPU
         static VTablesImpl()
         {
 
+        }
+
+        public static uint GetBaseType(uint aObjectType)
+        {
+            if (aObjectType >= mTypes.Length)
+            {
+                EnableDebug = true;
+                DebugAndHalt("Requested GetBaseType for invalid aObjectType: " + aObjectType);
+                throw new IndexOutOfRangeException();
+            }
+            return mTypes[aObjectType].BaseTypeIdentifier;
+        }
+
+        public static uint GetSize(uint aObjectType)
+        {
+            if (aObjectType >= mTypes.Length)
+            {
+                EnableDebug = true;
+                DebugAndHalt("Requested GetSize for invalid aObjectType: " + aObjectType);
+                throw new IndexOutOfRangeException();
+            }
+            return mTypes[aObjectType].Size;
         }
 
         public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
@@ -70,22 +93,25 @@ namespace Cosmos.IL2CPU
             return false;
         }
 
-        public static void SetTypeInfo(
-          int aType, uint aBaseType, uint aInterfaceCount, uint[] aInterfaceIndexes, uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
+        public static void SetTypeInfo(int aType, uint aBaseType, uint aSize, uint aInterfaceCount, uint[] aInterfaceIndexes,
+          uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
           uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes)
         {
-            mTypes[aType].BaseTypeIdentifier = aBaseType;
-            mTypes[aType].InterfaceCount = aInterfaceCount;
-            mTypes[aType].InterfaceIndexes = aInterfaceIndexes;
-            mTypes[aType].MethodCount = aMethodCount;
-            mTypes[aType].MethodIndexes = aMethodIndexes;
-            mTypes[aType].MethodAddresses = aMethodAddresses;
-            mTypes[aType].InterfaceMethodCount = aInterfaceMethodCount;
-            mTypes[aType].InterfaceMethodIndexes = aInterfaceMethodIndexes;
-            mTypes[aType].TargetMethodIndexes = aTargetMethodIndexes;
-            mTypes[aType].GCFieldCount = aGCFieldCount;
-            mTypes[aType].GCFieldOffsets = aGCFieldOffsets;
-            mTypes[aType].GCFieldTypes = aGCFieldTypes;
+            var vTable = new VTable();
+            vTable.BaseTypeIdentifier = aBaseType;
+            vTable.Size = aSize;
+            vTable.InterfaceCount = aInterfaceCount;
+            vTable.InterfaceIndexes = aInterfaceIndexes;
+            vTable.MethodCount = aMethodCount;
+            vTable.MethodIndexes = aMethodIndexes;
+            vTable.MethodAddresses = aMethodAddresses;
+            vTable.InterfaceMethodCount = aInterfaceMethodCount;
+            vTable.InterfaceMethodIndexes = aInterfaceMethodIndexes;
+            vTable.TargetMethodIndexes = aTargetMethodIndexes;
+            vTable.GCFieldCount = aGCFieldCount;
+            vTable.GCFieldOffsets = aGCFieldOffsets;
+            vTable.GCFieldTypes = aGCFieldTypes;
+            mTypes[aType] = vTable;
         }
 
         public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
@@ -187,6 +213,39 @@ namespace Cosmos.IL2CPU
             Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
             while (true) ;
             throw new Exception("Cannot find virtual method!");
+        }
+
+        // For a certain type and virtual method, find which type defines the virtual method actually used
+        public static uint GetDeclaringTypeOfMethodForType(uint aType, uint aMethodId)
+        {
+            var xCurrentType = aType;
+            do
+            {
+                var xCurrentTypeInfo = mTypes[xCurrentType];
+
+                for (int i = 0; i < xCurrentTypeInfo.MethodIndexes.Length; i++)
+                {
+                    if (xCurrentTypeInfo.MethodIndexes[i] == aMethodId)
+                    {
+                        return xCurrentType;
+                    }
+                }
+                if (xCurrentType == xCurrentTypeInfo.BaseTypeIdentifier)
+                {
+                    Debug("Ultimate base type already found!");
+                    break;
+                }
+                xCurrentType = xCurrentTypeInfo.BaseTypeIdentifier;
+            }
+            while (true);
+
+            EnableDebug = true;
+            DebugHex("Type", aType);
+            DebugHex("MethodId", aMethodId);
+            Debug("Not FOUND Declaring TYPE!");
+            Debugger.DoBochsBreak();
+            Debugger.SendKernelPanic(KernelPanics.VMT_MethodNotFound);
+            while (true) ;
         }
 
         public static uint GetMethodAddressForInterfaceType(uint aType, uint aInterfaceMethodId)

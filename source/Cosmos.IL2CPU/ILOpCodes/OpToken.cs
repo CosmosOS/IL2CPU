@@ -98,5 +98,7 @@ namespace Cosmos.IL2CPU.ILOpCodes {
           break;
       }
     }
+
+    public override void DoInterpretStackTypes() { }
   }
 }

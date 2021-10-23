@@ -56,8 +56,8 @@ namespace Cosmos.IL2CPU.X86.IL
         default:
           for (int i = 0; i < xStackCount; i++)
           {
-            XS.Set(EAX, EBP, sourceDisplacement: 0 - (xEBPOffset + (i * 4)));
-            XS.Push(EAX);
+            //XS.Set(EAX, EBP, sourceDisplacement: 0 - (xEBPOffset + (i * 4)));
+            XS.Push(EBP, displacement: 0 - (xEBPOffset + (i * 4)));
           }
           break;
       }

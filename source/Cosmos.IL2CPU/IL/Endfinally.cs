@@ -6,19 +6,19 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-  [OpCode(ILOpCode.Code.Endfinally)]
-  public class Endfinally : ILOp
-  {
-    public Endfinally(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
+    [OpCode(ILOpCode.Code.Endfinally)]
+    public class Endfinally : ILOp
     {
-    }
+        public Endfinally(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
+        {
+        }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
-    {
-      string leaveAddressVariableName = $"{aMethod.MethodBase.GetFullName()}_LeaveAddress_{aOpCode.CurrentExceptionRegion.HandlerOffset:X2}";
-      XS.DataMember(leaveAddressVariableName, 0);
-      XS.Set(EAX, leaveAddressVariableName);
-      new CPUx86.Jump { DestinationReg = EAX, DestinationIsIndirect = true };
+        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        {
+            string leaveAddressVariableName = $"{aMethod.MethodBase.GetFullName()}_LeaveAddress_{aOpCode.CurrentExceptionRegion.HandlerOffset:X2}";
+            XS.DataMember(leaveAddressVariableName, 0);
+            XS.Set(EAX, leaveAddressVariableName);
+            new CPUx86.Jump { DestinationReg = EAX, DestinationIsIndirect = true };
+        }
     }
-  }
 }
