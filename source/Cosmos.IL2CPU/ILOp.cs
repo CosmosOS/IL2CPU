@@ -602,7 +602,7 @@ namespace Cosmos.IL2CPU
         {
             return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint)
-                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
+                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr) || type.IsPointer;
         }
 
         public static bool IsLongBasedType(Type type)

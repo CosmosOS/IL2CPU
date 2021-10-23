@@ -111,6 +111,40 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             expectedType = expectedType.GetEnumUnderlyingType();
           }
+          if (StackPopTypes[1] == typeof(void*))
+          {
+            
+            return;
+          }
+          if (StackPopTypes[1] == expectedType ||
+              StackPopTypes[1] == Value.FieldType)
+          {
+            return;
+          }
+          if ((ILOp.IsPointer(Value.FieldType) || ILOp.IsIntegerBasedType(Value.FieldType)) &&
+            (ILOp.IsIntegerBasedType(StackPopTypes[1]) || ILOp.IsPointer(StackPopTypes[1])))
+          {
+            return;
+          }
+          if (expectedType == typeof(bool))
+          {
+            if (StackPopTypes[1] == typeof(int))
+            {
+              return;
+            }
+          }
+          if (StackPopTypes[1] == typeof(NullRef))
+          {
+            return;
+          }
+          if (expectedType.IsAssignableFrom(StackPopTypes[1]))
+          {
+            return;
+          }
+          if (StackPopTypes[0] == null)
+          {
+            return;
+          }
 
           if (expectedType.IsAssignableFrom(StackPopTypes[0]))
           {
@@ -140,7 +174,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           if(StackPopTypes[0] == typeof(void*))
           {
-          return;
+            return;
           }
           expectedType = Value.FieldType;
           if (expectedType.IsEnum)

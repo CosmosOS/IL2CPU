@@ -244,6 +244,7 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.InitRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
