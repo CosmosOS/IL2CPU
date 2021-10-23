@@ -14,6 +14,8 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase GetMethodAddressForTypeRef;
         public static readonly MethodBase GetMethodAddressForInterfaceTypeRef;
         public static readonly MethodBase IsInstanceRef;
+        // GC Methods
+        public static readonly MethodBase GetGCFieldCount;
 
         static VTablesImplRefs()
         {
