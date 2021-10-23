@@ -164,9 +164,9 @@ namespace IL2CPU.Debug.Symbols
         {
             try
             {
-                return aMethodBase.GetMethodBody().LocalVariables;
+                return aMethodBase.GetMethodBody()?.LocalVariables;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new List<LocalVariableInfo>();
             }
