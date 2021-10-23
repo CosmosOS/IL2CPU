@@ -593,12 +593,12 @@ namespace Cosmos.IL2CPU.ILOpCodes
             if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
             {
               StackPushTypes[0] = StackPopTypes[0]; //todo: figure out which one we actually want
-              aSituationChanged = true;
+              //aSituationChanged = true;
               return;
             }
-            if ((ILOp.IsIntegralType(StackPopTypes[0]) && ILOp.IsNativeInt(StackPopTypes[1])) || (ILOp.IsIntegralType(StackPopTypes[1]) && ILOp.IsNativeInt(StackPopTypes[0])))
+            if ((ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1])) || (ILOp.IsIntegerBasedType(StackPopTypes[1]) && ILOp.IsPointer(StackPopTypes[0])))
             {
-              if (ILOp.IsIntegralType(StackPopTypes[0]))
+              if (ILOp.IsIntegerBasedType(StackPopTypes[0]))
               {
                 StackPushTypes[0] = StackPopTypes[0];
               }
@@ -606,7 +606,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
               {
                 StackPushTypes[0] = StackPopTypes[1];
               }
-              aSituationChanged = true;
+              //aSituationChanged = true;
               return;
             }
 
