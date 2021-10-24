@@ -895,7 +895,7 @@ namespace Cosmos.IL2CPU
         {
             if (!mItems.Contains(aType))
             {
-                throw new Exception("Cannot get UID of types which are not queued!");
+                throw new Exception($"Cannot get UID of types which are not queued! Type: {aType.Name}");
             }
             if (!mTypeUIDs.ContainsKey(aType))
             {

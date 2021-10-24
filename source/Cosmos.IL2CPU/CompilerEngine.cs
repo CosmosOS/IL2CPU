@@ -254,7 +254,7 @@ namespace Cosmos.IL2CPU
             var assemblerLogFile = Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog);
             Directory.CreateDirectory(Path.GetDirectoryName(assemblerLogFile));
             var mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
-            return new AppAssembler(new CosmosAssembler(debugCom), mLog);
+            return new AppAssembler(new CosmosAssembler(debugCom), mLog, Path.GetDirectoryName(assemblerLogFile));
         }
 
         #region Gen2

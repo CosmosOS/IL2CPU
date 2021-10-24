@@ -41,6 +41,7 @@ namespace Cosmos.IL2CPU
         public bool ShouldOptimize = false;
         public DebugInfo DebugInfo { get; set; }
         private TextWriter mLog;
+        private string mLogDir;
         private Dictionary<string, ModuleDefinition> mLoadedModules = new Dictionary<string, ModuleDefinition>();
         public TraceAssemblies TraceAssemblies;
         public bool DebugEnabled = false;
@@ -52,10 +53,11 @@ namespace Cosmos.IL2CPU
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         public readonly CosmosAssembler Assembler;
 
-        public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog)
+        public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir)
         {
             Assembler = aAssembler;
             mLog = aLog;
+            mLogDir = aLogDir;
             InitILOps();
         }
 
@@ -535,7 +537,7 @@ namespace Cosmos.IL2CPU
                 {
                     var xLocals = aMethod.MethodBase.GetLocalVariables();
                     xLocalsSize = (from item in xLocals
-                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
+                                   select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
                 }
 
                 //Only emit INT3 as per conditions above...
@@ -902,10 +904,12 @@ namespace Cosmos.IL2CPU
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldOffsetArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gCFieldOffsets));
                 XS.Push(xDataName);
+                XS.Push(0);
 
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldTypesArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gcFieldTypes));
                 XS.Push(xDataName);
+                XS.Push(0);
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 
@@ -1349,7 +1353,7 @@ namespace Cosmos.IL2CPU
                 xMLSymbol.MethodID = aMethod.DebugMethodUID;
 
                 mSymbols.Add(xMLSymbol);
-                DebugInfo.AddSymbols(mSymbols);
+                //DebugInfo.AddSymbols(mSymbols);
             }
             DebugInfo.AddSymbols(mSymbols, false);
 
