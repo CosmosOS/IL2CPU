@@ -825,7 +825,7 @@ namespace Cosmos.IL2CPU
                 XS.Push((uint)xBaseIndex.Value);
 
                 // Size
-                Push(ILOp.SizeOfType(xType));
+                XS.Push(ILOp.SizeOfType(xType));
 
                 // Interface Count
                 var xInterfaces = xType.GetInterfaces();

@@ -97,20 +97,22 @@ namespace Cosmos.IL2CPU
           uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
           uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes)
         {
-            var vTable = new VTable();
-            vTable.BaseTypeIdentifier = aBaseType;
-            vTable.Size = aSize;
-            vTable.InterfaceCount = aInterfaceCount;
-            vTable.InterfaceIndexes = aInterfaceIndexes;
-            vTable.MethodCount = aMethodCount;
-            vTable.MethodIndexes = aMethodIndexes;
-            vTable.MethodAddresses = aMethodAddresses;
-            vTable.InterfaceMethodCount = aInterfaceMethodCount;
-            vTable.InterfaceMethodIndexes = aInterfaceMethodIndexes;
-            vTable.TargetMethodIndexes = aTargetMethodIndexes;
-            vTable.GCFieldCount = aGCFieldCount;
-            vTable.GCFieldOffsets = aGCFieldOffsets;
-            vTable.GCFieldTypes = aGCFieldTypes;
+            var vTable = new VTable
+            {
+                BaseTypeIdentifier = aBaseType,
+                Size = aSize,
+                InterfaceCount = aInterfaceCount,
+                InterfaceIndexes = aInterfaceIndexes,
+                MethodCount = aMethodCount,
+                MethodIndexes = aMethodIndexes,
+                MethodAddresses = aMethodAddresses,
+                InterfaceMethodCount = aInterfaceMethodCount,
+                InterfaceMethodIndexes = aInterfaceMethodIndexes,
+                TargetMethodIndexes = aTargetMethodIndexes,
+                GCFieldCount = aGCFieldCount,
+                GCFieldOffsets = aGCFieldOffsets,
+                GCFieldTypes = aGCFieldTypes
+            };
             mTypes[aType] = vTable;
         }
 
@@ -304,6 +306,7 @@ namespace Cosmos.IL2CPU
     public struct VTable
     {
         public uint BaseTypeIdentifier;
+        public uint Size;
 
         public uint InterfaceCount;
         public uint[] InterfaceIndexes;
