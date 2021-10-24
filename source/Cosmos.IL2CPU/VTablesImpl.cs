@@ -299,6 +299,16 @@ namespace Cosmos.IL2CPU
         {
             return mTypes[aType].GCFieldCount;
         }
+
+        public static uint[] GetGCFieldOffsets(uint aType)
+        {
+            return mTypes[aType].GCFieldOffsets;
+        }
+
+        public static uint[] GetGCFieldTypes(uint aType)
+        {
+            return mTypes[aType].GCFieldTypes;
+        }
     }
 
     public struct VTable

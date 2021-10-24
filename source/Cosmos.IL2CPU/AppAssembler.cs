@@ -881,7 +881,7 @@ namespace Cosmos.IL2CPU
                 XS.Push((uint)gcFieldCount);
                 var gCFieldOffsets = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
                 var gcFieldTypes = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
-                uint pos = 0;
+                uint pos = 4; // we cant overwrite the start of the array object
                 uint offset = 0;
                 foreach (var field in fields)
                 {
@@ -898,8 +898,8 @@ namespace Cosmos.IL2CPU
                             gCFieldOffsets[4 * pos + i] = value[i];
                         }
                         pos++;
-                        offset += ILOp.Align(ILOp.SizeOfType(field.FieldType), 4);
                     }
+                    offset += ILOp.Align(ILOp.SizeOfType(field.FieldType), 4);
                 }
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldOffsetArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gCFieldOffsets));
