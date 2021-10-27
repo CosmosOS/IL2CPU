@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 
 using Cosmos.Debug.Kernel;
+using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
 {
@@ -20,6 +21,7 @@ namespace Cosmos.IL2CPU
 
         }
 
+        [NoGC()]
         public static uint GetBaseType(uint aObjectType)
         {
             if (aObjectType >= mTypes.Length)
@@ -31,6 +33,7 @@ namespace Cosmos.IL2CPU
             return mTypes[aObjectType].BaseTypeIdentifier;
         }
 
+        [NoGC()]
         public static uint GetSize(uint aObjectType)
         {
             if (aObjectType >= mTypes.Length)
@@ -42,6 +45,7 @@ namespace Cosmos.IL2CPU
             return mTypes[aObjectType].Size;
         }
 
+        [NoGC()]
         public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
         {
             if (aObjectType == 0)
@@ -93,9 +97,11 @@ namespace Cosmos.IL2CPU
             return false;
         }
 
+        [NoGC()]
         public static void SetTypeInfo(int aType, uint aBaseType, uint aSize, uint aInterfaceCount, uint[] aInterfaceIndexes,
           uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
-          uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes)
+          uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes,
+          bool aIsValueType)
         {
             var vTable = new VTable();
             vTable.BaseTypeIdentifier = aBaseType;
@@ -111,9 +117,11 @@ namespace Cosmos.IL2CPU
             vTable.GCFieldCount = aGCFieldCount;
             vTable.GCFieldOffsets = aGCFieldOffsets;
             vTable.GCFieldTypes = aGCFieldTypes;
+            vTable.IsValueType = aIsValueType;
             mTypes[aType] = vTable;
         }
 
+        [NoGC()]
         public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
         {
             mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
@@ -124,6 +132,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
+        [NoGC()]
         public static void SetMethodInfo(int aType, int aMethodIndex, uint aMethodIdentifier, uint aMethodAddress)
         {
             mTypes[aType].MethodIndexes[aMethodIndex] = aMethodIdentifier;
@@ -135,12 +144,14 @@ namespace Cosmos.IL2CPU
             }
         }
 
+        [NoGC()]
         public static void SetInterfaceMethodInfo(int aType, int aMethodIndex, uint aInterfaceMethodId, uint aTargetMethodId)
         {
             mTypes[aType].InterfaceMethodIndexes[aMethodIndex] = aInterfaceMethodId;
             mTypes[aType].TargetMethodIndexes[aMethodIndex] = aTargetMethodId;
         }
 
+        [NoGC()]
         public static uint GetMethodAddressForType(uint aType, uint aMethodId)
         {
             if (aType > 0xFFFF)
@@ -216,6 +227,7 @@ namespace Cosmos.IL2CPU
         }
 
         // For a certain type and virtual method, find which type defines the virtual method actually used
+        [NoGC()]
         public static uint GetDeclaringTypeOfMethodForType(uint aType, uint aMethodId)
         {
             var xCurrentType = aType;
@@ -248,6 +260,7 @@ namespace Cosmos.IL2CPU
             while (true) ;
         }
 
+        [NoGC()]
         public static uint GetMethodAddressForInterfaceType(uint aType, uint aInterfaceMethodId)
         {
             if (aType > 0xFFFF)
@@ -295,19 +308,27 @@ namespace Cosmos.IL2CPU
             while (true) ;
         }
 
+        [NoGC()]
         public static uint GetGCFieldCount(uint aType)
         {
             return mTypes[aType].GCFieldCount;
         }
 
+        [NoGC()]
         public static uint[] GetGCFieldOffsets(uint aType)
         {
             return mTypes[aType].GCFieldOffsets;
         }
 
+        [NoGC()]
         public static uint[] GetGCFieldTypes(uint aType)
         {
             return mTypes[aType].GCFieldTypes;
+        }
+        [NoGC()]
+        public static bool IsValueType(uint aType)
+        {
+            return mTypes[aType].IsValueType;
         }
     }
 
@@ -330,5 +351,7 @@ namespace Cosmos.IL2CPU
         public uint GCFieldCount; // Number of fields where objects are stored on the heap
         public uint[] GCFieldOffsets;
         public uint[] GCFieldTypes;
+
+        public bool IsValueType;
     }
 }

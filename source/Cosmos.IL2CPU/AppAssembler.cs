@@ -293,6 +293,11 @@ namespace Cosmos.IL2CPU
         {
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
 
+            // Clean up local variables
+
+
+            // Deal with return value
+
             uint xReturnSize = 0;
             var xMethInfo = aMethod.MethodBase as MethodInfo;
             if (xMethInfo != null)
@@ -876,13 +881,12 @@ namespace Cosmos.IL2CPU
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
 
                 //GC Information
-                var fields = xType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var fields = ILOp.GetFieldsInfo(xType, false);
                 var gcFieldCount = fields.Where(f => !f.FieldType.IsValueType).Count();
                 XS.Push((uint)gcFieldCount);
                 var gCFieldOffsets = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
                 var gcFieldTypes = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
                 uint pos = 4; // we cant overwrite the start of the array object
-                uint offset = 0;
                 foreach (var field in fields)
                 {
                     if (!field.FieldType.IsValueType)
@@ -892,14 +896,13 @@ namespace Cosmos.IL2CPU
                         {
                             gcFieldTypes[4 * pos + i] = value[i];
                         }
-                        value = BitConverter.GetBytes(offset);
+                        value = BitConverter.GetBytes(Ldfld.GetFieldOffset(xType, field.Id));
                         for (var i = 0; i < 4; i++)
                         {
                             gCFieldOffsets[4 * pos + i] = value[i];
                         }
                         pos++;
                     }
-                    offset += ILOp.Align(ILOp.SizeOfType(field.FieldType), 4);
                 }
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}__GCFieldOffsetArray";
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gCFieldOffsets));
@@ -910,6 +913,8 @@ namespace Cosmos.IL2CPU
                 XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, gcFieldTypes));
                 XS.Push(xDataName);
                 XS.Push(0);
+
+                XS.Push(xType.IsValueType ? 1 : 0);
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 

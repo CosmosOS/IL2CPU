@@ -235,6 +235,9 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Add(ESP, EAX, destinationIsIndirect: true);
                 }
 
+                //XS.Push(".AfterAlloc");
+                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                //XS.Pop(EAX);
                 // todo: probably we want to check for exceptions after calling Alloc
                 XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
                 XS.Label(".AfterAlloc");

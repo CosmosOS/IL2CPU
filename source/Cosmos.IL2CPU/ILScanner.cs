@@ -248,6 +248,9 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.DecTypedRefCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.IncStructFieldReferencesRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.CleanupTypedObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
             Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
             Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
