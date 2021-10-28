@@ -164,13 +164,13 @@ namespace Cosmos.IL2CPU.X86.IL
         /// Decrements reference count of object with address in ECX + 4
         /// </summary>
         /// <param name="aMethod"></param>
-        /// <param name="xSize"></param>
-        /// <param name="fieldType"></param>
-        public static void GCUpdateOldObject(_MethodInfo aMethod, uint xSize, Type fieldType, int id, bool debug = false)
+        /// <param name="aSize"></param>
+        /// <param name="aFieldType"></param>
+        public static void GCUpdateOldObject(_MethodInfo aMethod, uint aSize, Type aFieldType, int aId, string aUniqueText = "", bool debug = false)
         {
-            if (IsReferenceType(fieldType) && aMethod.UseGC)
+            if (IsReferenceType(aFieldType) && aMethod.UseGC)
             {
-                if (xSize != 8)
+                if (aSize != 8)
                 {
                     throw new NotImplementedException();
                 }
@@ -180,22 +180,22 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
 
                 XS.Compare(ECX, 0, destinationIsIndirect: true, destinationDisplacement: 4);
-                XS.Jump(CPU.ConditionalTestEnum.Equal, ".AfterGC");
+                XS.Jump(CPU.ConditionalTestEnum.Equal, ".AfterGC" + aUniqueText);
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
-                XS.Push(id);
+                XS.Push(aId);
                 XS.Call(LabelName.Get(GCImplementationRefs.DecRefCountRef));
                 XS.Pop(ECX); // restore ecx
-                XS.Label(".AfterGC");
+                XS.Label(".AfterGC" + aUniqueText);
             }
-            else if (!fieldType.IsPointer && !fieldType.IsPrimitive && !fieldType.IsPrimitive
-                        && !fieldType.IsEnum && aMethod.UseGC)
+            else if (!aFieldType.IsPointer && !aFieldType.IsPrimitive && !aFieldType.IsPrimitive
+                        && !aFieldType.IsEnum && aMethod.UseGC)
             {
                 //XS.Exchange(BX, BX);
                 // let clean up object deal with it
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
                 XS.Push(ECX, isIndirect: true);
-                XS.Push(GetTypeIDLabel(fieldType), isIndirect: true);
+                XS.Push(GetTypeIDLabel(aFieldType), isIndirect: true);
                 XS.Call(LabelName.Get(GCImplementationRefs.CleanupTypedObjectRef));
                 XS.Pop(ECX);
             }

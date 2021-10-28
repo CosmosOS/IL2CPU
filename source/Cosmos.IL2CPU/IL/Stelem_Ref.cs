@@ -54,7 +54,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Pop(ECX);
 
-            Stfld.GCUpdateOldObject(aMethod, aElementSize, aOpCode.StackPopTypes[0], 2, false);
+            Stfld.GCUpdateOldObject(aMethod, aElementSize, aOpCode.StackPopTypes[0], 2, debug: false);
 
             //get bytes
             var bytes = aElementSize / 4;

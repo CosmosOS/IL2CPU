@@ -294,7 +294,21 @@ namespace Cosmos.IL2CPU
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
 
             // Clean up local variables
+            if (!aMethod.IsInlineAssembler && aMethod.PlugMethod is null)
+            {
+                var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
+                for (int i = 0; i < xLocals.Count; i++)
+                {
+                    var offset = ILOp.GetEBPOffsetForLocal(aMethod, i);
+                    XS.Comment(String.Format("Local {0} at EBP-{1}", i, offset));
+                    if (!xLocals[i].LocalType.IsPrimitive && !xLocals[i].LocalType.IsEnum && !xLocals[i].LocalType.IsPointer)
+                    {
+                        XS.Set(ECX, EBP, sourceIsIndirect: true, sourceDisplacement: (int)offset);
+                        Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(xLocals[i].LocalType), xLocals[i].LocalType, 3, i.ToString());
+                    }
+                }
 
+            }
 
             // Deal with return value
 
