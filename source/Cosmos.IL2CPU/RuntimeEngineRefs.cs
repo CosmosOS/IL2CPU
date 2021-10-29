@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
 
 namespace Cosmos.IL2CPU {
 	public static class RuntimeEngineRefs {
@@ -10,7 +11,7 @@ namespace Cosmos.IL2CPU {
 		public static readonly MethodBase Heap_AllocNewObjectRef;
 
 		static RuntimeEngineRefs() {
-			Type xType = typeof(RuntimeEngine);
+			Type xType = Base.RuntimeEngine;
 			foreach (FieldInfo xField in typeof(RuntimeEngineRefs).GetFields()) {
 				if (xField.Name.EndsWith("Ref")) {
 					MethodBase xTempMethod = xType.GetMethod(xField.Name.Substring(0, xField.Name.Length - "Ref".Length));

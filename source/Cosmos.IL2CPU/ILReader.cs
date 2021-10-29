@@ -6,6 +6,9 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 
 using Cosmos.IL2CPU.Extensions;
+using IL2CPU.Reflection;
+
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -73,7 +76,8 @@ namespace Cosmos.IL2CPU
 
             if (aMethod.DeclaringType.FullName == "Internal.Runtime.CompilerServices.Unsafe")
             {
-                var xUnsafeType = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
+                var rtUnsafeType = Type.GetType("System.Runtime.CompilerServices.Unsafe, System.Runtime.CompilerServices.Unsafe");
+                var xUnsafeType = TypeofExtensions.Reload(rtUnsafeType);
                 var xUnsafeMethod = xUnsafeType.GetMethods()
                     .Where(
                         m => m.Name == aMethod.Name
@@ -215,11 +219,11 @@ namespace Cosmos.IL2CPU
                     });
                     xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 2, 3, 0, null) {
                         StackPopTypes = Array.Empty<Type>(),
-                        StackPushTypes = new[] { typeof(int) },
+                        StackPushTypes = new[] { BaseTypes.Int32 },
                     });
                     var m_handle = runtimeType.GetField("m_handle", BindingFlags.Instance | BindingFlags.NonPublic);
                     xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 3, 4, m_handle, null) {
-                        StackPopTypes = new[] {typeof(int), runtimeType},
+                        StackPopTypes = new[] {BaseTypes.Int32, runtimeType},
                         StackPushTypes = Array.Empty<Type>(),
                     });
                     var runtimeTypeHandle = Type.GetType("System.RuntimeTypeHandle");
@@ -565,7 +569,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineField:
                         {
-                            var xValue = xModule.ResolveField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveField(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpField(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -574,7 +578,7 @@ namespace Cosmos.IL2CPU
                     // The operand is a 32-bit metadata token.
                     case OperandType.InlineMethod:
                         {
-                            var xValue = xModule.ResolveMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveMethod(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpMethod(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;
@@ -587,7 +591,7 @@ namespace Cosmos.IL2CPU
                         break;
 
                     case OperandType.InlineString:
-                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.ResolveString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
+                        xILOpCode = new ILOpCodes.OpString(xOpCodeVal, xOpPos, xPos + 4, xModule.RetrieveString(ReadInt32(xIL, xPos)), xCurrentExceptionRegion);
                         xPos = xPos + 4;
                         break;
 
@@ -616,7 +620,7 @@ namespace Cosmos.IL2CPU
                     // 32-bit metadata token.
                     case OperandType.InlineType:
                         {
-                            var xValue = xModule.ResolveType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
+                            var xValue = xModule.RetrieveType(ReadInt32(xIL, xPos), xTypeGenArgs, xMethodGenArgs);
                             xILOpCode = new ILOpCodes.OpType(xOpCodeVal, xOpPos, xPos + 4, xValue, xCurrentExceptionRegion);
                             xPos = xPos + 4;
                             break;

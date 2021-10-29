@@ -3,9 +3,12 @@ using System;
 using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
 
+using IL2CPU.Reflection;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
+
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -68,8 +71,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Add(ESP, xDeclaringTypeStackSize);
 
                 if ((xFieldInfo.Size < 4 && IsIntegerBasedType(xFieldType))
-                    || xFieldType == typeof(bool)
-                    || xFieldType == typeof(char))
+                    || xFieldType == BaseTypes.Boolean
+                    || xFieldType == BaseTypes.Char)
                 {
                     if (TypeIsSigned(xFieldType))
                     {
@@ -174,6 +177,12 @@ namespace Cosmos.IL2CPU.X86.IL
         }
 
         public static int GetFieldOffset(Type aDeclaringType, string aFieldId)
+        {
+            var loaded = aDeclaringType.ReplaceLoad();
+            return GetFieldOffsetInt(loaded, aFieldId);
+        }
+
+        private static int GetFieldOffsetInt(Type aDeclaringType, string aFieldId)
         {
             int xExtraOffset = 0;
             var xFieldInfo = ResolveField(aDeclaringType, aFieldId, true);

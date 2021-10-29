@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU.ILOpCodes
 {
@@ -24,7 +25,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           return 0;
         case Code.Ret:
           var methodInfo = aMethod as MethodInfo;
-          if (methodInfo != null && methodInfo.ReturnType != typeof(void))
+          if (methodInfo != null && methodInfo.ReturnType != BaseTypes.Void)
           {
             return 1;
           }
@@ -325,217 +326,217 @@ namespace Cosmos.IL2CPU.ILOpCodes
       switch (OpCode)
       {
         case Code.Ldind_U1:
-          StackPushTypes[0] = typeof(byte);
+          StackPushTypes[0] = BaseTypes.Byte;
           return;
 
         case Code.Ldind_U2:
-          StackPushTypes[0] = typeof(ushort);
+          StackPushTypes[0] = BaseTypes.UInt16;
           return;
 
         case Code.Ldind_U4:
-          StackPushTypes[0] = typeof(UInt32);
+          StackPushTypes[0] = BaseTypes.UInt32;
           return;
 
         case Code.Ldind_R4:
-          StackPushTypes[0] = typeof(Single);
+          StackPushTypes[0] = BaseTypes.Single;
           return;
 
         case Code.Ldind_R8:
-          StackPushTypes[0] = typeof(Double);
+          StackPushTypes[0] = BaseTypes.Double;
           return;
 
         case Code.Conv_I:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           break;
 
         case Code.Conv_I1:
-          StackPushTypes[0] = typeof(sbyte);
+          StackPushTypes[0] = BaseTypes.SByte;
           break;
 
         case Code.Conv_I2:
-          StackPushTypes[0] = typeof(short);
+          StackPushTypes[0] = BaseTypes.Int16;
           break;
 
         case Code.Conv_I4:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           break;
 
         case Code.Conv_I8:
-          StackPushTypes[0] = typeof(long);
+          StackPushTypes[0] = BaseTypes.Int64;
           break;
 
         case Code.Conv_U:
-          StackPushTypes[0] = typeof(UIntPtr);
+          StackPushTypes[0] = BaseTypes.UIntPtr;
           break;
 
         case Code.Conv_U1:
-          StackPushTypes[0] = typeof(byte);
+          StackPushTypes[0] = BaseTypes.Byte;
           break;
 
         case Code.Conv_U2:
-          StackPushTypes[0] = typeof(ushort);
+          StackPushTypes[0] = BaseTypes.UInt16;
           break;
 
         case Code.Conv_U4:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = BaseTypes.UInt32;
           break;
 
         case Code.Conv_U8:
-          StackPushTypes[0] = typeof(ulong);
+          StackPushTypes[0] = BaseTypes.UInt64;
           break;
 
         case Code.Conv_R4:
-          StackPushTypes[0] = typeof(Single);
+          StackPushTypes[0] = BaseTypes.Single;
           break;
 
         case Code.Conv_R8:
-          StackPushTypes[0] = typeof(Double);
+          StackPushTypes[0] = BaseTypes.Double;
           break;
         case Code.Conv_Ovf_I:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           break;
         case Code.Conv_Ovf_I1:
-          StackPushTypes[0] = typeof(sbyte);
+          StackPushTypes[0] = BaseTypes.SByte;
           break;
         case Code.Conv_Ovf_I1_Un:
-          StackPushTypes[0] = typeof(sbyte);
+          StackPushTypes[0] = BaseTypes.SByte;
           break;
         case Code.Conv_Ovf_I2:
-          StackPushTypes[0] = typeof(short);
+          StackPushTypes[0] = BaseTypes.Int16;
           break;
         case Code.Conv_Ovf_I2_Un:
-          StackPushTypes[0] = typeof(short);
+          StackPushTypes[0] = BaseTypes.Int16;
           break;
         case Code.Conv_Ovf_I4:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           break;
         case Code.Conv_Ovf_I4_Un:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           break;
         case Code.Conv_Ovf_I8:
-          StackPushTypes[0] = typeof(long);
+          StackPushTypes[0] = BaseTypes.Int64;
           break;
         case Code.Conv_Ovf_I8_Un:
-          StackPushTypes[0] = typeof(long);
+          StackPushTypes[0] = BaseTypes.Int64;
           break;
         case Code.Conv_Ovf_I_Un:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           break;
         case Code.Conv_Ovf_U:
-          StackPushTypes[0] = typeof(UIntPtr);
+          StackPushTypes[0] = BaseTypes.UIntPtr;
           break;
         case Code.Conv_Ovf_U1:
-          StackPushTypes[0] = typeof(byte);
+          StackPushTypes[0] = BaseTypes.Byte;
           break;
         case Code.Conv_Ovf_U1_Un:
-          StackPushTypes[0] = typeof(byte);
+          StackPushTypes[0] = BaseTypes.Byte;
           break;
         case Code.Conv_Ovf_U2:
-          StackPushTypes[0] = typeof(ushort);
+          StackPushTypes[0] = BaseTypes.UInt16;
           break;
         case Code.Conv_Ovf_U2_Un:
-          StackPushTypes[0] = typeof(ushort);
+          StackPushTypes[0] = BaseTypes.UInt16;
           break;
         case Code.Conv_Ovf_U4:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = BaseTypes.UInt32;
           break;
         case Code.Conv_Ovf_U4_Un:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = BaseTypes.UInt32;
           break;
         case Code.Conv_Ovf_U8:
-          StackPushTypes[0] = typeof(ulong);
+          StackPushTypes[0] = BaseTypes.UInt64;
           break;
         case Code.Conv_Ovf_U8_Un:
-          StackPushTypes[0] = typeof(ulong);
+          StackPushTypes[0] = BaseTypes.UInt64;
           break;
         case Code.Conv_Ovf_U_Un:
-          StackPushTypes[0] = typeof(UIntPtr);
+          StackPushTypes[0] = BaseTypes.UIntPtr;
           break;
 
         case Code.Clt:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Clt_Un:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Cgt:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Cgt_Un:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Ceq:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Throw:
-          StackPopTypes[0] = typeof(object);
+          StackPopTypes[0] = BaseTypes.Object;
           return;
         case Code.Ldlen:
-          StackPushTypes[0] = typeof(UIntPtr);
+          StackPushTypes[0] = BaseTypes.UIntPtr;
           return;
 
         case Code.Ldelem_I:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           return;
         case Code.Ldelem_I1:
-          StackPushTypes[0] = typeof(sbyte);
+          StackPushTypes[0] = BaseTypes.SByte;
           return;
         case Code.Ldelem_I2:
-          StackPushTypes[0] = typeof(short);
+          StackPushTypes[0] = BaseTypes.Int16;
           return;
         case Code.Ldelem_I4:
-          StackPushTypes[0] = typeof(int);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
         case Code.Ldelem_I8:
-          StackPushTypes[0] = typeof(long);
+          StackPushTypes[0] = BaseTypes.Int64;
           return;
         case Code.Ldelem_U1:
-          StackPushTypes[0] = typeof(byte);
+          StackPushTypes[0] = BaseTypes.Byte;
           return;
         case Code.Ldelem_U2:
-          StackPushTypes[0] = typeof(ushort);
+          StackPushTypes[0] = BaseTypes.UInt16;
           return;
         case Code.Ldelem_U4:
-          StackPushTypes[0] = typeof(uint);
+          StackPushTypes[0] = BaseTypes.UInt32;
           return;
         case Code.Ldelem_R4:
-          StackPushTypes[0] = typeof(float);
+          StackPushTypes[0] = BaseTypes.Single;
           return;
         case Code.Ldelem_R8:
-          StackPushTypes[0] = typeof(double);
+          StackPushTypes[0] = BaseTypes.Double;
           return;
         case Code.Ldnull:
-          StackPushTypes[0] = typeof(NullRef);
+          StackPushTypes[0] = Base.NullRef;
           return;
         case Code.Ldind_I:
-          StackPushTypes[0] = typeof(IntPtr);
+          StackPushTypes[0] = BaseTypes.IntPtr;
           return;
 
         case Code.Ldind_I1:
-          StackPushTypes[0] = typeof(sbyte);
+          StackPushTypes[0] = BaseTypes.SByte;
           return;
 
         case Code.Ldind_I2:
-          StackPushTypes[0] = typeof(short);
+          StackPushTypes[0] = BaseTypes.Int16;
           return;
 
         case Code.Ldind_I4:
-          StackPushTypes[0] = typeof(Int32);
+          StackPushTypes[0] = BaseTypes.Int32;
           return;
 
         case Code.Ldind_I8:
-          StackPushTypes[0] = typeof(long);
+          StackPushTypes[0] = BaseTypes.Int64;
           return;
 
         case Code.Stelem_I4:
-          StackPopTypes[0] = typeof(int);
+          StackPopTypes[0] = BaseTypes.Int32;
           return;
 
         case Code.Stelem_I8:
-          StackPopTypes[0] = typeof(long);
+          StackPopTypes[0] = BaseTypes.Int64;
           return;
         case Code.Conv_R_Un:
-          StackPushTypes[0] = typeof(Double);
+          StackPushTypes[0] = BaseTypes.Double;
           return;
       }
     }
@@ -575,19 +576,19 @@ namespace Cosmos.IL2CPU.ILOpCodes
 
             if (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
             {
-              StackPushTypes[0] = typeof(int);
+              StackPushTypes[0] = BaseTypes.Int32;
               return;
             }
 
             if (ILOp.IsLongBasedType(StackPopTypes[0]) && ILOp.IsLongBasedType(StackPopTypes[1]))
             {
-              StackPushTypes[0] = typeof(long);
+              StackPushTypes[0] = BaseTypes.Int64;
               return;
             }
 
             if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
             {
-              StackPushTypes[0] = typeof(uint*);
+              StackPushTypes[0] = Base.UintStar;
               return;
             }
             if (ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1]))
@@ -613,7 +614,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
             if ((ILOp.IsPointer(StackPopTypes[0]) && ILOp.IsIntegerBasedType(StackPopTypes[1]))
                  || (ILOp.IsIntegerBasedType(StackPopTypes[0]) && ILOp.IsPointer(StackPopTypes[1])))
             {
-              StackPushTypes[0] = typeof(uint*);
+              StackPushTypes[0] = Base.UintStar;
               return;
             }
             
@@ -621,7 +622,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           break;
         case Code.Localloc:
-          StackPushTypes[0] = typeof(void*);
+          StackPushTypes[0] = Base.VoidStar;
           return;
         case Code.Stelem_I2:
           var xTypeValue = StackPopTypes[0];
@@ -630,11 +631,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
             return;
           }
 
-          if (xTypeValue == typeof(byte)
-            || xTypeValue == typeof(char)
-            || xTypeValue == typeof(short)
-            || xTypeValue == typeof(ushort)
-            || xTypeValue == typeof(int))
+          if (xTypeValue == BaseTypes.Byte
+            || xTypeValue == BaseTypes.Char
+            || xTypeValue == BaseTypes.Int16
+            || xTypeValue == BaseTypes.UInt16
+            || xTypeValue == BaseTypes.Int32)
           {
             return;
           }
@@ -648,84 +649,84 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xTypeValue == typeof(int) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.Int32 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(byte) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.Byte && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(long) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.Int64 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(long);
+            StackPushTypes[0] = BaseTypes.Int64;
             return;
           }
-          if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.IntPtr && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(int) && xTypeShift == typeof(IntPtr))
+          if (xTypeValue == BaseTypes.Int32 && xTypeShift == BaseTypes.IntPtr)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(ushort) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.UInt16 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(char) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.Char && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(uint) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.UInt32 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(long) && xTypeShift == typeof(IntPtr))
+          if (xTypeValue == BaseTypes.Int64 && xTypeShift == BaseTypes.IntPtr)
           {
-            StackPushTypes[0] = typeof(long);
+            StackPushTypes[0] = BaseTypes.Int64;
             return;
           }
-          if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
+          if (xTypeValue == BaseTypes.IntPtr && xTypeShift == BaseTypes.IntPtr)
           {
-            StackPushTypes[0] = typeof(IntPtr);
+            StackPushTypes[0] = BaseTypes.IntPtr;
             return;
           }
-          if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
+          if (xTypeValue == BaseTypes.IntPtr && xTypeShift == BaseTypes.IntPtr)
           {
-            StackPushTypes[0] = typeof(IntPtr);
+            StackPushTypes[0] = BaseTypes.IntPtr;
             return;
           }
-          if (xTypeValue == typeof(ulong) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.UInt64 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(ulong);
+            StackPushTypes[0] = BaseTypes.UInt64;
             return;
           }
-          if (xTypeValue == typeof(sbyte) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.SByte && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(short) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.Int16 && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = BaseTypes.Int32;
             return;
           }
-          if (xTypeValue == typeof(UIntPtr) && xTypeShift == typeof(int))
+          if (xTypeValue == BaseTypes.UIntPtr && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(UIntPtr);
+            StackPushTypes[0] = BaseTypes.UIntPtr;
             return;
           }
-          if (xTypeValue == typeof(char*) && xTypeShift == typeof(int))
+          if (xTypeValue == Base.CharStar && xTypeShift == BaseTypes.Int32)
           {
-            StackPushTypes[0] = typeof(char*);
+            StackPushTypes[0] = Base.CharStar;
             return;
           }
           throw new NotImplementedException(String.Format("{0} with types {1} and {2} is not implemented!", OpCode, xTypeValue.FullName, xTypeShift.FullName));
@@ -770,7 +771,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int)) // can either be pointer or native int
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != BaseTypes.Int32) // can either be pointer or native int
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -780,7 +781,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != BaseTypes.Int32)
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -790,7 +791,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != BaseTypes.Int32)
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -800,7 +801,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != BaseTypes.Int32)
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -810,7 +811,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != BaseTypes.Int32)
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
@@ -830,7 +831,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           }
           if (StackPopTypes[0].IsPointer)
           {
-            StackPushTypes[0] = typeof(object);
+            StackPushTypes[0] = BaseTypes.Object;
           }
           else
           {

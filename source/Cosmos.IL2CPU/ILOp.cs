@@ -17,6 +17,9 @@ using XSharp.Assembler;
 using CPU = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.Reflection;
+
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -165,7 +168,7 @@ namespace Cosmos.IL2CPU
                 xInfo.Field = xField;
 
                 var xFieldOffsetAttrib =
-                  xField.GetCustomAttributes<FieldOffsetAttribute>(true).FirstOrDefault();
+                  xField.FetchCustomAttributes<FieldOffsetAttribute>(true).FirstOrDefault();
                 if (xFieldOffsetAttrib != null)
                 {
                     xInfo.Offset = (uint)xFieldOffsetAttrib.Value;
@@ -209,6 +212,12 @@ namespace Cosmos.IL2CPU
         }
 
         public static List<_FieldInfo> GetFieldsInfo(Type aType, bool includeStatic)
+        {
+            var loaded = aType.ReplaceLoad();
+            return GetFieldsInfoInt(loaded, includeStatic);
+        }
+
+        private static List<_FieldInfo> GetFieldsInfoInt(Type aType, bool includeStatic)
         {
             if (aType.IsValueType)
             {
@@ -275,7 +284,7 @@ namespace Cosmos.IL2CPU
 
                     if (pack == 0)
                     {
-                        pack = (int)SizeOfType(typeof(IntPtr));
+                        pack = (int)SizeOfType(BaseTypes.IntPtr);
                     }
 
                     if (fields.Length > 0)
@@ -307,7 +316,7 @@ namespace Cosmos.IL2CPU
                     foreach (var field in fields)
                     {
                         var fieldInfo = new _FieldInfo(field.GetFullName(), SizeOfType(field.FieldType), type, field.FieldType);
-                        fieldInfo.Offset = (uint)(field.GetCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
+                        fieldInfo.Offset = (uint)(field.FetchCustomAttribute<FieldOffsetAttribute>()?.Value ?? 0);
                         fieldInfo.Field = field;
 
                         fieldInfos.Add(fieldInfo);
@@ -356,7 +365,7 @@ namespace Cosmos.IL2CPU
 
                 if (pack == 0)
                 {
-                    pack = (int)SizeOfType(typeof(IntPtr));
+                    pack = (int)SizeOfType(BaseTypes.IntPtr);
                 }
 
                 var fieldsInfo = GetFieldsInfo(aType, false);
@@ -600,20 +609,20 @@ namespace Cosmos.IL2CPU
         /// <returns></returns>
         public static bool IsIntegerBasedType(Type type)
         {
-            return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
-                   || type == typeof(int) || type == typeof(uint)
-                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr) || type.IsPointer;
+            return type == BaseTypes.Byte || type == BaseTypes.Boolean || type == BaseTypes.SByte || type == BaseTypes.UInt16 || type == BaseTypes.Int16
+                   || type == BaseTypes.Int32 || type == BaseTypes.UInt32
+                   || type == BaseTypes.Char || type == BaseTypes.IntPtr || type == BaseTypes.UIntPtr || type.IsPointer;
         }
 
         public static bool IsLongBasedType(Type type)
         {
-            return type == typeof(long) || type == typeof(ulong);
+            return type == BaseTypes.Int64 || type == BaseTypes.UInt64;
         }
 
         public static bool IsSameValueType(Type aType, Type bType)
         {
             return (IsIntegerBasedType(aType) && IsIntegerBasedType(bType)) || (IsLongBasedType(aType) && IsLongBasedType(bType))
-                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float))));
+                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == BaseTypes.Double || aType == BaseTypes.Single)));
         }
 
         /// <summary>
@@ -628,12 +637,12 @@ namespace Cosmos.IL2CPU
 
         public static bool IsPointer(Type aPointer)
         {
-            return aPointer.IsPointer || aPointer.IsByRef || aPointer == typeof(IntPtr) || aPointer == typeof(UIntPtr);
+            return aPointer.IsPointer || aPointer.IsByRef || aPointer == BaseTypes.IntPtr || aPointer == BaseTypes.UIntPtr;
         }
 
         public static bool IsObject(Type aPointer)
         {
-            return aPointer.IsAssignableTo(typeof(object)) || aPointer == typeof(NullRef);
+            return aPointer.IsAssignableTo(BaseTypes.Object) || aPointer == Base.NullRef;
         }
 
         public static bool IsByRef(Type aType) => aType.IsByRef;
@@ -709,7 +718,7 @@ namespace Cosmos.IL2CPU
             {
                 return SizeOfType(aType.GetField("value__").FieldType);
             }
-            if (aType.IsValueType && aType != typeof(ValueType))
+            if (aType.IsValueType && aType != Base.ValueType)
             {
                 // structs are stored in the stack, so stack size = storage size
                 return GetStorageSize(aType);
@@ -719,7 +728,7 @@ namespace Cosmos.IL2CPU
 
         protected static bool TypeIsFloat(Type type)
         {
-            return type == typeof(float) || type == typeof(double);
+            return type == BaseTypes.Single || type == BaseTypes.Double;
         }
     }
 }

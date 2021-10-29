@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using Cosmos.IL2CPU.Extensions;
+using IL2CPU.Reflection;
 
 namespace Cosmos.IL2CPU.ILOpCodes {
   public class OpToken : ILOpCode {
@@ -43,11 +45,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
       Value = aValue;
       if (ValueIsField)
       {
-          ValueField = aModule.ResolveField(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueField = aModule.RetrieveField(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
       if (ValueIsType)
       {
-          ValueType = aModule.ResolveType(Value, aTypeGenericArgs, aMethodGenericArgs);
+          ValueType = aModule.RetrieveType(Value, aTypeGenericArgs, aMethodGenericArgs);
       }
 
     }
@@ -83,11 +85,11 @@ namespace Cosmos.IL2CPU.ILOpCodes {
         case Code.Ldtoken:
           if (ValueIsField)
           {
-            StackPushTypes[0] = typeof (RuntimeFieldHandle);
+            StackPushTypes[0] = Base.RuntimeFieldHandle;
           }
           else if (ValueIsType)
           {
-            StackPushTypes[0] = typeof (RuntimeTypeHandle);
+            StackPushTypes[0] = Base.RuntimeTypeHandle;
           }
           else
           {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
@@ -50,21 +50,21 @@ namespace Cosmos.IL2CPU
     [ForceInclude]
     public static class ExceptionHelperRefs
     {
-        public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
+        public static readonly FieldInfo CurrentExceptionRef = Base.ExceptionHelper.GetField("CurrentException");
 
         public static readonly MethodInfo ThrowOverflowExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowOverflow));
+            Base.ExceptionHelper.GetMethod(nameof(ExceptionHelper.ThrowOverflow));
 
         public static readonly MethodInfo ThrowDivideByZeroExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowDivideByZeroException));
+            Base.ExceptionHelper.GetMethod(nameof(ExceptionHelper.ThrowDivideByZeroException));
 
         public static readonly MethodInfo ThrowInvalidCastExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowInvalidCastException));
+            Base.ExceptionHelper.GetMethod(nameof(ExceptionHelper.ThrowInvalidCastException));
 
         public static readonly MethodInfo ThrowNotFiniteNumberExceptionRef =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
+            Base.ExceptionHelper.GetMethod(nameof(ExceptionHelper.ThrowNotFiniteNumberException));
 
         public static readonly MethodInfo ThrowIndexOutOfRangeException =
-            typeof(ExceptionHelper).GetMethod(nameof(ExceptionHelper.ThrowIndexOutOfRangeException));
+            Base.ExceptionHelper.GetMethod(nameof(ExceptionHelper.ThrowIndexOutOfRangeException));
     }
 }

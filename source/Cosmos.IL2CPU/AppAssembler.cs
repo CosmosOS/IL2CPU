@@ -19,6 +19,7 @@ using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
+using Cosmos.IL2CPU.Interpret;
 using Cosmos.IL2CPU.X86.IL;
 
 using XSharp;
@@ -27,11 +28,15 @@ using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
 using Cosmos.IL2CPU.MethodAnalysis;
+using IL2CPU.Reflection;
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
     internal sealed class AppAssembler : IDisposable
     {
+        private static readonly ProxyLoadContext loadCtx = new ProxyLoadContext();
+
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
         private const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
@@ -129,7 +134,7 @@ namespace Cosmos.IL2CPU
             XS.Label(xMethodLabel);
 
             // Alternative asm labels for the method
-            var xAsmLabelAttributes = aMethod.MethodBase.GetCustomAttributes<AsmLabel>();
+            var xAsmLabelAttributes = aMethod.MethodBase.FetchCustomAttributes<AsmLabel>();
             foreach (var xAttribute in xAsmLabelAttributes)
             {
                 XS.Label(xAttribute.Label);
@@ -456,12 +461,13 @@ namespace Cosmos.IL2CPU
                 mLog.Flush();
                 if (aMethod.MethodAssembler != null)
                 {
-                    var xAssembler = (AssemblerMethod)Activator.CreateInstance(aMethod.MethodAssembler);
+                    var xAssembler = new ProxyAssemblerMethod(loadCtx, aMethod.MethodAssembler);
                     xAssembler.AssembleNew(Assembler, aMethod.PluggedMethod);
                 }
                 else if (aMethod.IsInlineAssembler)
                 {
-                    aMethod.MethodBase.Invoke(null, new object[aMethod.MethodBase.GetParameters().Length]);
+                    var args = new object[aMethod.MethodBase.GetParameters().Length];
+                    ProxyAssemblerMethod.DoInline(loadCtx, aMethod.MethodBase, args);
                 }
                 else
                 {
@@ -643,7 +649,7 @@ namespace Cosmos.IL2CPU
             {
                 if (xType.IsSubclassOf(aAssemblerBaseOp))
                 {
-                    var xAttribs = xType.GetCustomAttributes<OpCodeAttribute>(false);
+                    var xAttribs = xType.FetchCustomAttributes<OpCodeAttribute>(false);
                     foreach (var xAttrib in xAttribs)
                     {
                         var xOpCode = (ushort)xAttrib.OpCode;
@@ -764,8 +770,8 @@ namespace Cosmos.IL2CPU
                      select item).First());
             }
 
-            uint xArrayTypeID = aGetTypeID(typeof(Array));
-            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(typeof(VTable)), xArrayTypeID);
+            uint xArrayTypeID = aGetTypeID(Base.Array);
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(Base.VTable), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
@@ -991,7 +997,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xInterface in aType.GetInterfaces())
             {
-                var xInterfaceMap = aType.GetInterfaceMap(xInterface);
+                var xInterfaceMap = aType.FetchInterfaceMap(xInterface);
 
                 foreach (var xMethod in aMethodSet)
                 {
@@ -1018,7 +1024,7 @@ namespace Cosmos.IL2CPU
 
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
-                var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
+                var xItemList = aField.FetchCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
                 object xItem = null;
                 if (xItemList.Any())
                 {
@@ -1081,7 +1087,7 @@ namespace Cosmos.IL2CPU
                         DebugSymbolReader.TryGetStaticFieldValue(aField.Module, aField.MetadataToken, ref xData);
                     }
 
-                    var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
+                    var xAsmLabelAttributes = aField.FetchCustomAttributes<AsmLabel>();
                     if (xAsmLabelAttributes.Count() > 0)
                     {
                         Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
@@ -1124,7 +1130,7 @@ namespace Cosmos.IL2CPU
 
                     if (!aTo.IsWildcard)
                     {
-                        var xObjectPointerAccessAttrib = xParams[0].GetCustomAttribute<ObjectPointerAccess>(true);
+                        var xObjectPointerAccessAttrib = xParams[0].FetchCustomAttribute<ObjectPointerAccess>(true);
                         if (xObjectPointerAccessAttrib != null)
                         {
                             XS.Comment("Skipping the reference to the next object reference.");
@@ -1147,8 +1153,8 @@ namespace Cosmos.IL2CPU
                 var xOriginalParamsIdx = 0;
                 foreach (var xParam in xParams)
                 {
-                    var xFieldAccessAttrib = xParam.GetCustomAttribute<FieldAccess>(true);
-                    var xObjectPointerAccessAttrib = xParam.GetCustomAttribute<ObjectPointerAccess>(true);
+                    var xFieldAccessAttrib = xParam.FetchCustomAttribute<FieldAccess>(true);
+                    var xObjectPointerAccessAttrib = xParam.FetchCustomAttribute<ObjectPointerAccess>(true);
                     if (xFieldAccessAttrib != null)
                     {
                         // field access
@@ -1214,8 +1220,8 @@ namespace Cosmos.IL2CPU
             XS.Label(InitStringIDsLabel);
             XS.Push(EBP);
             XS.Set(EBP, ESP);
-            XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
-            XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
+            XS.Set(EAX, ILOp.GetTypeIDLabel(BaseTypes.String), sourceIsIndirect: true);
+            XS.Set(LabelName.GetStaticFieldName(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
                 LdStr.GetContentsArrayName(""), destinationDisplacement: 4);
 
             var xMemberId = 0;

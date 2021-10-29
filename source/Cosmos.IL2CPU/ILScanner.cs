@@ -12,6 +12,9 @@ using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using XSharp.Assembler;
 
+using IL2CPU.Reflection;
+using static IL2CPU.Reflection.BaseTypeSystem;
+
 namespace Cosmos.IL2CPU
 {
     public class ScannerQueueItem
@@ -249,23 +252,23 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowNotImplemented", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowInvalidOperation", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
+            Queue(Base.ExceptionHelper.GetMethod("ThrowArgumentOutOfRange", new Type[] { BaseTypes.String }, null), null, "Explicit Entry");
 
             // register system types:
-            Queue(typeof(Array), null, "Explicit Entry");
-            Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
-            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
-            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(Base.Array, null, "Explicit Entry");
+            Queue(Base.Array.Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
+            Queue(Base.Array.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowIndexOutOfRangeException, null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             // Start from entry point of this program
             Queue(aStartMethod, null, "Entry Point");
@@ -320,11 +323,11 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
-            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+            Queue(Base.Array.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
-            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
+            Queue(Base.MulticastDelegate.GetMethod("GetInvocationList"), null, "Explicit Entry");
 
-            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
+            mAsmblr.ProcessField(BaseTypes.String.GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             ScanQueue();
             UpdateAssemblies();
@@ -563,9 +566,9 @@ namespace Cosmos.IL2CPU
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
-                                  && (xType.BaseType != typeof(Array) || !xVirtMethod.DeclaringType.IsGenericType))
+                                  && (xType.BaseType != Base.Array || !xVirtMethod.DeclaringType.IsGenericType))
                             {
-                                var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
+                                var xInterfaceMap = xType.FetchInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
 
                                 if (xMethodIndex != -1)
@@ -587,7 +590,7 @@ namespace Cosmos.IL2CPU
 
             MethodBase xPlug = null;
             // Plugs may use plugs, but plugs won't be plugged over themself
-            var inl = aMethod.GetCustomAttribute<InlineAttribute>();
+            var inl = aMethod.FetchCustomAttribute<InlineAttribute>();
             if (!aIsPlug && !xIsDynamicMethod)
             {
                 // Check to see if method is plugged, if it is we don't scan body
@@ -716,9 +719,9 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            if (aType.BaseType == typeof(Array))
+            if (aType.BaseType == Base.Array)
             {
-                var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
+                var szArrayHelper = Base.Array.Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
                 foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
                     Queue(xMethod.MakeGenericMethod(new Type[] { aType.GetElementType() }), aType, "Virtual SzArrayHelper");
@@ -753,11 +756,11 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
-                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
+                else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == Base.Array && xVirt.DeclaringType.IsGenericType))
                 {
                     if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
                     {
-                        var xIntfMapping = aType.GetInterfaceMap(xVirt.DeclaringType);
+                        var xIntfMapping = aType.FetchInterfaceMap(xVirt.DeclaringType);
                         if ((xIntfMapping.InterfaceMethods != null) && (xIntfMapping.TargetMethods != null))
                         {
                             var xIdx = Array.IndexOf(xIntfMapping.InterfaceMethods, xVirt);
@@ -815,7 +818,7 @@ namespace Cosmos.IL2CPU
             // Keys cant be null. If null, we just say ILScanner is the source
             if (aSrc == null)
             {
-                aSrc = typeof(ILScanner);
+                aSrc = Base.ILScanner;
             }
 
             var xLogItem = new LogItem
@@ -837,7 +840,7 @@ namespace Cosmos.IL2CPU
 
             while (true)
             {
-                var xBaseDefinition = xBaseMethod.GetBaseDefinition();
+                var xBaseDefinition = xBaseMethod.FetchBaseDefinition();
 
                 if (xBaseDefinition == xBaseMethod)
                 {
@@ -920,7 +923,7 @@ namespace Cosmos.IL2CPU
                     var xMethodType = _MethodInfo.TypeEnum.Normal;
                     Type xPlugAssembler = null;
                     _MethodInfo xPlugInfo = null;
-                    var xMethodInline = xMethod.GetCustomAttribute<InlineAttribute>();
+                    var xMethodInline = xMethod.FetchCustomAttribute<InlineAttribute>();
                     if (xMethodInline != null)
                     {
                         // inline assembler, shouldn't come here..
@@ -935,8 +938,8 @@ namespace Cosmos.IL2CPU
                     if (xPlug != null)
                     {
                         xMethodType = _MethodInfo.TypeEnum.NeedsPlug;
-                        xPlugAttrib = xPlug.GetCustomAttribute<PlugMethod>();
-                        var xInlineAttrib = xPlug.GetCustomAttribute<InlineAttribute>();
+                        xPlugAttrib = xPlug.FetchCustomAttribute<PlugMethod>();
+                        var xInlineAttrib = xPlug.FetchCustomAttribute<InlineAttribute>();
                         var xMethodIdPlug = mItemsList.IndexOf(xPlug);
                         if ((xMethodIdPlug == -1) && (xInlineAttrib == null))
                         {
@@ -994,7 +997,7 @@ namespace Cosmos.IL2CPU
                     }
                     else
                     {
-                        xPlugAttrib = xMethod.GetCustomAttribute<PlugMethod>();
+                        xPlugAttrib = xMethod.FetchCustomAttribute<PlugMethod>();
 
                         if (xPlugAttrib != null)
                         {

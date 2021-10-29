@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 
 using XSharp;
@@ -22,13 +22,13 @@ namespace Cosmos.IL2CPU.X86.IL
 
     public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
     {
-      ILOpCodes.OpType xType = (ILOpCodes.OpType)aOpCode;
+      var xType = (ILOpCodes.OpType)aOpCode;
 
       uint xSize = SizeOfType(xType.Value);
 
       //TODO cache it to reduce calculation
-      string xTypeID = GetTypeIDLabel(typeof(Array));
-      MethodBase xCtor = typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
+      string xTypeID = GetTypeIDLabel(Base.Array);
+      MethodBase xCtor = Base.Array.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
       string xCtorName = LabelName.Get(xCtor);
 
       XS.Comment("Element Size = " + xSize);

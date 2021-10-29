@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Metadata;
+using Cosmos.IL2CPU.Extensions;
 
 namespace Cosmos.IL2CPU
 {
@@ -38,7 +39,7 @@ namespace Cosmos.IL2CPU
                 {
                     Kind = ExceptionRegionKind.Filter;
                     FilterOffset = aExceptionClause.FilterOffset;
-                    CatchType = typeof(System.Exception); //TODO: Confirm that this is correct.
+                    CatchType = Base.Exception; //TODO: Confirm that this is correct.
                 }
                 else if (aExceptionClause.Flags.HasFlag(ExceptionHandlingClauseOptions.Finally))
                 {

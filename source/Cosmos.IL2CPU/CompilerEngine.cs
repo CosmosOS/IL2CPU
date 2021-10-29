@@ -13,6 +13,9 @@ using Cosmos.Build.Common;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
+using IL2CPU.Reflection;
+
+using static IL2CPU.Reflection.BaseTypeSystem;
 
 namespace Cosmos.IL2CPU
 {
@@ -35,7 +38,7 @@ namespace Cosmos.IL2CPU
 
         private ICompilerEngineSettings mSettings;
 
-        private AssemblyLoadContext _assemblyLoadContext;
+        private IsolatedAssemblyLoadContext _assemblyLoadContext;
 
         private Dictionary<MethodBase, int?> mBootEntries;
         private List<MemberInfo> mForceIncludes;
@@ -94,7 +97,9 @@ namespace Cosmos.IL2CPU
             #endregion
 
             _assemblyLoadContext = new IsolatedAssemblyLoadContext(
-                mSettings.References.Concat(mSettings.PlugsReferences).Append(mSettings.TargetAssembly));
+                mSettings.References.Concat(mSettings.PlugsReferences)
+                    .Append(mSettings.TargetAssembly).Append(typeof(object).Assembly.Location));
+            IsolatedAssemblyLoadContext.Default = _assemblyLoadContext;
 
             TypeResolver = new TypeResolver(_assemblyLoadContext);
 
@@ -356,7 +361,7 @@ namespace Cosmos.IL2CPU
 
                 foreach (var xType in aAssembly.GetTypes())
                 {
-                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
+                    var xForceIncludeAttribute = xType.FetchCustomAttribute<ForceIncludeAttribute>();
 
                     if (xForceIncludeAttribute != null)
                     {
@@ -365,14 +370,14 @@ namespace Cosmos.IL2CPU
 
                     foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
+                        xForceIncludeAttribute = xMethod.FetchCustomAttribute<ForceIncludeAttribute>();
 
                         if (xForceIncludeAttribute != null)
                         {
                             ForceInclude(xMethod, xForceIncludeAttribute);
                         }
 
-                        var xBootEntryAttribute = xMethod.GetCustomAttribute<BootEntry>();
+                        var xBootEntryAttribute = xMethod.FetchCustomAttribute<BootEntry>();
 
                         if (xBootEntryAttribute != null)
                         {
@@ -381,7 +386,7 @@ namespace Cosmos.IL2CPU
                             LogMessage("Boot Entry found: Name: " + xMethod + ", Entry Index: "
                                 + (xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "null"));
 
-                            if (xMethod.ReturnType != typeof(void))
+                            if (xMethod.ReturnType != BaseTypes.Void)
                             {
                                 throw new NotSupportedException(
                                     "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
@@ -398,7 +403,7 @@ namespace Cosmos.IL2CPU
                     }
 
                     if (xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                             .Where(m => m.GetCustomAttribute<BootEntry>() != null).Any())
+                             .Where(m => m.FetchCustomAttribute<BootEntry>() != null).Any())
                     {
                         throw new NotSupportedException(
                             "Boot Entry should be static! Type: " + xType.FullName);
