@@ -166,7 +166,7 @@ namespace Cosmos.IL2CPU.X86.IL
         /// <param name="aMethod"></param>
         /// <param name="aSize"></param>
         /// <param name="aFieldType"></param>
-        public static void GCUpdateOldObject(_MethodInfo aMethod, uint aSize, Type aFieldType, int aId, string aUniqueText = "", bool debug = false)
+        public static void GCUpdateOldObject(_MethodInfo aMethod, uint aSize, Type aFieldType, int aId, string aUniqueText = "", bool weak = false, bool debug = false)
         {
             if (IsReferenceType(aFieldType) && aMethod.UseGC)
             {
@@ -184,7 +184,14 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
                 XS.Push(aId);
-                XS.Call(LabelName.Get(GCImplementationRefs.DecRefCountRef));
+                if (weak)
+                {
+                    XS.Call(LabelName.Get(GCImplementationRefs.WeakDecRefCountRef));
+                }
+                else
+                {
+                    XS.Call(LabelName.Get(GCImplementationRefs.DecRefCountRef));
+                }
                 XS.Pop(ECX); // restore ecx
                 XS.Label(".AfterGC" + aUniqueText);
             }

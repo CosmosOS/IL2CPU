@@ -22,12 +22,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            ILOpCodes.OpType xType = (ILOpCodes.OpType)aOpCode;
+            var xType = (ILOpCodes.OpType)aOpCode;
 
             uint xSize = SizeOfType(xType.Value);
 
-            //TODO cache it to reduce calculation
-            string xTypeID = GetTypeIDLabel(typeof(Array));
+            string xTypeID = GetTypeIDLabel(xType.Value);
             MethodBase xCtor = typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
             string xCtorName = LabelName.Get(xCtor);
 
@@ -40,8 +39,8 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Push(EAX);
             XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
             XS.Label(".AfterAlloc");
-            XS.Pop(EAX);
-            XS.Pop(ESI);
+            XS.Pop(EAX); // location
+            XS.Pop(ESI); // element count
             XS.Push(EAX);
             XS.Push(ESP, isIndirect: true);
             XS.Push(ESP, isIndirect: true);
@@ -51,8 +50,8 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Set(EBX, xTypeID, sourceIsIndirect: true);  // array type id
             XS.Set(EAX, EBX, destinationIsIndirect: true); // array type id
             XS.Set(EAX, (uint)ObjectUtils.InstanceTypeEnum.Array, destinationDisplacement: 4, destinationIsIndirect: true);
-            XS.Set(EAX, ESI, destinationDisplacement: 8, destinationIsIndirect: true);
-            XS.Set(EAX, xSize, destinationDisplacement: 12, destinationIsIndirect: true);
+            XS.Set(EAX, ESI, destinationDisplacement: 8, destinationIsIndirect: true); // element count
+            XS.Set(EAX, xSize, destinationDisplacement: 12, destinationIsIndirect: true); // element size
             XS.Push(0);
             XS.Call(xCtorName);
             XS.Push(0);

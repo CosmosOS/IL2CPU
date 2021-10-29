@@ -9,6 +9,7 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase IncRefCountRef;
         public static readonly MethodBase IncStructFieldReferencesRef;
         public static readonly MethodBase DecRefCountRef;
+        public static readonly MethodBase WeakDecRefCountRef;
         public static readonly MethodBase DecTypedRefCountRef;
         public static readonly MethodBase InitRef;
         public static readonly MethodBase CleanupTypedObjectRef;

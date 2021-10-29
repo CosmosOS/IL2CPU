@@ -293,38 +293,22 @@ namespace Cosmos.IL2CPU
         {
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
 
-            // Clean up local variables
-            if (!aMethod.IsInlineAssembler && aMethod.PlugMethod is null)
-            {
-                var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
-                for (int i = 0; i < xLocals.Count; i++)
-                {
-                    var offset = ILOp.GetEBPOffsetForLocal(aMethod, i);
-                    XS.Comment(String.Format("Local {0} at EBP-{1}", i, offset));
-                    if (!xLocals[i].LocalType.IsPrimitive && !xLocals[i].LocalType.IsEnum && !xLocals[i].LocalType.IsPointer)
-                    {
-                        XS.Set(ECX, EBP, sourceIsIndirect: true, sourceDisplacement: (int)offset);
-                        Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(xLocals[i].LocalType), xLocals[i].LocalType, 3, i.ToString());
-                    }
-                }
-
-            }
-
-            // Deal with return value
-
-            uint xReturnSize = 0;
+            // Start end of method block
             var xMethInfo = aMethod.MethodBase as MethodInfo;
-            if (xMethInfo != null)
-            {
-                xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
-            }
-
             var xMethodLabel = ILOp.GetLabel(aMethod);
             XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
             XS.Comment("Following code is for debugging. Adjust accordingly!");
             XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
 
             XS.Set(ECX, 0);
+            
+            // Determine size of return value
+            uint xReturnSize = 0;
+            if (xMethInfo != null)
+            {
+                xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
+
+            }
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
                                   select (int)ILOp.Align(ILOp.SizeOfType(item.ParameterType), 4)).Sum();
             if (!aMethod.MethodBase.IsStatic)
@@ -362,6 +346,59 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+            // Clean up local variables
+            if (aMethod.UseGC && !aMethod.IsInlineAssembler && aMethod.PlugMethod is null)
+            {
+                var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
+                for (int i = 0; i < xLocals.Count; i++)
+                {
+                    var offset = ILOp.GetEBPOffsetForLocal(aMethod, i);
+                    var localType = xLocals[i].LocalType;
+                    XS.Comment(String.Format("Local {0} {2} at EBP-{1}", i, offset, localType.Name));
+                    if (!localType.IsPrimitive && !localType.IsEnum && !localType.IsPointer)
+                    {
+                        XS.Set(ECX, EBP);
+                        XS.Sub(ECX, offset + (uint)(localType.IsClass ? 4 : 0));
+                        // we need to ensure that we arnt freeing the object to be returned
+                        // TODO: Handle the case where we have the same object twice
+                        if (aMethod.MethodBase is MethodInfo aMethodInfo2 && localType == aMethodInfo2.ReturnType)
+                        {
+                            if (localType.IsValueType)
+                            {
+                                // struct we have to compare the entire thing
+                                for (int j = 0; j < ILOp.SizeOfType(localType) / 4; j++)
+                                {
+                                    XS.Set(EAX, ECX, sourceIsIndirect: true, sourceDisplacement: j * 4); 
+                                    XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: j * 4);
+                                    XS.Jump(ConditionalTestEnum.NotEqual, ".DoGCDecRef" + i);
+                                }
+                                XS.Jump(".SkipLocalCleanup" + i); // its the return value
+                                XS.Label(".DoGCDecRef" + i);
+                            }
+                            else
+                            {
+                                XS.Set(EAX, ECX, sourceIsIndirect: true, sourceDisplacement: 4);
+                                XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: 4);
+                                XS.Jump(ConditionalTestEnum.Equal, ".SkipLocalCleanup" + i);
+                            }
+                        }
+                        Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(localType), localType, 3, i.ToString());
+                        XS.Label(".SkipLocalCleanup" + i);
+                    }
+                }
+            }
+
+            // Do weak reference count update on return value
+            if(xReturnSize > 0 && aMethod.MethodBase is MethodInfo aMethodInfo)
+            {
+                var returnType = aMethodInfo.ReturnType;
+                if (!returnType.IsPrimitive && !returnType.IsEnum && !returnType.IsPointer)
+                {
+                    Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(returnType), returnType, 3, weak: true);
+                }
+            }
+
+            // move return value
             if (xReturnSize > 0)
             {
                 var xOffset = GetResultCodeOffset(xReturnSize, (uint)xTotalArgsSize);
@@ -372,6 +409,7 @@ namespace Cosmos.IL2CPU
                 }
                 // extra stack space is the space reserved for example when a "public static int TestMethod();" method is called, 4 bytes is pushed, to make room for result;
             }
+
             // Handle exception code here
             var xLabelExc = xMethodLabel + EndOfMethodLabelNameException;
             XS.Label(xLabelExc);
