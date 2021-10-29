@@ -1,5 +1,6 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
+using IL2CPU.API;
 using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API.Attribs;
 using System;
@@ -320,6 +321,7 @@ namespace Cosmos.IL2CPU
             };
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
+
             WriteDebugVideo("Creating GDT.");
             CreateGDT();
 
@@ -328,6 +330,7 @@ namespace Cosmos.IL2CPU
 
             WriteDebugVideo("Creating IDT.");
             CreateIDT();
+
 #if LFB_1024_8
             new Comment("Set graphics fields");
             XS.Mov(XSRegisters.EBX, XSharp.Assembler.ElementReference.New("MultiBootInfo_Structure"), sourceIsIndirect: true);
@@ -364,10 +367,13 @@ namespace Cosmos.IL2CPU
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_Init]);
             }
 
+            //Initiate Memory
+            WriteDebugVideo("Initiating Memory");
+            XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
+
             // Jump to Kernel entry point
             WriteDebugVideo("Jumping to kernel.");
             XS.Call(EntryPointName);
-
             new Comment(this, "Kernel done - loop till next IRQ");
             XS.Label(".loop");
             XS.ClearInterruptFlag();
@@ -415,7 +421,7 @@ namespace Cosmos.IL2CPU
                 XS.Label(AsmMarker.Labels[AsmMarker.Type.DebugStub_Step]);
                 XS.Return();
             }
-
+            
             // Start emitting assembly labels
             CurrentInstance.EmitAsmLabels = true;
         }
