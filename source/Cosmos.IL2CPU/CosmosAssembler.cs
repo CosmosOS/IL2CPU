@@ -224,7 +224,7 @@ namespace Cosmos.IL2CPU
             new Comment(this, "END - Create IDT");
         }
 
-        public void Initialize(bool enableVBE)
+        public void Initialize(bool enableVBE, string VBEResolution)
         {
             uint xSig = 0x1BADB002;
 
@@ -268,9 +268,18 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
             if (enableVBE)
             {
-                DataMembers.Add(new DataMember("", 0, 0, 0, 0, 0));
-                DataMembers.Add(new DataMember("", 0));
-                DataMembers.Add(new DataMember("", 1920, 1080, 32));
+                try
+                {
+                    string[] res = VBEResolution.Split('x');
+
+                    DataMembers.Add(new DataMember("", 0, 0, 0, 0, 0));
+                    DataMembers.Add(new DataMember("", 0));
+                    DataMembers.Add(new DataMember("", int.Parse(res[0]), int.Parse(res[1]), int.Parse(res[2])));
+                }
+                catch
+                {
+                    Console.WriteLine("VBE Resolution must be this format: 1920x1080x32");
+                }
             }
             DataMembers.Add(new DataEndIfDefined());
 

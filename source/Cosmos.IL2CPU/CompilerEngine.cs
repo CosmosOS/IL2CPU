@@ -171,7 +171,7 @@ namespace Cosmos.IL2CPU
                             xAsm.ShouldOptimize = true;
                         }
 
-                        xAsm.Assembler.Initialize(mSettings.CompileVBEMultiboot);
+                        xAsm.Assembler.Initialize(mSettings.CompileVBEMultiboot, mSettings.VBEResolution);
 
                         if (mSettings.DebugMode != DebugMode.IL)
                         {
