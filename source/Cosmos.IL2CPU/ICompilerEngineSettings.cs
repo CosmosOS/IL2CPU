@@ -25,5 +25,7 @@ namespace Cosmos.IL2CPU
         IEnumerable<string> AssemblySearchDirs { get; }
 
         string OutputFilename { get; }
+
+        bool CompileVBEMultiboot { get; }
     }
 }

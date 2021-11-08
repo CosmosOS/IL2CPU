@@ -40,6 +40,8 @@ namespace Cosmos.IL2CPU
 
         private Dictionary<string, string> mCmdOptions;
 
+        public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
+
         public ConsoleCompilerEngineSettings(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
             mLogMessage = aLogMessage;
