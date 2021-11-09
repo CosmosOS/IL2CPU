@@ -101,7 +101,7 @@ namespace Cosmos.IL2CPU
         public static void SetTypeInfo(int aType, uint aBaseType, uint aSize, uint aInterfaceCount, uint[] aInterfaceIndexes,
           uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
           uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes,
-          bool aIsValueType)
+          bool aIsValueType, bool aIsStruct)
         {
             var vTable = new VTable();
             vTable.BaseTypeIdentifier = aBaseType;
@@ -118,6 +118,7 @@ namespace Cosmos.IL2CPU
             vTable.GCFieldOffsets = aGCFieldOffsets;
             vTable.GCFieldTypes = aGCFieldTypes;
             vTable.IsValueType = aIsValueType;
+            vTable.IsStruct = aIsStruct;
             mTypes[aType] = vTable;
         }
 
@@ -330,6 +331,12 @@ namespace Cosmos.IL2CPU
         {
             return mTypes[aType].IsValueType;
         }
+
+        [NoGC()]
+        public static bool IsStruct(uint aType)
+        {
+            return mTypes[aType].IsStruct;
+        }
     }
 
     public struct VTable
@@ -353,5 +360,6 @@ namespace Cosmos.IL2CPU
         public uint[] GCFieldTypes;
 
         public bool IsValueType;
+        public bool IsStruct;
     }
 }

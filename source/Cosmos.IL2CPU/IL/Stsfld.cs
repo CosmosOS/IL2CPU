@@ -73,6 +73,12 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Compare(name, 0, destinationIsIndirect: true, destinationDisplacement: 4);
                 XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
                 XS.Push(name, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
+
+                XS.Push(".SecondAfterGC");
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
+
+
                 XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
                 XS.Label(".SecondAfterGC");
 

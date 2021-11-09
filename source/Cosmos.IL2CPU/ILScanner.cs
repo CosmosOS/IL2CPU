@@ -248,7 +248,6 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecTypedRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.WeakDecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.IncStructFieldReferencesRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.CleanupTypedObjectRef, null, "Explicit Entry");

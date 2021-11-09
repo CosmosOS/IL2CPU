@@ -1,4 +1,5 @@
 using System;
+using Cosmos.Debug.Kernel;
 using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
@@ -38,6 +39,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 
             XS.Label(xIndexOutOfRangeExeptionLabel);
+            XS.Exchange(BX, BX);
             Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
 
             XS.Label(xNoIndexOutOfRangeExeptionLabel);

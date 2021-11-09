@@ -48,7 +48,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Pop(ECX); // restore
                 XS.Label(".AfterGC");
             }
-            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive
+            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsByRef
                         && !xVar.LocalType.IsEnum && aMethod.UseGC)
             {
                 //XS.Exchange(BX, BX);
@@ -77,13 +77,17 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Compare(EBP, 0, destinationIsIndirect: true, destinationDisplacement: -xEBPOffset);
                 XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
 
+                XS.Push(".SecondAfterGC");
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
+
                 XS.Push(EBP, isIndirect: true, displacement: -xEBPOffset); // push object as pointer to send to IncRefCount
 
                 XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
 
                 XS.Label(".SecondAfterGC");
             }
-            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive
+            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsByRef
                         && !xVar.LocalType.IsEnum && aMethod.UseGC)
             {
                 //XS.Exchange(BX, BX);

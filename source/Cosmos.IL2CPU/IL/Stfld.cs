@@ -144,12 +144,15 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
 
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer to send to IncRefCount
+                XS.Push(".SecondAfterGC");
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
 
                 XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
 
                 XS.Label(".SecondAfterGC");
             }
-            else if (!fieldType.IsPointer && !fieldType.IsPrimitive && !fieldType.IsPrimitive
+            else if (!fieldType.IsPointer && !fieldType.IsPrimitive && !fieldType.IsPrimitive && !fieldType.IsByRef
                         && !fieldType.IsEnum && aMethod.UseGC)
             {
                 //XS.Exchange(BX, BX);
@@ -184,6 +187,9 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
                 XS.Push(aId);
+                XS.Push(".AfterGC" + aUniqueText);
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
                 if (weak)
                 {
                     XS.Call(LabelName.Get(GCImplementationRefs.WeakDecRefCountRef));
@@ -195,7 +201,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Pop(ECX); // restore ecx
                 XS.Label(".AfterGC" + aUniqueText);
             }
-            else if (!aFieldType.IsPointer && !aFieldType.IsPrimitive && !aFieldType.IsPrimitive
+            else if (!aFieldType.IsPointer && !aFieldType.IsPrimitive && !aFieldType.IsPrimitive && !aFieldType.IsByRef
                         && !aFieldType.IsEnum && aMethod.UseGC)
             {
                 //XS.Exchange(BX, BX);
