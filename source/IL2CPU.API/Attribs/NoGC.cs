@@ -2,7 +2,7 @@
 
 namespace IL2CPU.API.Attribs
 {
-    [AttributeUsage(System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(System.AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
     public sealed class NoGC : Attribute
     {
         public NoGC()

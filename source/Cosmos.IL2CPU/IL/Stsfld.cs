@@ -74,9 +74,9 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
                 XS.Push(name, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
 
-                XS.Push(".SecondAfterGC");
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EAX);
+                //XS.Push(".SecondAfterGC");
+                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                //XS.Pop(EAX);
 
 
                 XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
@@ -89,10 +89,15 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if(!xField.FieldType.IsPointer && !xField.FieldType.IsPrimitive && !xField.FieldType.IsEnum)
             {
+                XS.Label(".StructGC");
+                XS.Push(".StructGC");
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
+
                 // let clean up object deal with it
                 XS.Push(xDataName, isIndirect: true, displacement: 4);
                 XS.Push(GetTypeIDLabel(xField.FieldType), isIndirect: true);
-                XS.Call(LabelName.Get(GCImplementationRefs.CleanupTypedObjectRef));
+                XS.Call(LabelName.Get(GCImplementationRefs.PropagateDecRefCountRef));
             }
 
             for (int i = 0; i < (xSize / 4); i++)

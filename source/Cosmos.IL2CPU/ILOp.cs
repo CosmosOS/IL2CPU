@@ -101,6 +101,12 @@ namespace Cosmos.IL2CPU
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameNormal);
         }
 
+        /// <summary>
+        /// Number of bytes required to store type on stack
+        /// </summary>
+        /// <param name="aMethod"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
         public static uint GetStackCountForLocal(_MethodInfo aMethod, Type aField)
         {
             var xSize = SizeOfType(aField);

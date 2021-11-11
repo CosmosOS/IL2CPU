@@ -11,7 +11,8 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase DecRefCountRef;
         public static readonly MethodBase WeakDecRefCountRef;
         public static readonly MethodBase InitRef;
-        public static readonly MethodBase CleanupTypedObjectRef;
+        public static readonly MethodBase PropagateDecRefCountRef;
+        public static readonly MethodBase PropagateWeakDecRefCountRef;
 
         static GCImplementationRefs()
         {

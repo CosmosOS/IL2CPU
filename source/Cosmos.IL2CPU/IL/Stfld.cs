@@ -108,7 +108,6 @@ namespace Cosmos.IL2CPU.X86.IL
                 default:
                     throw new Exception("Remainder size " + (xSize % 4) + " not supported!");
             }
-
             // Notify GC if necessary of new object
             GCUpdateNewObject(aMethod, xSize, fieldType);
 
@@ -144,9 +143,9 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
 
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer to send to IncRefCount
-                XS.Push(".SecondAfterGC");
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EAX);
+                //XS.Push(".SecondAfterGC");
+                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                //XS.Pop(EAX);
 
                 XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
 
@@ -187,9 +186,9 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
                 XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
                 XS.Push(aId);
-                XS.Push(".AfterGC" + aUniqueText);
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EAX);
+                //XS.Push(".AfterGC" + aUniqueText);
+                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                //XS.Pop(EAX);
                 if (weak)
                 {
                     XS.Call(LabelName.Get(GCImplementationRefs.WeakDecRefCountRef));
@@ -207,9 +206,22 @@ namespace Cosmos.IL2CPU.X86.IL
                 //XS.Exchange(BX, BX);
                 // let clean up object deal with it
                 XS.Push(ECX); // the call will trash all registers, so store it on the stack
-                XS.Push(ECX, isIndirect: true);
+                XS.Push(ECX/*, isIndirect: true*/);
                 XS.Push(GetTypeIDLabel(aFieldType), isIndirect: true);
-                XS.Call(LabelName.Get(GCImplementationRefs.CleanupTypedObjectRef));
+
+                XS.Label(".StructGC" + aUniqueText);
+                XS.Push(".StructGC" + aUniqueText);
+                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
+                XS.Pop(EAX);
+                //XS.Exchange(BX, BX);
+                if (weak)
+                {
+                    XS.Call(LabelName.Get(GCImplementationRefs.PropagateWeakDecRefCountRef));
+                }
+                else
+                {
+                    XS.Call(LabelName.Get(GCImplementationRefs.PropagateDecRefCountRef));
+                }
                 XS.Pop(ECX);
             }
         }
