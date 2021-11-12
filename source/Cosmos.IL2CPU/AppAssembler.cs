@@ -946,14 +946,15 @@ namespace Cosmos.IL2CPU
 
                     //GC Information
                     var fields = ILOp.GetFieldsInfo(xType, false);
-                    var gcFieldCount = fields.Where(f => !f.FieldType.IsValueType).Count();
+                    var gcFieldCount = fields.Where(f => !f.FieldType.IsValueType || (!f.FieldType.IsPointer && !f.FieldType.IsEnum && !f.FieldType.IsPrimitive && !f.FieldType.IsByRef)).Count();
                     XS.Push((uint)gcFieldCount);
                     var gCFieldOffsets = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
                     var gcFieldTypes = AllocateEmptyArray(gcFieldCount, sizeof(uint), xArrayTypeID);
                     uint pos = 4; // we cant overwrite the start of the array object
+
                     foreach (var field in fields)
                     {
-                        if (!field.FieldType.IsValueType)
+                        if (!field.FieldType.IsValueType || (!field.FieldType.IsPointer && !field.FieldType.IsEnum && !field.FieldType.IsPrimitive && !field.FieldType.IsByRef))
                         {
                             var value = BitConverter.GetBytes(aGetTypeID(field.FieldType));
                             for (var i = 0; i < 4; i++)
