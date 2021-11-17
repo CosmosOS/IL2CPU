@@ -609,9 +609,9 @@ namespace Cosmos.IL2CPU
         /// <returns></returns>
         public static bool IsIntegerBasedType(Type type)
         {
-            return type == BaseTypes.Byte || type == BaseTypes.Boolean || type == BaseTypes.SByte || type == BaseTypes.UInt16 || type == BaseTypes.Int16
-                   || type == BaseTypes.Int32 || type == BaseTypes.UInt32
-                   || type == BaseTypes.Char || type == BaseTypes.IntPtr || type == BaseTypes.UIntPtr || type.IsPointer;
+            return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
+                   || type == typeof(int) || type == typeof(uint)
+                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr) || type.IsPointer;
         }
 
         public static bool IsLongBasedType(Type type)
