@@ -1020,7 +1020,7 @@ namespace Cosmos.IL2CPU
             {
                 var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
                 object xItem = null;
-                if (xItemList.Any())
+                if (xItemList.Count != 0)
                 {
                     xItem = xItemList.First();
                 }
@@ -1069,7 +1069,7 @@ namespace Cosmos.IL2CPU
                     }
 
                     var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
-                    if (xAsmLabelAttributes.Count() > 0)
+                    if (xAsmLabelAttributes.Any())
                     {
                         Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
                     }
