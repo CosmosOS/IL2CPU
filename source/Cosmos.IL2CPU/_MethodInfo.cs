@@ -69,7 +69,7 @@ namespace Cosmos.IL2CPU
             IsInlineAssembler = isInlineAssembler;
 
             var attribs = aMethodBase.GetCustomAttributes<DebugStub>(false).ToList();
-            if (attribs.Any())
+            if (attribs.Count != 0)
             {
                 var attrib = new DebugStub
                 {

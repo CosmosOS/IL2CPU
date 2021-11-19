@@ -478,7 +478,7 @@ namespace Cosmos.IL2CPU
                     aCleanup();
                     if (xJumpTo == null)
                     {
-                        XS.Jump(CPU.ConditionalTestEnum.NotEqual,GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
+                        XS.Jump(CPU.ConditionalTestEnum.NotEqual, GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                     }
                     else
                     {
@@ -638,6 +638,7 @@ namespace Cosmos.IL2CPU
 
         public static bool IsByRef(Type aType) => aType.IsByRef;
 
+        static Dictionary<Type, uint> Sizes = new Dictionary<Type, uint>();
         public static uint SizeOfType(Type aType)
         {
             if (aType == null)
@@ -705,6 +706,12 @@ namespace Cosmos.IL2CPU
             //if (xTypeSpec != null) {
             //    return 4;
             //}
+
+            if (Sizes.TryGetValue(aType, out uint value))
+            {
+                return value;
+            }
+
             if (aType.IsEnum)
             {
                 return SizeOfType(aType.GetField("value__").FieldType);
@@ -712,7 +719,9 @@ namespace Cosmos.IL2CPU
             if (aType.IsValueType && aType != typeof(ValueType))
             {
                 // structs are stored in the stack, so stack size = storage size
-                return GetStorageSize(aType);
+                var v = GetStorageSize(aType);
+                Sizes[aType] = v;
+                return v;
             }
             return 4;
         }

@@ -453,7 +453,7 @@ namespace Cosmos.IL2CPU
                 throw new NotSupportedException("No boot entries found!");
             }
 
-            if (mBootEntries.Where(e => e.Value == null).Count() == 0)
+            if (!mBootEntries.Where(e => e.Value == null).Any())
             {
                 throw new NotImplementedException("No default boot entries found!");
             }
