@@ -637,111 +637,93 @@ namespace Cosmos.IL2CPU
         }
 
         public static bool IsByRef(Type aType) => aType.IsByRef;
-        private static Dictionary<Type, uint> SizesOfTypes = new Dictionary<Type, uint>();
+
+        static Dictionary<Type, uint> Sizes = new Dictionary<Type, uint>();
         public static uint SizeOfType(Type aType)
         {
             if (aType == null)
             {
                 throw new ArgumentNullException(nameof(aType));
             }
-            if (SizesOfTypes.ContainsKey(aType))
-            {
-                return SizesOfTypes[aType];
-            }
-
-            uint result = 4;
             if (aType.IsEnum)
             {
                 aType.GetEnumUnderlyingType();
             }
-
             if (aType.IsPointer || aType.IsByRef)
             {
-                result = 4;
-                goto End;
+                return 4;
             }
             if (aType.FullName == "System.Void")
             {
-                result = 0;
-                goto End;
+                return 0;
             }
             if (IsReferenceType(aType))
             {
-                result = 8;
-                goto End;
+                return 8;
             }
 #pragma warning disable IDE0010 // Add missing cases
             switch (aType.FullName)
 #pragma warning restore IDE0010 // Add missing cases
             {
                 case "System.Char":
-                    result = 2;
-                    goto End;
+                    return 2;
                 case "System.Byte":
                 case "System.SByte":
-                    result = 1;
-                    goto End;
+                    return 1;
                 case "System.UInt16":
                 case "System.Int16":
-                    result = 2;
-                    goto End;
+                    return 2;
                 case "System.UInt32":
                 case "System.Int32":
-                    result = 4;
-                    goto End;
+                    return 4;
                 case "System.UInt64":
                 case "System.Int64":
-                    result = 8;
-                    goto End;
+                    return 8;
                 //TODO: for now hardcode IntPtr and UIntPtr to be 32-bit
                 case "System.UIntPtr":
                 case "System.IntPtr":
-                    result = 4;
-                    goto End;
+                    return 4;
                 case "System.Boolean":
-                    result = 1;
-                    goto End;
+                    return 1;
                 case "System.Single":
-                    result = 4;
-                    goto End;
+                    return 4;
                 case "System.Double":
-                    result = 8;
-                    goto End;
+                    return 8;
                 case "System.Decimal":
-                    result = 16;
-                    goto End;
+                    return 16;
                 case "System.Guid":
-                    result = 16;
-                    goto End;
+                    return 16;
                 case "System.DateTime":
-                    result = 8;
-                    goto End;
+                    return 8;
             }
             if (aType.FullName != null && aType.FullName.EndsWith("*"))
             {
                 // pointer
-                result = 4;
-                goto End;
+                return 4;
             }
             // array
             //TypeSpecification xTypeSpec = aType as TypeSpecification;
             //if (xTypeSpec != null) {
             //    return 4;
             //}
+
+            if (Sizes.TryGetValue(aType, out uint value))
+            {
+                return value;
+            }
+
             if (aType.IsEnum)
             {
-                result = SizeOfType(aType.GetField("value__").FieldType);
-                goto End;
+                return SizeOfType(aType.GetField("value__").FieldType);
             }
             if (aType.IsValueType && aType != typeof(ValueType))
             {
-                result = GetStorageSize(aType);
-                goto End;
+                // structs are stored in the stack, so stack size = storage size
+                var v = GetStorageSize(aType);
+                Sizes[aType] = v;
+                return v;
             }
-
-        End:
-            SizesOfTypes.Add(aType, result);
-            return result;
+            return 4;
         }
 
         protected static bool TypeIsFloat(Type type)
