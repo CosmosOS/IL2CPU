@@ -14,9 +14,9 @@
     <ItemGroup>
         <PackageReference Include="Cosmos.Build.Common" />
         <PackageReference Include="System.Memory" Version="4.5.4" />
-        <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+        <PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
         <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
 		<PackageReference Include="XSharp" />
     </ItemGroup>
