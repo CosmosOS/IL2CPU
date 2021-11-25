@@ -1,5 +1,6 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
+using Cosmos.Debug.Kernel;
 using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
@@ -226,78 +227,71 @@ namespace Cosmos.IL2CPU
 
         public void Initialize(bool enableVBE, string VBEResolution)
         {
-            uint xSig = 0x1BADB002;
+            uint xSig = 0xe85250d6;
 
-            DataMembers.Add(new DataIfNotDefined("ELF_COMPILATION"));
+            DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
+
             DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
 
-            uint xFlags = 0;
+            DataMembers.Add(new DataMember("MultibootArchitecture", 0));
 
-            if (enableVBE)
-            {
-                xFlags = 0x10007;
-            }
-            else
-            {
-                xFlags = 0x10003;
-            }
-            
-            DataMembers.Add(new DataMember("MultibootHeaderAddr", ElementReference.New("MultibootSignature")));
-            DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
-            DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
-            DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
-            DataMembers.Add(new DataMember("MultibootEntryAddr", ElementReference.New("Kernel_Start")));
-            if (enableVBE)
-            {
-                DataMembers.Add(new DataMember("", 0));
-                DataMembers.Add(new DataMember("", 800, 600, 32));
-            } 
-            DataMembers.Add(new DataEndIfDefined());
+            DataMembers.Add(new DataMember("MultibootChecksum", "MultibootHeaderEnd - MultibootHeader"));
 
-            DataMembers.Add(new DataIfDefined("ELF_COMPILATION"));
-            if (enableVBE)
-            {
-                xFlags = 0x10007;
-            }
-            else
-            {
-                xFlags = 0x10003;
-            }
-            DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
-            DataMembers.Add(new DataMember("MultibootFlags", xFlags));
-            DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
+            DataMembers.Add(new DataMember("MultibootLenght", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))"));
+
             if (enableVBE)
             {
                 try
                 {
                     string[] res = VBEResolution.Split('x');
 
-                    DataMembers.Add(new DataMember("", 0, 0, 0, 0, 0));
-                    DataMembers.Add(new DataMember("", 0));
-                    DataMembers.Add(new DataMember("", int.Parse(res[0]), int.Parse(res[1]), int.Parse(res[2])));
+                    DataMembers.Add(new DataMember("MultibootFramebufferTag", Array.Empty<byte>()));
+
+                    DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
+                    DataMembers.Add(new DataMember("MultibootFramebufferOptional", (ushort)1));
+                    DataMembers.Add(new DataMember("MultibootFramebufferLenght", "MultibootFramebufferTagEnd - MultibootFramebufferTag"));
+                    DataMembers.Add(new DataMember("", int.Parse(res[0])));
+                    DataMembers.Add(new DataMember("", int.Parse(res[1])));
+                    DataMembers.Add(new DataMember("", int.Parse(res[2])));
+
+                    DataMembers.Add(new DataMember("MultibootFramebufferTagEnd", Array.Empty<byte>()));
                 }
                 catch
                 {
                     Console.WriteLine("VBE Resolution must be this format: 1920x1080x32");
                 }
             }
-            DataMembers.Add(new DataEndIfDefined());
-
-            // graphics info fields
-            if (enableVBE)
-            {
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeModeInfoAddr", 1 << 2));
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeControlInfoAddr", 1 << 0));
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeMode", 0));
-            }
-            else
-            {
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeModeInfoAddr", System.Int32.MaxValue));
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeControlInfoAddr", System.Int32.MaxValue));
-                DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeMode", System.Int32.MaxValue));
-            } 
 
             // memory
+            DataMembers.Add(new DataMember("MultibootMemoryTag", Array.Empty<byte>()));
+
+            DataMembers.Add(new DataMember("MultibootMemoryTagType", (ushort)2));
+            DataMembers.Add(new DataMember("MultibootMemoryTagOptional", (ushort)1));
+            DataMembers.Add(new DataMember("MultibootMemoryTagLenght", "MultibootMemoryTagEnd - MultibootMemoryTag"));
+            DataMembers.Add(new DataMember("MultibootHeaderAddr", ElementReference.New("MultibootSignature")));
+            DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
+            DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
+            DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
+
+            DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
+
+            //Entry
+            DataMembers.Add(new DataMember("MultibootEntryTag", Array.Empty<byte>()));
+
+            DataMembers.Add(new DataMember("MultibootEntryTagType", (ushort)3));
+            DataMembers.Add(new DataMember("MultibootEntryTagOptional", (ushort)1));
+            DataMembers.Add(new DataMember("MultibootEntryTagLenght", "MultibootEntryTagEnd - MultibootEntryTag"));
+            DataMembers.Add(new DataMember("MultibootEntryAddr", ElementReference.New("Kernel_Start")));
+
+            DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
+
+            DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
+            DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
+            DataMembers.Add(new DataMember("", 8));
+
+            DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
+
+            //memory
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_Low", 0));
             DataMembers.Add(new DataMember("Before_Kernel_Stack", new byte[0x50000]));
