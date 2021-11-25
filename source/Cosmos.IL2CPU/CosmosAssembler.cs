@@ -229,14 +229,11 @@ namespace Cosmos.IL2CPU
         {
             uint xSig = 0xe85250d6;
 
+            //Multiboot header
             DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
-
             DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
-
             DataMembers.Add(new DataMember("MultibootArchitecture", 0));
-
             DataMembers.Add(new DataMember("MultibootChecksum", "MultibootHeaderEnd - MultibootHeader", "dd", false));
-
             DataMembers.Add(new DataMember("MultibootLenght", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", "dd", false));
 
             if (enableVBE)
@@ -245,6 +242,7 @@ namespace Cosmos.IL2CPU
                 {
                     string[] res = VBEResolution.Split('x');
 
+                    //Framebuffer Tag
                     DataMembers.Add(new DataMember("MultibootFramebufferTag", Array.Empty<byte>()));
 
                     DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
@@ -275,7 +273,7 @@ namespace Cosmos.IL2CPU
 
             DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
 
-            //Entry
+            //Entry Address
             DataMembers.Add(new DataMember("MultibootEntryTag", Array.Empty<byte>()));
 
             DataMembers.Add(new DataMember("MultibootEntryTagType", (ushort)3));
@@ -285,9 +283,9 @@ namespace Cosmos.IL2CPU
 
             DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
 
+            //End Tag
             DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
             DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
-            DataMembers.Add(new DataMember("", 8));
 
             DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
 
