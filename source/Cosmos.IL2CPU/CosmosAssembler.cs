@@ -365,17 +365,6 @@ namespace Cosmos.IL2CPU
             WriteDebugVideo("Creating IDT.");
             CreateIDT();
 
-            if (enableVBE)
-            {
-                new Mov { DestinationReg = XSRegisters.EBX, SourceRef = ElementReference.New("MultiBootInfo_Structure"), SourceIsIndirect = true };
-                new Mov { DestinationReg = XSRegisters.EAX, SourceReg = XSRegisters.EBX, SourceIsIndirect = true, SourceDisplacement = 72 };
-                new Mov { DestinationRef = ElementReference.New("MultibootGraphicsRuntime_VbeControlInfoAddr"), DestinationIsIndirect = true, SourceReg = XSRegisters.EAX };
-                new Mov { DestinationReg = XSRegisters.EAX, SourceReg = XSRegisters.EBX, SourceIsIndirect = true, SourceDisplacement = 76 };
-                new Mov { DestinationRef = ElementReference.New("MultibootGraphicsRuntime_VbeModeInfoAddr"), DestinationIsIndirect = true, SourceReg = XSRegisters.EAX };
-                new Mov { DestinationReg = XSRegisters.EAX, SourceReg = XSRegisters.EBX, SourceIsIndirect = true, SourceDisplacement = 80 };
-                new Mov { DestinationRef = ElementReference.New("MultibootGraphicsRuntime_VbeMode"), DestinationIsIndirect = true, SourceReg = XSRegisters.EAX };
-            }
-
             //WriteDebugVideo("Initializing SSE.");
             //new Comment(this, "BEGIN - SSE Init");
             //// CR4[bit 9]=1, CR4[bit 10]=1, CR0[bit 2]=0, CR0[bit 1]=1
