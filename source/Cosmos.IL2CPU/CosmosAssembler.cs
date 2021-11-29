@@ -234,8 +234,8 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
             DataMembers.Add(new DataMember("MultibootArchitecture", 0));
-            DataMembers.Add(new DataMember("MultibootChecksum", "MultibootHeaderEnd - MultibootHeader", typeof(uint)));
-            DataMembers.Add(new DataMember("MultibootLenght", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", typeof(uint)));
+            DataMembers.Add(new DataMember("MultibootLenght", "MultibootHeaderEnd - MultibootHeader", typeof(uint)));
+            DataMembers.Add(new DataMember("MultibootChecksum", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", typeof(uint)));
 
             if (enableVBE)
             {
@@ -271,7 +271,6 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
             DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
             DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
-
             DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
 
             //Entry Address
@@ -284,8 +283,11 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
 
             //End Tag
+            DataMembers.Add(new DataMember("align", "8", true));
+            DataMembers.Add(new DataMember("MultibootEndTag", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
             DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
+            DataMembers.Add(new DataMember("MultibootEndTagEnd", Array.Empty<byte>()));
 
             DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
 
@@ -329,7 +331,7 @@ namespace Cosmos.IL2CPU
             new LiteralAssemblerCode("%ifndef EXCLUDE_MULTIBOOT_MAGIC");
             new Comment(this, "MultiBoot compliant loader provides info in registers: ");
             new Comment(this, "EBX=multiboot_info ");
-            new Comment(this, "EAX=0x2BADB002 - check if it's really Multiboot-compliant loader ");
+            new Comment(this, "EAX=0x36d76289 - check if it's really Multiboot2-compliant loader ");
             new Comment(this, "                ;- copy mb info - some stuff for you  ");
             new Comment(this, "BEGIN - Multiboot Info");
             new Mov
