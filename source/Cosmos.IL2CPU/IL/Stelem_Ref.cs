@@ -56,8 +56,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Pop(ECX);
 
-            Stfld.GCUpdateOldObject(aMethod, aElementSize, aOpCode.StackPopTypes[0], 2, debug: false);
-
             //get bytes
             var bytes = aElementSize / 4;
             for (uint i = bytes; i > 0; i -= 1)
@@ -99,11 +97,6 @@ namespace Cosmos.IL2CPU.X86.IL
                     throw new Exception("Remainder size " + (aElementSize % 4) + " not supported!");
 
             }
-
-            XS.Sub(ECX, 4 * bytes);
-
-
-            Stfld.GCUpdateNewObject(aMethod, aElementSize, aOpCode.StackPopTypes[0], false);
 
             XS.Add(ESP, 12);
         }

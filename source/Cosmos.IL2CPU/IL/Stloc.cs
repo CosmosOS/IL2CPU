@@ -29,87 +29,10 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Comment("Local EBP offset = " + xEBPOffset);
             XS.Comment("Local size = " + xSize);
 
-            // Notify GC if necessary
-            if (IsReferenceType(xVar.LocalType) && aMethod.UseGC)
-            {
-                if (xSize != 8)
-                {
-                    throw new NotImplementedException();
-                }
-
-                //XS.Exchange(BX, BX);
-
-                XS.Compare(EBP, 0, destinationIsIndirect: true, destinationDisplacement: -xEBPOffset);
-                XS.Jump(CPU.ConditionalTestEnum.Equal, ".AfterGC");
-                XS.Push(ECX); // the call will trash all registers
-
-                //XS.Push(".AfterGC");
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EAX);
-
-                XS.Push(EBP, isIndirect: true, displacement: -xEBPOffset); // push object as pointer/uint to send to DecRefCount
-                XS.Push(0);
-                XS.Call(LabelName.Get(GCImplementationRefs.DecRefCountRef));
-                XS.Pop(ECX); // restore
-                XS.Label(".AfterGC");
-            }
-            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsByRef
-                        && !xVar.LocalType.IsEnum && aMethod.UseGC)
-            {
-                //XS.Exchange(BX, BX);
-                // let clean up object deal with it
-                XS.Set(ECX, EBP);
-                XS.Sub(ECX, (uint)(xEBPOffset + (GetStackCountForLocal(aMethod, xVar.LocalType) - 1) * 4));
-                XS.Push(ECX);
-                XS.Push(GetTypeIDLabel(xVar.LocalType), isIndirect: true);
-
-                XS.Label(".StructGC");
-                XS.Push(".StructGC");
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EAX);
-
-                XS.Call(LabelName.Get(GCImplementationRefs.PropagateDecRefCountRef));
-            }
-
             for (int i = xStackCount - 1; i >= 0; i--)
             {
                 XS.Pop(EAX);
                 XS.Set(EBP, EAX, destinationDisplacement: 0 - (xEBPOffset + (i * 4)));
-            }
-
-            // Notify GC if necessary of new object
-            if (IsReferenceType(xVar.LocalType) && aMethod.UseGC)
-            {
-                if (xSize != 8)
-                {
-                    throw new NotImplementedException();
-                }
-
-                //XS.Exchange(BX, BX);
-
-                XS.Compare(EBP, 0, destinationIsIndirect: true, destinationDisplacement: -xEBPOffset);
-                XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
-
-                //XS.Push(".SecondAfterGC");
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EAX);
-
-                XS.Push(EBP, isIndirect: true, displacement: -xEBPOffset); // push object as pointer to send to IncRefCount
-
-                XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
-
-                XS.Label(".SecondAfterGC");
-            }
-            else if (!xVar.LocalType.IsPointer && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsPrimitive && !xVar.LocalType.IsByRef
-                        && !xVar.LocalType.IsEnum && aMethod.UseGC)
-            {
-                //XS.Exchange(BX, BX);
-                // let clean up object deal with it
-                XS.Set(ECX, EBP);
-                XS.Sub(ECX, (uint)(xEBPOffset + (GetStackCountForLocal(aMethod, xVar.LocalType) - 1 )* 4));
-                XS.Push(ECX);
-                XS.Push(GetTypeIDLabel(xVar.LocalType), isIndirect: true);
-                XS.Call(LabelName.Get(GCImplementationRefs.IncStructFieldReferencesRef));
             }
         }
     }

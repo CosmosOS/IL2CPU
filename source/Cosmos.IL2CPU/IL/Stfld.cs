@@ -67,9 +67,6 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Add(ECX, (uint)(xActualOffset));
             }
 
-            // Notify GC if necessary
-            GCUpdateOldObject(aMethod, xSize, fieldType, ID);
-
             //TODO: Can't we use an x86 op to do a byte copy instead and be faster?
             for (int i = 0; i < (xSize / 4); i++)
             {
@@ -108,121 +105,12 @@ namespace Cosmos.IL2CPU.X86.IL
                 default:
                     throw new Exception("Remainder size " + (xSize % 4) + " not supported!");
             }
-            // Notify GC if necessary of new object
-            GCUpdateNewObject(aMethod, xSize, fieldType);
 
             // remove object from stack
             XS.Add(ESP, 4);
             if (aNeedsGC)
             {
                 XS.Add(ESP, 4);
-            }
-        }
-
-        /// <summary>
-        /// Increments object reference count of object with address at ECX + 4
-        /// </summary>
-        /// <param name="aMethod"></param>
-        /// <param name="aDeclaringObject"></param>
-        /// <param name="xSize"></param>
-        /// <param name="fieldType"></param>
-        public static void GCUpdateNewObject(_MethodInfo aMethod, uint xSize, Type fieldType, bool aDebug = false)
-        {
-            if (IsReferenceType(fieldType) && aMethod.UseGC)
-            {
-                if (xSize != 8)
-                {
-                    throw new NotImplementedException();
-                }
-                if (aDebug)
-                {
-                    XS.Exchange(BX, BX);
-                }
-
-                XS.Compare(ECX, 0, destinationIsIndirect: true, destinationDisplacement: 4);
-                XS.Jump(CPU.ConditionalTestEnum.Equal, ".SecondAfterGC");
-
-                XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer to send to IncRefCount
-                //XS.Push(".SecondAfterGC");
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EAX);
-
-                XS.Call(LabelName.Get(GCImplementationRefs.IncRefCountRef));
-
-                XS.Label(".SecondAfterGC");
-            }
-            else if (!fieldType.IsPointer && !fieldType.IsPrimitive && !fieldType.IsPrimitive && !fieldType.IsByRef
-                        && !fieldType.IsEnum && aMethod.UseGC)
-            {
-                //XS.Exchange(BX, BX);
-                // let clean up object deal with it
-                XS.Push(ECX);
-                XS.Push(GetTypeIDLabel(fieldType), isIndirect: true);
-                XS.Call(LabelName.Get(GCImplementationRefs.IncStructFieldReferencesRef));
-            }
-        }
-
-        /// <summary>
-        /// Decrements reference count of object with address in ECX + 4
-        /// </summary>
-        /// <param name="aMethod"></param>
-        /// <param name="aSize"></param>
-        /// <param name="aFieldType"></param>
-        public static void GCUpdateOldObject(_MethodInfo aMethod, uint aSize, Type aFieldType, int aId, string aUniqueText = "", bool weak = false, bool debug = false)
-        {
-            if (IsReferenceType(aFieldType) && aMethod.UseGC)
-            {
-                if (aSize != 8)
-                {
-                    throw new NotImplementedException();
-                }
-                if (debug)
-                {
-                    XS.Exchange(BX, BX);
-                }
-
-                XS.Compare(ECX, 0, destinationIsIndirect: true, destinationDisplacement: 4);
-                XS.Jump(CPU.ConditionalTestEnum.Equal, ".AfterGC" + aUniqueText);
-                XS.Push(ECX); // the call will trash all registers, so store it on the stack
-                XS.Push(ECX, isIndirect: true, displacement: 4); // push object as pointer/uint to send to DecTypedRefCount
-                XS.Push(aId);
-                //XS.Push(".AfterGC" + aUniqueText);
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EAX);
-                if (weak)
-                {
-                    XS.Call(LabelName.Get(GCImplementationRefs.WeakDecRefCountRef));
-                }
-                else
-                {
-                    XS.Call(LabelName.Get(GCImplementationRefs.DecRefCountRef));
-                }
-                XS.Pop(ECX); // restore ecx
-                XS.Label(".AfterGC" + aUniqueText);
-            }
-            else if (!aFieldType.IsPointer && !aFieldType.IsPrimitive && !aFieldType.IsPrimitive && !aFieldType.IsByRef
-                        && !aFieldType.IsEnum && aMethod.UseGC)
-            {
-                //XS.Exchange(BX, BX);
-                // let clean up object deal with it
-                XS.Push(ECX); // the call will trash all registers, so store it on the stack
-                XS.Push(ECX/*, isIndirect: true*/);
-                XS.Push(GetTypeIDLabel(aFieldType), isIndirect: true);
-
-                XS.Label(".StructGC" + aUniqueText);
-                XS.Push(".StructGC" + aUniqueText);
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EAX);
-                //XS.Exchange(BX, BX);
-                if (weak)
-                {
-                    XS.Call(LabelName.Get(GCImplementationRefs.PropagateWeakDecRefCountRef));
-                }
-                else
-                {
-                    XS.Call(LabelName.Get(GCImplementationRefs.PropagateDecRefCountRef));
-                }
-                XS.Pop(ECX);
             }
         }
 

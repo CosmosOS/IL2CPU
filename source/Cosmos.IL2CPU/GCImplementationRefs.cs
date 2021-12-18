@@ -6,13 +6,11 @@ namespace Cosmos.IL2CPU
     public static class GCImplementationRefs
     {
         public static readonly MethodBase AllocNewObjectRef;
-        public static readonly MethodBase IncRefCountRef;
-        public static readonly MethodBase IncStructFieldReferencesRef;
-        public static readonly MethodBase DecRefCountRef;
-        public static readonly MethodBase WeakDecRefCountRef;
         public static readonly MethodBase InitRef;
-        public static readonly MethodBase PropagateDecRefCountRef;
-        public static readonly MethodBase PropagateWeakDecRefCountRef;
+        public static readonly MethodBase IncRootCountRef;
+        public static readonly MethodBase DecRootCountRef;
+        public static readonly MethodBase IncRootCountsInStructRef;
+        public static readonly MethodBase DecRootCountsInStructRef;
 
         static GCImplementationRefs()
         {

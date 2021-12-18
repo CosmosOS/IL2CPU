@@ -245,13 +245,11 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.InitRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.IncRootCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.IncRootCountsInStructRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.DecRootCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.DecRootCountsInStructRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.WeakDecRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncStructFieldReferencesRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.PropagateDecRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.PropagateWeakDecRefCountRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
             Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
             Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
@@ -320,8 +318,6 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");

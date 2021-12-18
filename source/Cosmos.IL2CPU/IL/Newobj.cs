@@ -235,9 +235,6 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Add(ESP, EAX, destinationIsIndirect: true);
                 }
 
-                //XS.Push(".AfterAlloc");
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EAX);
                 // todo: probably we want to check for exceptions after calling Alloc
                 XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
                 XS.Label(".AfterAlloc");
@@ -249,9 +246,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 XS.Pop(EAX);
                 XS.Set(EBX, strTypeId, sourceIsIndirect: true);
-                //XS.Push(EBX);
-                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                //XS.Pop(EBX);
                 XS.Set(EAX, EBX, destinationIsIndirect: true);
                 XS.Set(EAX, (uint)ObjectUtils.InstanceTypeEnum.NormalObject, destinationDisplacement: 4, destinationIsIndirect: true, size: RegisterSize.Int32);
                 XS.Set(EAX, xMemSize, destinationDisplacement: 8, destinationIsIndirect: true, size: RegisterSize.Int32);

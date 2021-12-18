@@ -25,21 +25,6 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Pop(EAX);
 
-            if(mType.IsValueType && !mType.IsPointer && !mType.IsPrimitive && !mType.IsPrimitive && !mType.IsByRef
-                        && !mType.IsEnum && aMethod.UseGC && !aFromNewObj)
-            {
-
-                XS.Push(EAX);
-                XS.Push(EAX);
-                XS.Push(GetTypeIDLabel(mType), isIndirect: true);
-                XS.Label(".StructGC");
-                XS.Push(".StructGC");
-                XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                XS.Pop(EBX);
-                XS.Call(LabelName.Get(GCImplementationRefs.PropagateDecRefCountRef));
-                XS.Pop(EAX);
-            }
-
             for (int i = 0; i < (mObjSize / 4); i++)
             {
                 XS.Set(EAX, 0, destinationDisplacement: i * 4, size: RegisterSize.Int32);

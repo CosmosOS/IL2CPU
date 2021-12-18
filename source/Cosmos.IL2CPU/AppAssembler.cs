@@ -346,70 +346,6 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            // Clean up local variables
-            if (aMethod.UseGC && !aMethod.IsInlineAssembler && aMethod.PlugMethod is null)
-            {
-                var xLocals = aMethod.MethodBase.GetLocalVariables() ?? new List<LocalVariableInfo>();
-                if (xLocals.Where(local => !local.LocalType.IsPrimitive && !local.LocalType.IsEnum && !local.LocalType.IsPointer).Count() != 0)
-                {
-                    //XS.Push(0xE4D);
-                    //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                    //XS.Pop(ECX);
-                    //XS.Push(xMethodLabel + EndOfMethodLabelNameNormal);
-                    //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                    //XS.Pop(ECX);
-                }
-                for (int i = 0; i < xLocals.Count; i++)
-                {
-                    var offset = ILOp.GetEBPOffsetForLocal(aMethod, i);
-                    var localType = xLocals[i].LocalType;
-                    if (localType.IsValueType)
-                    {
-                        offset += (uint)(((int)ILOp.GetStackCountForLocal(aMethod, localType) - 1) * 4); //taken from ldloca
-                    }
-                    XS.Comment(String.Format("Local {0} {2} at EBP-{1}", i, offset, localType.Name));
-                    if (!localType.IsPrimitive && !localType.IsEnum && !localType.IsPointer && !localType.IsByRef)
-                    {
-                        XS.Set(ECX, EBP);
-                        XS.Sub(ECX, offset + (uint)(localType.IsClass ? 4 : 0));
-                        // we need to ensure that we arnt freeing the object to be returned
-                        // TODO: Handle the case where we have the same object twice
-                        if (aMethod.MethodBase is MethodInfo aMethodInfo2 && localType == aMethodInfo2.ReturnType)
-                        {
-                            if (localType.IsValueType && i == xLocals.Count - 1) // for structs they always have an additional local for the return value
-                            {
-                                // this case we know for sure have the return value so we have to do 
-                            }
-                            else if (localType.IsValueType)
-                            {
-                                // just decrease like usual since we know its not the return value
-                            }
-                            else
-                            {
-                                XS.Set(EAX, ECX, sourceIsIndirect: true, sourceDisplacement: 4);
-                                XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: 4);
-                                XS.Jump(ConditionalTestEnum.NotEqual, ".DoGCDecRef" + i);
-
-                                //XS.Push(0x456456);
-                                //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                                //XS.Pop(EAX);
-
-                            }
-                            Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(localType), localType, 4, "Return" + i.ToString(), weak: true);
-                            XS.Jump($".GCLocal{i}Finished"); // its the return value
-                            XS.Label(".DoGCDecRef" + i);
-
-                        }
-
-                        //XS.Push(0x741741);
-                        //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-                        //XS.Pop(EAX);
-                        Stfld.GCUpdateOldObject(aMethod, ILOp.SizeOfType(localType), localType, 3, i.ToString());
-                        XS.Label($".GCLocal{i}Finished");
-                    }
-                }
-            }
-
             if (xReturnSize > 0)
             {
                 var xOffset = GetResultCodeOffset(xReturnSize, (uint)xTotalArgsSize);
@@ -733,11 +669,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private static void Move(string aDestLabelName, int aValue)
-        {
-            XS.Set(aDestLabelName, (uint)aValue, destinationIsIndirect: true, size: RegisterSize.Int32);
-        }
-
         private static void Call(MethodBase aMethod)
         {
             XS.Call(LabelName.Get(aMethod));
@@ -888,6 +819,7 @@ namespace Cosmos.IL2CPU
 
                     // Type ID
                     string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
+                    XS.Comment(xType.FullName);
                     XS.Set(xDataName, (uint)xTypeID, destinationIsIndirect: true, size: RegisterSize.Int32);
                     XS.DataMember(xDataName, xTypeID);
                     XS.Push(xTypeID);
@@ -956,6 +888,13 @@ namespace Cosmos.IL2CPU
                     {
                         if (!field.FieldType.IsValueType || (!field.FieldType.IsPointer && !field.FieldType.IsEnum && !field.FieldType.IsPrimitive && !field.FieldType.IsByRef))
                         {
+#if VMT_DEBUG
+                            xVmtDebugOutput.WriteStartElement("Field");
+                            xVmtDebugOutput.WriteAttributeString("Name", field.FieldType.Name);
+                            xVmtDebugOutput.WriteAttributeString("Id", aGetTypeID(field.FieldType).ToString());
+                            xVmtDebugOutput.WriteAttributeString("Offset", Ldfld.GetFieldOffset(xType, field.Id).ToString());
+                            xVmtDebugOutput.WriteEndElement();
+#endif
                             var value = BitConverter.GetBytes(aGetTypeID(field.FieldType));
                             for (var i = 0; i < 4; i++)
                             {

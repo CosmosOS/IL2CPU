@@ -16,13 +16,11 @@ namespace Cosmos.IL2CPU
         // this field seems to be always empty, but the VTablesImpl class is embedded in the final exe.
         public static VTable[] mTypes;
 
-        [NoGC()]
         static VTablesImpl()
         {
 
         }
 
-        [NoGC()]
         public static uint GetBaseType(uint aObjectType)
         {
             if (aObjectType >= mTypes.Length)
@@ -34,7 +32,6 @@ namespace Cosmos.IL2CPU
             return mTypes[aObjectType].BaseTypeIdentifier;
         }
 
-        [NoGC()]
         public static uint GetSize(uint aObjectType)
         {
             if (aObjectType >= mTypes.Length)
@@ -46,7 +43,6 @@ namespace Cosmos.IL2CPU
             return mTypes[aObjectType].Size;
         }
 
-        [NoGC()]
         public static bool IsInstance(uint aObjectType, uint aDesiredObjectType, bool aIsInterface)
         {
             if (aObjectType == 0)
@@ -98,7 +94,6 @@ namespace Cosmos.IL2CPU
             return false;
         }
 
-        [NoGC()]
         public static void SetTypeInfo(int aType, uint aBaseType, uint aSize, uint aInterfaceCount, uint[] aInterfaceIndexes,
           uint aMethodCount, uint[] aMethodIndexes, uint[] aMethodAddresses,
           uint aInterfaceMethodCount, uint[] aInterfaceMethodIndexes, uint[] aTargetMethodIndexes, uint aGCFieldCount, uint[] aGCFieldOffsets, uint[] aGCFieldTypes,
@@ -123,7 +118,6 @@ namespace Cosmos.IL2CPU
             mTypes[aType] = vTable;
         }
 
-        [NoGC()]
         public static void SetInterfaceInfo(int aType, int aInterfaceIndex, uint aInterfaceIdentifier)
         {
             mTypes[aType].InterfaceIndexes[aInterfaceIndex] = aInterfaceIdentifier;
@@ -134,7 +128,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        [NoGC()]
         public static void SetMethodInfo(int aType, int aMethodIndex, uint aMethodIdentifier, uint aMethodAddress)
         {
             mTypes[aType].MethodIndexes[aMethodIndex] = aMethodIdentifier;
@@ -146,14 +139,12 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        [NoGC()]
         public static void SetInterfaceMethodInfo(int aType, int aMethodIndex, uint aInterfaceMethodId, uint aTargetMethodId)
         {
             mTypes[aType].InterfaceMethodIndexes[aMethodIndex] = aInterfaceMethodId;
             mTypes[aType].TargetMethodIndexes[aMethodIndex] = aTargetMethodId;
         }
 
-        [NoGC()]
         public static uint GetMethodAddressForType(uint aType, uint aMethodId)
         {
             if (aType > 0xFFFF)
@@ -229,7 +220,6 @@ namespace Cosmos.IL2CPU
         }
 
         // For a certain type and virtual method, find which type defines the virtual method actually used
-        [NoGC()]
         public static uint GetDeclaringTypeOfMethodForType(uint aType, uint aMethodId)
         {
             var xCurrentType = aType;
@@ -262,7 +252,6 @@ namespace Cosmos.IL2CPU
             while (true) ;
         }
 
-        [NoGC()]
         public static uint GetMethodAddressForInterfaceType(uint aType, uint aInterfaceMethodId)
         {
             if (aType > 0xFFFF)
@@ -310,30 +299,52 @@ namespace Cosmos.IL2CPU
             while (true) ;
         }
 
-        [NoGC()]
+        /// <summary>
+        /// Get nnumber of GC tracked Fields in Type
+        /// This includes all objects and struct fields
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
         public static uint GetGCFieldCount(uint aType)
         {
             return mTypes[aType].GCFieldCount;
         }
 
-        [NoGC()]
+        /// <summary>
+        /// Get Field Offsets of all Fields tracked by GC in bytes
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
         public static uint[] GetGCFieldOffsets(uint aType)
         {
             return mTypes[aType].GCFieldOffsets;
         }
 
-        [NoGC()]
+        /// <summary>
+        /// Get Types of Types Fields
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
         public static uint[] GetGCFieldTypes(uint aType)
         {
             return mTypes[aType].GCFieldTypes;
         }
-        [NoGC()]
+
+        /// <summary>
+        /// Determine if Type is a ValueType
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
         public static bool IsValueType(uint aType)
         {
             return mTypes[aType].IsValueType;
         }
 
-        [NoGC()]
+        /// <summary>
+        /// Determine if a Type is a Struct
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
         public static bool IsStruct(uint aType)
         {
             return mTypes[aType].IsStruct;

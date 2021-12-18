@@ -25,7 +25,6 @@ namespace Cosmos.IL2CPU
         public Type MethodAssembler { get; }
         public bool IsInlineAssembler { get; }
         public bool DebugStubOff { get; }
-        public bool UseGC { get; set; }
 
         private _MethodInfo _PluggedMethod;
         /// <summary>
@@ -80,8 +79,6 @@ namespace Cosmos.IL2CPU
             }
 
             MethodLabel = LabelName.Get(MethodBase);
-
-            UseGC = aMethodBase.GetCustomAttribute(typeof(NoGC)) == null;
         }
     }
 }
