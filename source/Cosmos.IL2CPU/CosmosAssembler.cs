@@ -294,14 +294,20 @@ namespace Cosmos.IL2CPU
             //memory
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));
             DataMembers.Add(new DataMember("MultiBootInfo_Memory_Low", 0));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember("Before_Kernel_Stack", new byte[0x50000]));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember("Kernel_Stack", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultiBootInfo_Structure", new uint[1]));
 
             // constants
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__uint2double_const", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x41 }));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__ulong2double_const", 0x5F800000));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__doublesignbit", 0x8000000000000000));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__floatsignbit", 0x80000000));
 
             if (mComPort > 0)
