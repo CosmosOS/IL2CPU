@@ -82,13 +82,14 @@ namespace IL2CPU.Debug.Symbols
             {
                 Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
 String.Join(";", Environment.GetEnvironmentVariable("PATH"),
-        Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes\\win-{xDir}\\native")));
+        Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes/win-{xDir}/native")));
             }
             else
             {
-                Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
-String.Join(":", Environment.GetEnvironmentVariable("PATH"),
-        Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes\\linux-{xDir}\\native")));
+                var asmPath = Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location);
+                var newPath = Environment.GetEnvironmentVariable("PATH") + ":" + Path.Combine(asmPath, $"runtimes/linux-{xDir}/native") + ":" + asmPath;
+
+                Environment.SetEnvironmentVariable("PATH", newPath);
             }
             SQLitePCL.Batteries.Init();
             mConnection = new SqliteConnection(mConnStr);
