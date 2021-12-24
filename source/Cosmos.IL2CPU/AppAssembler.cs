@@ -918,8 +918,8 @@ namespace Cosmos.IL2CPU
                     XS.Push(xDataName);
                     XS.Push(0);
 
-                    XS.Push(xType.IsValueType ? 1 : 0);
-                    XS.Push(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0);
+                    XS.Push((uint)(xType.IsValueType ? 1 : 0));
+                    XS.Push((uint)(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0));
 
                     Call(VTablesImplRefs.SetTypeInfoRef);
 
