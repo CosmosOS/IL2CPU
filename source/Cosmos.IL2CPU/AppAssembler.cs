@@ -1063,7 +1063,7 @@ namespace Cosmos.IL2CPU
             {
                 var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
                 object xItem = null;
-                if (xItemList.Any())
+                if (xItemList.Count != 0)
                 {
                     xItem = xItemList.First();
                 }
@@ -1075,10 +1075,10 @@ namespace Cosmos.IL2CPU
                 }
                 if (xManifestResourceName != null)
                 {
-                    // todo: add support for manifest streams again
-                    //string xFileName = Path.Combine(mOutputDir,
-                    //                                (xCurrentField.DeclaringType.Assembly.FullName + "__" + xManifestResourceName).Replace(",",
-                    //                                                                                                                       "_") + ".res");
+                    if(aField.FieldType != typeof(byte[]))
+                    {
+                        throw new Exception("ManifestResourceStreams are only supported on static byte arrays");
+                    }
                     var xTarget = new StringBuilder();
                     byte[] xData;
                     using (var xStream = aField.DeclaringType?.Assembly.GetManifestResourceStream(xManifestResourceName))
@@ -1091,19 +1091,6 @@ namespace Cosmos.IL2CPU
                         uint xArrayTypeID = 0;
                         xData = AllocateEmptyArray((int)xStream.Length, 1, xArrayTypeID);
                         xStream.Read(xData, 16, (int)xStream.Length);
-
-                        //xTarget.Append("0,");
-                        //xTarget.Append((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
-                        //xTarget.Append(",");
-                        //xTarget.Append((int)xStream.Length);
-                        //xTarget.Append(",");
-                        //xTarget.Append("1,");
-                        //while (xStream.Position < xStream.Length)
-                        //{
-                        //    xTarget.Append(xStream.ReadByte());
-                        //    xTarget.Append(",");
-                        //}
-                        //xTarget.Remove(xTarget.Length - 1, 1);
                     }
 
                     XS.DataMemberBytes(xFieldContentsName, xData);
@@ -1125,7 +1112,7 @@ namespace Cosmos.IL2CPU
                     }
 
                     var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
-                    if (xAsmLabelAttributes.Count() > 0)
+                    if (xAsmLabelAttributes.Any())
                     {
                         Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
                     }

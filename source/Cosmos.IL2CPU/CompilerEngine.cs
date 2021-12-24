@@ -171,7 +171,25 @@ namespace Cosmos.IL2CPU
                             xAsm.ShouldOptimize = true;
                         }
 
-                        xAsm.Assembler.Initialize();
+                        bool VBEMultiboot = false;
+                        string VBEResolution;
+                        if(mSettings.CompileVBEMultiboot)
+                        {
+                            VBEMultiboot = true;
+                        }
+                        else
+                        {
+                            VBEMultiboot = false;
+                        }
+                        if(String.IsNullOrEmpty(mSettings.VBEResolution))
+                        {
+                            VBEResolution = "800x600x32";
+                        }
+                        else
+                        {
+                            VBEResolution=mSettings.VBEResolution;
+                        }
+                        xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
                         if (mSettings.DebugMode != DebugMode.IL)
                         {
@@ -435,7 +453,7 @@ namespace Cosmos.IL2CPU
                 throw new NotSupportedException("No boot entries found!");
             }
 
-            if (mBootEntries.Where(e => e.Value == null).Count() == 0)
+            if (!mBootEntries.Where(e => e.Value == null).Any())
             {
                 throw new NotImplementedException("No default boot entries found!");
             }

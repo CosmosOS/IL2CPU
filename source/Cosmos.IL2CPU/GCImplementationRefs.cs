@@ -12,6 +12,7 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase IncRootCountsInStructRef;
         public static readonly MethodBase DecRootCountsInStructRef;
 
+
         static GCImplementationRefs()
         {
             var typeResolver = CompilerEngine.TypeResolver;

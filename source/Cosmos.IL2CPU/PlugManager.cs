@@ -167,9 +167,9 @@ namespace Cosmos.IL2CPU
                                 // We also skip methods which do method access.
                                 if (xMethod.GetParameters().Where(x =>
                                 {
-                                    return x.GetCustomAttributes(typeof(FieldAccess)).Count() > 0
-                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Count() > 0;
-                                }).Count() > 0)
+                                    return x.GetCustomAttributes(typeof(FieldAccess)).Any()
+                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Any();
+                                }).Any())
                                 {
                                     OK = true;
                                 }
@@ -431,7 +431,7 @@ namespace Cosmos.IL2CPU
                             var xActualParamCount = xParams.Length;
                             foreach (var xParam in xParams)
                             {
-                                if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                 {
                                     xActualParamCount--;
                                 }
@@ -445,7 +445,7 @@ namespace Cosmos.IL2CPU
                                 xTypesInst = Array.Empty<Type>();
 
                                 var xReplaceType = xParams[0].GetCustomAttributes(typeof(FieldType), false).ToList();
-                                if (xReplaceType.Any())
+                                if (xReplaceType.Count != 0)
                                 {
                                     xTypesStatic[0] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                 }
@@ -460,13 +460,13 @@ namespace Cosmos.IL2CPU
                                 var xCurIdx = 0;
                                 foreach (var xParam in xParams.Skip(1))
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                     {
                                         continue;
                                     }
 
                                     var xReplaceType = xParam.GetCustomAttributes(typeof(FieldType), false).ToList();
-                                    if (xReplaceType.Any())
+                                    if (xReplaceType.Count!=0)
                                     {
                                         xTypesInst[xCurIdx] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                     }
@@ -480,7 +480,7 @@ namespace Cosmos.IL2CPU
                                 xCurIdx = 0;
                                 foreach (var xParam in xParams)
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                     {
                                         xCurIdx++;
                                         continue;
