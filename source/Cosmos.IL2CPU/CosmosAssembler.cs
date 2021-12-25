@@ -1,6 +1,7 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
 using Cosmos.Debug.Kernel;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
@@ -397,6 +398,10 @@ namespace Cosmos.IL2CPU
                 WriteDebugVideo("Initializing DebugStub.");
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_Init]);
             }
+
+            //Initiate Memory
+            WriteDebugVideo("Initiating Memory");
+            XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
 
             // Jump to Kernel entry point
             WriteDebugVideo("Jumping to kernel.");
