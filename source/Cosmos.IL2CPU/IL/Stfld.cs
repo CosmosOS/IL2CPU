@@ -13,8 +13,6 @@ namespace Cosmos.IL2CPU.X86.IL
     [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stfld)]
     public class Stfld : ILOp
     {
-        static int ID = 10;
-
         public Stfld(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
         {
         }
@@ -38,7 +36,6 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Comment("Type: " + fieldType.ToString());
             XS.Comment("Size: " + xFieldInfo.Size);
             XS.Comment("Offset: " + xActualOffset + " (includes object header)");
-            XS.Comment("ID: " + (++ID).ToString("X"));
 
             uint xRoundedSize = Align(xSize, 4);
             if (aNeedsGC)

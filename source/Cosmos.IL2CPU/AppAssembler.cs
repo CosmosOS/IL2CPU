@@ -1,4 +1,4 @@
-#define VMT_DEBUG
+//#define VMT_DEBUG
 //#define COSMOSDEBUG
 
 using System;
