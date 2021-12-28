@@ -192,6 +192,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
+          if (ILOp.IsLongBasedType(expectedType) &&
+             ILOp.IsLongBasedType(StackPopTypes[0]))
+          {
+            return;
+          }
           if (expectedType == typeof(bool))
           {
             if (StackPopTypes[0] == typeof(int))
