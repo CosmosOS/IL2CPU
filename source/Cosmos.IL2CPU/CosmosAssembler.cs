@@ -293,8 +293,6 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
 
             //memory
-            DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));
-            DataMembers.Add(new DataMember("MultiBootInfo_Memory_Low", 0));
             DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember("Before_Kernel_Stack", new byte[0x50000]));
             DataMembers.Add(new DataMember("align", "16", true));
@@ -347,22 +345,9 @@ namespace Cosmos.IL2CPU
                 DestinationIsIndirect = true,
                 SourceReg = RegistersEnum.EBX
             };
-            XS.Add(EBX, 4);
-            XS.Set(EAX, EBX, sourceIsIndirect: true);
-            new Mov
-            {
-                DestinationRef = ElementReference.New("MultiBootInfo_Memory_Low"),
-                DestinationIsIndirect = true,
-                SourceReg = RegistersEnum.EAX
-            };
-            XS.Add(EBX, 4);
-            XS.Set(EAX, EBX, sourceIsIndirect: true);
-            new Mov
-            {
-                DestinationRef = ElementReference.New("MultiBootInfo_Memory_High"),
-                DestinationIsIndirect = true,
-                SourceReg = RegistersEnum.EAX
-            };
+
+            XS.Call("SystemVoidCosmosCoreMultiboot2Init");
+
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
             WriteDebugVideo("Creating GDT.");
