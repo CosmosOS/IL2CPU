@@ -740,6 +740,7 @@ namespace Cosmos.IL2CPU
         }
 
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
+        private static Type VTableType; //typeof(VTable)
 
         public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
@@ -762,7 +763,17 @@ namespace Cosmos.IL2CPU
             }
 
             uint xArrayTypeID = aGetTypeID(typeof(Array));
-            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(typeof(VTable)), xArrayTypeID);
+
+            if (VTableType == null)
+            {
+                VTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.VTable, Cosmos.Core", true);
+                if (VTableType == null)
+                {
+                    throw new Exception("Cannot resolve VTable struct in Cosmos.Core");
+                }
+            }
+
+            byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(VTableType), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
