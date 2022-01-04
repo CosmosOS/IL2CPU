@@ -740,7 +740,8 @@ namespace Cosmos.IL2CPU
         }
 
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
-        private static Type VTableType; //typeof(VTable)
+        private static Type VTableType;
+        private static Type GCTableType;
 
         public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
@@ -761,12 +762,25 @@ namespace Cosmos.IL2CPU
                      where item == xDataMember
                      select item).First());
             }
+            var xGCTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("gcTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            string xGCArrayName = LabelName.GetStaticFieldName(xGCTypesFieldRef);
+            xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                                      where item.Name == xGCArrayName
+                           select item).FirstOrDefault();
+            if (xDataMember != null)
+            {
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Remove(
+                    (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                     where item == xDataMember
+                     select item).First());
+            }
 
             uint xArrayTypeID = aGetTypeID(typeof(Array));
 
             if (VTableType == null)
             {
                 VTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.VTable, Cosmos.Core", true);
+                GCTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.GCTable, Cosmos.Core", true);
                 if (VTableType == null)
                 {
                     throw new Exception("Cannot resolve VTable struct in Cosmos.Core");
@@ -777,6 +791,10 @@ namespace Cosmos.IL2CPU
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+            xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(GCTableType), xArrayTypeID);
+            XS.DataMemberBytes(xGCArrayName + "_Contents", xData);
+            XS.DataMember(xGCArrayName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
+            XS.Set(xGCArrayName, xGCArrayName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
 #if VMT_DEBUG
             using (var xVmtDebugOutput = XmlWriter.Create(
                 File.Create(Path.Combine(mLogDir, @"vmt_debug.xml")), new XmlWriterSettings() { Indent = true }))
@@ -784,8 +802,8 @@ namespace Cosmos.IL2CPU
                 xVmtDebugOutput.WriteStartDocument();
                 xVmtDebugOutput.WriteStartElement("VMT");
 #endif
-                //Push((uint)aTypesSet.Count);
-                foreach (var xType in aTypesSet)
+            //Push((uint)aTypesSet.Count);
+            foreach (var xType in aTypesSet)
                 {
                     uint xTypeID = aGetTypeID(xType);
 #if VMT_DEBUG
