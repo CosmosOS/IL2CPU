@@ -289,11 +289,11 @@ namespace Cosmos.IL2CPU
 
                             if (!OK)
                             {
-                                if (xAttrib == null || xAttrib.IsOptional)
+                                if (xAttrib == null || !xAttrib.IsOptional)
                                 {
                                     if (LogWarning != null)
                                     {
-                                        //LogWarning("Invalid plug method! Target method not found. : " + xMethod.GetFullName());
+                                        LogWarning("Invalid plug method! Target method not found. : " + xMethod.GetFullName());
                                     }
                                 }
                             }
