@@ -4,8 +4,9 @@
         <TargetFrameworks>net5.0</TargetFrameworks>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <PackageDescription>IL2CPU debug symbols APIs.</PackageDescription>
-            <IsPackable>True</IsPackable>
-            <Configurations>Debug;Release;TEST</Configurations>
+        <IsPackable>True</IsPackable>
+        <Configurations>Debug;Release;TEST</Configurations>
+        <EnableDefaultItems>false</EnableDefaultItems>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,6 +27,27 @@
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
         <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
         <PackageReference Include="System.Runtime" Version="4.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="CacheHelper.cs" />
+        <Compile Include="DebugInfo.cs" />
+        <Compile Include="DebugModel.cs" />
+        <Compile Include="DebugSymbolReader.cs" />
+        <Compile Include="LocalTypeGenericContext.cs" />
+        <Compile Include="LocalTypeProvider.cs" />
+        <Compile Include="ObjDump.cs" />
+        <Compile Include="ObjectReader.cs" />
+        <Compile Include="SourceInfo.cs" />
+        <Compile Include="SQL.cs" />
+        <Compile Include="SqliteBulkCopy.cs" />
+        <Compile Include="Hashing/TypeHashingAlgorithms.cs" />
+        <Compile Include="Metadata/CachingMetadataStringDecoder.cs" />
+        <Compile Include="Metadata/MetadataHelper.cs" />
+        <Compile Include="Pdb/ILSequencePoint.cs" />
+        <Compile Include="Pdb/PdbSymbolReader.cs" />
+        <Compile Include="Pdb/PortablePdbSymbolReader.cs" />
+        <Compile Include="Pdb/UnmanagedPdbSymbolReader.cs" />
     </ItemGroup>
 
     <ItemGroup>
