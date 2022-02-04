@@ -18,10 +18,18 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase GetBaseTypeRef;
 
         public static Func<Type, uint> GetTypeId;
+        // GC Methods
+        public static readonly MethodBase GetGCFieldCount;
 
         static VTablesImplRefs()
         {
-            VTablesImplDef = typeof(VTablesImpl);
+            var typeResolver = CompilerEngine.TypeResolver;
+
+            VTablesImplDef = typeResolver.ResolveType("Cosmos.Core.VTablesImpl, Cosmos.Core", true);
+            if (VTablesImplDef == null)
+            {
+                throw new Exception("Cannot find VTablesImpl in Cosmos.Core!");
+            }
             foreach (FieldInfo xField in typeof(VTablesImplRefs).GetFields())
             {
                 if (xField.Name.EndsWith("Ref"))
@@ -29,7 +37,7 @@ namespace Cosmos.IL2CPU
                     MethodBase xTempMethod = VTablesImplDef.GetMethod(xField.Name.Substring(0, xField.Name.Length - "Ref".Length));
                     if (xTempMethod == null)
                     {
-                        throw new Exception("Method '" + xField.Name.Substring(0, xField.Name.Length - "Ref".Length) + "' not found on RuntimeEngine!");
+                        throw new Exception("Method '" + xField.Name.Substring(0, xField.Name.Length - "Ref".Length) + "' not found on VTablesImpl!");
                     }
                     xField.SetValue(null, xTempMethod);
                 }

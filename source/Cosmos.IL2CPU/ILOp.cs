@@ -101,6 +101,12 @@ namespace Cosmos.IL2CPU
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameNormal);
         }
 
+        /// <summary>
+        /// Number of bytes required to store type on stack
+        /// </summary>
+        /// <param name="aMethod"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
         public static uint GetStackCountForLocal(_MethodInfo aMethod, Type aField)
         {
             var xSize = SizeOfType(aField);
@@ -583,6 +589,17 @@ namespace Cosmos.IL2CPU
             return !aType.IsValueType && !aType.IsPointer && !aType.IsByRef;
         }
 
+        /// <summary>
+        /// Checks if the type is a struct
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
+        public static bool IsStruct(Type aType)
+        {
+            return aType.IsValueType && !aType.Equals(typeof(string)) && !aType.Equals(typeof(decimal)) && !aType.IsEnum && !aType.IsPrimitive;
+        }
+    
+
         public static bool TypeIsSigned(Type aType)
         {
             var name = aType.FullName;
@@ -602,7 +619,7 @@ namespace Cosmos.IL2CPU
         {
             return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint)
-                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
+                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr) || type.IsPointer;
         }
 
         public static bool IsLongBasedType(Type type)

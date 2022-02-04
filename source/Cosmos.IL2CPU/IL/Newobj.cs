@@ -22,8 +22,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
         {
-            OpMethod xMethod = (OpMethod)aOpCode;
-            string xCurrentLabel = GetLabel(aMethod, aOpCode);
+            var xMethod = (OpMethod)aOpCode;
+            var xCurrentLabel = GetLabel(aMethod, aOpCode);
             var xType = xMethod.Value.DeclaringType;
 
             Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value, DebugEnabled);
@@ -67,7 +67,7 @@ namespace Cosmos.IL2CPU.X86.IL
                  */
 
                 // Size of return value - we need to make room for this on the stack.
-                uint xStorageSize = Align(SizeOfType(objectType), 4);
+                var xStorageSize = Align(SizeOfType(objectType), 4);
                 XS.Comment("StorageSize: " + xStorageSize);
                 if (xStorageSize == 0)
                 {
@@ -103,7 +103,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(EAX);
 
                 var xOpType = new OpType(xMethod.OpCode, xMethod.Position, xMethod.NextPosition, xMethod.Value.DeclaringType, xMethod.CurrentExceptionRegion);
-                new Initobj(aAssembler).Execute(aMethod, xOpType);
+                new Initobj(aAssembler).Execute(aMethod, xOpType, true);
 
                 new Call(aAssembler).Execute(aMethod, xMethod);
 
@@ -120,7 +120,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 var xParams = constructor.GetParameters();
 
                 // array length + 8
-                bool xHasCalcSize = false;
+                var xHasCalcSize = false;
 
                 #region Special string handling
                 // try calculating size:
@@ -226,8 +226,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 #endregion Special string handling
 
-                uint xMemSize = GetStorageSize(objectType);
-                int xExtraSize = 12; // additional size for set values after alloc
+                var xMemSize = GetStorageSize(objectType);
+                var xExtraSize = 12; // additional size for set values after alloc
                 XS.Push((uint)(xMemSize + xExtraSize));
                 if (xHasCalcSize)
                 {
@@ -242,24 +242,23 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(ESP, isIndirect: true);
                 // it's on the stack now 3 times. Once from the Alloc return value, twice from the pushes
 
-                // todo: use a cleaner approach here. this class shouldnt assemble the string
-                string strTypeId = GetTypeIDLabel(constructor.DeclaringType);
+                var strTypeId = GetTypeIDLabel(constructor.DeclaringType);
 
                 XS.Pop(EAX);
                 XS.Set(EBX, strTypeId, sourceIsIndirect: true);
                 XS.Set(EAX, EBX, destinationIsIndirect: true);
                 XS.Set(EAX, (uint)ObjectUtils.InstanceTypeEnum.NormalObject, destinationDisplacement: 4, destinationIsIndirect: true, size: RegisterSize.Int32);
                 XS.Set(EAX, xMemSize, destinationDisplacement: 8, destinationIsIndirect: true, size: RegisterSize.Int32);
-                uint xSize = (uint)(from item in xParams
+                var xSize = (uint)(from item in xParams
                                     let xQSize = Align(SizeOfType(item.ParameterType), 4)
                                     select (int)xQSize).Take(xParams.Length).Sum();
                 XS.Push(0);
 
                 foreach (var xParam in xParams)
                 {
-                    uint xParamSize = Align(SizeOfType(xParam.ParameterType), 4);
+                    var xParamSize = Align(SizeOfType(xParam.ParameterType), 4);
                     XS.Comment($"Arg {xParam.Name}: {xParamSize}");
-                    for (int i = 0; i < xParamSize; i += 4)
+                    for (var i = 0; i < xParamSize; i += 4) 
                     {
                         XS.Push(ESP, isIndirect: true, displacement: (int)(xSize + 8));
                     }
@@ -271,7 +270,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     // todo: only happening for real methods now, not for ctor's ?
                     XS.Test(ECX, 2);
-                    string xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount.ToString();
+                    var xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount.ToString();
                     XS.Jump(CPUx86.ConditionalTestEnum.Equal, xNoErrorLabel);
 
                     PushAlignedParameterSize(constructor);
@@ -298,7 +297,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             uint xSize;
             XS.Comment("[ Newobj.PushAlignedParameterSize start count = " + xParams.Length.ToString() + " ]");
-            for (int i = 0; i < xParams.Length; i++)
+            for (var i = 0; i < xParams.Length; i++)
             {
                 xSize = SizeOfType(xParams[i].ParameterType);
                 XS.Add(ESP, Align(xSize, 4));

@@ -39,8 +39,8 @@ namespace IL2CPU.Compiler.Tests
         [Test]
         [TestCase(typeof(string), "Clone", 1, null)]
         [TestCase(typeof(string), "IndexOf", 9, new[] { typeof(string), typeof(int), typeof(int), typeof(StringComparison) })]
-        [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", 32, new[] { typeof(bool) })]
-        [TestCase(typeof(ExampleMethods), "TestSimpleException", new Type[0])]
+        [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", 33, new[] { typeof(bool) })]
+        [TestCase(typeof(ExampleMethods), "TestSimpleException", 4, new Type[0])]
         public void TestGenerateGroups(Type aType, string aMethodName, int aExpectedGroups, Type[] aArgs)
         {
             if (aArgs is null)
@@ -50,7 +50,7 @@ namespace IL2CPU.Compiler.Tests
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
             var methodBase = new _MethodInfo(method, 1, _MethodInfo.TypeEnum.Normal, null);
 
-            var appAssembler = new AppAssembler(null, new VoidTextWriter())
+            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
             {
                 DebugMode = Cosmos.Build.Common.DebugMode.None
             };
@@ -72,6 +72,7 @@ namespace IL2CPU.Compiler.Tests
         [TestCase(typeof(BitConverter), "GetBytes", new[] { typeof(long) })]
         [TestCase(typeof(Hashtable), "Insert", new[] { typeof(object), typeof(object), typeof(bool) })]
         [TestCase(typeof(ExampleMethods), "TestSimpleException", new Type[0])]
+        [TestCase(typeof(TypedReference), "GetHashCode", new Type[0])]
         public void TestStackAnalysis(Type aType, string aMethodName, Type[] aArgs)
         {
             if (aArgs is null)
@@ -81,7 +82,7 @@ namespace IL2CPU.Compiler.Tests
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
             var methodBase = new _MethodInfo(method, 1, _MethodInfo.TypeEnum.Normal, null);
 
-            var appAssembler = new AppAssembler(null, new VoidTextWriter())
+            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
             {
                 DebugMode = Cosmos.Build.Common.DebugMode.None
             };

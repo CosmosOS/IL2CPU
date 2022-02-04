@@ -427,7 +427,8 @@ namespace IL2CPU.Debug.Symbols
         {
             foreach (var x in aSymbols)
             {
-                x.ID = CreateId;
+                var val = ++mLastGuid;
+                x.ID = val;
             }
             BulkInsert("MethodIlOps", aSymbols, 2500, aFlush);
         }
