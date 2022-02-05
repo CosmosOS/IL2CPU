@@ -25,6 +25,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="../IL2CPU.Debug.Symbols/SQLite.sql" />
+        <EmbeddedResource Include="../IL2CPU.Debug.Symbols/SQLiteIndexes.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="../IL2CPU.Debug.Symbols/CacheHelper.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/DebugInfo.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/DebugModel.cs" />
@@ -43,8 +48,6 @@
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/PdbSymbolReader.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/PortablePdbSymbolReader.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/UnmanagedPdbSymbolReader.cs" />
-        <Content Include="../IL2CPU.Debug.Symbols/SQLite.sql" />
-        <Content Include="../IL2CPU.Debug.Symbols/SQLiteIndexes.sql" />
     </ItemGroup>
 
     <ItemGroup>
