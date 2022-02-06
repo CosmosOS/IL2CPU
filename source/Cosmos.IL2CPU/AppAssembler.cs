@@ -741,6 +741,7 @@ namespace Cosmos.IL2CPU
 
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
         private static Type VTableType;
+        private static Type VTable2Type;
         private static Type GCTableType;
 
         public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
@@ -762,6 +763,18 @@ namespace Cosmos.IL2CPU
                      where item == xDataMember
                      select item).First());
             }
+            var xTypesFieldRef2 = VTablesImplRefs.VTablesImplDef.GetField("mTypes2", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            string xTheName2 = LabelName.GetStaticFieldName(xTypesFieldRef2);
+            DataMember xDataMember2 = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                                      where item.Name == xTheName2
+                                      select item).FirstOrDefault();
+            if (xDataMember2 != null)
+            {
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Remove(
+                    (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                     where item == xDataMember2
+                     select item).First());
+            }
             var xGCTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("gcTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xGCArrayName = LabelName.GetStaticFieldName(xGCTypesFieldRef);
             xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
@@ -780,6 +793,7 @@ namespace Cosmos.IL2CPU
             if (VTableType == null)
             {
                 VTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.VTable, Cosmos.Core", true);
+                VTable2Type = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.VTable2, Cosmos.Core", true);
                 GCTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.GCTable, Cosmos.Core", true);
                 if (VTableType == null)
                 {
@@ -791,6 +805,10 @@ namespace Cosmos.IL2CPU
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+            xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(VTable2Type), xArrayTypeID);
+            XS.DataMemberBytes(xTheName2 + "_Contents", xData);
+            XS.DataMember(xTheName2, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
+            XS.Set(xTheName2, xTheName2 + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
             xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(GCTableType), xArrayTypeID);
             XS.DataMemberBytes(xGCArrayName + "_Contents", xData);
             XS.DataMember(xGCArrayName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
