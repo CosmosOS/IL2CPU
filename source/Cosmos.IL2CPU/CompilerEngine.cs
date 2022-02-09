@@ -459,7 +459,6 @@ namespace Cosmos.IL2CPU
             }
 
             mBootEntries = mBootEntries.OrderBy(e => e.Value)
-                                       .OrderByDescending(e => e.Value.HasValue)
                                        .ToDictionary(e => e.Key, e => e.Value);
 
             if (mBootEntries.Count > 1)
