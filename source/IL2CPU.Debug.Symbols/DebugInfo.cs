@@ -78,19 +78,18 @@ namespace IL2CPU.Debug.Symbols
             // Use the SQLiteConnectionFactory as the default database connection
             // Do not open mConnection before mEntities.CreateDatabase
             var xDir = IntPtr.Size == 4 ? "x86" : "x64";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
-String.Join(";", Environment.GetEnvironmentVariable("PATH"),
-        Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes/win-{xDir}/native")));
-            }
-            else
-            {
-                var asmPath = Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location);
-                var newPath = Environment.GetEnvironmentVariable("PATH") + ":" + Path.Combine(asmPath, $"runtimes/linux-{xDir}/native") + ":" + asmPath;
+            var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? "win" : "linux";
+            char path_separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? ';' : ':';
 
-                Environment.SetEnvironmentVariable("PATH", newPath);
-            }
+            Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
+                String.Join(path_separator, Environment.GetEnvironmentVariable("PATH"),
+                Path.Combine(
+                    Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), 
+                    $"runtimes/{os}-{xDir}/native"
+                    )
+                )
+            );
+
             SQLitePCL.Batteries.Init();
             mConnection = new SqliteConnection(mConnStr);
 
