@@ -93,7 +93,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             StackPopTypes[0] = StackPopTypes[0].MakeByRefType();
           }
-          StackPushTypes[0] = ILOp.IsPointer(StackPopTypes[0]) ? StackPopTypes[0] : Value.FieldType.MakeByRefType();
+          StackPushTypes[0] = ILOp.IsPointer(Value.FieldType) ? Value.FieldType : Value.FieldType.MakeByRefType();
           return;
       }
     }
