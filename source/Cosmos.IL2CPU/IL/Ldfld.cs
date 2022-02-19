@@ -144,7 +144,10 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(EAX);
             }
 
-            XS.Set(EAX, 0);
+            if(xSize % 4 != 0)
+            {
+                XS.Set(EAX, 0);
+            }
 
             switch (xSize % 4)
             {

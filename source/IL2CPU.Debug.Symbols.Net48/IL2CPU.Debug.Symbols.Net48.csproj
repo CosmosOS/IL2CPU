@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net48;net5.0</TargetFrameworks>
+        <TargetFramework>net48</TargetFramework>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <PackageDescription>IL2CPU debug symbols APIs.</PackageDescription>
         <IsPackable>True</IsPackable>
@@ -26,6 +26,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="../IL2CPU.Debug.Symbols/SQLite.sql" />
+        <EmbeddedResource Include="../IL2CPU.Debug.Symbols/SQLiteIndexes.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="../IL2CPU.Debug.Symbols/CacheHelper.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/DebugInfo.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/DebugModel.cs" />
@@ -44,8 +49,6 @@
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/PdbSymbolReader.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/PortablePdbSymbolReader.cs" />
         <Compile Include="../IL2CPU.Debug.Symbols/Pdb/UnmanagedPdbSymbolReader.cs" />
-        <Content Include="../IL2CPU.Debug.Symbols/SQLite.sql" />
-        <Content Include="../IL2CPU.Debug.Symbols/SQLiteIndexes.sql" />
     </ItemGroup>
 
     <ItemGroup>

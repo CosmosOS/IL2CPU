@@ -244,8 +244,11 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.InitRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.IncRootCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.IncRootCountsInStructRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.DecRootCountRef, null, "Explicit Entry");
+            Queue(GCImplementationRefs.DecRootCountsInStructRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // for now, to ease runtime exception throwing
             Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
@@ -315,8 +318,6 @@ namespace Cosmos.IL2CPU
             Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
             Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRefCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRefCountRef, null, "Explicit Entry");
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
@@ -724,6 +725,13 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+
+            // Scam Fields so that we include those types
+            foreach (var field in aType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                Queue(field.FieldType, aType, "Field Type");
+            }
+
             // For each new type, we need to scan for possible new virtuals
             // in our new type if its a descendant of something in
             // mVirtuals.
@@ -887,7 +895,7 @@ namespace Cosmos.IL2CPU
         {
             if (!mItems.Contains(aType))
             {
-                throw new Exception("Cannot get UID of types which are not queued!");
+                throw new Exception($"Cannot get UID of types which are not queued! Type: {aType.Name}");
             }
             if (!mTypeUIDs.ContainsKey(aType))
             {
