@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public static void Assemble(Assembler aAssembler, uint aElementSize, _MethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
+        public static void Assemble(Assembler aAssembler, uint aElementSize, Il2cpuMethodInfo aMethod, ILOpCode aOpCode, bool debugEnabled)
         {
             DoNullReferenceCheck(aAssembler, debugEnabled, (int)(8 + Align(aElementSize, 4)));
             uint xStackSize = aElementSize;
@@ -100,7 +100,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Add(ESP, 12);
         }
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             Assemble(Assembler, 8, aMethod, aOpCode, DebugEnabled);
         }

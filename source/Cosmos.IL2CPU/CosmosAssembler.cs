@@ -250,9 +250,9 @@ namespace Cosmos.IL2CPU
                     DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
                     DataMembers.Add(new DataMember("MultibootFramebufferOptional", (ushort)1));
                     DataMembers.Add(new DataMember("MultibootFramebufferLenght", "MultibootFramebufferTagEnd - MultibootFramebufferTag", typeof(uint)));
-                    DataMembers.Add(new DataMember("", int.Parse(res[0])));
-                    DataMembers.Add(new DataMember("", int.Parse(res[1])));
-                    DataMembers.Add(new DataMember("", int.Parse(res[2])));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[0])));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[1])));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[2])));
 
                     DataMembers.Add(new DataMember("MultibootFramebufferTagEnd", Array.Empty<byte>()));
                 }

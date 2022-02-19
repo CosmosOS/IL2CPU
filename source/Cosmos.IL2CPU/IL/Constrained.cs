@@ -12,13 +12,13 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpType = aOpCode as OpType;
       DoExecute(Assembler, aMethod, aOpCode, xOpType, DebugEnabled);
     }
 
-    private void DoExecute(Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode, OpType aTargetType, bool debugEnabled)
+    private void DoExecute(Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode, OpType aTargetType, bool debugEnabled)
     {
       var xType = aTargetType.Value;
 
