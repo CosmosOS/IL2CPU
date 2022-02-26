@@ -716,7 +716,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            if (aType.BaseType == typeof(Array))
+            if (aType.BaseType == typeof(Array) && !aType.GetElementType().IsPointer)
             {
                 var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
                 foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
