@@ -48,7 +48,7 @@ namespace IL2CPU.Compiler.Tests
                 aArgs = Array.Empty<Type>();
             }
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
-            var methodBase = new _MethodInfo(method, 1, _MethodInfo.TypeEnum.Normal, null);
+            var methodBase = new Il2cpuMethodInfo(method, 1, Il2cpuMethodInfo.TypeEnum.Normal, null);
 
             var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
             {
@@ -80,7 +80,7 @@ namespace IL2CPU.Compiler.Tests
                 aArgs = Array.Empty<Type>();
             }
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
-            var methodBase = new _MethodInfo(method, 1, _MethodInfo.TypeEnum.Normal, null);
+            var methodBase = new Il2cpuMethodInfo(method, 1, Il2cpuMethodInfo.TypeEnum.Normal, null);
 
             var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
             {

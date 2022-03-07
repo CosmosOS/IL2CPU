@@ -17,7 +17,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpCode = (ILOpCodes.OpField)aOpCode;
             var xField = xOpCode.Value;
@@ -25,7 +25,7 @@ namespace Cosmos.IL2CPU.X86.IL
             DoExecute(Assembler, aMethod, xField, DebugEnabled, IsReferenceType(aOpCode.StackPopTypes[1]));
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, string aFieldId, Type aDeclaringObject, bool aNeedsGC, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler aAssembler, Il2cpuMethodInfo aMethod, string aFieldId, Type aDeclaringObject, bool aNeedsGC, bool debugEnabled)
         {
             var xFieldInfo = ResolveField(aDeclaringObject, aFieldId, true);
             var xActualOffset = Ldfld.GetFieldOffset(aDeclaringObject, aFieldId);
@@ -111,7 +111,7 @@ namespace Cosmos.IL2CPU.X86.IL
             }
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler aAssembler, _MethodInfo aMethod, FieldInfo aField, bool debugEnabled, bool aNeedsGC)
+        public static void DoExecute(XSharp.Assembler.Assembler aAssembler, Il2cpuMethodInfo aMethod, FieldInfo aField, bool debugEnabled, bool aNeedsGC)
         {
             DoExecute(aAssembler, aMethod, aField.GetFullName(), aField.DeclaringType, aNeedsGC, debugEnabled);
         }

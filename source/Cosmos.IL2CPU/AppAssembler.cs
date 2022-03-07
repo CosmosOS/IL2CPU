@@ -71,7 +71,7 @@ namespace Cosmos.IL2CPU
             GC.SuppressFinalize(this);
         }
 
-        private void MethodBegin(_MethodInfo aMethod)
+        private void MethodBegin(Il2cpuMethodInfo aMethod)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Comment("Assembly: " + aMethod.MethodBase.DeclaringType.Assembly.FullName);
@@ -255,7 +255,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public DebugInfo.SequencePoint[] GenerateDebugSequencePoints(_MethodInfo aMethod, DebugMode aDebugMode)
+        public DebugInfo.SequencePoint[] GenerateDebugSequencePoints(Il2cpuMethodInfo aMethod, DebugMode aDebugMode)
         {
             if (aDebugMode == DebugMode.Source)
             {
@@ -289,7 +289,7 @@ namespace Cosmos.IL2CPU
             return new DebugInfo.SequencePoint[0];
         }
 
-        private void MethodEnd(_MethodInfo aMethod)
+        private void MethodEnd(Il2cpuMethodInfo aMethod)
         {
             XS.Comment("End Method: " + aMethod.MethodBase.Name);
 
@@ -439,14 +439,14 @@ namespace Cosmos.IL2CPU
             return xOffset;
         }
 
-        public void ProcessMethod(_MethodInfo aMethod, List<ILOpCode> aOpCodes)
+        public void ProcessMethod(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes)
         {
             try
             {
                 // We check this here and not scanner as when scanner makes these
                 // plugs may still have not yet been scanned that it will depend on.
                 // But by the time we make it here, they have to be resolved.
-                if (aMethod.Type == _MethodInfo.TypeEnum.NeedsPlug && aMethod.PlugMethod == null)
+                if (aMethod.Type == Il2cpuMethodInfo.TypeEnum.NeedsPlug && aMethod.PlugMethod == null)
                 {
                     throw new Exception("Method needs plug, but no plug was assigned.");
                 }
@@ -485,7 +485,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public void AnalyseMethodOpCodes(_MethodInfo aMethod, List<ILOpCode> aOpCodes)
+        public void AnalyseMethodOpCodes(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes)
         {
             var mSequences = GenerateDebugSequencePoints(aMethod, DebugMode); // TODO: Maybe control the DebugeMode to reduce methods debug symbols are generated for
                                                                               // now emit the actual assembler code for this method.
@@ -502,14 +502,14 @@ namespace Cosmos.IL2CPU
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private void BeforeEmitInstructions(_MethodInfo aMethod, List<ILOpCode> aCurrentGroup)
+        private void BeforeEmitInstructions(Il2cpuMethodInfo aMethod, List<ILOpCode> aCurrentGroup)
 #pragma warning restore CA1822 // Mark members as static
         {
             // do optimizations
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private void AfterEmitInstructions(_MethodInfo aMethod, List<ILOpCode> aCurrentGroup)
+        private void AfterEmitInstructions(Il2cpuMethodInfo aMethod, List<ILOpCode> aCurrentGroup)
 #pragma warning restore CA1822 // Mark members as static
         {
             // do optimizations
@@ -517,7 +517,7 @@ namespace Cosmos.IL2CPU
 
         //private static bool mDebugStackErrors = true;
 
-        private void EmitInstructions(_MethodInfo aMethod, List<ILOpCode> aCurrentGroup, ref bool emitINT3)
+        private void EmitInstructions(Il2cpuMethodInfo aMethod, List<ILOpCode> aCurrentGroup, ref bool emitINT3)
         {
             BeforeEmitInstructions(aMethod, aCurrentGroup);
 
@@ -674,17 +674,17 @@ namespace Cosmos.IL2CPU
             XS.Call(LabelName.Get(aMethod));
         }
 
-        private static _FieldInfo ResolveField(_MethodInfo method, string fieldId, bool aOnlyInstance)
+        private static _FieldInfo ResolveField(Il2cpuMethodInfo method, string fieldId, bool aOnlyInstance)
         {
             return ILOp.ResolveField(method.MethodBase.DeclaringType, fieldId, aOnlyInstance);
         }
 
-        private void Ldarg(_MethodInfo aMethod, int aIndex)
+        private void Ldarg(Il2cpuMethodInfo aMethod, int aIndex)
         {
             X86.IL.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
         }
 
-        private void Call(_MethodInfo aMethod, _MethodInfo aTargetMethod, string aNextLabel)
+        private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
         {
             var xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
             if (xSize > 0)
@@ -715,12 +715,12 @@ namespace Cosmos.IL2CPU
                      }, aNextLabel);
         }
 
-        private void Ldflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
+        private void Ldflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
             X86.IL.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
         }
 
-        private void Ldsflda(_MethodInfo aMethod, _FieldInfo aFieldInfo)
+        private void Ldsflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
             X86.IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
@@ -1158,7 +1158,7 @@ namespace Cosmos.IL2CPU
         /// </summary>
         /// <param name="aFrom">The method to forward to the plug</param>
         /// <param name="aTo">The plug</param>
-        internal void GenerateMethodForward(_MethodInfo aFrom, _MethodInfo aTo)
+        internal void GenerateMethodForward(Il2cpuMethodInfo aFrom, Il2cpuMethodInfo aTo)
         {
             var xMethodLabel = ILOp.GetLabel(aFrom);
             var xEndOfMethodLabel = xMethodLabel + EndOfMethodLabelNameNormal;
@@ -1251,17 +1251,17 @@ namespace Cosmos.IL2CPU
 
         // These are all temp functions until we move to the new assembler.
         // They are used to clean up the old assembler slightly while retaining compatibiltiy for now
-        public static string TmpPosLabel(_MethodInfo aMethod, int aOffset)
+        public static string TmpPosLabel(Il2cpuMethodInfo aMethod, int aOffset)
         {
             return ILOp.GetLabel(aMethod, aOffset);
         }
 
-        public static string TmpPosLabel(_MethodInfo aMethod, ILOpCode aOpCode)
+        public static string TmpPosLabel(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             return TmpPosLabel(aMethod, aOpCode.Position);
         }
 
-        public static string TmpBranchLabel(_MethodInfo aMethod, ILOpCode aOpCode)
+        public static string TmpBranchLabel(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             return TmpPosLabel(aMethod, ((OpBranch)aOpCode).Value);
         }
@@ -1342,12 +1342,12 @@ namespace Cosmos.IL2CPU
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private void AfterOp(_MethodInfo aMethod, ILOpCode aOpCode)
+        private void AfterOp(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
 #pragma warning restore CA1822 // Mark members as static
         {
         }
 
-        private void BeforeOp(_MethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint, int? xLocalsSize)
+        private void BeforeOp(Il2cpuMethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint, int? xLocalsSize)
         {
             if (DebugMode == DebugMode.Source)
             {
@@ -1443,7 +1443,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        private void EmitTracer(_MethodInfo aMethod, ILOpCode aOp, string aNamespace, bool emitInt3NotNop, out bool INT3Emitted, out bool INT3PlaceholderEmitted, bool isNewSourcePoint)
+        private void EmitTracer(Il2cpuMethodInfo aMethod, ILOpCode aOp, string aNamespace, bool emitInt3NotNop, out bool INT3Emitted, out bool INT3PlaceholderEmitted, bool isNewSourcePoint)
         {
             // NOTE - These if statements can be optimized down - but clarity is
             // more important than the optimizations. Furthermore the optimizations available
