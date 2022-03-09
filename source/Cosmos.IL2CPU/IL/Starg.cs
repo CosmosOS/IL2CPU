@@ -13,13 +13,13 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpVar = (OpVar)aOpCode;
       DoExecute(Assembler, aMethod, xOpVar.Value);
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
+    public static void DoExecute(XSharp.Assembler.Assembler Assembler, Il2cpuMethodInfo aMethod, ushort aParam)
     {
       var xDisplacement = Ldarg.GetArgumentDisplacement(aMethod, aParam);
       Type xArgType;

@@ -20,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xMethod = (OpMethod)aOpCode;
             var xCurrentLabel = GetLabel(aMethod, aOpCode);
@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU.X86.IL
             Assemble(Assembler, aMethod, xMethod, xCurrentLabel, xType, xMethod.Value, DebugEnabled);
         }
 
-        public static void Assemble(Assembler aAssembler, _MethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor, bool debugEnabled)
+        public static void Assemble(Assembler aAssembler, Il2cpuMethodInfo aMethod, OpMethod xMethod, string currentLabel, Type objectType, MethodBase constructor, bool debugEnabled)
         {
             // call cctor:
             if (aMethod != null)

@@ -17,14 +17,14 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpCode = (OpField) aOpCode;
       var xFieldName = LabelName.GetStaticFieldName(xOpCode.Value);
       DoExecute(Assembler, aMethod, xFieldName, xOpCode.Value.DeclaringType, aOpCode);
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler assembler, _MethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
+    public static void DoExecute(XSharp.Assembler.Assembler assembler, Il2cpuMethodInfo aMethod, string field, Type declaringType, ILOpCode aCurrentOpCode)
     {
       // call cctor:
       var xCctor = (declaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic) ?? Array.Empty<ConstructorInfo>()).SingleOrDefault();

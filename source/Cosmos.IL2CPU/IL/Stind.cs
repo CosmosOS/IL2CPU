@@ -19,7 +19,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             if (aOpCode.OpCode == ILOpCode.Code.Stind_I8
                 || aOpCode.OpCode == ILOpCode.Code.Stind_R8

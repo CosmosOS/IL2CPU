@@ -716,7 +716,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            if (aType.BaseType == typeof(Array))
+            if (aType.BaseType == typeof(Array) && !aType.GetElementType().IsPointer)
             {
                 var szArrayHelper = typeof(Array).Assembly.GetType("System.SZArrayHelper"); // We manually add the link to the generic interfaces for an array
                 foreach (var xMethod in szArrayHelper.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
@@ -924,9 +924,9 @@ namespace Cosmos.IL2CPU
                     var xParams = xMethod.GetParameters();
                     var xParamTypes = xParams.Select(q => q.ParameterType).ToArray();
                     var xPlug = mPlugManager.ResolvePlug(xMethod, xParamTypes);
-                    var xMethodType = _MethodInfo.TypeEnum.Normal;
+                    var xMethodType = Il2cpuMethodInfo.TypeEnum.Normal;
                     Type xPlugAssembler = null;
-                    _MethodInfo xPlugInfo = null;
+                    Il2cpuMethodInfo xPlugInfo = null;
                     var xMethodInline = xMethod.GetCustomAttribute<InlineAttribute>();
                     if (xMethodInline != null)
                     {
@@ -941,7 +941,7 @@ namespace Cosmos.IL2CPU
                     PlugMethod xPlugAttrib = null;
                     if (xPlug != null)
                     {
-                        xMethodType = _MethodInfo.TypeEnum.NeedsPlug;
+                        xMethodType = Il2cpuMethodInfo.TypeEnum.NeedsPlug;
                         xPlugAttrib = xPlug.GetCustomAttribute<PlugMethod>();
                         var xInlineAttrib = xPlug.GetCustomAttribute<InlineAttribute>();
                         var xMethodIdPlug = mItemsList.IndexOf(xPlug);
@@ -952,9 +952,9 @@ namespace Cosmos.IL2CPU
                         if ((xPlugAttrib != null) && (xInlineAttrib == null))
                         {
                             xPlugAssembler = xPlugAttrib.Assembler;
-                            xPlugInfo = new _MethodInfo(xPlug, (uint)xMethodIdPlug, _MethodInfo.TypeEnum.Plug, null, xPlugAssembler);
+                            xPlugInfo = new Il2cpuMethodInfo(xPlug, (uint)xMethodIdPlug, Il2cpuMethodInfo.TypeEnum.Plug, null, xPlugAssembler);
 
-                            var xMethodInfo = new _MethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
+                            var xMethodInfo = new Il2cpuMethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
                             if (xPlugAttrib.IsWildcard)
                             {
                                 xPlugInfo.IsWildcard = true;
@@ -977,9 +977,9 @@ namespace Cosmos.IL2CPU
                                 {
                                     throw new Exception("Method not in list!");
                                 }
-                                xPlugInfo = new _MethodInfo(xPlug, (uint)xMethodID, _MethodInfo.TypeEnum.Plug, null, true);
+                                xPlugInfo = new Il2cpuMethodInfo(xPlug, (uint)xMethodID, Il2cpuMethodInfo.TypeEnum.Plug, null, true);
 
-                                var xMethodInfo = new _MethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
+                                var xMethodInfo = new Il2cpuMethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
 
                                 xPlugInfo.PluggedMethod = xMethodInfo;
                                 var xInstructions = mReader.ProcessMethod(xPlug);
@@ -992,9 +992,9 @@ namespace Cosmos.IL2CPU
                             }
                             else
                             {
-                                xPlugInfo = new _MethodInfo(xPlug, (uint)xMethodIdPlug, _MethodInfo.TypeEnum.Plug, null, xPlugAssembler);
+                                xPlugInfo = new Il2cpuMethodInfo(xPlug, (uint)xMethodIdPlug, Il2cpuMethodInfo.TypeEnum.Plug, null, xPlugAssembler);
 
-                                var xMethodInfo = new _MethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
+                                var xMethodInfo = new Il2cpuMethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo);
                                 mAsmblr.GenerateMethodForward(xMethodInfo, xPlugInfo);
                             }
                         }
@@ -1016,7 +1016,7 @@ namespace Cosmos.IL2CPU
                             xPlugAssembler = xPlugAttrib.Assembler;
                         }
 
-                        var xMethodInfo = new _MethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo, xPlugAssembler);
+                        var xMethodInfo = new Il2cpuMethodInfo(xMethod, (uint)xMethodIdMethod, xMethodType, xPlugInfo, xPlugAssembler);
                         var xInstructions = mReader.ProcessMethod(xMethod);
                         if (xInstructions != null)
                         {

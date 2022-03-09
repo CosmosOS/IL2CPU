@@ -17,13 +17,13 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xSource = aOpCode.StackPopTypes[0];
       DoExecute(SizeOfType(xSource), TypeIsFloat(xSource), TypeIsSigned(xSource), false, Assembler, aMethod, aOpCode);
     }
 
-    public static void DoExecute(uint xSourceSize, bool xSourceIsFloat, bool xSourceIsSigned, bool checkOverflow, Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode)
+    public static void DoExecute(uint xSourceSize, bool xSourceIsFloat, bool xSourceIsSigned, bool checkOverflow, Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xBaseLabel = GetLabel(aMethod, aOpCode) + ".";
       var xSuccessLabel = xBaseLabel + "Success";

@@ -12,13 +12,13 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             Execute(aMethod, aOpCode);
 
         }
 
-        public void Execute(_MethodInfo aMethod, ILOpCode aOpCode, bool aFromNewObj = false)
+        public void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode, bool aFromNewObj = false)
         {
             Type mType = ((ILOpCodes.OpType)aOpCode).Value;
             uint mObjSize = SizeOfType(mType);
