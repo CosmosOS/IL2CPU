@@ -42,7 +42,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpCode = (OpField)aOpCode;
             var xStackType = aOpCode.StackPopTypes[0];
@@ -144,7 +144,10 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push(EAX);
             }
 
-            XS.Set(EAX, 0);
+            if(xSize % 4 != 0)
+            {
+                XS.Set(EAX, 0);
+            }
 
             switch (xSize % 4)
             {

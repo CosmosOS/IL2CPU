@@ -77,18 +77,18 @@ namespace Cosmos.IL2CPU.X86.IL
             return 8;
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpMethod = aOpCode as OpMethod;
             DoExecute(Assembler, aMethod, xOpMethod.Value, aOpCode, LabelName.Get(aMethod.MethodBase), DebugEnabled);
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, Il2cpuMethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aCurrent, string currentLabel, bool debugEnabled)
         {
             DoExecute(Assembler, aCurrentMethod, aTargetMethod, aCurrent, currentLabel, ILOp.GetLabel(aCurrentMethod, aCurrent.NextPosition), debugEnabled);
         }
 
-        public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
+        public static void DoExecute(XSharp.Assembler.Assembler Assembler, Il2cpuMethodInfo aCurrentMethod, MethodBase aTargetMethod, ILOpCode aOp, string currentLabel, string nextLabel, bool debugEnabled)
         {
             var xMethodInfo = aTargetMethod as MethodInfo;
             string xNormalAddress = LabelName.Get(aTargetMethod);

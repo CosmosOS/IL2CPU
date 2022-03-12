@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public static void Assemble(XSharp.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled, _MethodInfo aMethod, ILOpCode aOpCode)
+    public static void Assemble(XSharp.Assembler.Assembler aAssembler, OpType aOpType, uint aElementSize, bool debugEnabled, Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       XS.Comment("Arraytype: " + aOpType.StackPopTypes.Last().FullName);
       XS.Comment("Size: " + aElementSize);
@@ -60,7 +60,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Push(EDX);
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpType = (OpType)aOpCode;
       var xSize = SizeOfType(xOpType.Value);

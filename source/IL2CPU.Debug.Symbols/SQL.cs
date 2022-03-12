@@ -80,7 +80,7 @@ namespace IL2CPU.Debug.Symbols
             {
                 if (strm == null)
                 {
-                    throw new Exception("Sql resource not found!");
+                    throw new Exception($"Sql resource not found for {resourceName}!");
                 }
                 using (var reader = new StreamReader(strm))
                 {

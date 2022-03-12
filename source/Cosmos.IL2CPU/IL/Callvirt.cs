@@ -21,13 +21,13 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpMethod = aOpCode as OpMethod;
             DoExecute(Assembler, aMethod, xOpMethod.Value, xOpMethod.ValueUID, aOpCode, DebugEnabled);
         }
 
-        public static void DoExecute(Assembler aAssembler, _MethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool aDebugEnabled)
+        public static void DoExecute(Assembler aAssembler, Il2cpuMethodInfo aMethod, MethodBase aTargetMethod, uint aTargetMethodUID, ILOpCode aOp, bool aDebugEnabled)
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
             Type xPopType = aOp.StackPopTypes.Last();

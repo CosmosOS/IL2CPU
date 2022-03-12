@@ -12,12 +12,12 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpType = (OpType)aOpCode;
             var xSize = SizeOfType(xOpType.Value);
 
-            Stelem_Ref.Assemble(Assembler, (uint)xSize, aMethod, aOpCode, DebugEnabled);
+            Stelem_Ref.Assemble(Assembler, xSize, aMethod, aOpCode, DebugEnabled);
         }
     }
 }

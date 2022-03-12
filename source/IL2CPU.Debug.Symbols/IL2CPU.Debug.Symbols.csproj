@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net5.0</TargetFrameworks>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <PackageDescription>IL2CPU debug symbols APIs.</PackageDescription>
         <IsPackable>True</IsPackable>
         <Configurations>Debug;Release;TEST</Configurations>
+        <EnableDefaultItems>false</EnableDefaultItems>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,21 +16,42 @@
 
     <ItemGroup>
         <PackageReference Include="Dapper.StrongName" Version="2.0.90" />
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.6" />
         <PackageReference Include="Microsoft.DiaSymReader" Version="1.3.0" />
         <PackageReference Include="Microsoft.DiaSymReader.PortablePdb" Version="1.6.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-        <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
-        <PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
+        <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
         <PackageReference Include="System.Runtime" Version="4.3.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Cosmos\Resources\Dependencies\DapperExtensions.StrongName\DapperExtensions.StrongName.csproj" />
+        <Compile Include="CacheHelper.cs" />
+        <Compile Include="DebugInfo.cs" />
+        <Compile Include="DebugModel.cs" />
+        <Compile Include="DebugSymbolReader.cs" />
+        <Compile Include="LocalTypeGenericContext.cs" />
+        <Compile Include="LocalTypeProvider.cs" />
+        <Compile Include="ObjDump.cs" />
+        <Compile Include="ObjectReader.cs" />
+        <Compile Include="SourceInfo.cs" />
+        <Compile Include="SQL.cs" />
+        <Compile Include="SqliteBulkCopy.cs" />
+        <Compile Include="Hashing/TypeHashingAlgorithms.cs" />
+        <Compile Include="Metadata/CachingMetadataStringDecoder.cs" />
+        <Compile Include="Metadata/MetadataHelper.cs" />
+        <Compile Include="Pdb/ILSequencePoint.cs" />
+        <Compile Include="Pdb/PdbSymbolReader.cs" />
+        <Compile Include="Pdb/PortablePdbSymbolReader.cs" />
+        <Compile Include="Pdb/UnmanagedPdbSymbolReader.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Cosmos\Resources\Dependencies\DapperExtensions.StrongName\DapperExtensions.StrongName.csproj" />
     </ItemGroup>
 
 </Project>

@@ -34,7 +34,7 @@ namespace Cosmos.IL2CPU
 
         // This is called execute and not assemble, as the scanner
         // could be used for other things, profiling, analysis, reporting, etc
-        public abstract void Execute(_MethodInfo aMethod, ILOpCode aOpCode);
+        public abstract void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode);
 
         public static string GetTypeIDLabel(Type aType)
         {
@@ -61,7 +61,7 @@ namespace Cosmos.IL2CPU
             return xSize;
         }
 
-        public static string GetLabel(_MethodInfo aMethod, ILOpCode aOpCode)
+        public static string GetLabel(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             return GetLabel(aMethod, aOpCode.Position);
         }
@@ -71,7 +71,7 @@ namespace Cosmos.IL2CPU
             return LabelName.Get(aMethod);
         }
 
-        public static string GetLabel(_MethodInfo aMethod)
+        public static string GetLabel(Il2cpuMethodInfo aMethod)
         {
             if (aMethod.PluggedMethod != null)
             {
@@ -80,7 +80,7 @@ namespace Cosmos.IL2CPU
             return GetLabel(aMethod.MethodBase);
         }
 
-        public static string GetLabel(_MethodInfo aMethod, int aPos)
+        public static string GetLabel(Il2cpuMethodInfo aMethod, int aPos)
         {
             return LabelName.Get(GetLabel(aMethod), aPos);
         }
@@ -90,18 +90,24 @@ namespace Cosmos.IL2CPU
             return GetType().Name;
         }
 
-        protected static void Jump_Exception(_MethodInfo aMethod)
+        protected static void Jump_Exception(Il2cpuMethodInfo aMethod)
         {
             // todo: port to numeric labels
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
         }
 
-        protected static void Jump_End(_MethodInfo aMethod)
+        protected static void Jump_End(Il2cpuMethodInfo aMethod)
         {
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameNormal);
         }
 
-        public static uint GetStackCountForLocal(_MethodInfo aMethod, Type aField)
+        /// <summary>
+        /// Number of bytes required to store type on stack
+        /// </summary>
+        /// <param name="aMethod"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        public static uint GetStackCountForLocal(Il2cpuMethodInfo aMethod, Type aField)
         {
             var xSize = SizeOfType(aField);
             var xResult = xSize / 4;
@@ -112,7 +118,7 @@ namespace Cosmos.IL2CPU
             return xResult;
         }
 
-        public static uint GetEBPOffsetForLocal(_MethodInfo aMethod, int localIndex)
+        public static uint GetEBPOffsetForLocal(Il2cpuMethodInfo aMethod, int localIndex)
         {
             var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
             uint xOffset = 4;
@@ -128,7 +134,7 @@ namespace Cosmos.IL2CPU
             return xOffset;
         }
 
-        public static uint GetEBPOffsetForLocalForDebugger(_MethodInfo aMethod, int localIndex)
+        public static uint GetEBPOffsetForLocalForDebugger(Il2cpuMethodInfo aMethod, int localIndex)
         {
             // because the memory is read in positive direction, we need to add additional size if greater than 4
             uint xOffset = GetEBPOffsetForLocal(aMethod, localIndex);
@@ -419,7 +425,7 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public static void EmitExceptionLogic(Assembler aAssembler, _MethodInfo aMethodInfo, ILOpCode aCurrentOpCode,
+        public static void EmitExceptionLogic(Assembler aAssembler, Il2cpuMethodInfo aMethodInfo, ILOpCode aCurrentOpCode,
           bool aDoTest, Action aCleanup, string aJumpTargetNoException = null)
         {
             if (aJumpTargetNoException == null)
@@ -583,6 +589,17 @@ namespace Cosmos.IL2CPU
             return !aType.IsValueType && !aType.IsPointer && !aType.IsByRef;
         }
 
+        /// <summary>
+        /// Checks if the type is a struct
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <returns></returns>
+        public static bool IsStruct(Type aType)
+        {
+            return aType.IsValueType && !aType.Equals(typeof(string)) && !aType.Equals(typeof(decimal)) && !aType.IsEnum && !aType.IsPrimitive;
+        }
+    
+
         public static bool TypeIsSigned(Type aType)
         {
             var name = aType.FullName;
@@ -602,7 +619,7 @@ namespace Cosmos.IL2CPU
         {
             return type == typeof(byte) || type == typeof(bool) || type == typeof(sbyte) || type == typeof(ushort) || type == typeof(short)
                    || type == typeof(int) || type == typeof(uint)
-                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr);
+                   || type == typeof(char) || type == typeof(IntPtr) || type == typeof(UIntPtr) || type.IsPointer;
         }
 
         public static bool IsLongBasedType(Type type)

@@ -7,7 +7,7 @@ namespace Cosmos.IL2CPU.X86.IL
 {
   class ConvOverflowChecks
   {
-    public static void CheckOverflowForSmall(uint xResultSize, bool xSourceIsSigned, bool xResultIsSigned, Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode, string xSuccessLabel, string xOverflowLabel)
+    public static void CheckOverflowForSmall(uint xResultSize, bool xSourceIsSigned, bool xResultIsSigned, Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode, string xSuccessLabel, string xOverflowLabel)
     {
       XS.Set(EAX, ESP, sourceIsIndirect: true);
       // only look at bits which are part of result
@@ -48,7 +48,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Label(xSuccessLabel);
     }
 
-    public static void CheckOverflowForLong(uint xResultSize, bool xSourceIsSigned, bool xResultIsSigned, Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode, string xSuccessLabel, string xOverflowLabel, string xPositiveLabel, string xNegativeLabel)
+    public static void CheckOverflowForLong(uint xResultSize, bool xSourceIsSigned, bool xResultIsSigned, Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode, string xSuccessLabel, string xOverflowLabel, string xPositiveLabel, string xNegativeLabel)
     {
       // long is
       // low 
