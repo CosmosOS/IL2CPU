@@ -21,7 +21,6 @@
         <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
         <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-        <PackageReference Include="System.Runtime" Version="4.3.1" />
     </ItemGroup>
 
     <ItemGroup>
