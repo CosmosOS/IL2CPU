@@ -171,7 +171,25 @@ namespace Cosmos.IL2CPU
                             xAsm.ShouldOptimize = true;
                         }
 
-                        xAsm.Assembler.Initialize();
+                        bool VBEMultiboot = false;
+                        string VBEResolution;
+                        if(mSettings.CompileVBEMultiboot)
+                        {
+                            VBEMultiboot = true;
+                        }
+                        else
+                        {
+                            VBEMultiboot = false;
+                        }
+                        if(String.IsNullOrEmpty(mSettings.VBEResolution))
+                        {
+                            VBEResolution = "800x600x32";
+                        }
+                        else
+                        {
+                            VBEResolution=mSettings.VBEResolution;
+                        }
+                        xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
                         if (mSettings.DebugMode != DebugMode.IL)
                         {
@@ -254,7 +272,7 @@ namespace Cosmos.IL2CPU
             var assemblerLogFile = Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog);
             Directory.CreateDirectory(Path.GetDirectoryName(assemblerLogFile));
             var mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
-            return new AppAssembler(new CosmosAssembler(debugCom), mLog);
+            return new AppAssembler(new CosmosAssembler(debugCom), mLog, Path.GetDirectoryName(assemblerLogFile));
         }
 
         #region Gen2
@@ -435,13 +453,12 @@ namespace Cosmos.IL2CPU
                 throw new NotSupportedException("No boot entries found!");
             }
 
-            if (mBootEntries.Where(e => e.Value == null).Count() == 0)
+            if (!mBootEntries.Where(e => e.Value == null).Any())
             {
                 throw new NotImplementedException("No default boot entries found!");
             }
 
             mBootEntries = mBootEntries.OrderBy(e => e.Value)
-                                       .OrderByDescending(e => e.Value.HasValue)
                                        .ToDictionary(e => e.Key, e => e.Value);
 
             if (mBootEntries.Count > 1)

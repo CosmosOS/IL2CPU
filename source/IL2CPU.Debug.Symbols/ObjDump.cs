@@ -94,7 +94,7 @@ namespace IL2CPU.Debug.Symbols
                 }
                 else
                 {
-                    xGuid = DebugInfo.CreateId();
+                    xGuid = DebugInfo.CreateId;
                 }
 
                 yield return new Label()

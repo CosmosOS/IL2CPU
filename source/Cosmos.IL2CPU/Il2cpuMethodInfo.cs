@@ -6,7 +6,7 @@ using IL2CPU.API.Attribs;
 
 namespace Cosmos.IL2CPU
 {
-    public class _MethodInfo
+    public class Il2cpuMethodInfo
     {
         public enum TypeEnum { Normal, Plug, NeedsPlug };
 
@@ -21,16 +21,16 @@ namespace Cosmos.IL2CPU
         /// <summary>
         /// The method info for the method which plugs this one
         /// </summary>
-        public _MethodInfo PlugMethod { get; }
+        public Il2cpuMethodInfo PlugMethod { get; }
         public Type MethodAssembler { get; }
         public bool IsInlineAssembler { get; }
         public bool DebugStubOff { get; }
 
-        private _MethodInfo _PluggedMethod;
+        private Il2cpuMethodInfo _PluggedMethod;
         /// <summary>
         /// Method which is plugged by this method
         /// </summary>
-        public _MethodInfo PluggedMethod
+        public Il2cpuMethodInfo PluggedMethod
         {
             get => _PluggedMethod; set
             {
@@ -49,18 +49,18 @@ namespace Cosmos.IL2CPU
 
         public bool IsWildcard { get; set; }
 
-        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
+        public Il2cpuMethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, Il2cpuMethodInfo aPlugMethod, Type aMethodAssembler) : this(aMethodBase, aUID, aType, aPlugMethod, false)
         {
             MethodAssembler = aMethodAssembler;
         }
 
 
-        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod)
+        public Il2cpuMethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, Il2cpuMethodInfo aPlugMethod)
             : this(aMethodBase, aUID, aType, aPlugMethod, false)
         {
         }
 
-        public _MethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, _MethodInfo aPlugMethod, bool isInlineAssembler)
+        public Il2cpuMethodInfo(MethodBase aMethodBase, uint aUID, TypeEnum aType, Il2cpuMethodInfo aPlugMethod, bool isInlineAssembler)
         {
             MethodBase = aMethodBase;
             UID = aUID;
@@ -69,7 +69,7 @@ namespace Cosmos.IL2CPU
             IsInlineAssembler = isInlineAssembler;
 
             var attribs = aMethodBase.GetCustomAttributes<DebugStub>(false).ToList();
-            if (attribs.Any())
+            if (attribs.Count != 0)
             {
                 var attrib = new DebugStub
                 {

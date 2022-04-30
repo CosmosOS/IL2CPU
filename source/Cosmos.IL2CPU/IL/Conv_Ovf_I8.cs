@@ -14,7 +14,7 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xSource = aOpCode.StackPopTypes[0];
       var xSourceSize = SizeOfType(xSource);
@@ -22,7 +22,7 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(xSourceSize, false, Assembler, aMethod,aOpCode);
     }
 
-    public static void DoExecute(uint xSourceSize, bool SourceIsSigned, Assembler assembler, _MethodInfo aMethod, ILOpCode aOpCode)
+    public static void DoExecute(uint xSourceSize, bool SourceIsSigned, Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xBaseLabel = GetLabel(aMethod, aOpCode) + ".";
       var xSuccessLabel = xBaseLabel + "Success";

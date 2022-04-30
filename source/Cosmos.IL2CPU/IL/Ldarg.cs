@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
     {
     }
 
-    public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+    public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xOpVar = (OpVar)aOpCode;
       DoExecute(Assembler, aMethod, xOpVar.Value);
@@ -37,7 +37,7 @@ namespace Cosmos.IL2CPU.X86.IL
     /// <param name="aMethod"></param>
     /// <param name="aIndex"></param>
     /// <returns></returns>
-    public static int GetArgumentDisplacement(_MethodInfo aMethod, ushort aIndex)
+    public static int GetArgumentDisplacement(Il2cpuMethodInfo aMethod, ushort aIndex)
     {
       var xMethodBase = aMethod.MethodBase;
       if (aMethod.PluggedMethod != null)
@@ -136,7 +136,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
     }
 
-    public static void DoExecute(XSharp.Assembler.Assembler Assembler, _MethodInfo aMethod, ushort aParam)
+    public static void DoExecute(XSharp.Assembler.Assembler Assembler, Il2cpuMethodInfo aMethod, ushort aParam)
     {
       var xDisplacement = GetArgumentDisplacement(aMethod, aParam);
       var xType = GetArgumentType(aMethod, aParam);
@@ -168,7 +168,7 @@ namespace Cosmos.IL2CPU.X86.IL
       }
     }
 
-    public static Type GetArgumentType(_MethodInfo aMethod, ushort aParam)
+    public static Type GetArgumentType(Il2cpuMethodInfo aMethod, ushort aParam)
     {
       Type xArgType;
       if (aMethod.MethodBase.IsStatic)

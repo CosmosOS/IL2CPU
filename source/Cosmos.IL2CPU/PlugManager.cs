@@ -167,9 +167,9 @@ namespace Cosmos.IL2CPU
                                 // We also skip methods which do method access.
                                 if (xMethod.GetParameters().Where(x =>
                                 {
-                                    return x.GetCustomAttributes(typeof(FieldAccess)).Count() > 0
-                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Count() > 0;
-                                }).Count() > 0)
+                                    return x.GetCustomAttributes(typeof(FieldAccess)).Any()
+                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Any();
+                                }).Any())
                                 {
                                     OK = true;
                                 }
@@ -289,8 +289,7 @@ namespace Cosmos.IL2CPU
 
                             if (!OK)
                             {
-                                if (xAttrib == null
-                                    || xAttrib.IsOptional)
+                                if (xAttrib == null || !xAttrib.IsOptional)
                                 {
                                     if (LogWarning != null)
                                     {
@@ -432,7 +431,7 @@ namespace Cosmos.IL2CPU
                             var xActualParamCount = xParams.Length;
                             foreach (var xParam in xParams)
                             {
-                                if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                 {
                                     xActualParamCount--;
                                 }
@@ -446,7 +445,7 @@ namespace Cosmos.IL2CPU
                                 xTypesInst = Array.Empty<Type>();
 
                                 var xReplaceType = xParams[0].GetCustomAttributes(typeof(FieldType), false).ToList();
-                                if (xReplaceType.Any())
+                                if (xReplaceType.Count != 0)
                                 {
                                     xTypesStatic[0] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                 }
@@ -461,13 +460,13 @@ namespace Cosmos.IL2CPU
                                 var xCurIdx = 0;
                                 foreach (var xParam in xParams.Skip(1))
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                     {
                                         continue;
                                     }
 
                                     var xReplaceType = xParam.GetCustomAttributes(typeof(FieldType), false).ToList();
-                                    if (xReplaceType.Any())
+                                    if (xReplaceType.Count!=0)
                                     {
                                         xTypesInst[xCurIdx] = _typeResolver.ResolveType(((FieldType)xReplaceType[0]).Name, true);
                                     }
@@ -481,7 +480,7 @@ namespace Cosmos.IL2CPU
                                 xCurIdx = 0;
                                 foreach (var xParam in xParams)
                                 {
-                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Any())
+                                    if (xParam.GetCustomAttributes(typeof(FieldAccess), false).Length != 0)
                                     {
                                         xCurIdx++;
                                         continue;
@@ -628,34 +627,12 @@ namespace Cosmos.IL2CPU
                 //}
             }
 
-            //if (xAttrib != null && xAttrib.Signature != null)
-            //{
-            //    var xTargetMethods = aTargetType.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            //    //System_Void__Indy_IL2CPU_Assembler_Assembler__cctor__
-            //    //If signature exists, the search is slow. Signatures
-            //    //are infrequent though, so for now we just go slow method
-            //    //and have not optimized or cached this info. When we
-            //    //redo the plugs, we can fix this.
-            //    bool xEnabled=true;
-            //    foreach (var xTargetMethod in xTargetMethods)
-            //    {
-            //        string sName = DataMember.FilterStringForIncorrectChars(MethodInfoLabelGenerator.GetFullName(xTargetMethod));
-            //        if (string.Compare(sName, xAttrib.Signature, true) == 0)
-            //        {
-            //            //uint xUID = QueueMethod(xPlugImpl.Plug, "Plug", xMethod, true);
-            //            //mMethodPlugs.Add(xTargetMethod, new PlugInfo(xUID, xAttrib.Assembler));
-            //            // Mark as disabled, because we already handled it
-            //            xEnabled = false;
-            //            break;
-            //        }
-            //    }
-            //    // if still enabled, we didn't find our method
-            //    if (xEnabled)
-            //    {
-            //        // todo: more precise error: imagine having a 100K line project, and this error happens...
-            //        throw new Exception("Plug target method not found.");
-            //    }
-            //}
+            if (xResult is MethodInfo aMethodInfo && aMethodInfo.IsGenericMethodDefinition)
+            {
+                var types = aMethod.GetGenericArguments();
+                xResult = aMethodInfo.MakeGenericMethod(types);
+            }
+            
             return xResult;
         }
 

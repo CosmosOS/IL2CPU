@@ -17,7 +17,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
         }
 
-        public override void Execute(_MethodInfo aMethod, ILOpCode aOpCode)
+        public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
     {
       var xSource = aOpCode.StackPopTypes[0];
       var xSourceSize = SizeOfType(xSource);
@@ -26,7 +26,7 @@ namespace Cosmos.IL2CPU.X86.IL
       DoExecute(aMethod, xSource, xSourceSize, xSourceIsFloat);
     }
 
-    public static void DoExecute(_MethodInfo aMethod, Type xSource, uint xSourceSize, bool xSourceIsFloat)
+    public static void DoExecute(Il2cpuMethodInfo aMethod, Type xSource, uint xSourceSize, bool xSourceIsFloat)
     {
       if (IsReferenceType(xSource))
       {

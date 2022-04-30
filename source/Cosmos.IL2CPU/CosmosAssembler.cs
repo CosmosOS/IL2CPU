@@ -1,5 +1,7 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
+using Cosmos.Debug.Kernel;
+using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
@@ -224,45 +226,87 @@ namespace Cosmos.IL2CPU
             new Comment(this, "END - Create IDT");
         }
 
-        public void Initialize()
+        public void Initialize(bool enableVBE, string VBEResolution)
         {
-            uint xSig = 0x1BADB002;
+            uint xSig = 0xe85250d6;
 
-            DataMembers.Add(new DataIfNotDefined("ELF_COMPILATION"));
+            //Multiboot header
+            DataMembers.Add(new DataMember("align", "8", true));
+            DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
-            uint xFlags = 0x10003;
-            DataMembers.Add(new DataMember("MultibootFlags", xFlags));
-            DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
+            DataMembers.Add(new DataMember("MultibootArchitecture", 0));
+            DataMembers.Add(new DataMember("MultibootLenght", "MultibootHeaderEnd - MultibootHeader", typeof(uint)));
+            DataMembers.Add(new DataMember("MultibootChecksum", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", typeof(uint)));
+
+            if (enableVBE)
+            {
+                try
+                {
+                    string[] res = VBEResolution.Split('x');
+
+                    //Framebuffer Tag
+                    DataMembers.Add(new DataMember("align", "8", true));
+                    DataMembers.Add(new DataMember("MultibootFramebufferTag", Array.Empty<byte>()));
+                    DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
+                    DataMembers.Add(new DataMember("MultibootFramebufferOptional", (ushort)1));
+                    DataMembers.Add(new DataMember("MultibootFramebufferLenght", "MultibootFramebufferTagEnd - MultibootFramebufferTag", typeof(uint)));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[0])));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[1])));
+                    DataMembers.Add(new DataMember("", Int32.Parse(res[2])));
+
+                    DataMembers.Add(new DataMember("MultibootFramebufferTagEnd", Array.Empty<byte>()));
+                }
+                catch
+                {
+                    Console.WriteLine("VBE Resolution must be this format: 1920x1080x32");
+                }
+            }
+
+            // memory
+            DataMembers.Add(new DataMember("align", "8", true));
+            DataMembers.Add(new DataMember("MultibootMemoryTag", Array.Empty<byte>()));
+            DataMembers.Add(new DataMember("MultibootMemoryTagType", (ushort)2));
+            DataMembers.Add(new DataMember("MultibootMemoryTagOptional", (ushort)1));
+            DataMembers.Add(new DataMember("MultibootMemoryTagLenght", "MultibootMemoryTagEnd - MultibootMemoryTag", typeof(uint)));
             DataMembers.Add(new DataMember("MultibootHeaderAddr", ElementReference.New("MultibootSignature")));
             DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
             DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
             DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
+            DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
+
+            //Entry Address
+            DataMembers.Add(new DataMember("align", "8", true));
+            DataMembers.Add(new DataMember("MultibootEntryTag", Array.Empty<byte>()));
+            DataMembers.Add(new DataMember("MultibootEntryTagType", (ushort)3));
+            DataMembers.Add(new DataMember("MultibootEntryTagOptional", (ushort)1));
+            DataMembers.Add(new DataMember("MultibootEntryTagLenght", "MultibootEntryTagEnd - MultibootEntryTag", typeof(uint)));
             DataMembers.Add(new DataMember("MultibootEntryAddr", ElementReference.New("Kernel_Start")));
-            DataMembers.Add(new DataEndIfDefined());
+            DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
 
-            DataMembers.Add(new DataIfDefined("ELF_COMPILATION"));
-            xFlags = 0x00003;
-            DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
-            DataMembers.Add(new DataMember("MultibootFlags", xFlags));
-            DataMembers.Add(new DataMember("MultibootChecksum", (int)(0 - (xFlags + xSig))));
-            DataMembers.Add(new DataEndIfDefined());
+            //End Tag
+            DataMembers.Add(new DataMember("align", "8", true));
+            DataMembers.Add(new DataMember("MultibootEndTag", Array.Empty<byte>()));
+            DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
+            DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
+            DataMembers.Add(new DataMember("MultibootEndTagEnd", Array.Empty<byte>()));
 
-            // graphics info fields
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeModeInfoAddr", System.Int32.MaxValue));
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeControlInfoAddr", System.Int32.MaxValue));
-            DataMembers.Add(new DataMember("MultibootGraphicsRuntime_VbeMode", System.Int32.MaxValue));
+            DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
 
-            // memory
-            DataMembers.Add(new DataMember("MultiBootInfo_Memory_High", 0));
-            DataMembers.Add(new DataMember("MultiBootInfo_Memory_Low", 0));
+            //memory
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember("Before_Kernel_Stack", new byte[0x50000]));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember("Kernel_Stack", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultiBootInfo_Structure", new uint[1]));
 
             // constants
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__uint2double_const", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x41 }));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__ulong2double_const", 0x5F800000));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__doublesignbit", 0x8000000000000000));
+            DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__floatsignbit", 0x80000000));
 
             if (mComPort > 0)
@@ -292,7 +336,7 @@ namespace Cosmos.IL2CPU
             new LiteralAssemblerCode("%ifndef EXCLUDE_MULTIBOOT_MAGIC");
             new Comment(this, "MultiBoot compliant loader provides info in registers: ");
             new Comment(this, "EBX=multiboot_info ");
-            new Comment(this, "EAX=0x2BADB002 - check if it's really Multiboot-compliant loader ");
+            new Comment(this, "EAX=0x36d76289 - check if it's really Multiboot2-compliant loader ");
             new Comment(this, "                ;- copy mb info - some stuff for you  ");
             new Comment(this, "BEGIN - Multiboot Info");
             new Mov
@@ -301,22 +345,9 @@ namespace Cosmos.IL2CPU
                 DestinationIsIndirect = true,
                 SourceReg = RegistersEnum.EBX
             };
-            XS.Add(EBX, 4);
-            XS.Set(EAX, EBX, sourceIsIndirect: true);
-            new Mov
-            {
-                DestinationRef = ElementReference.New("MultiBootInfo_Memory_Low"),
-                DestinationIsIndirect = true,
-                SourceReg = RegistersEnum.EAX
-            };
-            XS.Add(EBX, 4);
-            XS.Set(EAX, EBX, sourceIsIndirect: true);
-            new Mov
-            {
-                DestinationRef = ElementReference.New("MultiBootInfo_Memory_High"),
-                DestinationIsIndirect = true,
-                SourceReg = RegistersEnum.EAX
-            };
+
+            XS.Call("SystemVoidCosmosCoreMultiboot2Init");
+
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
             WriteDebugVideo("Creating GDT.");
@@ -327,16 +358,6 @@ namespace Cosmos.IL2CPU
 
             WriteDebugVideo("Creating IDT.");
             CreateIDT();
-#if LFB_1024_8
-            new Comment("Set graphics fields");
-            XS.Mov(XSRegisters.EBX, XSharp.Assembler.ElementReference.New("MultiBootInfo_Structure"), sourceIsIndirect: true);
-            XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 72);
-            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeControlInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
-            XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 76);
-            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeModeInfoAddr"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
-            XS.Mov(XSRegisters.EAX, XSRegisters.EBX, sourceDisplacement: 80);
-            new Move { DestinationRef = XSharp.Assembler.ElementReference.New("MultibootGraphicsRuntime_VbeMode"), DestinationIsIndirect = true, SourceReg = Registers.EAX };
-#endif
 
             //WriteDebugVideo("Initializing SSE.");
             //new Comment(this, "BEGIN - SSE Init");
@@ -362,6 +383,10 @@ namespace Cosmos.IL2CPU
                 WriteDebugVideo("Initializing DebugStub.");
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_Init]);
             }
+
+            //Initiate Memory
+            WriteDebugVideo("Initiating Memory");
+            XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
 
             // Jump to Kernel entry point
             WriteDebugVideo("Jumping to kernel.");

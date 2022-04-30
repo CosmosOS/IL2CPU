@@ -395,63 +395,83 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Conv_R8:
           StackPushTypes[0] = typeof(Double);
           break;
+
         case Code.Conv_Ovf_I:
           StackPushTypes[0] = typeof(IntPtr);
           break;
+
         case Code.Conv_Ovf_I1:
           StackPushTypes[0] = typeof(sbyte);
           break;
+
         case Code.Conv_Ovf_I1_Un:
           StackPushTypes[0] = typeof(sbyte);
           break;
+
         case Code.Conv_Ovf_I2:
           StackPushTypes[0] = typeof(short);
           break;
+
         case Code.Conv_Ovf_I2_Un:
           StackPushTypes[0] = typeof(short);
           break;
+
         case Code.Conv_Ovf_I4:
           StackPushTypes[0] = typeof(int);
           break;
+
         case Code.Conv_Ovf_I4_Un:
           StackPushTypes[0] = typeof(int);
           break;
+
         case Code.Conv_Ovf_I8:
           StackPushTypes[0] = typeof(long);
           break;
+
         case Code.Conv_Ovf_I8_Un:
           StackPushTypes[0] = typeof(long);
           break;
+
         case Code.Conv_Ovf_I_Un:
           StackPushTypes[0] = typeof(IntPtr);
           break;
+
         case Code.Conv_Ovf_U:
           StackPushTypes[0] = typeof(UIntPtr);
           break;
+
         case Code.Conv_Ovf_U1:
           StackPushTypes[0] = typeof(byte);
           break;
+
         case Code.Conv_Ovf_U1_Un:
           StackPushTypes[0] = typeof(byte);
           break;
+
         case Code.Conv_Ovf_U2:
           StackPushTypes[0] = typeof(ushort);
           break;
+
         case Code.Conv_Ovf_U2_Un:
           StackPushTypes[0] = typeof(ushort);
           break;
+
         case Code.Conv_Ovf_U4:
           StackPushTypes[0] = typeof(uint);
           break;
+
         case Code.Conv_Ovf_U4_Un:
           StackPushTypes[0] = typeof(uint);
           break;
+
         case Code.Conv_Ovf_U8:
           StackPushTypes[0] = typeof(ulong);
           break;
+
         case Code.Conv_Ovf_U8_Un:
           StackPushTypes[0] = typeof(ulong);
           break;
+
         case Code.Conv_Ovf_U_Un:
           StackPushTypes[0] = typeof(UIntPtr);
           break;
@@ -459,21 +479,27 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Clt:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Clt_Un:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Cgt:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Cgt_Un:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Ceq:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Throw:
           StackPopTypes[0] = typeof(object);
           return;
+
         case Code.Ldlen:
           StackPushTypes[0] = typeof(UIntPtr);
           return;
@@ -481,36 +507,47 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Ldelem_I:
           StackPushTypes[0] = typeof(IntPtr);
           return;
+
         case Code.Ldelem_I1:
           StackPushTypes[0] = typeof(sbyte);
           return;
+
         case Code.Ldelem_I2:
           StackPushTypes[0] = typeof(short);
           return;
+
         case Code.Ldelem_I4:
           StackPushTypes[0] = typeof(int);
           return;
+
         case Code.Ldelem_I8:
           StackPushTypes[0] = typeof(long);
           return;
+
         case Code.Ldelem_U1:
           StackPushTypes[0] = typeof(byte);
           return;
+
         case Code.Ldelem_U2:
           StackPushTypes[0] = typeof(ushort);
           return;
+
         case Code.Ldelem_U4:
           StackPushTypes[0] = typeof(uint);
           return;
+
         case Code.Ldelem_R4:
           StackPushTypes[0] = typeof(float);
           return;
+
         case Code.Ldelem_R8:
           StackPushTypes[0] = typeof(double);
           return;
+
         case Code.Ldnull:
           StackPushTypes[0] = typeof(NullRef);
           return;
+
         case Code.Ldind_I:
           StackPushTypes[0] = typeof(IntPtr);
           return;
@@ -538,8 +575,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Stelem_I8:
           StackPopTypes[0] = typeof(long);
           return;
+
         case Code.Conv_R_Un:
           StackPushTypes[0] = typeof(Double);
+          return;
+
+        case Code.Refanytype:
+          StackPushTypes[0] = typeof(int);
           return;
       }
     }

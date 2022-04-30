@@ -7,6 +7,7 @@
         <DevelopmentDependency>True</DevelopmentDependency>
         <Platforms>AnyCPU</Platforms>
         <Prefer32Bit>true</Prefer32Bit>
+        <Configurations>Debug;Release;TEST</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
