@@ -34,8 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{27E233BC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IL2CPU.Compiler.Tests", "tests\IL2CPU.Compiler.Tests\IL2CPU.Compiler.Tests.csproj", "{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IL2CPU.Runtime", "source\IL2CPU.Runtime\IL2CPU.Runtime.csproj", "{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -173,14 +171,8 @@ Global
 		{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}.Release|x86.Build.0 = Release|x86
 		{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}.Release-CI|Any CPU.ActiveCfg = Release|Any CPU
 		{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}.Release-CI|Any CPU.Build.0 = Release|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Debug-CI|Any CPU.ActiveCfg = Debug|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Debug-CI|Any CPU.Build.0 = Debug|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Release-CI|Any CPU.ActiveCfg = Release|Any CPU
-		{978A1633-9F0B-48E0-AB35-CAE63E8FEEDC}.Release-CI|Any CPU.Build.0 = Release|Any CPU
+		{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}.Release-CI|x86.ActiveCfg = Release|x86
+		{FBA88B9D-F6B3-422C-ABF8-470BB4A4E22E}.Release-CI|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
