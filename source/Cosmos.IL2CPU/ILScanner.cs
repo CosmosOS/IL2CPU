@@ -260,6 +260,7 @@ namespace Cosmos.IL2CPU
             Queue(typeof(Array), null, "Explicit Entry");
             Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
             Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
             Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
@@ -321,6 +322,7 @@ namespace Cosmos.IL2CPU
             Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
             // Pull in Array constructor
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
+
             // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
 
@@ -428,8 +430,6 @@ namespace Cosmos.IL2CPU
                 }
             }
         }
-
-        public int MethodCount => mMethodUIDs.Count;
 
         protected string LogItemText(object aItem)
         {
@@ -563,7 +563,7 @@ namespace Cosmos.IL2CPU
                             }
                             else if (xVirtMethod.DeclaringType.IsInterface
                                   && xType.GetInterfaces().Contains(xVirtMethod.DeclaringType)
-                                  && (xType.BaseType != typeof(Array) || !xVirtMethod.DeclaringType.IsGenericType))
+                                  && !(xType.BaseType == typeof(Array) && xVirtMethod.DeclaringType.IsGenericType))
                             {
                                 var xInterfaceMap = xType.GetInterfaceMap(xVirtMethod.DeclaringType);
                                 var xMethodIndex = Array.IndexOf(xInterfaceMap.InterfaceMethods, xVirtMethod);
@@ -656,7 +656,7 @@ namespace Cosmos.IL2CPU
                         {
                             Queue(((ILOpCodes.OpMethod)xOpCode).Value, aMethod, "Call", sourceItem);
                         }
-                        else if (xOpCode is ILOpCodes.OpType)
+                        else if (xOpCode is ILOpCodes.OpType xOpType)
                         {
                             Queue(((ILOpCodes.OpType)xOpCode).Value, aMethod, "OpCode Value");
                         }
@@ -697,6 +697,23 @@ namespace Cosmos.IL2CPU
         {
             CompilerHelpers.Debug($"ILScanner: ScanType");
             CompilerHelpers.Debug($"Type = '{aType}'");
+
+            // This is a bit overkill, most likely we dont need all these methods
+            // but I dont see a better way to do it easily
+            // so for generic interface methods on arrays, we just add all methods
+            if (aType.Name.Contains("SZArrayImpl"))
+            {
+                foreach (var xMethod in aType.GetMethods())
+                {
+                    Queue(xMethod, aType, "Generic Interface Method");
+                }
+            }
+
+            if (aType.IsGenericType && new string[] { "IList", "ICollection", "IEnumerable", "IReadOnlyList", "IReadOnlyCollection" }
+                        .Any(i => aType.Name.Contains(i)))
+            {
+                Queue(aType.GenericTypeArguments[0].MakeArrayType(), aType, "CallVirt of Generic Interface for Array");
+            }
 
             // Add immediate ancestor type
             // We dont need to crawl up farther, when the BaseType is scanned
@@ -762,7 +779,8 @@ namespace Cosmos.IL2CPU
                 }
                 else if (!aType.IsGenericParameter && xVirt.DeclaringType.IsInterface && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
                 {
-                    if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType))
+                    if (!aType.IsInterface && aType.GetInterfaces().Contains(xVirt.DeclaringType)
+                        && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
                     {
                         var xIntfMapping = aType.GetInterfaceMap(xVirt.DeclaringType);
                         if ((xIntfMapping.InterfaceMethods != null) && (xIntfMapping.TargetMethods != null))
@@ -775,6 +793,11 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
+            }
+
+            if (aType.BaseType == typeof(Array))
+            {
+                Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 
             foreach (var xInterface in aType.GetInterfaces())
