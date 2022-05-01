@@ -97,6 +97,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 else
                 {
                     XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 4);
+                    XS.Set(EBX, EAX, sourceDisplacement: 4, sourceIsIndirect: true); // type of object
                     XS.Push(EAX, isIndirect: true);
                 }
 
@@ -111,13 +112,13 @@ namespace Cosmos.IL2CPU.X86.IL
                     var notArrayLabel = xCurrentMethodLabel + ".NotArrayType";
                     var endOfCheckLabel = xCurrentMethodLabel + ".AfterGenericArrayInterfaceCheck";
                     XS.Pop(EAX); // EAX now contains type of object
-                    XS.Set(EBX, GetTypeIDLabel(typeof(Array)), sourceIsIndirect: true);
-                    XS.Compare(EAX, EBX);
+                    // Now check if type derives from array
+                    XS.Compare(EBX, (uint)ObjectUtils.InstanceTypeEnum.Array);
                     XS.Jump(CPU.ConditionalTestEnum.NotEqual, notArrayLabel);
                     XS.Comment($"Set type to be {aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType().Name}");
                     XS.Push(GetTypeIDLabel(aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType()), isIndirect: true);
                     XS.Jump(endOfCheckLabel);
-                    XS.Label(notArrayLabel);
+                    XS.Label(notArrayLabel); // we already pushed that value when it does not need to be overwritten
                     XS.Push(EAX);
                     XS.Label(endOfCheckLabel);
                 }
