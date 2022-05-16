@@ -162,6 +162,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Endfinally:
         case Code.Endfilter:
           return 0;
+        case Code.Readonly:
+          return 0;
         case Code.Refanytype:
           return 1;
         case Code.Initblk:
@@ -312,6 +314,8 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Refanytype:
           return 1;
         case Code.Initblk:
+          return 0;
+        case Code.Readonly:
           return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");

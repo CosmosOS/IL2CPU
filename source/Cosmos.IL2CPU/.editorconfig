@@ -30,13 +30,16 @@ indent_size = 4
 [IL/Ldlen.cs]
 indent_size = 4
 
-[IL/Newobj.cs]
+[IL/*.cs]
 indent_size = 4
 
 [AppAssembler.cs]
 indent_size = 4
 
 [CompilerEngine.cs]
+indent_size = 4
+
+[AppAssemblerRingsCheck.cs]
 indent_size = 4
 
 [IL/Stfld.cs]

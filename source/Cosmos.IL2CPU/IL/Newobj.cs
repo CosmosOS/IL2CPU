@@ -279,7 +279,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Add(ESP, 4);
 
                     new Comment(aAssembler, "[ Newobj.Execute cleanup end ]");
-                    Jump_Exception(aMethod);
+                    XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
                     XS.Label(xNoErrorLabel);
                 }
                 XS.Pop(EAX);
