@@ -723,6 +723,8 @@ namespace Cosmos.IL2CPU
                 {
                     Queue(xMethod.MakeGenericMethod(new Type[] { aType.GetElementType() }), aType, "Virtual SzArrayHelper");
                 }
+
+                Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 
 
