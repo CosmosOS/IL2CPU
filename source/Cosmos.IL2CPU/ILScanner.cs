@@ -740,6 +740,8 @@ namespace Cosmos.IL2CPU
                 {
                     Queue(xMethod.MakeGenericMethod(new Type[] { aType.GetElementType() }), aType, "Virtual SzArrayHelper");
                 }
+
+                Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 
 
@@ -793,11 +795,6 @@ namespace Cosmos.IL2CPU
                         }
                     }
                 }
-            }
-
-            if (aType.BaseType == typeof(Array))
-            {
-                Queue(typeof(SZArrayImpl<>).MakeGenericType(aType.GetElementType()), aType, "Array");
             }
 
             foreach (var xInterface in aType.GetInterfaces())

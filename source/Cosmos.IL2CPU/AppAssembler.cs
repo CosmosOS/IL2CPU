@@ -1043,7 +1043,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            if (aType.IsArray)
+            if (aType.IsArray && !aType.GetElementType().IsPointer)
                 // we need to do additional work for arrays
                 // since they have the weird generic interfaces and we need to add the implementations for the interfaces
                 // we manually link the interface implementations in the method 
@@ -1076,7 +1076,7 @@ namespace Cosmos.IL2CPU
 
             var xEmittedInterfaceMethods = new List<(MethodBase, MethodBase)>();
 
-            if (aType.IsArray) // we need to handle arrays seperately since they have the weird generic interfaces
+            if (aType.IsArray && !aType.GetElementType().IsPointer) // we need to handle arrays seperately since they have the weird generic interfaces
             {
                 var interfaces = aType.GetInterfaces().Where(t => t.IsGenericType);
 
