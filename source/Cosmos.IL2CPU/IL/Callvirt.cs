@@ -31,6 +31,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             string xCurrentMethodLabel = GetLabel(aMethod, aOp.Position);
             Type xPopType = aOp.StackPopTypes.Last();
+            var isInterface = aTargetMethod.DeclaringType.IsInterface;
 
             string xNormalAddress = "";
             if (aTargetMethod.IsStatic || !aTargetMethod.IsVirtual || aTargetMethod.IsFinal)
@@ -58,8 +59,7 @@ namespace Cosmos.IL2CPU.X86.IL
             // Might have to go to old data structure for the offset...
             // Can we add this method info somehow to the data passed in?
             // mThisOffset = mTargetMethodInfo.Arguments[0].Offset;
-            XS.Comment("Method: " + aTargetMethod.Name);
-            XS.Comment("Declaring type:" + aTargetMethod.DeclaringType.Name);
+            XS.Comment($"Calling = {aTargetMethod.DeclaringType.FullName}.{aTargetMethod.Name}");
             XS.Comment("ThisOffset = " + xThisOffset);
 
             if (IsReferenceType(xPopType))
@@ -82,26 +82,50 @@ namespace Cosmos.IL2CPU.X86.IL
             }
             else
             {
+                var afterCall = xCurrentMethodLabel + ".AfterCall";
+
                 /*
                 * On the stack now:
                 * $esp                 Params
-                * $esp + mThisOffset   This
+                * $esp + xThisOffset   This
                 */
-                if ((xPopType.IsPointer) || (xPopType.IsByRef))
+                if (xPopType.IsPointer || xPopType.IsByRef)
                 {
                     xPopType = xPopType.GetElementType();
-                    string xTypeId = GetTypeIDLabel(xPopType);
-                    XS.Push(xTypeId, isIndirect: true);
+                    XS.Push(GetTypeIDLabel(xPopType), isIndirect: true);
                 }
                 else
                 {
                     XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 4);
+                    XS.Set(EBX, EAX, sourceDisplacement: 4, sourceIsIndirect: true); // type of object
                     XS.Push(EAX, isIndirect: true);
+                }
+
+                // To handle generic interfaces on arrays, we need to check if the callvirt is for such an interface, in which case if the object
+                // the method is being called on is an array, we dont push the type array but rather an typed array (System.Array vs T[])
+
+                if (aTargetMethod.DeclaringType.IsGenericType
+                    && new string[] { "IList", "ICollection", "IEnumerable", "IReadOnlyList", "IReadOnlyCollection" }
+                        .Any(i => aTargetMethod.DeclaringType.Name.Contains(i)))
+                {
+                    isInterface = true;
+                    var notArrayLabel = xCurrentMethodLabel + ".NotArrayType";
+                    var endOfCheckLabel = xCurrentMethodLabel + ".AfterGenericArrayInterfaceCheck";
+                    XS.Pop(EAX); // EAX now contains type of object
+                    // Now check if type derives from array
+                    XS.Compare(EBX, (uint)ObjectUtils.InstanceTypeEnum.Array);
+                    XS.Jump(CPU.ConditionalTestEnum.NotEqual, notArrayLabel);
+                    XS.Comment($"Set type to be {aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType().Name}");
+                    XS.Push(GetTypeIDLabel(aTargetMethod.DeclaringType.GenericTypeArguments[0].MakeArrayType()), isIndirect: true);
+                    XS.Jump(endOfCheckLabel);
+                    XS.Label(notArrayLabel); // we already pushed that value when it does not need to be overwritten
+                    XS.Push(EAX);
+                    XS.Label(endOfCheckLabel);
                 }
 
                 XS.Push(aTargetMethodUID);
 
-                if (aTargetMethod.DeclaringType.IsInterface)
+                if (isInterface)
                 {
                     XS.Call(LabelName.Get(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef));
                 }
@@ -118,7 +142,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 /*
                  * On the stack now:
                  * $esp                 Params
-                 * $esp + mThisOffset   This
+                 * $esp + xThisOffset   This
                  */
                 XS.Pop(ECX);
 
@@ -129,7 +153,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp + 0              Params
-                    * $esp + mThisOffset    This
+                    * $esp + xThisOffset    This
                     */
                     // we need to see if $this is a boxed object, and if so, we need to unbox it
                     XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 4);
@@ -138,7 +162,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   This
+                    * $esp + xThisOffset   This
                     *
                     * ECX contains the method to call
                     * EAX contains the type pointer (not the handle!!)
@@ -177,7 +201,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   This
+                    * $esp + xThisOffset   This
                     *
                     * ECX contains the method to call
                     * EAX contains the type pointer (not the handle!!)
@@ -206,7 +230,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     /*
                     * On the stack now:
                     * $esp                 Params
-                    * $esp + mThisOffset   Pointer to address inside box
+                    * $esp + xThisOffset   Pointer to address inside box
                     *
                     * ECX contains the method to call
                     */
@@ -220,6 +244,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
 
                 XS.Call(ECX);
+                XS.Label(afterCall);
             }
             EmitExceptionLogic(aAssembler, aMethod, aOp, true,
                 delegate
