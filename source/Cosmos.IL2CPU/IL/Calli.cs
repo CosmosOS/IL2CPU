@@ -1,6 +1,7 @@
 using System;
-
+using XSharp;
 using XSharp.Assembler;
+using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
@@ -14,7 +15,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
-            throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Calli.cs->Error: The Calli op-code has not been implemented yet!");
+            XS.Pop(EAX);
+            XS.Call(EAX);
         }
     }
 }
