@@ -305,8 +305,8 @@ namespace Cosmos.IL2CPU
             if (xMethInfo != null)
             {
                 xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
-
             }
+
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
                                   select (int)ILOp.Align(ILOp.SizeOfType(item.ParameterType), 4)).Sum();
             if (!aMethod.MethodBase.IsStatic)
@@ -684,14 +684,22 @@ namespace Cosmos.IL2CPU
 
         private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
         {
-            var xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            uint xSize = 0;
+            if(!(aTargetMethod.MethodBase.Name == "Invoke" && aTargetMethod.MethodBase.DeclaringType.Name == "DelegateImpl"))
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            }
+            else
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
+            }
             if (xSize > 0)
             {
                 XS.Sub(ESP, xSize);
             }
             XS.Call(ILOp.GetLabel(aTargetMethod));
             var xMethodInfo = aMethod.MethodBase as MethodInfo;
-
+                
             uint xReturnsize = 0;
             if (xMethodInfo != null)
             {
@@ -1194,6 +1202,10 @@ namespace Cosmos.IL2CPU
         /// <param name="aTo">The plug</param>
         internal void GenerateMethodForward(Il2cpuMethodInfo aFrom, Il2cpuMethodInfo aTo)
         {
+            if(aFrom.MethodBase.Name == "Invoke")
+            {
+                int x = 0;
+            }
             var xMethodLabel = ILOp.GetLabel(aFrom);
             var xEndOfMethodLabel = xMethodLabel + EndOfMethodLabelNameNormal;
 

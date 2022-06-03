@@ -155,9 +155,8 @@ namespace Cosmos.IL2CPU
             var xFields = (from item in aType.GetFields(xBindingFlags)
                            orderby item.Name, item.DeclaringType.ToString()
                            select item).ToArray();
-            for (int i = 0; i < xFields.Length; i++)
+            foreach (var xField in xFields)
             {
-                var xField = xFields[i];
                 // todo: should be possible to have GetFields only return fields from a given type, thus removing need of next statement
                 if (xField.DeclaringType != aType)
                 {
