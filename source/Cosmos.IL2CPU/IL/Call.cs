@@ -116,17 +116,17 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (xExtraStackSize > 0)
             {
-                XS.Sub(XSRegisters.ESP, (uint)xExtraStackSize);
+                XS.Sub(XSRegisters.ESP, xExtraStackSize);
             }
             XS.Call(xNormalAddress);
 
-            uint xReturnSize = 0;
-            if (xMethodInfo != null)
-            {
-                xReturnSize = SizeOfType(xMethodInfo.ReturnType);
-            }
             if (aCurrentMethod != null)
             {
+                uint xReturnSize = 0;
+                if (xMethodInfo != null)
+                {
+                    xReturnSize = SizeOfType(xMethodInfo.ReturnType);
+                }
                 EmitExceptionLogic(Assembler, aCurrentMethod, aOp, true,
                                    delegate
                                    {
