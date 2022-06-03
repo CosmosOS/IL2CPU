@@ -305,8 +305,8 @@ namespace Cosmos.IL2CPU
             if (xMethInfo != null)
             {
                 xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
-
             }
+
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
                                   select (int)ILOp.Align(ILOp.SizeOfType(item.ParameterType), 4)).Sum();
             if (!aMethod.MethodBase.IsStatic)
@@ -684,14 +684,22 @@ namespace Cosmos.IL2CPU
 
         private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
         {
-            var xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            uint xSize = 0;
+            if(!(aTargetMethod.MethodBase.Name == "Invoke" && aTargetMethod.MethodBase.DeclaringType.Name == "DelegateImpl"))
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            }
+            else
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
+            }
             if (xSize > 0)
             {
                 XS.Sub(ESP, xSize);
             }
             XS.Call(ILOp.GetLabel(aTargetMethod));
             var xMethodInfo = aMethod.MethodBase as MethodInfo;
-
+                
             uint xReturnsize = 0;
             if (xMethodInfo != null)
             {
@@ -699,18 +707,18 @@ namespace Cosmos.IL2CPU
             }
 
             ILOp.EmitExceptionLogic(Assembler, aMethod, null, true,
-                     delegate ()
-                     {
-                         var xResultSize = xReturnsize;
-                         if (xResultSize % 4 != 0)
-                         {
-                             xResultSize += 4 - (xResultSize % 4);
-                         }
-                         for (int i = 0; i < xResultSize / 4; i++)
-                         {
-                             XS.Add(ESP, 4);
-                         }
-                     }, aNextLabel);
+                delegate ()
+                {
+                    var xResultSize = xReturnsize;
+                    if (xResultSize % 4 != 0)
+                    {
+                        xResultSize += 4 - (xResultSize % 4);
+                    }
+                    for (int i = 0; i < xResultSize / 4; i++)
+                    {
+                        XS.Add(ESP, 4);
+                    }
+                }, aNextLabel);
         }
 
         private void Ldflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
@@ -1309,7 +1317,7 @@ namespace Cosmos.IL2CPU
             XS.Set(EBP, ESP);
             XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
             XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
-                LdStr.GetContentsArrayName(""), destinationDisplacement: 4);
+                LdStr.GetContentsArrayName(Assembler, ""), destinationDisplacement: 4);
 
             var xMemberId = 0;
 

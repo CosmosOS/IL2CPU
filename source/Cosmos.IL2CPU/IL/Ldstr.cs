@@ -6,21 +6,24 @@ using System.Text;
 using XSharp.Assembler;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
+using System.Collections.Generic;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
     [OpCode(ILOpCode.Code.Ldstr)]
     public class LdStr : ILOp
     {
-        public LdStr(Assembler aAsmblr)
-            : base(aAsmblr)
+        private readonly Assembler assembler;
+
+        public LdStr(Assembler aAssembler) : base(aAssembler)
         {
+            assembler = aAssembler;
         }
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xOpString = aOpCode as OpString;
-            string xDataName = GetContentsArrayName(xOpString.Value);
+            string xDataName = GetContentsArrayName(assembler, xOpString.Value);
             XS.Comment("String Value: \"" + xOpString.Value.Replace("\r", "\\r").Replace("\n", "\\n") + "\"");
             XS.Push(xDataName);
             XS.Push(0);
@@ -41,13 +44,17 @@ namespace Cosmos.IL2CPU.X86.IL
             #endregion
         }
 
-        public static string GetContentsArrayName(string aLiteral)
-        {
-            var xAsm = CPU.Assembler.CurrentInstance;
+        static Dictionary<string, string> stringLiterals = new Dictionary<string, string>();
 
+        public static string GetContentsArrayName(Assembler assembler, string aLiteral)
+        {
+            if(stringLiterals.TryGetValue(aLiteral, out string xDataName))
+            {
+                return xDataName;
+            }
             Encoding xEncoding = Encoding.Unicode;
 
-            string xDataName = xAsm.GetIdentifier("StringLiteral");
+            xDataName = assembler.GetIdentifier("StringLiteral");
             var xBytecount = xEncoding.GetByteCount(aLiteral);
             var xObjectData = new byte[(4 * 4) + (xBytecount)];
             Array.Copy(BitConverter.GetBytes((int)-1), 0, xObjectData, 0, 4);
@@ -55,7 +62,11 @@ namespace Cosmos.IL2CPU.X86.IL
             Array.Copy(BitConverter.GetBytes((int)1), 0, xObjectData, 8, 4);
             Array.Copy(BitConverter.GetBytes(aLiteral.Length), 0, xObjectData, 12, 4);
             Array.Copy(xEncoding.GetBytes(aLiteral), 0, xObjectData, 16, xBytecount);
-            xAsm.DataMembers.Add(new DataMember(xDataName, xObjectData));
+            assembler.DataMembers.Add(new DataMember(xDataName, xObjectData));
+
+            stringLiterals[aLiteral] = xDataName;
+
+
             return xDataName;
         }
     }
