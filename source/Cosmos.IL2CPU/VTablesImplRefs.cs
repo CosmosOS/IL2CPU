@@ -16,6 +16,7 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase GetDeclaringTypeOfMethodForTypeRef;
         public static readonly MethodBase IsInstanceRef;
         public static readonly MethodBase GetBaseTypeRef;
+        public static readonly MethodBase IsStructRef;
 
         public static Func<Type, uint> GetTypeId;
         // GC Methods
