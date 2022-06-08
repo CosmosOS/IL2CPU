@@ -21,13 +21,13 @@ namespace Cosmos.IL2CPU.X86.IL
 
 			if (xIsFloat)
 			{
-				throw new Exception("Cosmos.IL2CPU.x86->IL->Add_Ovf_Un.cs->Error: Expected unsigned integer operands but get float!");
+				throw new Exception("Cosmos.IL2CPU.x86->IL->Sub_Ovf_Un.cs->Error: Expected unsigned integer operands but get float!");
 			}
 
 			if (xSize > 8)
 			{
 				//EmitNotImplementedException( Assembler, aServiceProvider, "Size '" + xSize.Size + "' not supported (add)", aCurrentLabel, aCurrentMethodInfo, aCurrentOffset, aNextLabel );
-				throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Add_Ovf_Un.cs->Error: StackSize > 8 not supported");
+				throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Sub_Ovf_Un.cs->Error: StackSize > 8 not supported");
 			}
 			else
 			{

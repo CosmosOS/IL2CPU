@@ -96,8 +96,6 @@ namespace Cosmos.IL2CPU
                     xIdxOffset++;
                 }
 
-                string x = aMethod.MethodBase.Name;
-                string y = aMethod.MethodBase.DeclaringType.Name;
                 var xParams = aMethod.MethodBase.GetParameters();
                 var xParamCount = (ushort)xParams.Length;
 
@@ -307,8 +305,8 @@ namespace Cosmos.IL2CPU
             if (xMethInfo != null)
             {
                 xReturnSize = ILOp.Align(ILOp.SizeOfType(xMethInfo.ReturnType), 4);
-
             }
+
             var xTotalArgsSize = (from item in aMethod.MethodBase.GetParameters()
                                   select (int)ILOp.Align(ILOp.SizeOfType(item.ParameterType), 4)).Sum();
             if (!aMethod.MethodBase.IsStatic)
@@ -686,14 +684,22 @@ namespace Cosmos.IL2CPU
 
         private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
         {
-            var xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            uint xSize = 0;
+            if(!(aTargetMethod.MethodBase.Name == "Invoke" && aTargetMethod.MethodBase.DeclaringType.Name == "DelegateImpl"))
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+            }
+            else
+            {
+                xSize = X86.IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
+            }
             if (xSize > 0)
             {
                 XS.Sub(ESP, xSize);
             }
             XS.Call(ILOp.GetLabel(aTargetMethod));
             var xMethodInfo = aMethod.MethodBase as MethodInfo;
-
+                
             uint xReturnsize = 0;
             if (xMethodInfo != null)
             {
@@ -701,18 +707,18 @@ namespace Cosmos.IL2CPU
             }
 
             ILOp.EmitExceptionLogic(Assembler, aMethod, null, true,
-                     delegate ()
-                     {
-                         var xResultSize = xReturnsize;
-                         if (xResultSize % 4 != 0)
-                         {
-                             xResultSize += 4 - (xResultSize % 4);
-                         }
-                         for (int i = 0; i < xResultSize / 4; i++)
-                         {
-                             XS.Add(ESP, 4);
-                         }
-                     }, aNextLabel);
+                delegate ()
+                {
+                    var xResultSize = xReturnsize;
+                    if (xResultSize % 4 != 0)
+                    {
+                        xResultSize += 4 - (xResultSize % 4);
+                    }
+                    for (int i = 0; i < xResultSize / 4; i++)
+                    {
+                        XS.Add(ESP, 4);
+                    }
+                }, aNextLabel);
         }
 
         private void Ldflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
@@ -802,8 +808,8 @@ namespace Cosmos.IL2CPU
                 xVmtDebugOutput.WriteStartDocument();
                 xVmtDebugOutput.WriteStartElement("VMT");
 #endif
-            //Push((uint)aTypesSet.Count);
-            foreach (var xType in aTypesSet)
+
+                foreach (var xType in aTypesSet)
                 {
                     uint xTypeID = aGetTypeID(xType);
 #if VMT_DEBUG
@@ -1045,30 +1051,66 @@ namespace Cosmos.IL2CPU
                 }
             }
 
+            if (aType.IsArray && !aType.GetElementType().IsPointer)
+                // we need to do additional work for arrays
+                // since they have the weird generic interfaces and we need to add the implementations for the interfaces
+                // we manually link the interface implementations in the method 
+            {
+                var interfaces = aType.GetInterfaces().Where(t => t.IsGenericType);
+
+                foreach (var xInterface in interfaces)
+                {
+                    foreach (var xMethod in xInterface.GetMethods())
+                    {
+                        var szArray = aMethodSet.Where(method => method.DeclaringType.IsGenericType
+                                                       && method.DeclaringType.GetGenericTypeDefinition() == typeof(SZArrayImpl<>)).ToList();
+                        var implementation = szArray.First(method => method.Name == xMethod.Name
+                            && method.DeclaringType.GenericTypeArguments[0].Name == xMethod.DeclaringType.GenericTypeArguments[0].Name);
+                        xList.Add(implementation);
+                    }
+                }
+            }
+
             return xList;
         }
 
-        private static readonly List<(MethodBase, MethodBase)> EmptyEmittedInterfaceMethodsList =
-            new List<(MethodBase, MethodBase)>(0);
-
-        private static IReadOnlyList<(MethodBase InterfaceMethod, MethodBase TargetMethod)> GetEmittedInterfaceMethods(
-            Type aType, HashSet<MethodBase> aMethodSet)
+        private static IReadOnlyList<(MethodBase InterfaceMethod, MethodBase TargetMethod)> GetEmittedInterfaceMethods(Type aType, HashSet<MethodBase> aMethodSet)
         {
-            if (aType.IsInterface || aType.IsArray)
+            if (aType.IsInterface)
             {
-                return EmptyEmittedInterfaceMethodsList;
+                return new List<(MethodBase, MethodBase)>(0);
             }
 
+
             var xEmittedInterfaceMethods = new List<(MethodBase, MethodBase)>();
+
+            if (aType.IsArray && !aType.GetElementType().IsPointer) // we need to handle arrays seperately since they have the weird generic interfaces
+            {
+                var interfaces = aType.GetInterfaces().Where(t => t.IsGenericType);
+
+                foreach (var xInterface in interfaces)
+                {
+                    foreach (var xMethod in xInterface.GetMethods())
+                    {
+                        var szArray = aMethodSet.Where(method => method.DeclaringType.IsGenericType
+                                                       && method.DeclaringType.GetGenericTypeDefinition() == typeof(SZArrayImpl<>)).ToList();
+                        var implementation = szArray.First(method => method.Name == xMethod.Name
+                            && method.DeclaringType.GenericTypeArguments[0].Name == xMethod.DeclaringType.GenericTypeArguments[0].Name);
+                        xEmittedInterfaceMethods.Add((xMethod, implementation));
+                    }
+                }
+
+                return xEmittedInterfaceMethods;
+            }
 
             foreach (var xInterface in aType.GetInterfaces())
             {
                 var xInterfaceMap = aType.GetInterfaceMap(xInterface);
 
-                foreach (var xMethod in aMethodSet)
+                foreach (var xMethod in aMethodSet) // This loop seems optimizable
                 {
                     var xTargetMethod = xInterfaceMap.TargetMethods.SingleOrDefault(
-                        m => MemberInfoComparer.Instance.Equals(m, xMethod) == true);
+                        m => MemberInfoComparer.Instance.Equals(m, xMethod));
 
                     if (xTargetMethod != null)
                     {
@@ -1275,7 +1317,7 @@ namespace Cosmos.IL2CPU
             XS.Set(EBP, ESP);
             XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
             XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
-                LdStr.GetContentsArrayName(""), destinationDisplacement: 4);
+                LdStr.GetContentsArrayName(Assembler, ""), destinationDisplacement: 4);
 
             var xMemberId = 0;
 

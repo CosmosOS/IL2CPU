@@ -155,9 +155,8 @@ namespace Cosmos.IL2CPU
             var xFields = (from item in aType.GetFields(xBindingFlags)
                            orderby item.Name, item.DeclaringType.ToString()
                            select item).ToArray();
-            for (int i = 0; i < xFields.Length; i++)
+            foreach (var xField in xFields)
             {
-                var xField = xFields[i];
                 // todo: should be possible to have GetFields only return fields from a given type, thus removing need of next statement
                 if (xField.DeclaringType != aType)
                 {
@@ -403,10 +402,7 @@ namespace Cosmos.IL2CPU
                 XS.Comment("Cleanup return");
 
                 // cleanup result values
-                for (int i = 0; i < aReturnSize / 4; i++)
-                {
-                    XS.Add(ESP, 4);
-                }
+                XS.Add(XSRegisters.ESP, 4 * aReturnSize / 4);
             }
 
             if (aStackSizeBeforeCall > (aTotalArgumentSizeOfMethod))
@@ -417,10 +413,7 @@ namespace Cosmos.IL2CPU
                     XS.Comment("Cleanup extra stack");
 
                     // cleanup result values
-                    for (int i = 0; i < xExtraStack / 4; i++)
-                    {
-                        XS.Add(ESP, 4);
-                    }
+                    XS.Add(XSRegisters.ESP, 4 * xExtraStack / 4);
                 }
             }
         }
@@ -466,7 +459,7 @@ namespace Cosmos.IL2CPU
                 //new CPU.Call("_CODE_REQUESTED_BREAK_");
                 if (xJumpTo == null)
                 {
-                    Jump_Exception(aMethodInfo);
+                    XS.Jump(GetLabel(aMethodInfo) + AppAssembler.EndOfMethodLabelNameException);
                 }
                 else
                 {

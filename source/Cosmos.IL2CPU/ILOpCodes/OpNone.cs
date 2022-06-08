@@ -162,9 +162,13 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Endfinally:
         case Code.Endfilter:
           return 0;
+        case Code.Readonly:
+          return 0;
         case Code.Refanytype:
           return 1;
         case Code.Initblk:
+          return 3;
+        case Code.Cpblk:
           return 3;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
@@ -312,6 +316,10 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Refanytype:
           return 1;
         case Code.Initblk:
+          return 0;
+        case Code.Cpblk:
+          return 0;
+        case Code.Readonly:
           return 0;
         default:
           throw new NotImplementedException("OpCode '" + OpCode + "' not implemented!");
@@ -671,9 +679,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (xTypeValue == typeof(int) && xTypeShift == typeof(int))
+          if (xTypeValue == typeof(IntPtr) && (xTypeShift == typeof(int) || xTypeShift == typeof(uint)))
           {
-            StackPushTypes[0] = typeof(int);
+            StackPushTypes[0] = xTypeShift;
             return;
           }
           if (xTypeValue == typeof(byte) && xTypeShift == typeof(int))
@@ -686,7 +694,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
             StackPushTypes[0] = typeof(long);
             return;
           }
-          if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(int))
+          if (xTypeValue == typeof(int) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
             return;

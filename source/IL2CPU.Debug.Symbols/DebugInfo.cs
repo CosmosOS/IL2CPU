@@ -554,10 +554,14 @@ namespace IL2CPU.Debug.Symbols
                 AddAssemblies(null, true);
                 AddDocument(null, true);
                 AddMethod(null, true);
-                var xConn = mConnection;
-                xConn.Close();
-                xConn = null;
+                mConnection.Close();
                 mConnection = null;
+
+                //https://stackoverflow.com/questions/8511901/system-data-sqlite-close-not-releasing-database-file
+                SqliteConnection.ClearAllPools();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 // Dont set to null... causes problems because of bad code :(
                 // Need to fix the whole class, but its here for now.
                 //CurrentInstance = null;
