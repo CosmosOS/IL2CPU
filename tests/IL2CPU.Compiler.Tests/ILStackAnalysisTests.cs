@@ -11,7 +11,7 @@ using System.Collections;
 
 namespace IL2CPU.Compiler.Tests
 {
-    public class ExampleMethods
+    public unsafe class ExampleMethods
     {
         public void TestSimpleException()
         {
@@ -24,6 +24,7 @@ namespace IL2CPU.Compiler.Tests
                 Console.WriteLine("Caught exception.");
             }
         }
+           
     }
 
     public class VoidTextWriter : TextWriter
@@ -34,7 +35,7 @@ namespace IL2CPU.Compiler.Tests
     }
 
     [TestFixture(TestOf = typeof(AppAssembler))]
-    public class ILStackAnalysisTests
+    public unsafe class ILStackAnalysisTests
     {
         [Test]
         [TestCase(typeof(string), "Clone", 1, null)]
@@ -73,12 +74,14 @@ namespace IL2CPU.Compiler.Tests
         [TestCase(typeof(Hashtable), "Insert", new[] { typeof(object), typeof(object), typeof(bool) })]
         [TestCase(typeof(ExampleMethods), "TestSimpleException", new Type[0])]
         [TestCase(typeof(TypedReference), "GetHashCode", new Type[0])]
+
         public void TestStackAnalysis(Type aType, string aMethodName, Type[] aArgs)
         {
             if (aArgs is null)
             {
                 aArgs = Array.Empty<Type>();
             }
+
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
             var methodBase = new Il2cpuMethodInfo(method, 1, Il2cpuMethodInfo.TypeEnum.Normal, null);
 
