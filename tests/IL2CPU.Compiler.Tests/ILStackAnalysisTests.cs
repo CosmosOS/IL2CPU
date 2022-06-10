@@ -11,7 +11,7 @@ using System.Collections;
 
 namespace IL2CPU.Compiler.Tests
 {
-    public unsafe class ExampleMethods
+    public class ExampleMethods
     {
         public void TestSimpleException()
         {
@@ -35,7 +35,7 @@ namespace IL2CPU.Compiler.Tests
     }
 
     [TestFixture(TestOf = typeof(AppAssembler))]
-    public unsafe class ILStackAnalysisTests
+    public class ILStackAnalysisTests
     {
         [Test]
         [TestCase(typeof(string), "Clone", 1, null)]
