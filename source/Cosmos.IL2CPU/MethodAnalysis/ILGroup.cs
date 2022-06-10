@@ -81,13 +81,16 @@ namespace Cosmos.IL2CPU.MethodAnalysis
             }
 
             // Initialse the datastructure with the first opcode
-
+            var list = aMethod.Code.Select(c => c.Value.Position).ToList();
             // Analyse op codes
-            foreach (var (_, opGroup) in groups)
+            foreach (var (val, opGroup) in groups)
             {
+
                 while (true)
                 {
                     var analysing = opGroup.OpCodes.Last();
+
+                    list.Remove(analysing.Position);
 
                     analysed++;
 
@@ -119,6 +122,9 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                     }
                 }
             }
+
+            aMethod.Code = aMethod.Code.Where(c => !list.Contains(c.Key)).ToDictionary(i => i.Key, i => i.Value);
+            aMethod.Length = aMethod.Code.Count;
 
             if(analysed != aMethod.Length)
             {
