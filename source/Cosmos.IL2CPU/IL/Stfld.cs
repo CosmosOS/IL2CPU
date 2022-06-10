@@ -1,16 +1,13 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using Cosmos.IL2CPU.Extensions;
 using XSharp;
 using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
-using CPU = XSharp.Assembler.x86;
-using IL2CPU.API;
 
 namespace Cosmos.IL2CPU.X86.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stfld)]
+    [OpCode(ILOpCode.Code.Stfld)]
     public class Stfld : ILOp
     {
         public Stfld(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)
