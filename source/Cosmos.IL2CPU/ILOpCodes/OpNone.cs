@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Cosmos.IL2CPU.X86.IL;
 
 
 namespace Cosmos.IL2CPU.ILOpCodes
@@ -684,6 +685,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
             StackPushTypes[0] = xTypeShift;
             return;
           }
+          if (xTypeValue == typeof(UIntPtr) && (xTypeShift == typeof(int) || xTypeShift == typeof(uint)))
+          {
+              StackPushTypes[0] = xTypeShift;
+              return;
+          }
           if (xTypeValue == typeof(byte) && xTypeShift == typeof(int))
           {
             StackPushTypes[0] = typeof(int);
@@ -722,11 +728,6 @@ namespace Cosmos.IL2CPU.ILOpCodes
           if (xTypeValue == typeof(long) && xTypeShift == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(long);
-            return;
-          }
-          if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
-          {
-            StackPushTypes[0] = typeof(IntPtr);
             return;
           }
           if (xTypeValue == typeof(IntPtr) && xTypeShift == typeof(IntPtr))
