@@ -832,7 +832,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             throw new Exception("Wrong value type: " + StackPopTypes[0].FullName);
           }
-          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(int))
+          if (!ILOp.IsPointer(StackPopTypes[1]) && StackPopTypes[1] != typeof(long) && StackPopTypes[1] != typeof(int))
           {
             throw new Exception("Wrong Pointer type: " + StackPopTypes[1].FullName);
           }
