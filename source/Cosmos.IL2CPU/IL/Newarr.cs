@@ -22,12 +22,6 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xType = (ILOpCodes.OpType)aOpCode;
-
-            if (xType.Value.FullName.Contains("Void"))
-            {
-                int x = 0;
-            }
-
             uint xSize = SizeOfType(xType.Value);
 
             string xTypeID = GetTypeIDLabel(xType.Value);
