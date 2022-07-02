@@ -22,10 +22,9 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             var xType = (ILOpCodes.OpType)aOpCode;
+            uint xSize = SizeOfType(xType.Value);
 
-            uint xSize = SizeOfType(xType.Value.GetElementType() ?? xType.Value);
-
-            string xTypeID = GetTypeIDLabel(xType.Value.GetElementType() ?? xType.Value);
+            string xTypeID = GetTypeIDLabel(xType.Value);
             MethodBase xCtor = typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)[0];
             string xCtorName = LabelName.Get(xCtor);
 
@@ -36,16 +35,9 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Multiply(EDX); // total element size
             XS.Add(EAX, ObjectUtils.FieldDataOffset + 4); // total array size
             XS.Push(EAX);
-            //XS.Push(0x4E3A44A9);
-            //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-            //XS.Pop(EAX);
-            //XS.Push(".AfterAlloc");
-            //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
-            //XS.Pop(EAX);
             XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
             XS.Label(".AfterAlloc");
             XS.Pop(EAX); // location
-            //XS.LiteralCode("Call DebugStub_SendSimpleNumber");
             XS.Pop(ESI); // element count
             XS.Push(EAX);
             XS.Push(ESP, isIndirect: true);
