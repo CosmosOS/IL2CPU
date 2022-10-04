@@ -40,6 +40,7 @@ namespace Cosmos.IL2CPU
 
         private Dictionary<string, string> mCmdOptions;
 
+        public bool EnableFastBoost => GetOption<bool>(nameof(EnableFastBoost));
         public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
         public string VBEResolution => GetOption<string>(nameof(VBEResolution));
 

@@ -26,6 +26,7 @@ namespace Cosmos.IL2CPU
 
         string OutputFilename { get; }
 
+        bool EnableFastBoost { get; }
         bool CompileVBEMultiboot { get; }
         string VBEResolution { get;  }
     }

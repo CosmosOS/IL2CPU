@@ -30,6 +30,8 @@ namespace Cosmos.IL2CPU
         public static bool ReadDebugStubFromDisk = true;
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
+        public bool EnableFastBoost = false;
+
         public virtual void WriteDebugVideo(string aText)
         {
             // This method emits a lot of ASM, but thats what we want becuase
@@ -38,7 +40,7 @@ namespace Cosmos.IL2CPU
 
             // TODO: Add an option on the debug project properties to turn this off.
             // Also see TokenPatterns.cs Checkpoint in X#
-            var xPreBootLogging = true;
+            var xPreBootLogging = EnableFastBoost;
             if (xPreBootLogging)
             {
                 new Comment("DebugVideo '" + aText + "'");
