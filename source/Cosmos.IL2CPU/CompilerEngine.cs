@@ -189,7 +189,7 @@ namespace Cosmos.IL2CPU
                         {
                             VBEResolution=mSettings.VBEResolution;
                         }
-                        xAsm.Assembler.EnableFastBoost = mSettings.EnableFastBoost;
+                        xAsm.Assembler.EnableLittleOptimization = mSettings.EnableLittleOptimization;
                         xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
                         if (mSettings.DebugMode != DebugMode.IL)
