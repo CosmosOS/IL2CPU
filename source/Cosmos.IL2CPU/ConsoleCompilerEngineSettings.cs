@@ -40,7 +40,7 @@ namespace Cosmos.IL2CPU
 
         private Dictionary<string, string> mCmdOptions;
 
-        public bool EnableLittleOptimization => GetOption<bool>(nameof(EnableLittleOptimization));
+        public bool RemoveBootDebugOutput => GetOption<bool>(nameof(RemoveBootDebugOutput));
         public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
         public string VBEResolution => GetOption<string>(nameof(VBEResolution));
 
