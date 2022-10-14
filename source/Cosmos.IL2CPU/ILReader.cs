@@ -6,10 +6,11 @@ using System.Reflection.Emit;
 using System.Reflection.Metadata;
 
 using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.Optimization;
 
 namespace Cosmos.IL2CPU
 {
-    public class ILReader
+    public class ILReader : IOptimizerLookaheadProvider
     {
         // We split this into two arrays since we have to read
         // a byte at a time anways. In the future if we need to
@@ -18,6 +19,14 @@ namespace Cosmos.IL2CPU
         // This will reduce array size down to 768 entries.
         private static readonly OpCode[] mOpCodesLo = new OpCode[256];
         private static readonly OpCode[] mOpCodesHi = new OpCode[256];
+
+        private static readonly Dictionary<MethodBase, List<ILOpCode>> methodCache = new();
+        private static readonly Dictionary<MethodBase, List<ILOpCode>> lookaheadCache = new();
+
+        /// <summary>
+        /// The optimizer to use.
+        /// </summary>
+        public Optimizer Optimizer { get; set; }
 
         public ILReader()
         {
@@ -50,10 +59,22 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        public List<ILOpCode> ProcessMethod(MethodBase aMethod)
+        public List<ILOpCode> ProcessMethodAhead(MethodBase aMethod)
         {
-            var xResult = new List<ILOpCode>();
+            return ProcessMethod(aMethod, lookahead: true);
+        }
 
+        public List<ILOpCode> ProcessMethod(MethodBase aMethod, bool lookahead = false)
+        {
+            if (methodCache.TryGetValue(aMethod, out var result)) {
+                return result;
+            }
+
+            if(lookahead && lookaheadCache.TryGetValue(aMethod, out var lookaheadResult)) {
+                return lookaheadResult;
+            }
+
+            var xResult = new List<ILOpCode>();
             var xBody = aMethod.GetMethodBody();
             var xModule = aMethod.Module;
 
@@ -127,7 +148,6 @@ namespace Cosmos.IL2CPU
             }
 
             #endregion
-
 
             #region ByReference Intrinsic
 
@@ -657,8 +677,25 @@ namespace Cosmos.IL2CPU
                     default:
                         throw new Exception("Unknown OperandType");
                 }
-                xILOpCode.InitStackAnalysis(aMethod);
+
+                //xILOpCode.InitStackAnalysis(aMethod);
                 xResult.Add(xILOpCode);
+            }
+
+            if (!lookahead) {
+                xResult = Optimizer.Optimize(xResult);
+            }
+
+            foreach (var opCode in xResult) {
+                opCode.InitStackAnalysis(aMethod);
+            }
+
+            if (lookahead) {
+                lookaheadCache[aMethod] = xResult;
+            }
+            else {
+                methodCache[aMethod] = xResult;
+                lookaheadCache.Remove(aMethod);
             }
 
             return xResult;

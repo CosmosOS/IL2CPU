@@ -11,6 +11,8 @@ using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using XSharp.Assembler;
+using Cosmos.IL2CPU.Optimization;
+using Cosmos.IL2CPU.Optimization.Passes;
 
 namespace Cosmos.IL2CPU
 {
@@ -81,6 +83,11 @@ namespace Cosmos.IL2CPU
         {
             mAsmblr = aAsmblr;
             mReader = new ILReader();
+
+            var optimizer = new Optimizer(mReader)
+                .WithPass(new InlineDirectPropertiesPass());
+
+            mReader.Optimizer = optimizer;
 
             LogException = aLogException;
             LogWarning = aLogWarning;

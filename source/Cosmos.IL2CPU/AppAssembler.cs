@@ -1379,7 +1379,7 @@ namespace Cosmos.IL2CPU
 
             if (ShouldOptimize)
             {
-                Optimizer.Optimize(Assembler);
+                
             }
         }
 
