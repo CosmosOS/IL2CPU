@@ -1371,7 +1371,7 @@ namespace Cosmos.IL2CPU
             }
             else
             {
-                X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.BaseType.GetMethod(CompilerEngine.UseGen3Kernel ? "EntryPoint" : "Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
+                X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod(CompilerEngine.UseGen3Kernel ? "EntryPoint" : "Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
             }
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
             XS.Pop(EBP);
