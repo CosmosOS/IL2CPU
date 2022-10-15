@@ -44,20 +44,20 @@ namespace IL2CPU.Debug.Symbols
         // Please beware this field, it may cause issues if used incorrectly.
         public static DebugInfo CurrentInstance { get; private set; }
 
+        SqliteConnection initConnection;
+
         public class Field_Map
         {
             public string TypeName { get; set; }
             public List<string> FieldNames = new List<string>();
         }
 
-        private SqliteConnection mConnection;
         // Dont use DbConnectionStringBuilder class, it doesnt work with LocalDB properly.
         //protected mDataSouce = @".\SQLEXPRESS";
         private string mConnStr;
 
         public DebugInfo(string aPathname, bool aCreate = false, bool aCreateIndexes = false)
         {
-            InitializeCache();
             CurrentInstance = this;
 
             if (aPathname != ":memory:")
@@ -80,15 +80,17 @@ namespace IL2CPU.Debug.Symbols
             String.Join(";", Environment.GetEnvironmentVariable("PATH"),
                     Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes\\win-{xDir}\\native")));
             SQLitePCL.Batteries.Init();
-            mConnection = new SqliteConnection(mConnStr);
+            initConnection = new SqliteConnection(mConnStr);
+            initConnection.Open();
+
+            InitializeCache(initConnection);
 
             DapperExtensions.DapperExtensions.DefaultMapper = typeof(PluralizedAutoClassMapper<>);
             DapperExtensions.DapperExtensions.SqlDialect = new SqliteDialect();
 
             if (aCreate)
             {
-                mConnection.Open();
-                var xSQL = new SQL(mConnection);
+                var xSQL = new SQL(initConnection);
                 xSQL.CreateDB();
 
                 // Be careful with indexes, they slow down inserts. So on tables that we have a
@@ -96,20 +98,26 @@ namespace IL2CPU.Debug.Symbols
                 //
                 if (aCreateIndexes)
                 {
-                    CreateIndexes();
+                    CreateIndexes(initConnection);
                 }
             }
+        }
 
-            if (mConnection.State == ConnectionState.Closed)
-            {
-                mConnection.Open();
-            }
+        /// <summary>
+        /// Create a new sqlite connection for the current thread
+        /// </summary>
+        /// <returns></returns>
+        public SqliteConnection GetNewConnection()
+        {
+            var sqliteConnection = new SqliteConnection(mConnStr);
+            sqliteConnection.Open();
+            return sqliteConnection;
         }
 
         /// <summary>
         /// Create indexes inside the database.
         /// </summary>
-        public void CreateIndexes()
+        public void CreateIndexes(SqliteConnection mConnection)
         {
             var xSQL = new SQL(mConnection);
 
@@ -124,16 +132,17 @@ namespace IL2CPU.Debug.Symbols
         // Because of this, we also allow manual loading.
         public void LoadLookups()
         {
+            var mConnection = new SqliteConnection(mConnStr);
             foreach (var xDoc in mConnection.GetList<Document>())
             {
                 DocumentGUIDs.Add(xDoc.Pathname.ToLower(), xDoc.ID);
             }
         }
 
-        private void InitializeCache()
+        private void InitializeCache(SqliteConnection mConnection)
         {
             mSourceInfosCache = new CacheHelper<uint, SourceInfos>(a => DoGetSourceInfos(a));
-            mLabelsCache = new CacheHelper<uint, string[]>(a => DoGetLabels(a));
+            mLabelsCache = new CacheHelper<uint, string[]>(a => DoGetLabels(mConnection, a));
             mFirstMethodIlOpByLabelNameCache = new CacheHelper<string, MethodIlOp>(n => mConnection.GetList<MethodIlOp>(Predicates.Field<MethodIlOp>(q => q.LabelName, Operator.Eq, n)).FirstOrDefault());
             mMethodCache = new CacheHelper<long, Method>(i => mConnection.Get<Method>(i));
             mAllLocalsAndArgumentsInfosByMethodLabelNameCache = new CacheHelper<string, LOCAL_ARGUMENT_INFO[]>(a => mConnection.GetList<LOCAL_ARGUMENT_INFO>(Predicates.Field<LOCAL_ARGUMENT_INFO>(q => q.METHODLABELNAME, Operator.Eq, a)).ToArray());
@@ -152,8 +161,8 @@ namespace IL2CPU.Debug.Symbols
             });
 
             mAssemblyFileByIdCache = new CacheHelper<long, AssemblyFile>(i => mConnection.Get<AssemblyFile>(i));
-            mAddressOfLabelCache = new CacheHelper<string, uint>(l => DoGetAddressOfLabel(l));
-            mFieldMapCache = new CacheHelper<string, Field_Map>(t => DoGetFieldMap(t));
+            mAddressOfLabelCache = new CacheHelper<string, uint>(l => DoGetAddressOfLabel(mConnection, l));
+            mFieldMapCache = new CacheHelper<string, Field_Map>(t => DoGetFieldMap(mConnection, t));
             mFieldInfoByNameCache = new CacheHelper<string, FIELD_INFO>(n => mConnection.GetList<FIELD_INFO>(Predicates.Field<FIELD_INFO>(q => q.NAME, Operator.Eq, n)).First());
         }
 
@@ -220,7 +229,7 @@ namespace IL2CPU.Debug.Symbols
             return mFieldInfoByNameCache.GetValue(aName);
         }
 
-        private uint DoGetAddressOfLabel(string aLabel)
+        private uint DoGetAddressOfLabel(SqliteConnection mConnection, string aLabel)
         {
             var xRow = mConnection.GetList<Label>(Predicates.Field<Label>(q => q.Name, Operator.Eq, aLabel)).FirstOrDefault();
 
@@ -231,10 +240,9 @@ namespace IL2CPU.Debug.Symbols
             return (uint)xRow.Address;
         }
 
-        private string[] DoGetLabels(uint aAddress)
+        private string[] DoGetLabels(SqliteConnection mConnection, uint aAddress)
         {
             var xLabels = mConnection.GetList<Label>(Predicates.Field<Label>(q => q.Address, Operator.Eq, aAddress)).Select(i => i.Name).ToArray();
-
             return xLabels;
         }
 
@@ -267,10 +275,13 @@ namespace IL2CPU.Debug.Symbols
                     xItemsToAdd.Add(xRow);
                 }
             }
-            BulkInsert<FIELD_MAPPING>("FIELD_MAPPINGS", xItemsToAdd);
+            // TODO: Can we really not cache the results somewhere, currently these are many small calls
+            var connection = GetNewConnection();
+            BulkInsert<FIELD_MAPPING>(connection,"FIELD_MAPPINGS", xItemsToAdd);
+            connection.Close();
         }
 
-        private Field_Map DoGetFieldMap(string aName)
+        private Field_Map DoGetFieldMap(SqliteConnection mConnection, string aName)
         {
             var xMap = new Field_Map();
             xMap.TypeName = aName;
@@ -285,7 +296,7 @@ namespace IL2CPU.Debug.Symbols
             return xMap;
         }
 
-        public void ReadFieldMappingList(List<Field_Map> aSymbols)
+        public void ReadFieldMappingList(SqliteConnection mConnection, List<Field_Map> aSymbols)
         {
             var xMap = new Field_Map();
 
@@ -323,7 +334,9 @@ namespace IL2CPU.Debug.Symbols
                     itemsToAdd.Add(xItem);
                 }
             }
-            BulkInsert("FIELD_INFOS", itemsToAdd, 2500, true);
+            var connection = GetNewConnection();
+            BulkInsert(connection, "FIELD_INFOS", itemsToAdd, 2500, true);
+            connection.Close();
         }
 
         public class SequencePoint
@@ -365,7 +378,9 @@ namespace IL2CPU.Debug.Symbols
             {
                 mMethods.Add(aMethod);
             }
-            BulkInsert("Methods", mMethods, 2500, aFlush);
+            var connection = GetNewConnection();
+            BulkInsert(connection, "Methods", mMethods, 2500, aFlush);
+            connection.Close();
         }
 
         // Quick look up of assemblies so we dont have to go to the database and compare by fullname.
@@ -390,13 +405,16 @@ namespace IL2CPU.Debug.Symbols
                     AssemblyGUIDs.Add(xAsm, xRow.ID);
                 }
             }
-            BulkInsert("AssemblyFiles", xAssemblies, 2500, aFlush);
+            var connection = GetNewConnection();
+            BulkInsert(connection, "AssemblyFiles", xAssemblies, 2500, aFlush);
+            connection.Close();
         }
 
         public Dictionary<string, long> DocumentGUIDs = new Dictionary<string, long>();
         List<Document> xDocuments = new List<Document>(1);
         public void AddDocument(string aPathname, bool aFlush = false)
         {
+            var connection = GetNewConnection();
             if (aPathname != null)
             {
                 aPathname = aPathname.ToLower();
@@ -413,13 +431,14 @@ namespace IL2CPU.Debug.Symbols
                     // open so its probably faster than using EF, and its about the same amount of code.
                     // Need to insert right away so RI will be ok when dependents are inserted.
                     xDocuments.Add(xRow);
-                    BulkInsert("Documents", xDocuments, 2500, aFlush);
+                    BulkInsert(connection, "Documents", xDocuments, 2500, aFlush);
                 }
             }
             else
             {
-                BulkInsert("Documents", xDocuments, 2500, aFlush);
+                BulkInsert(connection, "Documents", xDocuments, 2500, aFlush);
             }
+            connection.Close();
         }
 
         public void AddSymbols(IList<MethodIlOp> aSymbols, bool aFlush = false)
@@ -429,7 +448,9 @@ namespace IL2CPU.Debug.Symbols
                 var val = ++mLastGuid;
                 x.ID = val;
             }
-            BulkInsert("MethodIlOps", aSymbols, 2500, aFlush);
+            var connection = GetNewConnection();
+            BulkInsert(connection, "MethodIlOps", aSymbols, 2500, aFlush);
+            connection.Close();
         }
 
         public void WriteAllLocalsArgumentsInfos(IList<LOCAL_ARGUMENT_INFO> aInfos)
@@ -438,7 +459,9 @@ namespace IL2CPU.Debug.Symbols
             {
                 x.ID = CreateId;
             }
-            BulkInsert("LOCAL_ARGUMENT_INFOS", aInfos, aFlush: true);
+            var connection = GetNewConnection();
+            BulkInsert(connection, "LOCAL_ARGUMENT_INFOS", aInfos, aFlush: true);
+            connection.Close();
         }
 
         // EF is slow on bulk operations. But we want to retain explicit bindings to the model to avoid unbound mistakes.
@@ -450,7 +473,7 @@ namespace IL2CPU.Debug.Symbols
         // at time of writing the full structure would take up 11 MB of RAM just for this structure.
         // This is not a huge amount, but as we compile in more and more this figure will grow.
         // So as a compromise, we collect 2500 records then bulk insert.
-        public void BulkInsert<T>(string aTableName, IList<T> aList, int aFlushSize = 0, bool aFlush = false) where T : class
+        public void BulkInsert<T>(SqliteConnection mConnection, string aTableName, IList<T> aList, int aFlushSize = 0, bool aFlush = false) where T : class
         {
             if (aList.Count >= aFlushSize || aFlush)
             {
@@ -525,40 +548,32 @@ namespace IL2CPU.Debug.Symbols
             }
         }
 
-        public void AddLabels(IList<Label> aLabels, bool aFlush = false)
+        public void AddLabels(SqliteConnection mConnection, IList<Label> aLabels, bool aFlush = false)
         {
             // GUIDs inserted by caller
-            BulkInsert("Labels", aLabels, 2500, aFlush);
+            BulkInsert(mConnection, "Labels", aLabels, 2500, aFlush);
         }
 
-        public void AddINT3Labels(IList<INT3Label> aLabels, bool aFlush = false)
+        public void AddINT3Labels(SqliteConnection mConnection, IList<INT3Label> aLabels, bool aFlush = false)
         {
-            BulkInsert("INT3Labels", aLabels, 2500, aFlush);
+            BulkInsert(mConnection, "INT3Labels", aLabels, 2500, aFlush);
         }
 
         public void Dispose()
         {
             CurrentInstance = null;
-            if (mConnection != null)
+            if(initConnection != null)
             {
-                AddAssemblies(null, true);
-                AddDocument(null, true);
-                AddMethod(null, true);
-                mConnection.Close();
-                mConnection = null;
-
-                //https://stackoverflow.com/questions/8511901/system-data-sqlite-close-not-releasing-database-file
-                SqliteConnection.ClearAllPools();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                // Dont set to null... causes problems because of bad code :(
-                // Need to fix the whole class, but its here for now.
-                //CurrentInstance = null;
+                initConnection.Close();
             }
+            DebugSymbolReader.DisposeStatic();
+            //https://stackoverflow.com/questions/8511901/system-data-sqlite-close-not-releasing-database-file
+            SqliteConnection.ClearAllPools();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
-        public Label GetMethodHeaderLabel(uint aAddress)
+        public Label GetMethodHeaderLabel(SqliteConnection mConnection, uint aAddress)
         {
             var xAddress = (long)aAddress;
             var xLabels = mConnection.GetList<Label>(Predicates.Field<Label>(q => q.Address, Operator.Le, xAddress)).OrderByDescending(i => i.Address).ToArray();
@@ -578,9 +593,9 @@ namespace IL2CPU.Debug.Symbols
             return methodHeaderLabel;
         }
 
-        public Label[] GetMethodLabels(uint address)
+        public Label[] GetMethodLabels(SqliteConnection mConnection, uint address)
         {
-            var xMethod = GetMethod(address);
+            var xMethod = GetMethod(mConnection, address);
             var xFirst = mConnection.Get<Label>(xMethod.LabelStartID);
             var xLast = mConnection.Get<Label>(xMethod.LabelEndID);
             var xTemp = mConnection.GetList<Label>(new PredicateGroup()
@@ -615,7 +630,7 @@ namespace IL2CPU.Debug.Symbols
             return xResult.ToArray();
         }
 
-        public Method GetMethod(uint aAddress)
+        public Method GetMethod(SqliteConnection mConnection, uint aAddress)
         {
             var method = mConnection.Query<Method>("select Methods.* from methods " +
                                                    "inner join Labels LStart on LStart.ID = methods.LabelStartID " +
@@ -627,7 +642,7 @@ namespace IL2CPU.Debug.Symbols
         }
 
         // Gets MLSymbols for a method, given an address within the method.
-        public MethodIlOp[] GetSymbols(Method aMethod)
+        public MethodIlOp[] GetSymbols(SqliteConnection mConnection, Method aMethod)
         {
             var xSymbols = mConnection.GetList<MethodIlOp>(Predicates.Field<MethodIlOp>(q => q.MethodID, Operator.Eq, aMethod.ID)).OrderBy(q => q.IlOffset).ToArray();
 
@@ -636,15 +651,16 @@ namespace IL2CPU.Debug.Symbols
 
         private SourceInfos DoGetSourceInfos(uint aAddress)
         {
+            SqliteConnection mConnection = new SqliteConnection(mConnStr);
             var xResult = new SourceInfos();
 
             try
             {
-                var xMethod = GetMethod(aAddress);
+                var xMethod = GetMethod(mConnection, aAddress);
 
                 if (xMethod != null)
                 {
-                    var xSymbols = GetSymbols(xMethod);
+                    var xSymbols = GetSymbols(mConnection, xMethod);
                     var xAssemblyFile = mConnection.Get<AssemblyFile>(xMethod.AssemblyFileID);
 
                     var xSeqPoints = GetSequencePoints(xAssemblyFile.Pathname, xMethod.MethodToken).ToList();
@@ -714,10 +730,11 @@ namespace IL2CPU.Debug.Symbols
             catch (Exception)
             {
             }
+            mConnection.Close();
             return xResult;
         }
 
-        public List<KeyValuePair<uint, string>> GetAllINT3AddressesForMethod(Method aMethod, bool filterPermanentINT3s)
+        public List<KeyValuePair<uint, string>> GetAllINT3AddressesForMethod(SqliteConnection mConnection, Method aMethod, bool filterPermanentINT3s)
         {
             var INT3Labels = mConnection.GetList<INT3Label>(Predicates.Field<INT3Label>(q => q.MethodID, Operator.Eq, aMethod.ID));
 
@@ -731,8 +748,9 @@ namespace IL2CPU.Debug.Symbols
 
         public uint GetClosestCSharpBPAddress(uint aAddress)
         {
+            var mConnection = new SqliteConnection(mConnStr);
             // Get the method this address belongs to
-            var xMethod = GetMethod(aAddress);
+            var xMethod = GetMethod(mConnection, aAddress);
 
             // Get the assembly file this method belongs to
             var asm = mConnection.Get<AssemblyFile>(xMethod.AssemblyFileID);
@@ -772,12 +790,12 @@ namespace IL2CPU.Debug.Symbols
             return address;
         }
 
-        public Document GetDocumentById(long aDocumentId)
+        public Document GetDocumentById(SqliteConnection mConnection, long aDocumentId)
         {
             return mConnection.Get<Document>(aDocumentId);
         }
 
-        public MethodIlOp GetFirstMethodIlOpByMethodIdAndILOffset(long aMethodId, long aILOffset)
+        public MethodIlOp GetFirstMethodIlOpByMethodIdAndILOffset(SqliteConnection mConnection, long aMethodId, long aILOffset)
         {
             //Debug("GetFirstMethodIlOpByMethodIdAndILOffset. MethodID = {0}, ILOffset = 0x{1}", aMethodId, aILOffset.ToString("X4"));
             var xResult = mConnection.GetList<MethodIlOp>(new PredicateGroup
@@ -793,7 +811,7 @@ namespace IL2CPU.Debug.Symbols
             return xResult;
         }
 
-        public Method GetMethodByDocumentIDAndLinePosition(long aDocID, long aStartPos, long aEndPos)
+        public Method GetMethodByDocumentIDAndLinePosition(SqliteConnection mConnection, long aDocID, long aStartPos, long aEndPos)
         {
             //Debug("GetMethodByDocumentIDAndLinePosition. DocID = {0}, StartPos = {1}, EndPos = {2}", aDocID, aStartPos, aEndPos);
             var xResult = mConnection.GetList<Method>(new PredicateGroup

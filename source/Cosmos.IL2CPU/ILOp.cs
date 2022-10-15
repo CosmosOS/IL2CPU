@@ -551,47 +551,10 @@ namespace Cosmos.IL2CPU
                 ?? ResolveField(fieldInfo.DeclaringType, fieldInfo.GetFullName(), !fieldInfo.IsStatic);
         }
 
-        protected static void CopyValue(Register32 destination, int destinationDisplacement, Register32 source, int sourceDisplacement, uint size)
-        {
-            for (int i = 0; i < (size / 4); i++)
-            {
-                XS.Set(EAX, source, sourceDisplacement: sourceDisplacement + (i * 4));
-                XS.Set(destination, EAX, destinationDisplacement: destinationDisplacement + (i * 4));
-            }
-            switch (size % 4)
-            {
-                case 1:
-                    XS.Set(AL, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, AL,
-                      destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
-                    break;
-                case 2:
-                    XS.Set(AX, source, sourceDisplacement: (int)(sourceDisplacement + ((size / 4) * 4)));
-                    XS.Set(destination, AX,
-                      destinationDisplacement: (int)(destinationDisplacement + ((size / 4) * 4)));
-                    break;
-                case 0:
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
         public static bool IsReferenceType(Type aType)
         {
             return !aType.IsValueType && !aType.IsPointer && !aType.IsByRef;
         }
-
-        /// <summary>
-        /// Checks if the type is a struct
-        /// </summary>
-        /// <param name="aType"></param>
-        /// <returns></returns>
-        public static bool IsStruct(Type aType)
-        {
-            return aType.IsValueType && !aType.Equals(typeof(string)) && !aType.Equals(typeof(decimal)) && !aType.IsEnum && !aType.IsPrimitive;
-        }
-    
 
         public static bool TypeIsSigned(Type aType)
         {

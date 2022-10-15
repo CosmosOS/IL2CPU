@@ -272,13 +272,6 @@ namespace Cosmos.IL2CPU
             CurrentExceptionRegion = aCurrentExceptionRegion;
         }
 
-        public override string ToString()
-        {
-            // leave here, makes easier debugging the compiler. Compiler will
-            // show for example "IL_0001: ldstr" instead of just ILOpCode
-            return $"IL_{Position:X4}: {OpCode}";
-        }
-
         /// <summary>
         /// Returns the number of items popped from the stack. This is the logical stack, not physical items.
         /// So a 100byte struct is 1 pop, even though it might be multiple 32-bit or 64-bit words on the stack.
@@ -368,12 +361,6 @@ namespace Cosmos.IL2CPU
         /// Based on updated StackPopTypes, try to update
         /// </summary>
         public abstract void DoInterpretStackTypes();
-
-        [Conditional("COSMOSDEBUG")]
-        public static void ILInterpretationDebugLine(Func<string> message)
-        {
-            Console.WriteLine(message());
-        }
 
         /// <summary>
         /// Return the position of all instructions which can be reached from this one and if they should be part of the current group or not
