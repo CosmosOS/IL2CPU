@@ -13,14 +13,14 @@ using IL2CPU.Debug.Symbols.Pdb;
 
 namespace IL2CPU.Debug.Symbols
 {
-    public class DebugSymbolReader
+    public class DebugSymbolReader : IDisposable
     {
         private static string mCurrentFile;
         private static DebugSymbolReader mCurrentDebugSymbolReader;
 
         private readonly PEReader mPEReader;
         private readonly MetadataReader mMetadataReader;
-        private readonly PdbSymbolReader mSymbolReader;
+        private PdbSymbolReader mSymbolReader;
 
         private DebugSymbolReader(string aFilePath)
         {
@@ -190,6 +190,18 @@ namespace IL2CPU.Debug.Symbols
             }
 
             return false;
+        }
+
+        public static void DisposeStatic()
+        {
+            mCurrentDebugSymbolReader?.Dispose();
+        }
+
+        public void Dispose()
+        {
+            mSymbolReader?.Dispose();
+            mSymbolReader = null;
+            mCurrentDebugSymbolReader = null;
         }
     }
 }
