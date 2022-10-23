@@ -9,7 +9,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace IL2CPU.Debug.Symbols
 {
@@ -77,18 +76,9 @@ namespace IL2CPU.Debug.Symbols
             // Use the SQLiteConnectionFactory as the default database connection
             // Do not open mConnection before mEntities.CreateDatabase
             var xDir = IntPtr.Size == 4 ? "x86" : "x64";
-            var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? "win" : "linux";
-            char path_separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? ';' : ':';
-
             Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
-                String.Join(path_separator.ToString(), Environment.GetEnvironmentVariable("PATH"),
-                Path.Combine(
-                    Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), 
-                    $"runtimes/{os}-{xDir}/native"
-                    )
-                )
-            );
-
+            String.Join(";", Environment.GetEnvironmentVariable("PATH"),
+                    Path.Combine(Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), $"runtimes\\win-{xDir}\\native")));
             SQLitePCL.Batteries.Init();
             initConnection = new SqliteConnection(mConnStr);
             initConnection.Open();

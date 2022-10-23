@@ -77,7 +77,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xReference in mSettings.References)
             {
-                if (!File.Exists(xReference))
+                if (!File.Exists(mSettings.TargetAssembly))
                 {
                     throw new FileNotFoundException("A reference assembly path is invalid!", xReference);
                 }
@@ -85,7 +85,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xPlugsReference in mSettings.PlugsReferences)
             {
-                if (!File.Exists(xPlugsReference))
+                if (!File.Exists(mSettings.TargetAssembly))
                 {
                     throw new FileNotFoundException("A plugs reference assembly path is invalid!", xPlugsReference);
                 }
