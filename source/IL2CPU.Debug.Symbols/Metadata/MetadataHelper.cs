@@ -8,10 +8,19 @@ using System.Reflection.PortableExecutable;
 
 namespace IL2CPU.Debug.Symbols.Metadata
 {
-    internal static class MetadataHelper
+    public static class MetadataHelper
     {
         private static MetadataStringDecoder mMetadataStringDecoder;
         private static readonly Dictionary<string, MetadataReaderProvider> mMetadataCache = new Dictionary<string, MetadataReaderProvider>();
+
+        public static void DisposeStatic()
+        {
+            foreach (var item in mMetadataCache.Values)
+            {
+                item.Dispose();
+            }
+            mMetadataCache.Clear();
+        }
 
         public static MetadataReader TryGetReader(string aAssemblyPath)
         {
