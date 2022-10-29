@@ -116,6 +116,7 @@ namespace IL2CPU.Debug.Symbols
             DebugInfo.SetRange(DebugInfo.ElfFileMapExtractionRange);
             using (var xDebugInfo = new DebugInfo(debugFile))
             {
+                var connection = xDebugInfo.GetNewConnection();
                 // In future instead of loading all labels, save indexes to major labels but not IL.ASM labels.
                 // Then code can find major lables, and use position markers into the map file to parse in between
                 // as needed.
@@ -124,11 +125,12 @@ namespace IL2CPU.Debug.Symbols
                 foreach (var xLabel in ExtractMapSymbolsForElfFile(xFileLines))
                 {
                     xLabels.Add(xLabel);
-                    xDebugInfo.AddLabels(xLabels);
+                    xDebugInfo.AddLabels(connection, xLabels);
                 }
 
-                xDebugInfo.AddLabels(xLabels, true);
-                xDebugInfo.CreateIndexes();
+                xDebugInfo.AddLabels(connection, xLabels, true);
+                xDebugInfo.CreateIndexes(connection);
+                connection.Close();
             }
         }
     }

@@ -40,6 +40,7 @@ namespace Cosmos.IL2CPU
 
         private Dictionary<string, string> mCmdOptions;
 
+        public bool RemoveBootDebugOutput => GetOption<bool>(nameof(RemoveBootDebugOutput));
         public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
         public string VBEResolution => GetOption<string>(nameof(VBEResolution));
 
@@ -136,10 +137,12 @@ namespace Cosmos.IL2CPU
 
                 if (String.Equals(key, "References", StringComparison.OrdinalIgnoreCase))
                 {
+                    value = Path.GetFullPath(value);
                     mReferences.Add(value);
                 }
                 else if (String.Equals(key, "PlugsReferences", StringComparison.OrdinalIgnoreCase))
                 {
+                    value = Path.GetFullPath(value);
                     mPlugsReferences.Add(value);
                 }
                 else if (String.Equals(key, "AssemblySearchDirs", StringComparison.OrdinalIgnoreCase))

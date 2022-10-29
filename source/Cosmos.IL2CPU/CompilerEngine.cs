@@ -77,7 +77,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xReference in mSettings.References)
             {
-                if (!File.Exists(mSettings.TargetAssembly))
+                if (!File.Exists(xReference))
                 {
                     throw new FileNotFoundException("A reference assembly path is invalid!", xReference);
                 }
@@ -85,7 +85,7 @@ namespace Cosmos.IL2CPU
 
             foreach (var xPlugsReference in mSettings.PlugsReferences)
             {
-                if (!File.Exists(mSettings.TargetAssembly))
+                if (!File.Exists(xPlugsReference))
                 {
                     throw new FileNotFoundException("A plugs reference assembly path is invalid!", xPlugsReference);
                 }
@@ -189,6 +189,7 @@ namespace Cosmos.IL2CPU
                         {
                             VBEResolution=mSettings.VBEResolution;
                         }
+                        xAsm.Assembler.RemoveBootDebugOutput = mSettings.RemoveBootDebugOutput;
                         xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
                         if (mSettings.DebugMode != DebugMode.IL)

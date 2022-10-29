@@ -670,9 +670,7 @@ namespace Cosmos.IL2CPU
                             }
                         }
                     }
-                }
-                if (xResult == null)
-                {
+
                     xImpls = null;
                     if (aMethod.DeclaringType.IsGenericType)
                     {
