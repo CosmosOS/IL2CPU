@@ -11,6 +11,12 @@ using System.Collections;
 
 namespace IL2CPU.Compiler.Tests
 {
+    class FakeDisposable : IDisposable
+    {
+        public void Dispose() => throw new NotImplementedException();
+        public void Connect(int x) => throw new NotImplementedException();
+        internal object NonBlockingReceive(ref object endpoint) => throw new NotImplementedException();
+    }
     public class ExampleMethods
     {
         public void TestSimpleException()
@@ -22,6 +28,19 @@ namespace IL2CPU.Compiler.Tests
             catch (Exception ex)
             {
                 Console.WriteLine("Caught exception.");
+            }
+        }
+
+        public void FakeOpCode()
+        {
+            using (var xClient = new FakeDisposable())
+            {
+                xClient.Connect(80);
+                var endpoint = new object();
+                while (true)
+                {
+                    var data = xClient.NonBlockingReceive(ref endpoint);
+                }
             }
         }
            
@@ -40,8 +59,9 @@ namespace IL2CPU.Compiler.Tests
         [Test]
         [TestCase(typeof(string), "Clone", 1, null)]
         [TestCase(typeof(string), "IndexOf", 9, new[] { typeof(string), typeof(int), typeof(int), typeof(StringComparison) })]
-        [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", 33, new[] { typeof(bool) })]
-        [TestCase(typeof(ExampleMethods), "TestSimpleException", 4, new Type[0])]
+        [TestCase(typeof(CancellationTokenSource), "ExecuteCallbackHandlers", 28, new[] { typeof(bool) })]
+        [TestCase(typeof(ExampleMethods), "TestSimpleException", 3, new Type[0])]
+        [TestCase(typeof(ExampleMethods), "FakeOpCode", 6, new Type[0])]
         public void TestGenerateGroups(Type aType, string aMethodName, int aExpectedGroups, Type[] aArgs)
         {
             if (aArgs is null)
