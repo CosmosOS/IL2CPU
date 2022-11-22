@@ -8,7 +8,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <NoWarn>CS1572;CS1573;CS1574;CS1591;$(NoWarn)</NoWarn>
+        <LangVersion>Latest</LangVersion>
+        <NoWarn>CS1572;CS1573;CS1574;CS1591;NU1603;$(NoWarn)</NoWarn>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     </PropertyGroup>
 
     <PropertyGroup>
