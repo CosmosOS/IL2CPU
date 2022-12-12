@@ -1065,7 +1065,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, GetMethodUID);
+            mAsmblr.GenerateVMTCode(xTypes, xMethods, mPlugManager, GetTypeUID, GetMethodUID);
         }
     }
 }

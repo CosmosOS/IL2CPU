@@ -722,7 +722,7 @@ namespace Cosmos.IL2CPU
         private static Type VTableType;
         private static Type GCTableType;
 
-        public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
+        public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, PlugManager aPlugManager, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Label(InitVMTCodeLabel);
@@ -959,6 +959,9 @@ namespace Cosmos.IL2CPU
                 {
                     var xMethod = xEmittedMethods[j];
                     var xMethodUID = aGetMethodUID(xMethod);
+                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod), out MethodBase plug)){
+                        xMethodUID = aGetMethodUID(plug);
+                    }
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Method");
                         xVmtDebugOutput.WriteAttributeString("Id", xMethodUID.ToString());
