@@ -732,11 +732,14 @@ namespace Cosmos.IL2CPU
                 if (xResult != null && !PlugRequriesModifiedCall(xResult as MethodInfo) &&
                     (xResult.GetCustomAttribute<InlineAttribute>() == null))
                 {
-                    if(LabelName.Get(xResult) == "SystemVoidCosmosDebugKernelPlugsAsmDebuggerAsmSendKernelPanicSystemUInt32")
+                    // we need to stop wildcard plugs because they have different naming schemes
+                    if(xResult.GetCustomAttribute<PlugMethod>()?.IsWildcard ?? false)
                     {
-                        int x = 0;
                     }
-                    DirectPlugMapping[xMethodKey] = xResult;
+                    else
+                    {
+                        DirectPlugMapping[xMethodKey] = xResult;
+                    }
                 }
 
                 return xResult;

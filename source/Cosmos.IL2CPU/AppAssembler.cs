@@ -117,15 +117,7 @@ namespace Cosmos.IL2CPU
             #endregion
 
             // Issue label that is used for calls etc.
-            string xMethodLabel;
-            if (aMethod.PluggedMethod != null)
-            {
-                xMethodLabel = "PLUG_FOR___" + LabelName.Get(aMethod.PluggedMethod.MethodBase);
-            }
-            else
-            {
-                xMethodLabel = LabelName.Get(aMethod.MethodBase);
-            }
+            string xMethodLabel = ILOp.GetLabel(aMethod);
             XS.Label(xMethodLabel);
 
             // Alternative asm labels for the method
@@ -134,8 +126,6 @@ namespace Cosmos.IL2CPU
             {
                 XS.Label(xAttribute.Label);
             }
-
-            //Assembler.WriteDebugVideo("Method " + aMethod.UID);
 
             // We could use same GUID as MethodLabelStart, but its better to keep GUIDs unique globaly for items
             // so during debugging they can never be confused as to what they point to.
@@ -439,7 +429,7 @@ namespace Cosmos.IL2CPU
             return xOffset;
         }
 
-        public void ProcessMethod(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes)
+        public void ProcessMethod(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes, PlugManager aPlugManager)
         {
             try
             {
@@ -456,6 +446,12 @@ namespace Cosmos.IL2CPU
                 if (aMethod.UID > 0x00FFFFFF)
                 {
                     throw new Exception("Too many methods.");
+                }
+
+                if (aPlugManager.DirectPlugMapping.ContainsKey(LabelName.GetFullName(aMethod.MethodBase)))
+                {
+                    // we dont need the trampoline since we can always call the plug directly
+                    return;
                 }
 
                 MethodBegin(aMethod);
@@ -959,8 +955,10 @@ namespace Cosmos.IL2CPU
                 {
                     var xMethod = xEmittedMethods[j];
                     var xMethodUID = aGetMethodUID(xMethod);
-                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod), out MethodBase plug)){
-                        xMethodUID = aGetMethodUID(plug);
+                    var xAddress = ILOp.GetLabel(xMethod);
+                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod), out MethodBase plug))
+                    {
+                        xAddress = ILOp.GetLabel(plug);
                     }
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Method");
@@ -980,7 +978,7 @@ namespace Cosmos.IL2CPU
                         }
                         else
                         {
-                            XS.Push(ILOp.GetLabel(xMethod));
+                            XS.Push(xAddress);
                         }
 
                         Call(VTablesImplRefs.SetMethodInfoRef);
