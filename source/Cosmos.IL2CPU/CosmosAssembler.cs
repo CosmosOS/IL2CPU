@@ -455,9 +455,9 @@ namespace Cosmos.IL2CPU
             const byte PIC1 = 0x20; /* IO base address for master PIC */
             const byte PIC2 = 0xA0; /* IO base address for slave PIC */
             const byte PIC1_COMMAND = PIC1;
-            const byte PIC1_DATA = (PIC1 + 1);
+            const byte PIC1_DATA = PIC1 + 1;
             const byte PIC2_COMMAND = PIC2;
-            const byte PIC2_DATA = (PIC2 + 1);
+            const byte PIC2_DATA = PIC2 + 1;
 
             const byte ICW1_ICW4 = 0x01; /* ICW4 (not) needed */
             const byte ICW1_SINGLE = 0x02; /* Single (cascade) mode */
@@ -524,7 +524,7 @@ namespace Cosmos.IL2CPU
             var xResult = new byte[8];
 
             // Check the limit to make sure that it can be encoded
-            if ((aSize > 65536) && (aSize & 0x0FFF) != 0x0FFF)
+            if (aSize > 65536 && (aSize & 0x0FFF) != 0x0FFF)
             {
                 // If larger than 16 bit, must be an even page (4kb) size
                 throw new Exception("Invalid size in GDT descriptor.");

@@ -131,16 +131,16 @@ namespace Cosmos.IL2CPU.X86.IL
             }
             XS.Pop(ECX);
 
-            XS.Add(ECX, (uint)(xOffset));
+            XS.Add(ECX, (uint)xOffset);
 
             if (xFieldInfo.IsExternalValue)
             {
                 XS.Set(ECX, ECX, sourceIsIndirect: true);
             }
 
-            for (int i = 1; i <= (xSize / 4); i++)
+            for (int i = 1; i <= xSize / 4; i++)
             {
-                XS.Set(EAX, ECX, sourceDisplacement: (int)(xSize - (i * 4)));
+                XS.Set(EAX, ECX, sourceDisplacement: (int)(xSize - i * 4));
                 XS.Push(EAX);
             }
 

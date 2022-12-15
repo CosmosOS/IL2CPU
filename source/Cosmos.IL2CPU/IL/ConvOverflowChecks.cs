@@ -13,7 +13,7 @@ namespace Cosmos.IL2CPU.X86.IL
       // only look at bits which are part of result
       // normally check that they are all either 0 or 1
       // if same size but casting between signed and unsigned, then first bit must be zero
-      byte bitCount = (byte)((xResultSize) * 8 - 1);
+      byte bitCount = (byte)(xResultSize * 8 - 1);
       XS.ShiftRight(EAX, bitCount);
       XS.Compare(EAX, 0);
       XS.Jump(ConditionalTestEnum.Equal, xSuccessLabel);
@@ -51,13 +51,13 @@ namespace Cosmos.IL2CPU.X86.IL
     public static void CheckOverflowForLong(uint xResultSize, bool xSourceIsSigned, bool xResultIsSigned, Assembler assembler, Il2cpuMethodInfo aMethod, ILOpCode aOpCode, string xSuccessLabel, string xOverflowLabel, string xPositiveLabel, string xNegativeLabel)
     {
       // long is
-      // low 
+      // low
       // high
       XS.Set(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: 4); // read high
       if (xSourceIsSigned)
       {
         XS.ShiftRight(EAX, 31); // get highest bit of high to determine sign
-        XS.Compare(EAX, 0); 
+        XS.Compare(EAX, 0);
         XS.Jump(ConditionalTestEnum.Equal, xPositiveLabel);
         XS.Compare(EAX, 1);
         XS.Jump(ConditionalTestEnum.Equal, xResultIsSigned ? xNegativeLabel : xOverflowLabel);

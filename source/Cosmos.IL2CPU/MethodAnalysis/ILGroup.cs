@@ -70,9 +70,9 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                     {
                         // if this is the first operation in a try block we also want a new group
                         newGroup = aMethod.Code.ContainsKey(Position)
-                            && ((exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1));
+                            && (exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1);
                         // we still have to check if we want this group to have a debug point at this position
-                        newGroup |= (sequenceLookup != null && sequenceLookup.Contains(Position));
+                        newGroup |= sequenceLookup != null && sequenceLookup.Contains(Position);
                         // also a new group if we reach the catch block
                         newGroup |= exceptionRegion != null && exceptionRegion.HandlerOffset == Position;
                     }
@@ -143,7 +143,7 @@ namespace Cosmos.IL2CPU.MethodAnalysis
         public List<ILGroup> PossibleContinuations;
         public int? StartPosition;
         public Stack<Type> StartStack = null;
-        
+
         #region Constructors
         public ILGroup()
         {
@@ -169,7 +169,7 @@ namespace Cosmos.IL2CPU.MethodAnalysis
             PossibleContinuations = new List<ILGroup>();
         }
 
-        #endregion 
+        #endregion
 
         public bool ReadyToAnalyse()
         {

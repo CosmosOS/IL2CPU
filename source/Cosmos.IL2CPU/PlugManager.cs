@@ -250,7 +250,7 @@ namespace Cosmos.IL2CPU
 
                                             OK = true;
                                             // Exact match except if first param doesn't match, we skip 1st param and restart matching
-                                            for (int i = 0; i < posMethParamTypes.Length && (i + offset) < xParamTypes.Length; i++)
+                                            for (int i = 0; i < posMethParamTypes.Length && i + offset < xParamTypes.Length; i++)
                                             {
                                                 //Continue if current type is null i.e. was a pointer as that could be any type originally.
                                                 if (xParamTypes[i + offset] != null && !xParamTypes[i + offset].Equals(posMethParamTypes[i]))
@@ -395,7 +395,7 @@ namespace Cosmos.IL2CPU
                             xAttrib = x;
                         }
 
-                        if (xAttrib != null && (xAttrib.IsWildcard && !xAttrib.WildcardMatchParameters))
+                        if (xAttrib != null && xAttrib.IsWildcard && !xAttrib.WildcardMatchParameters)
                         {
                             MethodBase xTargetMethod = null;
                             if (String.Equals(xSigMethod.Name, "Ctor", StringComparison.OrdinalIgnoreCase)
@@ -632,7 +632,7 @@ namespace Cosmos.IL2CPU
                 var types = aMethod.GetGenericArguments();
                 xResult = aMethodInfo.MakeGenericMethod(types);
             }
-            
+
             return xResult;
         }
 

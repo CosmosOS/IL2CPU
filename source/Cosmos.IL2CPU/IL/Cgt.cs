@@ -101,20 +101,20 @@ namespace Cosmos.IL2CPU.X86.IL
 					XS.And(XSRegisters.EBX, 1);
 					XS.Set(ESP, EBX, destinationIsIndirect: true);
 				}
-
 				else
 				{
-					XS.Pop(EAX);
-					XS.Compare(EAX, ESP, sourceIsIndirect: true);
-					XS.Jump(ConditionalTestEnum.LessThan, LabelTrue);
-					XS.Jump(LabelFalse);
-					XS.Label(LabelTrue);
-					XS.Add(XSRegisters.ESP, 4);
-					XS.Push(1);
-					XS.Jump(xNextLabel);
-					XS.Label(LabelFalse);
-					XS.Add(XSRegisters.ESP, 4);
-					XS.Push(0);
+                    /*XS.Xor(EBX, EBX);
+                    XS.Pop(EAX);
+                    XS.Compare(EAX, ESP, sourceIsIndirect: true);
+                    XS.SetByteOnCondition(ConditionalTestEnum.LessThan, BL);
+                    XS.Push(EBX);*/
+
+                    XS.Xor(EBX, EBX);
+                    XS.Pop(ECX);
+                    XS.Pop(EAX);
+                    XS.Compare(EAX, ECX);
+                    XS.SetByteOnCondition(ConditionalTestEnum.GreaterThan, BL);
+                    XS.Push(EBX);
 				}
 			}
 		}

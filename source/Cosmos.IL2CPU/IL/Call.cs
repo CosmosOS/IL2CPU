@@ -141,7 +141,7 @@ namespace Cosmos.IL2CPU.X86.IL
                                        var xResultSize = xReturnSize;
                                        if (xResultSize % 4 != 0)
                                        {
-                                           xResultSize += 4 - (xResultSize % 4);
+                                           xResultSize += 4 - xResultSize % 4;
                                        }
 
                                        ILOp.EmitExceptionCleanupAfterCall(Assembler, xResultSize, xStackOffsetBefore, xPopSize);

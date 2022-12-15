@@ -151,7 +151,7 @@ namespace IL2CPU.Debug.Symbols.Metadata
             // or pick a victim within the bucket range
             // and replace with new entry
             var i1 = _evictionHint++ & (BucketSize - 1);
-            idx = (idx + ((i1 * i1 + i1) / 2)) & mask;
+            idx = (idx + (i1 * i1 + i1) / 2) & mask;
 
             foundIdx:
             arr[idx].HashCode = hashCode;

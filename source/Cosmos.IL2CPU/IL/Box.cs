@@ -33,10 +33,10 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Set(ESI, EBX, destinationIsIndirect: true);
             XS.Set(ESI, (uint)ObjectUtils.InstanceTypeEnum.BoxedValueType, destinationDisplacement: 4, size: RegisterSize.Int32);
             new Comment(Assembler, "xSize is " + xSize);
-            for (int i = 0; i < (xSize / 4); i++)
+            for (int i = 0; i < xSize / 4; i++)
             {
                 XS.Pop(EDX);
-                XS.Set(ESI, EDX, destinationDisplacement: (ObjectUtils.FieldDataOffset + (i * 4)), size: RegisterSize.Int32);
+                XS.Set(ESI, EDX, destinationDisplacement: ObjectUtils.FieldDataOffset + i * 4, size: RegisterSize.Int32);
             }
             XS.Push(ESI);
             XS.Push(0);

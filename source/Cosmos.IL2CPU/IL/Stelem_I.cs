@@ -20,10 +20,10 @@ namespace Cosmos.IL2CPU.X86.IL
 
         // using System;
         // using System.IO;
-        // 
-        // 
+        //
+        //
         // using CPU = XSharp.Assembler.x86;
-        // 
+        //
         // namespace Cosmos.IL2CPU.IL.X86 {
         // 	[XSharp.Assembler.OpCode(OpCodeEnum.Stelem_I)]
         // 	public class Stelem_I: Op {
@@ -31,7 +31,7 @@ namespace Cosmos.IL2CPU.X86.IL
         // 	    private string mCurLabel;
         // 	    private uint mCurOffset;
         // 	    private MethodInformation mMethodInformation;
-        //         
+        //
         //         public Stelem_I(ILReader aReader, MethodInformation aMethodInfo)
         // 			: base(aReader, aMethodInfo) {
         //              mMethodInformation = aMethodInfo;

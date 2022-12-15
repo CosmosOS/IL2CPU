@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             var xStackContent = aOpCode.StackPopTypes[0];
             var xStackContentSize = SizeOfType(xStackContent);
-            var StackSize = (int)((xStackContentSize / 4) + (xStackContentSize % 4 == 0 ? 0 : 1));
+            var StackSize = (int)(xStackContentSize / 4 + (xStackContentSize % 4 == 0 ? 0 : 1));
 
             for (int i = StackSize; i > 0; i--)
             {

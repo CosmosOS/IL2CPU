@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
             var xIsReferenceType = IsReferenceType(xField.FieldType);
 
             // call cctor:
-            var xCctor = (xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic)).SingleOrDefault();
+            var xCctor = xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic).SingleOrDefault();
             if (xCctor != null)
             {
                 XS.Call(LabelName.Get(xCctor));
@@ -89,7 +89,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Call(LabelName.Get(GCImplementationRefs.DecRootCountsInStructRef));
             }
 
-            for (int i = 0; i < (xSize / 4); i++)
+            for (int i = 0; i < xSize / 4; i++)
             {
                 XS.Pop(EAX);
                 new CPU.Mov { DestinationRef = ElementReference.New(xDataName, i * 4), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.EAX };
@@ -99,13 +99,13 @@ namespace Cosmos.IL2CPU.X86.IL
                 case 1:
                     {
                         XS.Pop(EAX);
-                        new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)((xSize / 4) * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AL };
+                        new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)(xSize / 4 * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AL };
                         break;
                     }
                 case 2:
                     {
                         XS.Pop(EAX);
-                        new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)((xSize / 4) * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AX };
+                        new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)(xSize / 4 * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AX };
                         break;
                     }
                 case 0:

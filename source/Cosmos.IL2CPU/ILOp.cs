@@ -44,9 +44,9 @@ namespace Cosmos.IL2CPU
         public static uint Align(uint aSize, uint aAlign)
         {
             uint xSize = aSize;
-            if ((xSize % aAlign) != 0)
+            if (xSize % aAlign != 0)
             {
-                xSize += aAlign - (xSize % aAlign);
+                xSize += aAlign - xSize % aAlign;
             }
             return xSize;
         }
@@ -54,9 +54,9 @@ namespace Cosmos.IL2CPU
         public static int SignedAlign(int aSize, int aAlign)
         {
             int xSize = aSize;
-            if ((xSize % aAlign) != 0)
+            if (xSize % aAlign != 0)
             {
-                xSize += aAlign - (xSize % aAlign);
+                xSize += aAlign - xSize % aAlign;
             }
             return xSize;
         }
@@ -405,7 +405,7 @@ namespace Cosmos.IL2CPU
                 XS.Add(XSRegisters.ESP, 4 * aReturnSize / 4);
             }
 
-            if (aStackSizeBeforeCall > (aTotalArgumentSizeOfMethod))
+            if (aStackSizeBeforeCall > aTotalArgumentSizeOfMethod)
             {
                 if (aTotalArgumentSizeOfMethod > 0)
                 {
@@ -586,7 +586,7 @@ namespace Cosmos.IL2CPU
         public static bool IsSameValueType(Type aType, Type bType)
         {
             return (IsIntegerBasedType(aType) && IsIntegerBasedType(bType)) || (IsLongBasedType(aType) && IsLongBasedType(bType))
-                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float))));
+                                                                            || IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float)));
         }
 
         /// <summary>

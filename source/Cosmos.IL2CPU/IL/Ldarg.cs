@@ -161,9 +161,9 @@ namespace Cosmos.IL2CPU.X86.IL
             }
             else
             {
-                for (int i = 0; i < (xArgSize / 4); i++)
+                for (int i = 0; i < xArgSize / 4; i++)
                 {
-                    XS.Push(EBP, isIndirect: true, displacement: (xDisplacement - (i * 4)));
+                    XS.Push(EBP, isIndirect: true, displacement: xDisplacement - i * 4);
                 }
             }
         }

@@ -77,7 +77,7 @@ namespace IL2CPU.API
             /*const string xIllegalChars = "&.,+$<>{}-`\'/\\ ()[]*!=_";
             foreach (char c in xIllegalChars) {
               xSB.Replace(c.ToString(), "");
-            }*/ 
+            }*/
             xName = xName.Replace("[]", "array");
             xName = xName.Replace("<>", "compilergenerated");
             xName = xName.Replace("[,]", "array");
@@ -228,7 +228,7 @@ namespace IL2CPU.API
                     continue;
                 }
                 xBuilder.Append(GetFullName(xParams[i].ParameterType));
-                if (i < (xParams.Length - 1))
+                if (i < xParams.Length - 1)
                 {
                     xBuilder.Append(", ");
                 }
