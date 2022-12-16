@@ -24,6 +24,14 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Call("SystemExceptionOccurred");
             XS.Set(ECX, 3);
             EmitExceptionLogic(Assembler, aMethod, aOpCode, false, null);
+
+            // FIXME: This is only temporary, but this is better to avoid potential CPU faults if the code still gets executed (aka the exception was not handled before)
+            var xBaseLabel = GetLabel(aMethod, aOpCode);
+            var xLoop = xBaseLabel + "_Loop";
+
+            XS.Label(xLoop);
+            XS.Halt();
+            XS.Jump(xLoop);
         }
     }
 }
