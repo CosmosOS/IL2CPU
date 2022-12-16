@@ -103,12 +103,6 @@ namespace Cosmos.IL2CPU.X86.IL
 				}
 				else
 				{
-                    /*XS.Xor(EBX, EBX);
-                    XS.Pop(EAX);
-                    XS.Compare(EAX, ESP, sourceIsIndirect: true);
-                    XS.SetByteOnCondition(ConditionalTestEnum.LessThan, BL);
-                    XS.Push(EBX);*/
-
                     XS.Xor(EBX, EBX);
                     XS.Pop(ECX);
                     XS.Pop(EAX);
