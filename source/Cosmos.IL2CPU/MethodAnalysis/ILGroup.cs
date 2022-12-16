@@ -39,6 +39,8 @@ namespace Cosmos.IL2CPU.MethodAnalysis
             foreach (var position in aMethod.Code.Keys)
             {
                 var op = aMethod.Code[position];
+
+
                 exceptionRegion = op.CurrentExceptionRegion;
 
                 if (exceptionRegion != null && exceptionRegion.HandlerOffset == position)
@@ -53,6 +55,10 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                 foreach (var future in op.GetNextOpCodePositions())
                 {
                     var (newGroup, Position) = future;
+                    if (!aMethod.Code.ContainsKey(Position))
+                    {
+                        continue; // if this is the last opcode of the method next position is set but does not actually exist
+                    }
 
                     if (groups.ContainsKey(Position)) // branches sometimes force us to have more groups then expected
                     {
@@ -63,7 +69,8 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                     if (!newGroup)
                     {
                         // if this is the first operation in a try block we also want a new group
-                        newGroup = ((exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1));
+                        newGroup = aMethod.Code.ContainsKey(Position)
+                            && ((exceptionRegion?.TryOffset ?? -1) != (aMethod.Code[Position].CurrentExceptionRegion?.TryOffset ?? -1));
                         // we still have to check if we want this group to have a debug point at this position
                         newGroup |= (sequenceLookup != null && sequenceLookup.Contains(Position));
                         // also a new group if we reach the catch block
@@ -101,7 +108,11 @@ namespace Cosmos.IL2CPU.MethodAnalysis
                     foreach (var future in analysing.GetNextOpCodePositions())
                     {
                         var (newGroup, Position) = future;
-                        if (!newGroup && !groups.ContainsKey(Position))
+                        if (!aMethod.Code.ContainsKey(Position))
+                        {
+                            // we skip it if it doesnt actually exist
+                        }
+                        else if (!newGroup && !groups.ContainsKey(Position))
                         {
                             opGroup.OpCodes.Add(aMethod.Code[Position]);
                             done = false;
