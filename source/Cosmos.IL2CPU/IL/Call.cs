@@ -92,6 +92,12 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             var xMethodInfo = aTargetMethod as MethodInfo;
             string xNormalAddress = LabelName.Get(aTargetMethod);
+            if (PlugManager.DirectPlugMapping.ContainsKey(LabelName.GetFullName(aTargetMethod)))
+            {
+                string xPlugAddress = LabelName.Get(PlugManager.DirectPlugMapping[LabelName.GetFullName(aTargetMethod)]);
+                XS.Comment($"Redirecting call to {xNormalAddress} directly to plug {xPlugAddress}");
+                xNormalAddress = xPlugAddress;
+            }
             var xParameters = aTargetMethod.GetParameters();
 
             // todo: implement exception support

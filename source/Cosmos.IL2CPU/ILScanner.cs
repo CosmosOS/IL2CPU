@@ -983,7 +983,7 @@ namespace Cosmos.IL2CPU
                                 if (xInstructions != null)
                                 {
                                     ProcessInstructions(xInstructions);
-                                    mAsmblr.ProcessMethod(xPlugInfo, xInstructions);
+                                    mAsmblr.ProcessMethod(xPlugInfo, xInstructions, mPlugManager);
                                 }
                             }
                             mAsmblr.GenerateMethodForward(xMethodInfo, xPlugInfo);
@@ -1006,7 +1006,7 @@ namespace Cosmos.IL2CPU
                                 if (xInstructions != null)
                                 {
                                     ProcessInstructions(xInstructions);
-                                    mAsmblr.ProcessMethod(xPlugInfo, xInstructions);
+                                    mAsmblr.ProcessMethod(xPlugInfo, xInstructions, mPlugManager);
                                 }
                                 mAsmblr.GenerateMethodForward(xMethodInfo, xPlugInfo);
                             }
@@ -1041,7 +1041,7 @@ namespace Cosmos.IL2CPU
                         if (xInstructions != null)
                         {
                             ProcessInstructions(xInstructions);
-                            mAsmblr.ProcessMethod(xMethodInfo, xInstructions);
+                            mAsmblr.ProcessMethod(xMethodInfo, xInstructions, mPlugManager);
                         }
                     }
                 }
@@ -1065,7 +1065,7 @@ namespace Cosmos.IL2CPU
                 }
             }
 
-            mAsmblr.GenerateVMTCode(xTypes, xMethods, GetTypeUID, GetMethodUID);
+            mAsmblr.GenerateVMTCode(xTypes, xMethods, mPlugManager, GetTypeUID, GetMethodUID);
         }
     }
 }

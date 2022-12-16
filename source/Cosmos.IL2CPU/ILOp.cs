@@ -90,12 +90,6 @@ namespace Cosmos.IL2CPU
             return GetType().Name;
         }
 
-        protected static void Jump_Exception(Il2cpuMethodInfo aMethod)
-        {
-            // todo: port to numeric labels
-            XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
-        }
-
         protected static void Jump_End(Il2cpuMethodInfo aMethod)
         {
             XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameNormal);

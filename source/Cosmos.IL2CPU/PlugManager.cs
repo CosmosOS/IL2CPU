@@ -46,10 +46,11 @@ namespace Cosmos.IL2CPU
 
         private Dictionary<string, MethodBase> ResolvedPlugs = new Dictionary<string, MethodBase>();
 
-        private static string BuildMethodKeyName(MethodBase m)
-        {
-            return LabelName.GetFullName(m);
-        }
+        /// <summary>
+        /// When the plug method has the same parameters as the original method, we dont have to generate or use any trampoline code
+        /// We can just change all calls to go directly to the plugged method
+        /// </summary>
+        public Dictionary<string, MethodBase> DirectPlugMapping = new Dictionary<string, MethodBase>();
 
         public PlugManager(Action<Exception> aLogException, Action<string> aLogWarning, TypeResolver typeResolver)
         {
@@ -165,11 +166,7 @@ namespace Cosmos.IL2CPU
                             {
                                 // Skip checking methods related to fields because it's just too messy...
                                 // We also skip methods which do method access.
-                                if (xMethod.GetParameters().Where(x =>
-                                {
-                                    return x.GetCustomAttributes(typeof(FieldAccess)).Any()
-                                           || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Any();
-                                }).Any())
+                                if (PlugRequriesModifiedCall(xMethod))
                                 {
                                     OK = true;
                                 }
@@ -333,6 +330,18 @@ namespace Cosmos.IL2CPU
                 }
             }
         }
+
+        /// <summary>
+        /// Determines if the method requires any modificiation or addition of parameters compared to the plugged call
+        /// This includes special field accesses or modifing self to be a pointer
+        /// </summary>
+        /// <param name="xMethod"></param>
+        /// <returns></returns>
+        private static bool PlugRequriesModifiedCall(MethodInfo xMethod) => xMethod.GetParameters().Where(x =>
+        {
+            return x.GetCustomAttributes(typeof(FieldAccess)).Any()
+                   || x.GetCustomAttributes(typeof(ObjectPointerAccess)).Any();
+        }).Any();
 
         public Action<string> LogWarning;
 
@@ -638,7 +647,7 @@ namespace Cosmos.IL2CPU
 
         public MethodBase ResolvePlug(MethodBase aMethod, Type[] aParamTypes)
         {
-            var xMethodKey = BuildMethodKeyName(aMethod);
+            var xMethodKey = LabelName.GetFullName(aMethod);
             if (ResolvedPlugs.TryGetValue(xMethodKey, out var xResult))
             {
                 return xResult;
@@ -718,6 +727,20 @@ namespace Cosmos.IL2CPU
                 }
 
                 ResolvedPlugs[xMethodKey] = xResult;
+                // this data structure is used to track when we can skip the trampoline code when emitting the methods
+                // inline is some weird kind of plug, which require other handling
+                if (xResult != null && !PlugRequriesModifiedCall(xResult as MethodInfo) &&
+                    (xResult.GetCustomAttribute<InlineAttribute>() == null))
+                {
+                    // we need to stop wildcard plugs because they have different naming schemes
+                    if(xResult.GetCustomAttribute<PlugMethod>()?.IsWildcard ?? false)
+                    {
+                    }
+                    else
+                    {
+                        DirectPlugMapping[xMethodKey] = xResult;
+                    }
+                }
 
                 return xResult;
             }
