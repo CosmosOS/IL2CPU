@@ -645,8 +645,7 @@ namespace Cosmos.IL2CPU
                     return; // cancel inline
                 }
 
-                List<ILOpCode> xOpCodes;
-                xOpCodes = mReader.ProcessMethod(aMethod);
+                var xOpCodes = mReader.ProcessMethod(aMethod);
                 if (xOpCodes != null)
                 {
                     ProcessInstructions(xOpCodes);
@@ -785,7 +784,7 @@ namespace Cosmos.IL2CPU
                         && !(aType.BaseType == typeof(Array) && xVirt.DeclaringType.IsGenericType))
                     {
                         var xIntfMapping = aType.GetInterfaceMap(xVirt.DeclaringType);
-                        if ((xIntfMapping.InterfaceMethods != null) && (xIntfMapping.TargetMethods != null))
+                        if (xIntfMapping.InterfaceMethods != null && xIntfMapping.TargetMethods != null)
                         {
                             var xIdx = Array.IndexOf(xIntfMapping.InterfaceMethods, xVirt);
                             if (xIdx != -1)
@@ -965,11 +964,11 @@ namespace Cosmos.IL2CPU
                         xPlugAttrib = xPlug.GetCustomAttribute<PlugMethod>();
                         var xInlineAttrib = xPlug.GetCustomAttribute<InlineAttribute>();
                         var xMethodIdPlug = mItemsList.IndexOf(xPlug);
-                        if ((xMethodIdPlug == -1) && (xInlineAttrib == null))
+                        if (xMethodIdPlug == -1 && xInlineAttrib == null)
                         {
                             throw new Exception("Plug method not in scanner list!");
                         }
-                        if ((xPlugAttrib != null) && (xInlineAttrib == null))
+                        if (xPlugAttrib != null && xInlineAttrib == null)
                         {
                             xPlugAssembler = xPlugAttrib.Assembler;
                             xPlugInfo = new Il2cpuMethodInfo(xPlug, (uint)xMethodIdPlug, Il2cpuMethodInfo.TypeEnum.Plug, null, xPlugAssembler);

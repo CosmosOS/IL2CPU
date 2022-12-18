@@ -34,22 +34,22 @@ namespace Cosmos.IL2CPU.X86.IL
         case 1:
           if (xSigned)
           {
-            XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: (0 - xEBPOffset), size: RegisterSize.Byte8);
+            XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: 0 - xEBPOffset, size: RegisterSize.Byte8);
           }
           else
           {
-            XS.MoveZeroExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: (0 - xEBPOffset), size: RegisterSize.Byte8);
+            XS.MoveZeroExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: 0 - xEBPOffset, size: RegisterSize.Byte8);
           }
           XS.Push(EAX);
           break;
         case 2:
           if (xSigned)
           {
-            XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: (0 - xEBPOffset), size: RegisterSize.Short16);
+            XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: 0 - xEBPOffset, size: RegisterSize.Short16);
           }
           else
           {
-            XS.MoveZeroExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: (0 - xEBPOffset), size: RegisterSize.Short16);
+            XS.MoveZeroExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: 0 - xEBPOffset, size: RegisterSize.Short16);
           }
           XS.Push(EAX);
           break;
@@ -57,7 +57,7 @@ namespace Cosmos.IL2CPU.X86.IL
           for (int i = 0; i < xStackCount; i++)
           {
             //XS.Set(EAX, EBP, sourceDisplacement: 0 - (xEBPOffset + (i * 4)));
-            XS.Push(EBP, displacement: 0 - (xEBPOffset + (i * 4)));
+            XS.Push(EBP, displacement: 0 - (xEBPOffset + i * 4));
           }
           break;
       }

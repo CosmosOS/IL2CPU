@@ -11,7 +11,6 @@ namespace IL2CPU.Debug.Symbols
         [Obsolete("We're not using ELF Format anymore")]
         public static SortedList<uint, string> GetLabelByAddressMapping(string aKernel, string aObjDumpExe)
         {
-            string[] xSymbolsContents;
             #region Run ObjDump
             string xTempFile = Path.GetTempFileName();
             var xRandom = new Random(78367);
@@ -27,7 +26,7 @@ namespace IL2CPU.Debug.Symbols
             {
                 xProcess.WaitForExit();
             }
-            xSymbolsContents = File.ReadAllLines(xTempFile);
+            var xSymbolsContents = File.ReadAllLines(xTempFile);
             File.Delete(xTempFile);
             File.Delete(xBatFile);
             #endregion

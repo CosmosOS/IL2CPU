@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU.X86.IL
       FieldInfo xField = xOpCode.Value;
 
       // call cctor:
-      var xCctor = (xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic)).SingleOrDefault();
+      var xCctor = xField.DeclaringType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic).SingleOrDefault();
       if (xCctor != null)
       {
         XS.Call(LabelName.Get(xCctor));
@@ -57,11 +57,11 @@ namespace Cosmos.IL2CPU.X86.IL
 
       if (xSize >= 4)
       {
-        for (int i = 1; i <= (xSize / 4); i++)
+        for (int i = 1; i <= xSize / 4; i++)
         {
           //	Pop("eax");
           //	Move(Assembler, "dword [" + mDataName + " + 0x" + (i * 4).ToString("X") + "]", "eax");
-          new CPUx86.Push { DestinationRef = XSharp.Assembler.ElementReference.New(xDataName), DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize - (i * 4)) };
+          new CPUx86.Push { DestinationRef = XSharp.Assembler.ElementReference.New(xDataName), DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize - i * 4) };
         }
         switch (xSize % 4)
         {

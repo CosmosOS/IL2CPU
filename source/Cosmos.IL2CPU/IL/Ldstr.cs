@@ -56,7 +56,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             xDataName = assembler.GetIdentifier("StringLiteral");
             var xBytecount = xEncoding.GetByteCount(aLiteral);
-            var xObjectData = new byte[(4 * 4) + (xBytecount)];
+            var xObjectData = new byte[4 * 4 + xBytecount];
             Array.Copy(BitConverter.GetBytes((int)-1), 0, xObjectData, 0, 4);
             Array.Copy(BitConverter.GetBytes((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedObject), 0, xObjectData, 4, 4);
             Array.Copy(BitConverter.GetBytes((int)1), 0, xObjectData, 8, 4);

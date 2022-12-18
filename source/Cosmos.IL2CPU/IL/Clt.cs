@@ -36,9 +36,6 @@ namespace Cosmos.IL2CPU.X86.IL
                 throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Clt.cs->Error: StackSizes > 8 not supported");
                 //return;
             }
-            string BaseLabel = GetLabel( aMethod, aOpCode ) + ".";
-            string LabelTrue = BaseLabel + "True";
-            string LabelFalse = BaseLabel + "False";
             if( xStackItemSize > 4 )
             {
                 // Using SSE registers (that do NOT branch!) This is needed only for long now
@@ -64,22 +61,22 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
-                    XS.Set(XSRegisters.ESI, 1);
+                    XS.Set(ESI, 1);
                     // esi = 1
-                    XS.Xor(XSRegisters.EDI, XSRegisters.EDI);
+                    XS.Xor(EDI, EDI);
                     // edi = 0
-                    XS.Pop(XSRegisters.EAX);
-                    XS.Pop(XSRegisters.EDX);
+                    XS.Pop(EAX);
+                    XS.Pop(EDX);
                     //value2: EDX:EAX
-                    XS.Pop(XSRegisters.EBX);
-                    XS.Pop(XSRegisters.ECX);
+                    XS.Pop(EBX);
+                    XS.Pop(ECX);
                     //value1: ECX:EBX
-                    XS.Sub(XSRegisters.EBX, XSRegisters.EAX);
-                    XS.SubWithCarry(XSRegisters.ECX, XSRegisters.EDX);
+                    XS.Sub(EBX, EAX);
+                    XS.SubWithCarry(ECX, EDX);
                     //result = value1 - value2
-                    
-                    new CPUx86.ConditionalMove { Condition = CPUx86.ConditionalTestEnum.LessThan, DestinationReg = XSRegisters.EDI, SourceReg = XSRegisters.ESI };
-                    XS.Push(XSRegisters.EDI);
+
+                    new ConditionalMove { Condition = ConditionalTestEnum.LessThan, DestinationReg = EDI, SourceReg = ESI };
+                    XS.Push(EDI);
                 }
             }
             else
@@ -87,30 +84,21 @@ namespace Cosmos.IL2CPU.X86.IL
                 if (xStackItemIsFloat)
                 {
                     XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(XSRegisters.ESP, 4);
+                    XS.Add(ESP, 4);
                     XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
                     XS.SSE.CompareSS(XMM1, XMM0, comparision: LessThan);
                     XS.MoveD(EBX, XMM1);
-                    XS.And(XSRegisters.EBX, 1);
+                    XS.And(EBX, 1);
                     XS.Set(ESP, EBX, destinationIsIndirect: true);
                 }
                 else
                 {
-                    XS.Pop(XSRegisters.ECX);
-                    XS.Pop(XSRegisters.EAX);
-                    XS.Push(XSRegisters.ECX);
-                    XS.Compare(EAX, ESP, sourceIsIndirect: true);
-                    XS.Jump(ConditionalTestEnum.LessThan, LabelTrue);
-                    XS.Jump(LabelFalse);
-                    XS.Label(LabelTrue );
-                    XS.Add(XSRegisters.ESP, 4);
-                    XS.Push(1);
-
-                    new Jump { DestinationLabel = GetLabel(aMethod, aOpCode.NextPosition) };
-
-                    XS.Label(LabelFalse );
-                    XS.Add(XSRegisters.ESP, 4);
-                    XS.Push(0);
+                    XS.Xor(EBX, EBX);
+                    XS.Pop(ECX);
+                    XS.Pop(EAX);
+                    XS.Compare(EAX, ECX);
+                    XS.SetByteOnCondition(ConditionalTestEnum.LessThan, BL);
+                    XS.Push(EBX);
                 }
             }
         }
