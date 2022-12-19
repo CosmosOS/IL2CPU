@@ -1,5 +1,7 @@
 ﻿//#define COSMOSDEBUG
 
+using XSharp;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,6 +69,8 @@ namespace Cosmos.IL2CPU
         public CompilerEngine(ICompilerEngineSettings aSettings)
         {
             mSettings = aSettings;
+
+            XS.AllowComments = mSettings.AllowComments;
 
             #region Assembly Path Checks
 
