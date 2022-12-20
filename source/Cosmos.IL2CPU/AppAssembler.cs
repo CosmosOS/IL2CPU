@@ -495,7 +495,6 @@ namespace Cosmos.IL2CPU
 
         private void EmitInstructions(Il2cpuMethodInfo aMethod, List<ILOpCode> aCurrentGroup, bool emitINT3)
         {
-            var xFirstInstruction = true;
             foreach (var xOpCode in aCurrentGroup)
             {
                 ushort xOpCodeVal = (ushort)xOpCode.OpCode;
@@ -521,7 +520,6 @@ namespace Cosmos.IL2CPU
 
                 //Only emit INT3 as per conditions above...
                 BeforeOp(aMethod, xOpCode, emitINT3 && !(xILOp is Nop), out var INT3Emitted, true, xLocalsSize);
-                xFirstInstruction = false;
                 //Emit INT3 on the first non-NOP instruction immediately after a NOP
                 // - This is because TracePoints for NOP are automatically ignored in code called below this
 
@@ -813,16 +811,6 @@ namespace Cosmos.IL2CPU
                             break;
                         }
                     }
-                    //for (int t = 0; t < aTypesSet.Count; t++)
-                    //{
-                    //    // todo: optimize check
-                    //    var xItem = aTypesSet.Skip(t).First();
-                    //    if (xItem.ToString() == xType.BaseType.ToString())
-                    //    {
-                    //        xBaseIndex = (int)aGetTypeID(xItem);
-                    //        break;
-                    //    }
-                    //}
                 }
                 if (xBaseIndex == null)
                 {
@@ -936,6 +924,9 @@ namespace Cosmos.IL2CPU
 
                 XS.Push((uint)(xType.IsValueType ? 1 : 0));
                 XS.Push((uint)(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0));
+
+                LdStr.PushString(Assembler, xType.Name);
+                LdStr.PushString(Assembler, xType.AssemblyQualifiedName);
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 
