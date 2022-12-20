@@ -44,6 +44,8 @@ namespace Cosmos.IL2CPU
         public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
         public string VBEResolution => GetOption<string>(nameof(VBEResolution));
 
+        public bool AllowComments => GetOption<bool>(nameof(AllowComments));
+
         public ConsoleCompilerEngineSettings(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
             mLogMessage = aLogMessage;
