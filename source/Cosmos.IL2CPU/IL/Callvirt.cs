@@ -176,7 +176,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                     else
                     {
-                        XS.Push(EAX); // we will need this eax again 
+                        XS.Push(EAX); // we will need this eax again
                         XS.Push(ECX); // the call will trash ecx
                         XS.Set(EAX, ESP, sourceDisplacement: xThisOffset + 12);
                         XS.Push(EAX, isIndirect: true);
@@ -260,7 +260,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     var xResultSize = xReturnSize;
                     if (xResultSize % 4 != 0)
                     {
-                        xResultSize += 4 - (xResultSize % 4);
+                        xResultSize += 4 - xResultSize % 4;
                     }
 
                     EmitExceptionCleanupAfterCall(aAssembler, xResultSize, xStackOffsetBefore, xPopSize);

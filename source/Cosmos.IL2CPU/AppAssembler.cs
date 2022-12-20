@@ -104,7 +104,7 @@ namespace Cosmos.IL2CPU
                     var xOffset = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
                     var xSize = ILOp.SizeOfType(xParams[i].ParameterType);
                     // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
-                    XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, (xIdxOffset + i)));
+                    XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, xIdxOffset + i));
                 }
 
                 var xMethodInfo = aMethod.MethodBase as MethodInfo;
@@ -117,15 +117,7 @@ namespace Cosmos.IL2CPU
             #endregion
 
             // Issue label that is used for calls etc.
-            string xMethodLabel;
-            if (aMethod.PluggedMethod != null)
-            {
-                xMethodLabel = "PLUG_FOR___" + LabelName.Get(aMethod.PluggedMethod.MethodBase);
-            }
-            else
-            {
-                xMethodLabel = LabelName.Get(aMethod.MethodBase);
-            }
+            string xMethodLabel = ILOp.GetLabel(aMethod);
             XS.Label(xMethodLabel);
 
             // Alternative asm labels for the method
@@ -134,8 +126,6 @@ namespace Cosmos.IL2CPU
             {
                 XS.Label(xAttribute.Label);
             }
-
-            //Assembler.WriteDebugVideo("Method " + aMethod.UID);
 
             // We could use same GUID as MethodLabelStart, but its better to keep GUIDs unique globaly for items
             // so during debugging they can never be confused as to what they point to.
@@ -279,7 +269,7 @@ namespace Cosmos.IL2CPU
                     }
                     xMethod.DocumentID = DebugInfo.DocumentGUIDs[mSequences[0].Document.ToLower()];
                     xMethod.LineColStart = ((long)mSequences[0].LineStart << 32) + mSequences[0].ColStart;
-                    xMethod.LineColEnd = ((long)(mSequences[mSequences.Length - 1].LineEnd) << 32) + mSequences[mSequences.Length - 1].ColEnd;
+                    xMethod.LineColEnd = ((long)mSequences[mSequences.Length - 1].LineEnd << 32) + mSequences[mSequences.Length - 1].ColEnd;
                     DebugInfo.AddMethod(xMethod);
                 }
                 return mSequences;
@@ -348,10 +338,10 @@ namespace Cosmos.IL2CPU
             {
                 var xOffset = GetResultCodeOffset(xReturnSize, (uint)xTotalArgsSize);
                 // move return value
-                for (int i = 0; i < ((int)(xReturnSize / 4)); i++)
+                for (int i = 0; i < (int)(xReturnSize / 4); i++)
                 {
                     XS.Pop(EAX);
-                    XS.Set(EBP, EAX, destinationDisplacement: (int)(xOffset + ((i + 0) * 4)));
+                    XS.Set(EBP, EAX, destinationDisplacement: (int)(xOffset + (i + 0) * 4));
                 }
             }
             // extra stack space is the space reserved for example when a "public static int TestMethod();" method is called, 4 bytes is pushed, to make room for result;
@@ -405,7 +395,7 @@ namespace Cosmos.IL2CPU
             }
             XS.Label(xLabelExc + "__2");
             XS.Pop(EBP);
-            var xRetSize = (xTotalArgsSize) - ((int)xReturnSize);
+            var xRetSize = xTotalArgsSize - (int)xReturnSize;
             if (xRetSize < 0)
             {
                 xRetSize = 0;
@@ -431,7 +421,7 @@ namespace Cosmos.IL2CPU
         public static uint GetResultCodeOffset(uint aResultSize, uint aTotalArgumentSize)
         {
             uint xOffset = 8;
-            if ((aTotalArgumentSize > 0) && (aTotalArgumentSize >= aResultSize))
+            if (aTotalArgumentSize > 0 && aTotalArgumentSize >= aResultSize)
             {
                 xOffset += aTotalArgumentSize;
                 xOffset -= aResultSize;
@@ -439,7 +429,7 @@ namespace Cosmos.IL2CPU
             return xOffset;
         }
 
-        public void ProcessMethod(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes)
+        public void ProcessMethod(Il2cpuMethodInfo aMethod, List<ILOpCode> aOpCodes, PlugManager aPlugManager)
         {
             try
             {
@@ -456,6 +446,12 @@ namespace Cosmos.IL2CPU
                 if (aMethod.UID > 0x00FFFFFF)
                 {
                     throw new Exception("Too many methods.");
+                }
+
+                if (aPlugManager.DirectPlugMapping.ContainsKey(LabelName.GetFullName(aMethod.MethodBase)))
+                {
+                    // we dont need the trampoline since we can always call the plug directly
+                    return;
                 }
 
                 MethodBegin(aMethod);
@@ -534,14 +530,14 @@ namespace Cosmos.IL2CPU
                 {
                     if (xHandler.TryOffset > 0)
                     {
-                        if (xHandler.TryOffset <= xNextPosition && (xHandler.TryLength + xHandler.TryOffset) > xNextPosition)
+                        if (xHandler.TryOffset <= xNextPosition && xHandler.TryLength + xHandler.TryOffset > xNextPosition)
                         {
                             if (xCurrentExceptionRegion == null)
                             {
                                 xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && (xHandler.TryLength + xHandler.TryOffset) < (xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset))
+                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && xHandler.TryLength + xHandler.TryOffset < xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset)
                             {
                                 // only replace if the current found handler is narrower
                                 xCurrentExceptionRegion = xHandler;
@@ -551,14 +547,14 @@ namespace Cosmos.IL2CPU
                     }
                     if (xHandler.HandlerOffset > 0)
                     {
-                        if (xHandler.HandlerOffset <= xNextPosition && (xHandler.HandlerOffset + xHandler.HandlerLength) > xNextPosition)
+                        if (xHandler.HandlerOffset <= xNextPosition && xHandler.HandlerOffset + xHandler.HandlerLength > xNextPosition)
                         {
                             if (xCurrentExceptionRegion == null)
                             {
                                 xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && (xHandler.HandlerOffset + xHandler.HandlerLength) < (xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength))
+                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && xHandler.HandlerOffset + xHandler.HandlerLength < xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength)
                             {
                                 // only replace if the current found handler is narrower
                                 xCurrentExceptionRegion = xHandler;
@@ -591,10 +587,10 @@ namespace Cosmos.IL2CPU
                 #endregion
 
                 var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
-                    (((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
-                            || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
-                                && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
-                        && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch);
+                                          ((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
+                                           || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
+                                               && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
+                                          && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch;
                 if (xNeedsExceptionPush)
                 {
                     XS.Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
@@ -683,7 +679,7 @@ namespace Cosmos.IL2CPU
                     var xResultSize = xReturnsize;
                     if (xResultSize % 4 != 0)
                     {
-                        xResultSize += 4 - (xResultSize % 4);
+                        xResultSize += 4 - xResultSize % 4;
                     }
                     for (int i = 0; i < xResultSize / 4; i++)
                     {
@@ -720,7 +716,7 @@ namespace Cosmos.IL2CPU
         private static Type VTableType;
         private static Type GCTableType;
 
-        public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
+        public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, PlugManager aPlugManager, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
             XS.Comment("---------------------------------------------------------");
             XS.Label(InitVMTCodeLabel);
@@ -950,6 +946,11 @@ namespace Cosmos.IL2CPU
                 {
                     var xMethod = xEmittedMethods[j];
                     var xMethodUID = aGetMethodUID(xMethod);
+                    var xAddress = ILOp.GetLabel(xMethod);
+                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod), out MethodBase plug))
+                    {
+                        xAddress = ILOp.GetLabel(plug);
+                    }
 #if VMT_DEBUG
                         xVmtDebugOutput.WriteStartElement("Method");
                         xVmtDebugOutput.WriteAttributeString("Id", xMethodUID.ToString());
@@ -968,7 +969,7 @@ namespace Cosmos.IL2CPU
                         }
                         else
                         {
-                            XS.Push(ILOp.GetLabel(xMethod));
+                            XS.Push(xAddress);
                         }
 
                         Call(VTablesImplRefs.SetMethodInfoRef);
@@ -1026,7 +1027,7 @@ namespace Cosmos.IL2CPU
             if (aType.IsArray && !aType.GetElementType().IsPointer)
             // we need to do additional work for arrays
             // since they have the weird generic interfaces and we need to add the implementations for the interfaces
-            // we manually link the interface implementations in the method 
+            // we manually link the interface implementations in the method
             {
                 var interfaces = aType.GetInterfaces().Where(t => t.IsGenericType);
 
@@ -1489,7 +1490,7 @@ namespace Cosmos.IL2CPU
             }
 
             // Check if the DebugStub has been disabled for this method
-            if ((!IgnoreDebugStubAttribute) && (aMethod.DebugStubOff))
+            if (!IgnoreDebugStubAttribute && aMethod.DebugStubOff)
             {
                 return;
             }

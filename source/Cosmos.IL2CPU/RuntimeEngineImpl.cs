@@ -25,7 +25,7 @@ namespace Cosmos.IL2CPU {
 			// finalize all runtime services, like heap and gc
 			//Heap_Shutdown();
 			FinalizeEngine();
-			ExitProcess(aExitCode);			
+			ExitProcess(aExitCode);
 		}
 
 		public static void ExitProcess(int aExitCode) {

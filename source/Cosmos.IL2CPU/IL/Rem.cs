@@ -31,12 +31,12 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xIsFloat)
                 {
-                    XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
+                    XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
                     XS.Add(ESP, 8);
-                    XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
-                    XS.SSE.XorPS(XMM2, XMM2);
-                    XS.SSE.DivPS(XMM1, XMM0);
-                    XS.SSE.MoveSS(ESP, XMM2, destinationIsIndirect: true);
+                    XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+                    XS.SSE2.XorPD(XMM2, XMM2);
+                    XS.SSE2.DivSD(XMM1, XMM0);
+                    XS.SSE2.MoveSD(ESP, XMM2, destinationIsIndirect: true);
                 }
                 else
                 {

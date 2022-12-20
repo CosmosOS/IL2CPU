@@ -94,7 +94,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         break;
                     }
                 default:
-                    throw new Exception("Remainder size " + (aElementSize % 4) + " not supported!");
+                    throw new Exception("Remainder size " + aElementSize % 4 + " not supported!");
 
             }
 

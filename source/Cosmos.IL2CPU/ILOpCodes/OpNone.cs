@@ -648,7 +648,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
               StackPushTypes[0] = typeof(uint*);
               return;
             }
-            
+
             throw new NotImplementedException(string.Format("{0} on types '{1}' and '{2}' {3} not yet implemented!", OpCode, StackPopTypes[0], StackPopTypes[1], StackPopTypes[1].IsByRef));
           }
           break;

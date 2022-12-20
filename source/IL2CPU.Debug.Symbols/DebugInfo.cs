@@ -83,7 +83,7 @@ namespace IL2CPU.Debug.Symbols
             Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
                 String.Join(path_separator.ToString(), Environment.GetEnvironmentVariable("PATH"),
                 Path.Combine(
-                    Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location), 
+                    Path.GetDirectoryName(typeof(DebugInfo).Assembly.Location),
                     $"runtimes/{os}-{xDir}/native"
                     )
                 )

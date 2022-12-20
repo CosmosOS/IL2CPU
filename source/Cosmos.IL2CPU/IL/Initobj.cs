@@ -25,7 +25,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Pop(EAX);
 
-            for (int i = 0; i < (mObjSize / 4); i++)
+            for (int i = 0; i < mObjSize / 4; i++)
             {
                 XS.Set(EAX, 0, destinationDisplacement: i * 4, size: RegisterSize.Int32);
             }
@@ -33,18 +33,18 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 case 1:
                     {
-                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)((mObjSize / 4) * 4), SourceValue = 0, Size = 8 };
+                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(mObjSize / 4 * 4), SourceValue = 0, Size = 8 };
                         break;
                     }
                 case 2:
                     {
-                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)((mObjSize / 4) * 4), SourceValue = 0, Size = 16 };
+                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(mObjSize / 4 * 4), SourceValue = 0, Size = 16 };
                         break;
                     }
                 case 3:
                     {
-                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)((mObjSize / 4) * 4), SourceValue = 0, Size = 8 };
-                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(((mObjSize / 4) * 4) + 1), SourceValue = 0, Size = 16 };
+                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(mObjSize / 4 * 4), SourceValue = 0, Size = 8 };
+                        new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.EAX, DestinationIsIndirect = true, DestinationDisplacement = (int)(mObjSize / 4 * 4 + 1), SourceValue = 0, Size = 16 };
                         break;
                     }
                 case 0:
