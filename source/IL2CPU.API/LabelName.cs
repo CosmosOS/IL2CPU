@@ -55,11 +55,16 @@ namespace IL2CPU.API
 
         private const string IllegalIdentifierChars = "&.,+$<>{}-`\'/\\ ()[]*!=";
         // no array bracket, they need to replace, for unique names for used types in methods
-        private static readonly Regex IllegalCharsReplace = new Regex($"[{IllegalIdentifierChars}]", RegexOptions.Compiled);
+        private static readonly Regex IllegalCharsReplace = new Regex($"[&.,+$<>{}\-\`\\'/\\ \(\)\*!=]", RegexOptions.Compiled);
 
         public static string FilterStringForIncorrectChars(string aName)
         {
-            return IllegalCharsReplace.Replace(aName, "_");
+            string xTempResult = aName;
+            foreach (char c in IllegalIdentifierChars)
+            {
+                xTempResult = xTempResult.Replace(c, '_');
+            }
+            return xTempResult;
         }
 
         public static string Final(string xName)
