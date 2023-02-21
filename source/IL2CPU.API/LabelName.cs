@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
+using IL2CPU.API.Attribs;
 
 namespace IL2CPU.API
 {
@@ -52,19 +54,13 @@ namespace IL2CPU.API
         }
 
         private const string IllegalIdentifierChars = "&.,+$<>{}-`\'/\\ ()[]*!=";
+        // no array bracket, they need to replace, for unique names for used types in methods
+        private static readonly Regex IllegalCharsReplace = new Regex($"[{IllegalIdentifierChars}]", RegexOptions.Compiled);
 
         public static string FilterStringForIncorrectChars(string aName)
         {
-            string xTempResult = aName;
-            foreach (char c in IllegalIdentifierChars)
-            {
-                xTempResult = xTempResult.Replace(c, '_');
-            }
-            return xTempResult;
+            return IllegalCharsReplace.Replace(aName, "_");
         }
-
-        // no array bracket, they need to replace, for unique names for used types in methods
-        private static readonly System.Text.RegularExpressions.Regex IllegalCharsReplace = new System.Text.RegularExpressions.Regex(@"[&.,+$<>{}\-\`\\'/\\ \(\)\*!=]", System.Text.RegularExpressions.RegexOptions.Compiled);
 
         public static string Final(string xName)
         {
@@ -242,10 +238,71 @@ namespace IL2CPU.API
             return GetFullName(aField.FieldType) + " " + GetFullName(aField.DeclaringType) + "." + aField.Name;
         }
 
+        /// <summary>
+        /// Gets a label for the given static field
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">throws if its not static</exception>
+        public static string GetStaticFieldName(Type aType, string aField)
+        {
+            return GetStaticFieldName(aType.GetField(aField));
+        }
+
+        /// <summary>
+        /// Gets a label for the given static field
+        /// </summary>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">throws if its not static</exception>
         public static string GetStaticFieldName(FieldInfo aField)
         {
+            if (!aField.IsStatic)
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static");
+            }
+
             return FilterStringForIncorrectChars(
                 "static_field__" + GetFullName(aField.DeclaringType) + "." + aField.Name);
         }
+
+        /// <summary>
+        /// Gets a label for the given Manifest Resource Stream
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"> throws if does not have <see cref="T:ManifestResourceStreamAttribute"/> or is its not static or is not a <see cref="T:byte[]"/> </exception>
+        public static string GetManifestResourceStreamName(Type aType, string aField)
+        {
+            return GetManifestResourceStreamName(aType.GetField(aField));
+        }
+
+        /// <summary>
+        /// Gets a label for the given Manifest Resource Stream
+        /// </summary>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"> throws if does not have <see cref="T:ManifestResourceStreamAttribute"/> or is its not static or is not a <see cref="T:byte[]"/> </exception>
+        public static string GetManifestResourceStreamName(FieldInfo aField)
+        {
+            if (
+                    !aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).Any()
+                )
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static or not a byte array");
+            }
+
+            if (!aField.IsStatic || aField.FieldType != typeof(byte[]))
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static or not a byte array");
+            }
+
+            return $"{GetStaticFieldName(aField)}__Contents";
+        }
+
+        public static string GetRandomLabel() => $"random_label__{Guid.NewGuid()}";
+
     }
 }

@@ -24,6 +24,11 @@ namespace IL2CPU.API.Attribs
             TargetName = targetName;
         }
 
+        /// <summary>
+        /// This field currently does nothing, but is here for later use.
+        /// </summary>
+        public TargetPlatform TargetPlatform = TargetPlatform.x86;
+
         public Type Target { get; set; }
 
         /// <summary>
