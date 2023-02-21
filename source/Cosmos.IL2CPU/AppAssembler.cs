@@ -1101,7 +1101,7 @@ namespace Cosmos.IL2CPU
         public void ProcessField(FieldInfo aField)
         {
             string xFieldName = LabelName.GetStaticFieldName(aField);
-            string xFieldContentsName = $"{xFieldName}__Contents";
+            string xFieldContentsName = LabelName.GetManifestResourceStreamName(aField);
 
             if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
             {
