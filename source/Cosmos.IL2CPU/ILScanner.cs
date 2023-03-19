@@ -131,9 +131,9 @@ namespace Cosmos.IL2CPU
             // We find it here, not via QueueType so we only check it here. Later
             // we might have to checkin QueueType also.
             // So now we accept both types, but emit code for only one. This works
-            // with the current Yasm assembler as we resolve by name in the assembler.
+            // with the current Nasm assembler as we resolve by name in the assembler.
             // However with other assemblers this approach may not work.
-            // If AssemblerYASM adds assembly name to the label, this will allow
+            // If AssemblerNASM adds assembly name to the label, this will allow
             // both to exist as they do in BCL.
             // So in the future we might be able to remove this hack, or change
             // how it works.
