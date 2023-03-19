@@ -40,7 +40,7 @@ namespace IL2CPU.Debug.Symbols
         /// <summary>
         /// Specifies range which is used by the Yasm map extraction process.
         /// </summary>
-        public const long YasmMapExtractionRange = 0x4000000000000000L;
+        public const long NAsmMapExtractionRange = 0x4000000000000000L;
 
         // Please beware this field, it may cause issues if used incorrectly.
         public static DebugInfo CurrentInstance { get; private set; }
