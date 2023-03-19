@@ -175,24 +175,9 @@ namespace Cosmos.IL2CPU
                             xAsm.ShouldOptimize = true;
                         }
 
-                        bool VBEMultiboot = false;
-                        string VBEResolution;
-                        if(mSettings.CompileVBEMultiboot)
-                        {
-                            VBEMultiboot = true;
-                        }
-                        else
-                        {
-                            VBEMultiboot = false;
-                        }
-                        if(String.IsNullOrEmpty(mSettings.VBEResolution))
-                        {
-                            VBEResolution = "800x600x32";
-                        }
-                        else
-                        {
-                            VBEResolution=mSettings.VBEResolution;
-                        }
+                        bool VBEMultiboot = mSettings.CompileVBEMultiboot;
+                        string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;
+
                         xAsm.Assembler.RemoveBootDebugOutput = mSettings.RemoveBootDebugOutput;
                         xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
