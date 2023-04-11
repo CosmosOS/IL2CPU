@@ -12,8 +12,8 @@ namespace Cosmos.IL2CPU
         {
             var debug = Environment.GetEnvironmentVariable(EnvironmentVariables.IL2CPU_DEBUG);
 
-            if (String.Equals(debug, Boolean.TrueString, StringComparison.OrdinalIgnoreCase)
-                || String.Equals(debug, "1", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(debug, bool.TrueString, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(debug, "1", StringComparison.OrdinalIgnoreCase))
             {
                 aLogMessage($"Waiting for debugger. PID: {Process.GetCurrentProcess().Id}");
 
@@ -51,7 +51,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                aLogError(String.Format("Error occurred: " + e.ToString()));
+                aLogError(string.Format("Error occurred: " + e.ToString()));
             }
 
             return Failed;
@@ -64,9 +64,9 @@ namespace Cosmos.IL2CPU
             var xEngine = new CompilerEngine(xSettings)
             {
                 OnLogError = aLogError,
-                OnLogWarning = m => aLogMessage(String.Format("Warning: {0}", m)),
+                OnLogWarning = m => aLogMessage(string.Format("Warning: {0}", m)),
                 OnLogMessage = aLogMessage,
-                OnLogException = m => aLogError(String.Format("Exception: {0}", m.ToString()))
+                OnLogException = m => aLogError(string.Format("Exception: {0}", m.ToString()))
             };
 
             return xEngine.Execute();

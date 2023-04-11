@@ -1,7 +1,4 @@
-﻿//#define COSMOSDEBUG
-
-using XSharp;
-
+﻿using XSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +8,6 @@ using System.Runtime.Loader;
 using System.Text;
 
 using Cosmos.Build.Common;
-
-using IL2CPU.API;
-using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
@@ -33,8 +27,7 @@ namespace Cosmos.IL2CPU
         public static TypeResolver TypeResolver { get; private set; }
 
         public static string KernelPkg { get; set; }
-        public static bool UseGen3Kernel => String.Equals(KernelPkg, "X86", StringComparison.OrdinalIgnoreCase);
-
+        
         private ICompilerEngineSettings mSettings;
 
         private AssemblyLoadContext _assemblyLoadContext;
@@ -136,17 +129,10 @@ namespace Cosmos.IL2CPU
                 // Find the kernel's entry point. We are looking for a public class Kernel, with public static void Boot()
                 MethodBase xKernelCtor = null;
 
-                if (UseGen3Kernel)
+                xKernelCtor = LoadAssemblies();
+                if (xKernelCtor == null)
                 {
-                    LoadBootEntries();
-                }
-                else
-                {
-                    xKernelCtor = LoadAssemblies();
-                    if (xKernelCtor == null)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 var debugCom = mSettings.DebugCom;
@@ -161,91 +147,82 @@ namespace Cosmos.IL2CPU
                 {
                     var xOutputFilenameWithoutExtension = Path.ChangeExtension(mSettings.OutputFilename, null);
 
-                    using (var xDebugInfo = new DebugInfo(xOutputFilenameWithoutExtension + ".cdb", true, false))
+                    using DebugInfo xDebugInfo = new(xOutputFilenameWithoutExtension + ".cdb", true, false);
+                    xAsm.DebugInfo = xDebugInfo;
+                    xAsm.DebugEnabled = mSettings.EnableDebug;
+                    xAsm.StackCorruptionDetection = mSettings.EnableStackCorruptionDetection;
+                    xAsm.StackCorruptionDetectionLevel = mSettings.StackCorruptionDetectionLevel;
+                    xAsm.DebugMode = mSettings.DebugMode;
+                    xAsm.TraceAssemblies = mSettings.TraceAssemblies;
+                    xAsm.IgnoreDebugStubAttribute = mSettings.IgnoreDebugStubAttribute;
+                    if (!mSettings.EnableDebug)
                     {
-                        xAsm.DebugInfo = xDebugInfo;
-                        xAsm.DebugEnabled = mSettings.EnableDebug;
-                        xAsm.StackCorruptionDetection = mSettings.EnableStackCorruptionDetection;
-                        xAsm.StackCorruptionDetectionLevel = mSettings.StackCorruptionDetectionLevel;
-                        xAsm.DebugMode = mSettings.DebugMode;
-                        xAsm.TraceAssemblies = mSettings.TraceAssemblies;
-                        xAsm.IgnoreDebugStubAttribute = mSettings.IgnoreDebugStubAttribute;
-                        if (!mSettings.EnableDebug)
-                        {
-                            xAsm.ShouldOptimize = true;
-                        }
-
-                        bool VBEMultiboot = mSettings.CompileVBEMultiboot;
-                        string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;
-
-                        xAsm.Assembler.RemoveBootDebugOutput = mSettings.RemoveBootDebugOutput;
-                        xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
-
-                        if (mSettings.DebugMode != DebugMode.IL)
-                        {
-                            xAsm.Assembler.EmitAsmLabels = false;
-                        }
-
-                        using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext), LogException, LogWarning))
-                        {
-                            CompilerHelpers.DebugEvent += LogMessage;
-                            if (mSettings.EnableLogging)
-                            {
-                                var xLogFile = xOutputFilenameWithoutExtension + ".log.html";
-                                if (!xScanner.EnableLogging(xLogFile))
-                                {
-                                    // file creation not possible
-                                    LogWarning("Could not create the file \"" + xLogFile + "\"! No log will be created!");
-                                }
-                            }
-
-                            var plugsAssemblies = mSettings.PlugsReferences.Select(
-                                r => _assemblyLoadContext.LoadFromAssemblyPath(r));
-
-                            if (UseGen3Kernel)
-                            {
-                                xScanner.Execute(mBootEntries.Keys.ToArray(), mForceIncludes, plugsAssemblies);
-                            }
-                            else
-                            {
-                                xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod(UseGen3Kernel ? "EntryPoint" : "Start"));
-                                xScanner.Execute(xKernelCtor, plugsAssemblies);
-                            }
-
-                            //AppAssemblerRingsCheck.Execute(xScanner, xKernelCtor.DeclaringType.Assembly);
-
-                            using (var xOut = new StreamWriter(File.Create(mSettings.OutputFilename), Encoding.ASCII, 128 * 1024))
-                            {
-                                //if (EmitDebugSymbols) {
-                                xAsm.Assembler.FlushText(xOut);
-                                xAsm.FinalizeDebugInfo();
-                                //// for now: write debug info to console
-                                //Console.WriteLine("Wrote {0} instructions and {1} datamembers", xAsm.Assembler.Instructions.Count, xAsm.Assembler.DataMembers.Count);
-                                //var dict = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-                                //foreach (var instr in xAsm.Assembler.Instructions)
-                                //{
-                                //    var mn = instr.Mnemonic ?? "";
-                                //    if (dict.ContainsKey(mn))
-                                //    {
-                                //        dict[mn] = dict[mn] + 1;
-                                //    }
-                                //    else
-                                //    {
-                                //        dict[mn] = 1;
-                                //    }
-                                //}
-                                //foreach (var entry in dict)
-                                //{
-                                //    Console.WriteLine("{0}|{1}", entry.Key, entry.Value);
-                                //}
-                            }
-                        }
-                        // If you want to uncomment this line make sure to enable PERSISTANCE_PROFILING symbol in
-                        // DebugInfo.cs file.
-                        //LogMessage(string.Format("DebugInfo flatening {0} seconds, persistance : {1} seconds",
-                        //    (int)xDebugInfo.FlateningDuration.TotalSeconds,
-                        //    (int)xDebugInfo.PersistanceDuration.TotalSeconds));
+                        xAsm.ShouldOptimize = true;
                     }
+
+                    bool VBEMultiboot = mSettings.CompileVBEMultiboot;
+                    string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;
+
+                    xAsm.Assembler.RemoveBootDebugOutput = mSettings.RemoveBootDebugOutput;
+                    xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
+
+                    if (mSettings.DebugMode != DebugMode.IL)
+                    {
+                        xAsm.Assembler.EmitAsmLabels = false;
+                    }
+
+                    using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext), LogException, LogWarning))
+                    {
+                        CompilerHelpers.DebugEvent += LogMessage;
+                        if (mSettings.EnableLogging)
+                        {
+                            var xLogFile = xOutputFilenameWithoutExtension + ".log.html";
+                            if (!xScanner.EnableLogging(xLogFile))
+                            {
+                                // file creation not possible
+                                LogWarning("Could not create the file \"" + xLogFile + "\"! No log will be created!");
+                            }
+                        }
+
+                        var plugsAssemblies = mSettings.PlugsReferences.Select(
+                            r => _assemblyLoadContext.LoadFromAssemblyPath(r));
+
+                        xScanner.QueueMethod(xKernelCtor.DeclaringType.BaseType.GetMethod("Start"));
+                        xScanner.Execute(xKernelCtor, plugsAssemblies);
+
+                        //AppAssemblerRingsCheck.Execute(xScanner, xKernelCtor.DeclaringType.Assembly);
+
+                        using (StreamWriter xOut = new(File.Create(mSettings.OutputFilename), Encoding.ASCII, 128 * 1024))
+                        {
+                            //if (EmitDebugSymbols) {
+                            xAsm.Assembler.FlushText(xOut);
+                            xAsm.FinalizeDebugInfo();
+                            //// for now: write debug info to console
+                            //Console.WriteLine("Wrote {0} instructions and {1} datamembers", xAsm.Assembler.Instructions.Count, xAsm.Assembler.DataMembers.Count);
+                            //var dict = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+                            //foreach (var instr in xAsm.Assembler.Instructions)
+                            //{
+                            //    var mn = instr.Mnemonic ?? "";
+                            //    if (dict.ContainsKey(mn))
+                            //    {
+                            //        dict[mn] = dict[mn] + 1;
+                            //    }
+                            //    else
+                            //    {
+                            //        dict[mn] = 1;
+                            //    }
+                            //}
+                            //foreach (var entry in dict)
+                            //{
+                            //    Console.WriteLine("{0}|{1}", entry.Key, entry.Value);
+                            //}
+                        }
+                    }
+                    // If you want to uncomment this line make sure to enable PERSISTANCE_PROFILING symbol in
+                    // DebugInfo.cs file.
+                    //LogMessage(string.Format("DebugInfo flatening {0} seconds, persistance : {1} seconds",
+                    //    (int)xDebugInfo.FlateningDuration.TotalSeconds,
+                    //    (int)xDebugInfo.PersistanceDuration.TotalSeconds));
                 }
                 LogTime("Engine execute finished");
                 return true;
@@ -261,7 +238,7 @@ namespace Cosmos.IL2CPU
         {
             var assemblerLogFile = Path.Combine(Path.GetDirectoryName(mSettings.OutputFilename), AssemblerLog);
             Directory.CreateDirectory(Path.GetDirectoryName(assemblerLogFile));
-            var mLog = new StreamWriter(File.OpenWrite(assemblerLogFile));
+            StreamWriter mLog = new(File.OpenWrite(assemblerLogFile));
             return new AppAssembler(new CosmosAssembler(debugCom), mLog, Path.GetDirectoryName(assemblerLogFile));
         }
 
@@ -337,167 +314,5 @@ namespace Cosmos.IL2CPU
         }
 
         #endregion
-
-        private void LoadBootEntries()
-        {
-            mBootEntries = new Dictionary<MethodBase, int?>();
-            mForceIncludes = new List<MemberInfo>();
-
-            var xCheckedAssemblies = new List<string>();
-
-            LogMessage($"Checking target assembly: {mSettings.TargetAssembly}");
-
-            if (!File.Exists(mSettings.TargetAssembly))
-            {
-                throw new FileNotFoundException("Target assembly not found!", mSettings.TargetAssembly);
-            }
-
-            var xTargetAssembly = _assemblyLoadContext.LoadFromAssemblyPath(mSettings.TargetAssembly);
-            CheckAssembly(xTargetAssembly);
-
-            void CheckAssembly(Assembly aAssembly)
-            {
-                // Just for debugging
-                //LogMessage("Checking Assembly: " + aAssembly.Location);
-
-                xCheckedAssemblies.Add(aAssembly.GetName().ToString());
-
-                foreach (var xType in aAssembly.GetTypes())
-                {
-                    var xForceIncludeAttribute = xType.GetCustomAttribute<ForceIncludeAttribute>();
-
-                    if (xForceIncludeAttribute != null)
-                    {
-                        ForceInclude(xType, xForceIncludeAttribute);
-                    }
-
-                    foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
-                    {
-                        xForceIncludeAttribute = xMethod.GetCustomAttribute<ForceIncludeAttribute>();
-
-                        if (xForceIncludeAttribute != null)
-                        {
-                            ForceInclude(xMethod, xForceIncludeAttribute);
-                        }
-
-                        var xBootEntryAttribute = xMethod.GetCustomAttribute<BootEntry>();
-
-                        if (xBootEntryAttribute != null)
-                        {
-                            var xEntryIndex = xBootEntryAttribute.EntryIndex;
-
-                            LogMessage("Boot Entry found: Name: " + xMethod + ", Entry Index: "
-                                + (xEntryIndex.HasValue ? xEntryIndex.Value.ToString() : "null"));
-
-                            if (xMethod.ReturnType != typeof(void))
-                            {
-                                throw new NotSupportedException(
-                                    "Boot Entry should return void! Method: " + LabelName.Get(xMethod));
-                            }
-
-                            if (xMethod.GetParameters().Length != 0)
-                            {
-                                throw new NotSupportedException(
-                                    "Boot Entry shouldn't have parameters! Method: " + LabelName.Get(xMethod));
-                            }
-
-                            mBootEntries.Add(xMethod, xEntryIndex);
-                        }
-                    }
-
-                    if (xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                             .Where(m => m.GetCustomAttribute<BootEntry>() != null).Any())
-                    {
-                        throw new NotSupportedException(
-                            "Boot Entry should be static! Type: " + xType.FullName);
-                    }
-                }
-
-                foreach (var xReference in aAssembly.GetReferencedAssemblies())
-                {
-                    try
-                    {
-                        if (!xCheckedAssemblies.Contains(xReference.ToString()))
-                        {
-                            var xAssembly = _assemblyLoadContext.LoadFromAssemblyName(xReference);
-
-                            if (xAssembly != null)
-                            {
-                                CheckAssembly(xAssembly);
-                            }
-                        }
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        if (xReference.Name.Contains("Cosmos"))
-                        {
-                            LogWarning("Cosmos Assembly not found!" + Environment.NewLine +
-                                       "Assembly Name: " + xReference.FullName);
-                        }
-                    }
-                }
-            }
-
-            if (mBootEntries.Count == 0)
-            {
-                throw new NotSupportedException("No boot entries found!");
-            }
-
-            if (!mBootEntries.Where(e => e.Value == null).Any())
-            {
-                throw new NotImplementedException("No default boot entries found!");
-            }
-
-            mBootEntries = mBootEntries.OrderBy(e => e.Value)
-                                       .ToDictionary(e => e.Key, e => e.Value);
-
-            if (mBootEntries.Count > 1)
-            {
-                var xLastEntryIndex = mBootEntries.Values.ElementAt(0);
-
-                for (int i = 1; i < mBootEntries.Count; i++)
-                {
-                    var xEntryIndex = mBootEntries.Values.ElementAt(i);
-
-                    if (xLastEntryIndex == xEntryIndex)
-                    {
-                        throw new NotSupportedException("Two boot entries with the same entry index were found! Methods: '" +
-                                                        LabelName.GetFullName(mBootEntries.Keys.ElementAt(i - 1)) + "' and '" +
-                                                        LabelName.GetFullName(mBootEntries.Keys.ElementAt(i)) + "'");
-                    }
-
-                    xLastEntryIndex = xEntryIndex;
-                }
-            }
-        }
-
-        private void ForceInclude(MemberInfo aMemberInfo, ForceIncludeAttribute aForceIncludeAttribute)
-        {
-            if (aMemberInfo is Type xType)
-            {
-                mForceIncludes.Add(xType);
-
-                foreach (var xMethod in xType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-                {
-                    mForceIncludes.Add(xMethod);
-                }
-
-                foreach (var xMethod in xType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-                {
-                    if (!xMethod.IsSpecialName)
-                    {
-                        mForceIncludes.Add(xMethod);
-                    }
-                }
-            }
-            else if (aMemberInfo is MethodInfo xMethod)
-            {
-                mForceIncludes.Add(xMethod);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
     }
 }

@@ -52,7 +52,7 @@ namespace Cosmos.IL2CPU
         private static string GetDeclareTypeString(MemberInfo item)
         {
             var xName = item.DeclaringType;
-            return xName == null ? String.Empty : xName.ToString();
+            return xName == null ? string.Empty : xName.ToString();
         }
     }
 }

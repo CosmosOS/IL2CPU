@@ -35,7 +35,7 @@ namespace Cosmos.IL2CPU
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
         private const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
-        private List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new List<LOCAL_ARGUMENT_INFO>();
+        private List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new();
         private ILOp[] mILOpsLo = new ILOp[256];
         private ILOp[] mILOpsHi = new ILOp[256];
         public bool ShouldOptimize = false;
@@ -196,7 +196,7 @@ namespace Cosmos.IL2CPU
                         mLocals_Arguments_Infos.Add(xInfo);
 
                         var xSize = ILOp.Align(ILOp.SizeOfType(xLocals[i].LocalType), 4);
-                        XS.Comment(String.Format("Local {0}, Size {1}", i, xSize));
+                        XS.Comment(string.Format("Local {0}, Size {1}", i, xSize));
                         for (int j = 0; j < xSize / 4; j++) //TODO: Can this be done shorter?
                         {
                             XS.Push(0);
@@ -1327,25 +1327,9 @@ namespace Cosmos.IL2CPU
             var xCurLabel = CosmosAssembler.EntryPointName + ".CreateEntrypoint";
             XS.Label(xCurLabel);
             Assembler.WriteDebugVideo("Now create the kernel class");
-            if (!CompilerEngine.UseGen3Kernel)
-            {
-                Newobj.Assemble(XSharp.Assembler.Assembler.CurrentInstance, null, null, xCurLabel, aEntrypoint.DeclaringType, aEntrypoint, DebugEnabled);
-                Assembler.WriteDebugVideo("Kernel class created");
-            }
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";
             XS.Label(xCurLabel);
-            if (CompilerEngine.UseGen3Kernel)
-            {
-                foreach (var xBootEntry in aBootEntries)
-                {
-                    Assembler.WriteDebugVideo(xBootEntry.Name);
-                    X86.IL.Call.DoExecute(Assembler, null, xBootEntry, null, null, null, DebugEnabled);
-                }
-            }
-            else
-            {
-                X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod(CompilerEngine.UseGen3Kernel ? "EntryPoint" : "Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
-            }
+            X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
             XS.Pop(EBP);
             XS.Return();

@@ -75,7 +75,7 @@ namespace Cosmos.IL2CPU
         {
             var xValue = GetOption<string>(aOptionName);
 
-            if (String.IsNullOrEmpty(xValue))
+            if (string.IsNullOrEmpty(xValue))
             {
                 if (typeof(T) == typeof(TraceAssemblies))
                 {

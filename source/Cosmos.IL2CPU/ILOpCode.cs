@@ -1,14 +1,8 @@
-﻿//#define COSMOSDEBUG
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Text;
-
 
 namespace Cosmos.IL2CPU
 {
@@ -19,7 +13,6 @@ namespace Cosmos.IL2CPU
     //     only needed by reader and not ILOpCode
     public abstract class ILOpCode
     {
-        [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
         public enum Code : ushort
         {
             #region Values
