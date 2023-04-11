@@ -943,6 +943,9 @@ namespace Cosmos.IL2CPU
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
                     XS.Push(xDataName);
                     XS.Push(0);
+
+                    // Enum underlying type id
+                    XS.Push(aGetTypeID(xType.GetEnumUnderlyingType()));
                 } else { // Otherwise, fill the data with pure emptiness. Just like my soul.
                     xData = AllocateEmptyArray(0, sizeof(uint), xArrayTypeID);
                     XS.Push(0);
@@ -956,6 +959,8 @@ namespace Cosmos.IL2CPU
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
                     XS.Push(xDataName);
                     XS.Push(0);
+
+                    XS.Push(uint.MaxValue-1);
                 }
 
                 // Full type name
