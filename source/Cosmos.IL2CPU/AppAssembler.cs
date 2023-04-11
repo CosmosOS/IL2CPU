@@ -1087,28 +1087,30 @@ namespace Cosmos.IL2CPU
                     }
                 }
 
-                for(int j = 0; j < enumValues.Length; j++) {
-                    XS.Push(xTypeID);
-                    XS.Push((uint)j);
-                    //Console.WriteLine(xType.Name + " pushing value " + enumValues.GetValue(j));
-
-                    byte[] rawBytes = BitConverter.GetBytes(enumValues[j]);
-                    XS.Push(BitConverter.ToUInt32(rawBytes, 0));
-                    XS.Push(BitConverter.ToUInt32(rawBytes, 4));
-
-                    Call(VTablesImplRefs.SetEnumInfoRef);
-
-                    // Split up name in 8x4 byte chunks
-                    byte[] rawASCII = Encoding.ASCII.GetBytes(enumNames[j]);
-                    byte[] paddedASCII = new byte[64];
-
-                    Array.Copy(rawASCII, paddedASCII, rawASCII.Length);
-
-                    for(var k = 0; k < 16; k++) {
+                if (xType.IsEnum) {
+                    for (int j = 0; j < enumValues.Length; j++) {
                         XS.Push(xTypeID);
-                        XS.Push((uint)(j + k));
-                        XS.Push(BitConverter.ToUInt32(paddedASCII, k*4));
-                        Call(VTablesImplRefs.SetEnumNamePartialRef);
+                        XS.Push((uint)j);
+                        //Console.WriteLine(xType.Name + " pushing value " + enumValues.GetValue(j));
+
+                        byte[] rawBytes = BitConverter.GetBytes(enumValues[j]);
+                        XS.Push(BitConverter.ToUInt32(rawBytes, 0));
+                        XS.Push(BitConverter.ToUInt32(rawBytes, 4));
+
+                        Call(VTablesImplRefs.SetEnumInfoRef);
+
+                        // Split up name in 8x4 byte chunks
+                        byte[] rawASCII = Encoding.ASCII.GetBytes(enumNames[j]);
+                        byte[] paddedASCII = new byte[64];
+
+                        Array.Copy(rawASCII, paddedASCII, rawASCII.Length);
+
+                        for (var k = 0; k < 16; k++) {
+                            XS.Push(xTypeID);
+                            XS.Push((uint)((j * 16) + k));
+                            XS.Push(BitConverter.ToUInt32(paddedASCII, k * 4));
+                            Call(VTablesImplRefs.SetEnumNamePartialRef);
+                        }
                     }
                 }
 #if VMT_DEBUG
