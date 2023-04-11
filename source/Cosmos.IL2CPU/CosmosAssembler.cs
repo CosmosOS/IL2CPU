@@ -42,18 +42,19 @@ namespace Cosmos.IL2CPU
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)
             {
-                new Comment("DebugVideo '" + aText + "'");
+                _ = new Comment("DebugVideo '" + aText + "'");
                 uint xVideo = 0xB8000;
-                for (uint i = xVideo; i < xVideo + 80 * 2; i = i + 2)
+
+                for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)
                 {
-                    new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
-                    new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
+                    _ = new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
+                    _ = new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
                 }
 
                 foreach (var xChar in aText)
                 {
-                    new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
-                    xVideo = xVideo + 2;
+                    _ = new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
+                    xVideo += 2;
                 }
             }
         }
