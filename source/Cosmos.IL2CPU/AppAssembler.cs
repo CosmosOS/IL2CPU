@@ -792,6 +792,48 @@ namespace Cosmos.IL2CPU
                 var xEmittedMethods = GetEmittedMethods(xType, aMethodsSet);
                 var xEmittedInterfaceMethods = GetEmittedInterfaceMethods(xType, aMethodsSet);
 
+                ulong[] enumValues = new ulong[0];
+                string[] enumNames = new string[0];
+
+                if (xType.IsEnum) {
+                    var internalValues = xType.GetEnumValues();
+                    enumValues = new ulong[internalValues.Length];
+
+                    for(int i = 0; i < internalValues.Length; i++) {
+                        //enumValues[i] = (ulong)Convert.ChangeType(Convert.ChangeType(internalValues.GetValue(i), xType.GetEnumUnderlyingType()), typeof(ulong));
+                        switch(xType.GetEnumUnderlyingType().Name) { // well, we cant use reflection as it does not allow for unchecked casts
+                            case "Byte":
+                                enumValues[i] = (ulong)(Byte)internalValues.GetValue(i);
+                                break;
+                            case "SByte":
+                                enumValues[i] = (ulong)(SByte)internalValues.GetValue(i);
+                                break;
+                            case "UInt16":
+                                enumValues[i] = (ulong)(UInt16)internalValues.GetValue(i);
+                                break;
+                            case "Int16":
+                                enumValues[i] = (ulong)(Int16)internalValues.GetValue(i);
+                                break;
+                            case "UInt32":
+                                enumValues[i] = (ulong)(UInt32)internalValues.GetValue(i);
+                                break;
+                            case "Int32":
+                                enumValues[i] = (ulong)(Int32)internalValues.GetValue(i);
+                                break;
+                            case "UInt64":
+                                enumValues[i] = (ulong)(UInt64)internalValues.GetValue(i);
+                                break;
+                            case "Int64":
+                                enumValues[i] = (ulong)(Int64)internalValues.GetValue(i);
+                                break;
+                            default:
+                                throw new Exception($"Unexpected underlying enum type {xType.GetEnumUnderlyingType().Name} for type {xType.Name}");
+                        }
+                    }
+
+                    enumNames = xType.GetEnumNames();
+                }
+
                 int? xBaseIndex = null;
                 if (xType.BaseType == null)
                 {
@@ -870,6 +912,52 @@ namespace Cosmos.IL2CPU
                 XS.Push(xDataName);
                 XS.Push(0);
 
+
+
+                // Enum entries
+                if (xType.IsEnum) { // If the type is an enum, insert actual useful information
+                    if(enumValues.Length != enumNames.Length) { // In **theory**, this is not possible
+                        throw new Exception("Type has unbalanced enum values/names data");
+                    }
+
+                    // This is kinda a compromise. We could surely change that in the future, somehow.
+                    // If this isn't fine and I should think of something else, tell me so when reviewing this pr :)
+
+                    // We only allow 32 byte long names so we can safely assume the size of the string
+                    foreach(var name in enumNames) {
+                        if (name.Length > 64) throw new Exception($"Enum names may not exceed 64 characters in length due to a technical limitation. Violating name: '{name}' in type {xType.FullName}");
+                    }
+
+                    xData = AllocateEmptyArray(enumValues.Length*2, sizeof(uint), xArrayTypeID);
+                    // Enum entries count
+                    XS.Push((uint)enumValues.Length);
+                    // Enum value entries
+                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__EnumValuesArray";
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XS.Push(xDataName);
+                    XS.Push(0);
+
+                    xData = AllocateEmptyArray(enumValues.Length*16, sizeof(uint), xArrayTypeID);
+                    // Enum value entries
+                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__EnumValueNamesArray";
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XS.Push(xDataName);
+                    XS.Push(0);
+                } else { // Otherwise, fill the data with pure emptiness. Just like my soul.
+                    xData = AllocateEmptyArray(0, sizeof(uint), xArrayTypeID);
+                    XS.Push(0);
+                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__EnumValuesArray";
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XS.Push(xDataName);
+                    XS.Push(0);
+
+                    xData = AllocateEmptyArray(0, sizeof(uint), xArrayTypeID);
+                    xDataName = $"____SYSTEM____TYPE___{xTypeName}__EnumValueNamesArray";
+                    XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
+                    XS.Push(xDataName);
+                    XS.Push(0);
+                }
+
                 // Full type name
                 xDataName = $"____SYSTEM____TYPE___{xTypeName}";
                 int xDataByteCount = Encoding.Unicode.GetByteCount($"{xType.FullName}, {xType.Assembly.FullName}");
@@ -918,6 +1006,7 @@ namespace Cosmos.IL2CPU
                 XS.Push(xDataName);
                 XS.Push(0);
 
+                XS.Push((uint)(xType.IsEnum ? 1 : 0));
                 XS.Push((uint)(xType.IsValueType ? 1 : 0));
                 XS.Push((uint)(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0));
 
@@ -995,6 +1084,31 @@ namespace Cosmos.IL2CPU
                         XS.Push(xTargetMethodUID);
 
                         Call(VTablesImplRefs.SetInterfaceMethodInfoRef);
+                    }
+                }
+
+                for(int j = 0; j < enumValues.Length; j++) {
+                    XS.Push(xTypeID);
+                    XS.Push((uint)j);
+                    //Console.WriteLine(xType.Name + " pushing value " + enumValues.GetValue(j));
+
+                    byte[] rawBytes = BitConverter.GetBytes(enumValues[j]);
+                    XS.Push(BitConverter.ToUInt32(rawBytes, 0));
+                    XS.Push(BitConverter.ToUInt32(rawBytes, 4));
+
+                    Call(VTablesImplRefs.SetEnumInfoRef);
+
+                    // Split up name in 8x4 byte chunks
+                    byte[] rawASCII = Encoding.ASCII.GetBytes(enumNames[j]);
+                    byte[] paddedASCII = new byte[64];
+
+                    Array.Copy(rawASCII, paddedASCII, rawASCII.Length);
+
+                    for(var k = 0; k < 16; k++) {
+                        XS.Push(xTypeID);
+                        XS.Push((uint)(j + k));
+                        XS.Push(BitConverter.ToUInt32(paddedASCII, k*4));
+                        Call(VTablesImplRefs.SetEnumNamePartialRef);
                     }
                 }
 #if VMT_DEBUG
