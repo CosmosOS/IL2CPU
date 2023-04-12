@@ -712,9 +712,29 @@ namespace Cosmos.IL2CPU
             return xData;
         }
 
+        public static byte[] AllocateFilledArray(uint[] data, uint aArrayTypeID) {
+            var xData = new byte[16 + data.Length * sizeof(uint)];
+            var xTemp = BitConverter.GetBytes(aArrayTypeID);
+            Array.Copy(xTemp, 0, xData, 0, 4);
+            xTemp = BitConverter.GetBytes((uint)ObjectUtils.InstanceTypeEnum.StaticEmbeddedArray);
+            Array.Copy(xTemp, 0, xData, 4, 4);
+            xTemp = BitConverter.GetBytes(data.Length);
+            Array.Copy(xTemp, 0, xData, 8, 4);
+            xTemp = BitConverter.GetBytes(sizeof(uint));
+            Array.Copy(xTemp, 0, xData, 12, 4);
+
+            for(var i = 0; i < data.Length; i++) {
+                var bytes = BitConverter.GetBytes(data[i]);
+                Array.Copy(bytes, 0, xData, 16 + (i * sizeof(uint)), 4);
+            }
+
+            return xData;
+        }
+
         public const string InitVMTCodeLabel = "___INIT__VMT__CODE____";
         private static Type VTableType;
         private static Type GCTableType;
+        private static Type EnumTableType;
 
         public unsafe void GenerateVMTCode(HashSet<Type> aTypesSet, HashSet<MethodBase> aMethodsSet, PlugManager aPlugManager, Func<Type, uint> aGetTypeID, Func<MethodBase, uint> aGetMethodUID)
         {
@@ -723,6 +743,7 @@ namespace Cosmos.IL2CPU
             XS.Push(EBP);
             XS.Set(EBP, ESP);
 
+            // Types Ref
             var xTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xTheName = LabelName.GetStaticFieldName(xTypesFieldRef);
             DataMember xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
@@ -735,6 +756,8 @@ namespace Cosmos.IL2CPU
                      where item == xDataMember
                      select item).First());
             }
+
+            // GCTypes Ref
             var xGCTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("gcTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xGCArrayName = LabelName.GetStaticFieldName(xGCTypesFieldRef);
             xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
@@ -748,12 +771,27 @@ namespace Cosmos.IL2CPU
                      select item).First());
             }
 
+            // Enums Ref
+            var xEnumsFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mEnums", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            string xEnumsArrayName = LabelName.GetStaticFieldName(xEnumsFieldRef);
+            xDataMember = (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                           where item.Name == xEnumsArrayName
+                           select item).FirstOrDefault();
+            if (xDataMember != null) {
+                XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Remove(
+                    (from item in XSharp.Assembler.Assembler.CurrentInstance.DataMembers
+                     where item == xDataMember
+                     select item).First());
+            }
+
             uint xArrayTypeID = aGetTypeID(typeof(Array));
 
             if (VTableType == null)
             {
                 VTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.VTable, Cosmos.Core", true);
                 GCTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.GCTable, Cosmos.Core", true);
+                EnumTableType = CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.EnumTable, Cosmos.Core", true);
+
                 if (VTableType == null)
                 {
                     throw new Exception("Cannot resolve VTable struct in Cosmos.Core");
@@ -764,10 +802,18 @@ namespace Cosmos.IL2CPU
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+
             xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(GCTableType), xArrayTypeID);
             XS.DataMemberBytes(xGCArrayName + "_Contents", xData);
             XS.DataMember(xGCArrayName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
             XS.Set(xGCArrayName, xGCArrayName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+
+            xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(EnumTableType), xArrayTypeID);
+            XS.DataMemberBytes(xEnumsArrayName + "_Contents", xData);
+            XS.DataMember(xEnumsArrayName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
+            XS.Set(xEnumsArrayName, xEnumsArrayName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+
+
 #if VMT_DEBUG
             using (var xVmtDebugOutput = XmlWriter.Create(
                 File.Create(Path.Combine(mLogDir, @"vmt_debug.xml")), new XmlWriterSettings() { Indent = true }))
@@ -928,7 +974,8 @@ namespace Cosmos.IL2CPU
                         if (name.Length > 64) throw new Exception($"Enum names may not exceed 64 characters in length due to a technical limitation. Violating name: '{name}' in type {xType.FullName}");
                     }
 
-                    xData = AllocateEmptyArray(enumValues.Length*2, sizeof(uint), xArrayTypeID);
+                    uint[] enumValuesData = GetEnumValuesDataArray(enumValues);
+                    xData = AllocateFilledArray(enumValuesData, xArrayTypeID);
                     // Enum entries count
                     XS.Push((uint)enumValues.Length);
                     // Enum value entries
@@ -937,7 +984,8 @@ namespace Cosmos.IL2CPU
                     XS.Push(xDataName);
                     XS.Push(0);
 
-                    xData = AllocateEmptyArray(enumValues.Length*16, sizeof(uint), xArrayTypeID);
+                    uint[] enumNamesData = GetEnumNamesDataArray(enumNames);
+                    xData = AllocateFilledArray(enumNamesData, xArrayTypeID);
                     // Enum value entries
                     xDataName = $"____SYSTEM____TYPE___{xTypeName}__EnumValueNamesArray";
                     XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Add(new DataMember(xDataName, xData));
@@ -1091,33 +1139,6 @@ namespace Cosmos.IL2CPU
                         Call(VTablesImplRefs.SetInterfaceMethodInfoRef);
                     }
                 }
-
-                if (xType.IsEnum) {
-                    for (int j = 0; j < enumValues.Length; j++) {
-                        XS.Push(xTypeID);
-                        XS.Push((uint)j);
-                        //Console.WriteLine(xType.Name + " pushing value " + enumValues.GetValue(j));
-
-                        byte[] rawBytes = BitConverter.GetBytes(enumValues[j]);
-                        XS.Push(BitConverter.ToUInt32(rawBytes, 0));
-                        XS.Push(BitConverter.ToUInt32(rawBytes, 4));
-
-                        Call(VTablesImplRefs.SetEnumInfoRef);
-
-                        // Split up name in 8x4 byte chunks
-                        byte[] rawASCII = Encoding.ASCII.GetBytes(enumNames[j]);
-                        byte[] paddedASCII = new byte[64];
-
-                        Array.Copy(rawASCII, paddedASCII, rawASCII.Length);
-
-                        for (var k = 0; k < 16; k++) {
-                            XS.Push(xTypeID);
-                            XS.Push((uint)((j * 16) + k));
-                            XS.Push(BitConverter.ToUInt32(paddedASCII, k * 4));
-                            Call(VTablesImplRefs.SetEnumNamePartialRef);
-                        }
-                    }
-                }
 #if VMT_DEBUG
                     xVmtDebugOutput.WriteEndElement(); // type
 #endif
@@ -1131,6 +1152,37 @@ namespace Cosmos.IL2CPU
             XS.Label("_END_OF_" + InitVMTCodeLabel);
             XS.Pop(EBP);
             XS.Return();
+        }
+
+
+        private uint[] GetEnumValuesDataArray(ulong[] enumValues) {
+            var res = new uint[enumValues.Length * 2];
+
+            for(int i = 0; i < enumValues.Length; i++) {
+                var data = BitConverter.GetBytes(enumValues[i]);
+                res[i * 2] = BitConverter.ToUInt32(data, 0);
+                res[i * 2 + 1] = BitConverter.ToUInt32(data, 4);
+            }
+
+            return res;
+        }
+
+        private uint[] GetEnumNamesDataArray(string[] enumNames) {
+            var res = new uint[enumNames.Length * 16];
+
+            for (var i = 0; i < enumNames.Length; i++) {
+                // Split up name in 8x4 byte chunks
+                byte[] rawASCII = Encoding.ASCII.GetBytes(enumNames[i]);
+                byte[] paddedASCII = new byte[64];
+
+                Array.Copy(rawASCII, paddedASCII, rawASCII.Length);
+
+                for (var j = 0; j < 16; j ++) {
+                    res[i * 16 + j] = BitConverter.ToUInt32(paddedASCII, j * 4);
+                }
+            }
+
+            return res;
         }
 
         private static IReadOnlyList<MethodBase> GetEmittedMethods(Type aType, HashSet<MethodBase> aMethodSet)

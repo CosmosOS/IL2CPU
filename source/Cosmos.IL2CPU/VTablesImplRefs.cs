@@ -10,8 +10,6 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase SetTypeInfoRef;
         public static readonly MethodBase SetInterfaceInfoRef;
         public static readonly MethodBase SetMethodInfoRef;
-        public static readonly MethodBase SetEnumInfoRef;
-        public static readonly MethodBase SetEnumNamePartialRef;
         public static readonly MethodBase SetInterfaceMethodInfoRef;
         public static readonly MethodBase GetMethodAddressForTypeRef;
         public static readonly MethodBase GetMethodAddressForInterfaceTypeRef;
