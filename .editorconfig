@@ -111,3 +111,4 @@ dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 end_of_line = crlf
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_diagnostic.CA1806.severity = silent

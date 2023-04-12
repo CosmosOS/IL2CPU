@@ -47,13 +47,13 @@ namespace Cosmos.IL2CPU
 
                 for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)
                 {
-                    _ = new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
-                    _ = new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
+                    new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
+                    new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
                 }
 
                 foreach (var xChar in aText)
                 {
-                    _ = new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
+                    new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
                     xVideo += 2;
                 }
             }
@@ -62,7 +62,7 @@ namespace Cosmos.IL2CPU
         public void CreateGDT()
         {
             new Comment(this, "BEGIN - Create GDT");
-            var xGDT = new List<byte>();
+            List<byte> xGDT = new();
 
             // Null Segment - Selector 0x00
             // Not used, but required by many emulators.
