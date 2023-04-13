@@ -2,7 +2,6 @@
 
 namespace Cosmos.IL2CPU
 {
-    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Scope = "member")]
     public static class KernelPanics
     {
         public const uint VMT_MethodNotFound = 0x1;

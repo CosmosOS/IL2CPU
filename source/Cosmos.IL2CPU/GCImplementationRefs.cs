@@ -12,20 +12,12 @@ namespace Cosmos.IL2CPU
         public static readonly MethodBase IncRootCountsInStructRef;
         public static readonly MethodBase DecRootCountsInStructRef;
 
-
         static GCImplementationRefs()
         {
             var typeResolver = CompilerEngine.TypeResolver;
 
             Type xType = null;
-            if (CompilerEngine.UseGen3Kernel)
-            {
-                xType = typeResolver.ResolveType("Cosmos.CPU.x86.GCImplementation, Cosmos.CPU.x86", true);
-            }
-            else
-            {
-                xType = typeResolver.ResolveType("Cosmos.Core.GCImplementation, Cosmos.Core", true);
-            }
+            xType = typeResolver.ResolveType("Cosmos.Core.GCImplementation, Cosmos.Core", true);
             if (xType == null)
             {
                 throw new Exception("GCImplementation type not found!");

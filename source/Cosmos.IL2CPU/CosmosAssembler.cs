@@ -1,6 +1,5 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
-using Cosmos.Debug.Kernel;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using System;
@@ -43,9 +42,10 @@ namespace Cosmos.IL2CPU
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)
             {
-                new Comment("DebugVideo '" + aText + "'");
+                _ = new Comment("DebugVideo '" + aText + "'");
                 uint xVideo = 0xB8000;
-                for (uint i = xVideo; i < xVideo + 80 * 2; i = i + 2)
+
+                for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)
                 {
                     new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
                     new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
@@ -54,7 +54,7 @@ namespace Cosmos.IL2CPU
                 foreach (var xChar in aText)
                 {
                     new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
-                    xVideo = xVideo + 2;
+                    xVideo += 2;
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace Cosmos.IL2CPU
         public void CreateGDT()
         {
             new Comment(this, "BEGIN - Create GDT");
-            var xGDT = new List<byte>();
+            List<byte> xGDT = new();
 
             // Null Segment - Selector 0x00
             // Not used, but required by many emulators.

@@ -6,7 +6,7 @@ namespace IL2CPU
     {
         private static int Main(string[] args) =>
             Cosmos.IL2CPU.Program.Run(args,
-                m => Console.WriteLine($"Message: {m}"),
+                m => Console.WriteLine($"{m}"),
                 e => Console.Error.WriteLine($"Error: {e}"));
     }
 }
