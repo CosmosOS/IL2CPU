@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using DapperExtensions;
+using DapperExtensions.Mapper;
+using DapperExtensions.Sql;
 
 namespace IL2CPU.Debug.Symbols
 {
