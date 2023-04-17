@@ -6,7 +6,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Endfinally)]
     public class Endfinally : ILOp
     {
         public Endfinally(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

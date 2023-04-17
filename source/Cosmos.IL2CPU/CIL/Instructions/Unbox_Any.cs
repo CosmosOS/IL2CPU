@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Unbox_Any)]
     public class Unbox_Any : ILOp
     {
         public Unbox_Any(XSharp.Assembler.Assembler aAsmblr)

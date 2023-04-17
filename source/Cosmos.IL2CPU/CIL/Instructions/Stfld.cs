@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Stfld)]
     public class Stfld : ILOp
     {
         public Stfld(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

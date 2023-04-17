@@ -3,7 +3,6 @@ using XSharp;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode( ILOpCode.Code.Nop )]
     public class Nop : ILOp
     {
         public Nop( XSharp.Assembler.Assembler aAsmblr )

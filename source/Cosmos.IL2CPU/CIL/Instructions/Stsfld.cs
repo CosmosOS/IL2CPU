@@ -11,7 +11,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Stsfld)]
     public class Stsfld : ILOp
     {
         public Stsfld(XSharp.Assembler.Assembler aAsmblr)

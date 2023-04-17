@@ -9,7 +9,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
   /// <summary>
   /// Convert to unsigned int32, pushing int32 on stack.
   /// </summary>
-  [OpCode(ILOpCode.Code.Conv_U4)]
   public class Conv_U4 : ILOp
   {
     public Conv_U4(Assembler aAsmblr)

@@ -4,7 +4,6 @@ using XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Switch)]
     public class Switch : ILOp
     {
         public Switch(XSharp.Assembler.Assembler aAsmblr)

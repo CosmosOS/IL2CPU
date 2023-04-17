@@ -7,7 +7,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Ldobj)]
   public class Ldobj : ILOp
   {
     public Ldobj(Assembler aAsmblr)

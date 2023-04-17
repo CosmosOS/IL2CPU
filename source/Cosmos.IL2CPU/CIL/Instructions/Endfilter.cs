@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Endfilter)]
     public class Endfilter : ILOp
     {
         public Endfilter(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

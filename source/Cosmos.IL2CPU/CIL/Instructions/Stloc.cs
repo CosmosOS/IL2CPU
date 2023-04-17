@@ -7,7 +7,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Stloc)]
     public class Stloc : ILOp
     {
         public Stloc(Assembler aAsmblr)

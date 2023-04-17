@@ -9,18 +9,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Beq)]
-    [OpCode(ILOpCode.Code.Bge)]
-    [OpCode(ILOpCode.Code.Bgt)]
-    [OpCode(ILOpCode.Code.Ble)]
-    [OpCode(ILOpCode.Code.Blt)]
-    [OpCode(ILOpCode.Code.Bne_Un)]
-    [OpCode(ILOpCode.Code.Bge_Un)]
-    [OpCode(ILOpCode.Code.Bgt_Un)]
-    [OpCode(ILOpCode.Code.Ble_Un)]
-    [OpCode(ILOpCode.Code.Blt_Un)]
-    [OpCode(ILOpCode.Code.Brfalse)]
-    [OpCode(ILOpCode.Code.Brtrue)]
     public class Branch : ILOp
     {
         private static readonly Dictionary<ILOpCode.Code, ConditionalTestEnum> TestOPs = new Dictionary<ILOpCode.Code, ConditionalTestEnum>()

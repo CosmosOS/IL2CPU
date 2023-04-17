@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 /* Add.Ovf is unsigned integer addition with check for overflow */
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Add_Ovf_Un)]
     public class Add_Ovf_Un : ILOp
     {
         public Add_Ovf_Un(XSharp.Assembler.Assembler aAsmblr)

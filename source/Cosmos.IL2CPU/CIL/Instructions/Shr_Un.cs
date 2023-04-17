@@ -7,7 +7,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode( ILOpCode.Code.Shr_Un )]
     public class Shr_Un : ILOp
     {
         public Shr_Un( XSharp.Assembler.Assembler aAsmblr )
@@ -88,7 +87,7 @@ namespace Cosmos.IL2CPU.CIL.Instructions
 				// shift high part
 				XS.ShiftRight(XSRegisters.ESP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Int32);
             }*/
-        
+
 #if false
             XS.Pop(XSRegisters.ECX); // shift amount
             string xBaseLabel = GetLabel( aMethod, aOpCode ) + ".";

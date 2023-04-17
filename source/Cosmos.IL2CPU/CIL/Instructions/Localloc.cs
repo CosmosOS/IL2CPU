@@ -4,7 +4,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Localloc)]
     public class Localloc : ILOp
     {
         public Localloc(Assembler aAsmblr)

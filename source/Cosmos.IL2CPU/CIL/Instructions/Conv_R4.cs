@@ -9,7 +9,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     /// <summary>
     /// Convert to float32, pushing F on stack.
     /// </summary>
-    [OpCode(ILOpCode.Code.Conv_R4)]
     public class Conv_R4 : ILOp
     {
         public Conv_R4(Assembler aAsmblr)

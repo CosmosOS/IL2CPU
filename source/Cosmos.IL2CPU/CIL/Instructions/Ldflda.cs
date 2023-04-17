@@ -6,7 +6,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldflda)]
     public class Ldflda : ILOp
     {
         public Ldflda(XSharp.Assembler.Assembler aAsmblr)

@@ -5,14 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Stind_I)]
-    [OpCode(ILOpCode.Code.Stind_I1)]
-    [OpCode(ILOpCode.Code.Stind_I2)]
-    [OpCode(ILOpCode.Code.Stind_I4)]
-    [OpCode(ILOpCode.Code.Stind_I8)]
-    [OpCode(ILOpCode.Code.Stind_R4)]
-    [OpCode(ILOpCode.Code.Stind_R8)]
-    [OpCode(ILOpCode.Code.Stind_Ref)]
     public class Stind : ILOp
     {
         public Stind(Assembler aAsmblr)

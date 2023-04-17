@@ -4,7 +4,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Break)]
     public class Break : ILOp
     {
         public Break(Assembler aAsmblr)

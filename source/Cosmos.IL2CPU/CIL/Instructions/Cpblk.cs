@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Cpblk)]
     public class Cpblk : ILOp
     {
         public Cpblk(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

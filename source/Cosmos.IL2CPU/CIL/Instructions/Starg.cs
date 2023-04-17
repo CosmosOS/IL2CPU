@@ -6,7 +6,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Starg)]
   public class Starg : ILOp
   {
     public Starg(XSharp.Assembler.Assembler aAsmblr)

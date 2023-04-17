@@ -4,7 +4,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Dup)]
     public class Dup : ILOp
     {
         public Dup(XSharp.Assembler.Assembler aAsmblr)

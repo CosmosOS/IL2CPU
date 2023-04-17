@@ -3,7 +3,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-	[OpCode(ILOpCode.Code.Ldvirtftn)]
 	public class Ldvirtftn: ILOp
 	{
 		public Ldvirtftn(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)

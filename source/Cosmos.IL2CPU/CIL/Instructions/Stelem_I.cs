@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode( ILOpCode.Code.Stelem_I )]
     public class Stelem_I : ILOp
     {
         public Stelem_I( XSharp.Assembler.Assembler aAsmblr )

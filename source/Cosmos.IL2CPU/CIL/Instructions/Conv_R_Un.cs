@@ -11,7 +11,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     /// Converts the unsigned integer value on top of the evaluation stack to F (native float) it can be double or some FPU extended precision Floating Point
     /// type as the weird 80 bit float of x87). For now we assume it to be always equal to double.
     /// </summary>
-    [OpCode(ILOpCode.Code.Conv_R_Un)]
     public class Conv_R_Un : ILOp
     {
         public Conv_R_Un(Assembler aAsmblr)

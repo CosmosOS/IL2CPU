@@ -7,7 +7,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Sub_Ovf)]
   public class Sub_Ovf : ILOp
   {
     public Sub_Ovf(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

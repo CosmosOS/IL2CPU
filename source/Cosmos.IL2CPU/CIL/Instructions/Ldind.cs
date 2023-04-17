@@ -5,17 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldind_I)]
-    [OpCode(ILOpCode.Code.Ldind_I1)]
-    [OpCode(ILOpCode.Code.Ldind_I2)]
-    [OpCode(ILOpCode.Code.Ldind_I4)]
-    [OpCode(ILOpCode.Code.Ldind_I8)]
-    [OpCode(ILOpCode.Code.Ldind_U1)]
-    [OpCode(ILOpCode.Code.Ldind_U2)]
-    [OpCode(ILOpCode.Code.Ldind_U4)]
-    [OpCode(ILOpCode.Code.Ldind_R4)]
-    [OpCode(ILOpCode.Code.Ldind_R8)]
-    [OpCode(ILOpCode.Code.Ldind_Ref)]
     public class Ldind : ILOp
     {
         public Ldind(Assembler aAsmblr)

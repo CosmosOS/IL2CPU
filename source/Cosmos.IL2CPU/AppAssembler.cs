@@ -30,7 +30,6 @@ using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
 using ILOpCode = Cosmos.IL2CPU.CIL.ILOpCode;
-using OpCodeAttribute = Cosmos.IL2CPU.CIL.OpCodeAttribute;
 
 namespace Cosmos.IL2CPU
 {
@@ -609,32 +608,224 @@ namespace Cosmos.IL2CPU
 
         private void InitILOps()
         {
-            InitILOps(typeof(ILOp));
-        }
+            mILOpsLo[(int)ILOpCode.Code.Nop] = new Nop(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Break] = new Break(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarg_0] = new Ldarg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarg_1] = new Ldarg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarg_2] = new Ldarg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarg_3] = new Ldarg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloc_0] = new Ldloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloc_1] = new Ldloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloc_2] = new Ldloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloc_3] = new Ldloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stloc_0] = new Stloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stloc_1] = new Stloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stloc_2] = new Stloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stloc_3] = new Stloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarg_S] = new Ldarg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldarga_S] = new Ldarga(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Starg_S] = new Starg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloc_S] = new Ldloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldloca_S] = new Ldloca(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stloc_S] = new Stloc(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldnull] = new Ldnull(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_M1] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_0] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_1] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_2] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_3] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_4] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_5] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_6] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_7] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_8] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4_S] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I4] = new Ldc_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_I8] = new Ldc_I8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_R4] = new Ldc_R4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldc_R8] = new Ldc_R8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Dup] = new Dup(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Pop] = new CIL.Instructions.Pop(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Jmp] = new Jmp(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Call] = new CIL.Instructions.Call(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Calli] = new Calli(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ret] = new Ret(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Br_S] = new Br(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Brfalse_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Brtrue_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Beq_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bge_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bgt_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ble_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Blt_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bne_Un_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bge_Un_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bgt_Un_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ble_Un_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Blt_Un_S] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Br] = new Br(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Brfalse] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Brtrue] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Beq] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bge] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bgt] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ble] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Blt] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bne_Un] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bge_Un] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Bgt_Un] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ble_Un] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Blt_Un] = new Branch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Switch] = new Switch(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_I1] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_U1] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_I2] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_U2] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_I4] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_U4] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_I8] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_I] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_R4] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_R8] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldind_Ref] = new Ldind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_Ref] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_I1] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_I2] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_I4] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_I8] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_R4] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_R8] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Add] = new CIL.Instructions.Add(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Sub] = new CIL.Instructions.Sub(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Mul] = new Mul(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Mul] = new Mul(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Div_Un] = new Div_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Rem] = new Rem(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Rem_Un] = new Rem_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.And] = new CIL.Instructions.And(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Or] = new CIL.Instructions.Or(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Xor] = new CIL.Instructions.Xor(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Shl] = new Shl(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Shr] = new Shr(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Shr_Un] = new Shr_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Neg] = new CIL.Instructions.Neg(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Not] = new CIL.Instructions.Not(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_I1] = new Conv_I1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_I2] = new Conv_I2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_I4] = new Conv_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_I8] = new Conv_I8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_R4] = new Conv_R4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_R8] = new Conv_R8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_U4] = new Conv_U4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_U8] = new Conv_U8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Callvirt] = new Callvirt(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Cpobj] = new Cpobj(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldobj] = new Ldobj(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldstr] = new LdStr(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Newobj] = new Newobj(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Castclass] = new Castclass(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Isinst] = new Isinst(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_R_Un] = new Conv_R_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Unbox] = new Unbox(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Throw] = new Throw(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldfld] = new Ldfld(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldflda] = new Ldflda(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stfld] = new Stfld(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldsfld] = new Ldsfld(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldsflda] = new Ldsflda(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stsfld] = new Stsfld(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stobj] = new Stobj(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I1_Un] = new Conv_Ovf_I1_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I2_Un] = new Conv_Ovf_I2_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I4_Un] = new Conv_Ovf_I4_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I8_Un] = new Conv_Ovf_I8_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U1_Un] = new Conv_Ovf_U1_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U2_Un] = new Conv_Ovf_U2_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U4_Un] = new Conv_Ovf_U4_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U8_Un] = new Conv_Ovf_U8_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I_Un] = new Conv_Ovf_I_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U_Un] = new Conv_Ovf_U_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Box] = new Box(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Newarr] = new Newarr(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldlen] = new Ldlen(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelema] = new Ldelema(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_I1] = new Ldelem_I1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_U1] = new Ldelem_U1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_I2] = new Ldelem_I2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_U2] = new Ldelem_U2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_I4] = new Ldelem_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_U4] = new Ldelem_U4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_I8] = new Ldelem_I8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_I] = new Ldelem_I(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_R4] = new Ldelem_R4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_R8] = new Ldelem_R8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem_Ref] = new Ldelem_Ref(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_I] = new Stelem_I(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_I1] = new Stelem_I1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_I2] = new Stelem_I2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_I4] = new Stelem_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_I8] = new Stelem_I8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_R4] = new Stelem_R4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_R8] = new Stelem_R8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem_Ref] = new Stelem_Ref(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldelem] = new Ldelem(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stelem] = new Stelem(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Unbox_Any] = new Unbox_Any(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I1] = new Conv_Ovf_I1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U1] = new Conv_Ovf_U1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I2] = new Conv_Ovf_I2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U2] = new Conv_Ovf_U2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I4] = new Conv_Ovf_I4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U4] = new Conv_Ovf_U4(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I8] = new Conv_Ovf_I8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U8] = new Conv_Ovf_U8(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Refanyval] = new Refanyval(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ckfinite] = new Ckfinite(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Mkrefany] = new Mkrefany(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Ldtoken] = new Ldtoken(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_U2] = new Conv_U2(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_U1] = new Conv_U1(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_I] = new Conv_I(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_I] = new Conv_Ovf_I(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_Ovf_U] = new Conv_Ovf_U(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Add_Ovf] = new Add_Ovf(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Add_Ovf_Un] = new Add_Ovf_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Mul_Ovf] = new Mul_Ovf(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Mul_Ovf_Un] = new Mul_Ovf_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Sub_Ovf] = new Sub_Ovf(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Sub_Ovf_Un] = new Sub_Ovf_Un(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Endfinally] = new Endfinally(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Leave] = new Leave(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Leave_S] = new Leave(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Stind_I] = new Stind(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Conv_U] = new Conv_U(Assembler);
 
-        private void InitILOps(Type aAssemblerBaseOp)
-        {
-            foreach (var xType in aAssemblerBaseOp.Assembly.GetExportedTypes())
-            {
-                if (xType.IsSubclassOf(aAssemblerBaseOp))
-                {
-                    var xAttribs = xType.GetCustomAttributes<OpCodeAttribute>(false);
-                    foreach (var xAttrib in xAttribs)
-                    {
-                        var xOpCode = (ushort)xAttrib.OpCode;
-                        var xCtor = xType.GetConstructor(new[] { typeof(Assembler) });
-                        var xILOp = (ILOp)xCtor.Invoke(new object[] { Assembler });
-                        if (xOpCode <= 0xFF)
-                        {
-                            mILOpsLo[xOpCode] = xILOp;
-                        }
-                        else
-                        {
-                            mILOpsHi[xOpCode & 0xFF] = xILOp;
-                        }
-                    }
-                }
-            }
+            mILOpsHi[(int)ILOpCode.Code.Arglist] = new Arglist(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ceq] = new Ceq(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Cgt] = new Cgt(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Cgt_Un] = new Cgt_Un(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Clt] = new Clt(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Clt_Un] = new Clt_Un(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldftn] = new Ldftn(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldvirtftn] = new Ldvirtftn(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldarg] = new Ldarg(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldarga] = new Ldarga(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Starg] = new Starg(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Starg] = new Starg(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldloc] = new Ldloc(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Stloc] = new Stloc(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Localloc] = new Localloc(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Endfilter] = new Endfilter(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Unaligned] = new Unaligned(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Volatile] = new Volatile(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Initobj] = new Initobj(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Constrained] = new Constrained(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Cpblk] = new Cpblk(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Initblk] = new Initblk(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Rethrow] = new Rethrow(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Sizeof] = new Sizeof(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Refanytype] = new Refanytype(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Readonly] = new Readonly(Assembler);
         }
 
         private static void Call(MethodBase aMethod)

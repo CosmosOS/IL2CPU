@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Unaligned)]
     public class Unaligned : ILOp
     {
         public Unaligned(XSharp.Assembler.Assembler aAsmblr)

@@ -8,7 +8,6 @@ using XSharp;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Ldsflda)]
   public class Ldsflda : ILOp
   {
     public Ldsflda(XSharp.Assembler.Assembler aAsmblr)

@@ -38,7 +38,6 @@ namespace Cosmos.IL2CPU
             // at this point we need ASM as simple as possible and completely transparent.
             // No stack changes, no register mods, etc.
 
-            // TODO: Add an option on the debug project properties to turn this off.
             // Also see TokenPatterns.cs Checkpoint in X#
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)

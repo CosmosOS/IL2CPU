@@ -7,7 +7,6 @@ using XSharp;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Call)]
     public class Call : ILOp
     {
         public Call(XSharp.Assembler.Assembler aAsmblr)

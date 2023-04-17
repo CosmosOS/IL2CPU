@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Xor)]
     public class Xor : ILOp
     {
         public Xor(XSharp.Assembler.Assembler aAsmblr)

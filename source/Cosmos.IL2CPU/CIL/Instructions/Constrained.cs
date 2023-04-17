@@ -6,7 +6,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Constrained)]
     public class Constrained : ILOp
     {
         public Constrained(Assembler aAsmblr) : base(aAsmblr)

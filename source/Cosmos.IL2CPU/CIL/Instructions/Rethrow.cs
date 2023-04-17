@@ -4,7 +4,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Rethrow)]
     public class Rethrow : ILOp
     {
         public Rethrow(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Not)]
     public class Not : ILOp
     {
         public Not(XSharp.Assembler.Assembler aAsmblr)

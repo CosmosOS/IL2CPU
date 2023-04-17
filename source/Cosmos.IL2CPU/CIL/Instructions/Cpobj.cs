@@ -3,7 +3,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Cpobj)]
     public class Cpobj : ILOp
     {
         public Cpobj(XSharp.Assembler.Assembler aAsmblr)

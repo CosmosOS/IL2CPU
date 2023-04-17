@@ -4,7 +4,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Readonly)]
     public class Readonly : ILOp
     {
         public Readonly(Assembler aAsmblr)

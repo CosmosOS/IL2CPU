@@ -10,7 +10,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     /// <summary>
     /// Divides two unsigned values and pushes the remainder onto the evaluation stack.
     /// </summary>
-    [OpCode(ILOpCode.Code.Rem_Un)]
     public class Rem_Un : ILOp
     {
         public Rem_Un(Assembler aAsmblr)

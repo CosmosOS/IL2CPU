@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 /* Div.Un is unsigned integer division so the valid input values are uint / ulong and the result is always expressed as unsigned */
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Div_Un)]
     public class Div_Un : ILOp
     {
         public Div_Un(Assembler aAsmblr)

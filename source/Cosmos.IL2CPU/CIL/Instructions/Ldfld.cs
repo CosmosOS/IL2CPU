@@ -33,7 +33,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     ///
     /// This is typically checked when Microsoft Intermediate Language (MSIL) instructions are converted to native code, not at run time.
     /// </remarks>
-    [OpCode(ILOpCode.Code.Ldfld)]
     public class Ldfld : ILOp
     {
         public Ldfld(Assembler aAsmblr)

@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldarg)]
     public class Ldarg : ILOp
     {
         public Ldarg(XSharp.Assembler.Assembler aAsmblr)

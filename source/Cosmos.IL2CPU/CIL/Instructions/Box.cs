@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Box)]
     public class Box : ILOp
     {
         public Box(Assembler aAsmblr)

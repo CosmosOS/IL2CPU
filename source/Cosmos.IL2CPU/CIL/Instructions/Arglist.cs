@@ -4,7 +4,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Arglist)]
     public class Arglist : ILOp
     {
         public Arglist(Assembler aAsmblr)

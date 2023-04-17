@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Refanytype)]
     public class Refanytype : ILOp
     {
         public Refanytype(Assembler aAsmblr)

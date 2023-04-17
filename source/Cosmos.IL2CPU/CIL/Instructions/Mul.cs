@@ -5,7 +5,6 @@ using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Mul)]
     public class Mul : ILOp
     {
         public Mul(XSharp.Assembler.Assembler aAsmblr)

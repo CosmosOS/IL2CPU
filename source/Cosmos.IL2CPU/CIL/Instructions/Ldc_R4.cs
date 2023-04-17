@@ -6,7 +6,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldc_R4)]
     public class Ldc_R4 : ILOp
     {
         public Ldc_R4(Assembler aAsmblr)

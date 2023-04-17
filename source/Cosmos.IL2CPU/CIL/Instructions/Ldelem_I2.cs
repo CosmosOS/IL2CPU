@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode( ILOpCode.Code.Ldelem_I2 )]
     public class Ldelem_I2 : ILOp
     {
         public Ldelem_I2( XSharp.Assembler.Assembler aAsmblr )

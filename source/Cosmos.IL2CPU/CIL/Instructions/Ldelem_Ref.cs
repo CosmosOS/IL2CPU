@@ -8,7 +8,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Ldelem_Ref)]
   public class Ldelem_Ref : ILOp
   {
     public Ldelem_Ref(Assembler aAsmblr)

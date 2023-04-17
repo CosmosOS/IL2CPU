@@ -2,7 +2,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Conv_Ovf_I)]
   public class Conv_Ovf_I : ILOp
   {
     public Conv_Ovf_I(XSharp.Assembler.Assembler aAsmblr)

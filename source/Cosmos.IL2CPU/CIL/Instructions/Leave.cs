@@ -6,7 +6,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Leave)]
   public class Leave : ILOp
   {
     public Leave(XSharp.Assembler.Assembler aAsmblr)

@@ -12,7 +12,6 @@ using CPU = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Callvirt)]
     public class Callvirt : ILOp
     {
         public Callvirt(Assembler aAsmblr)

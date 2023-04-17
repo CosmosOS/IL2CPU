@@ -9,7 +9,6 @@ using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Ldsfld)]
   public class Ldsfld : ILOp
   {
     public Ldsfld(XSharp.Assembler.Assembler aAsmblr)

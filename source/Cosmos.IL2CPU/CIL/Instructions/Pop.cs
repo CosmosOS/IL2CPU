@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Pop)]
     public class Pop : ILOp
     {
         public Pop(Assembler aAsmblr)

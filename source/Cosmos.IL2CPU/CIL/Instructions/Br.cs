@@ -3,7 +3,6 @@ using XSharp;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Br)]
     public class Br : ILOp
     {
         public Br(XSharp.Assembler.Assembler aAsmblr)

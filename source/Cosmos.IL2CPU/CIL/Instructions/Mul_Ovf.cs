@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Mul_Ovf)]
   public class Mul_Ovf : ILOp
   {
     public Mul_Ovf(XSharp.Assembler.Assembler aAsmblr)

@@ -7,7 +7,6 @@ using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode( ILOpCode.Code.Cgt_Un )]
     public class Cgt_Un : ILOp
     {
         public Cgt_Un( XSharp.Assembler.Assembler aAsmblr )

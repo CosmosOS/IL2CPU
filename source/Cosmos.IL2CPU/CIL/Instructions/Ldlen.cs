@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldlen)]
     public class Ldlen : ILOp
     {
         public Ldlen(Assembler aAsmblr)

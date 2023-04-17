@@ -8,7 +8,6 @@ using CPUx86 = XSharp.Assembler.x86;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Stelem_Ref)]
     public class Stelem_Ref : ILOp
     {
         public Stelem_Ref(XSharp.Assembler.Assembler aAsmblr)

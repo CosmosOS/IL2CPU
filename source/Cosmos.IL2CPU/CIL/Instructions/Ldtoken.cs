@@ -7,7 +7,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldtoken)]
     public class Ldtoken : ILOp
     {
         public Ldtoken(Assembler aAsmblr)

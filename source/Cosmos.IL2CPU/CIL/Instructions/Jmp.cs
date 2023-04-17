@@ -4,7 +4,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Jmp)]
     public class Jmp : ILOp
     {
         public Jmp(Assembler aAsmblr)

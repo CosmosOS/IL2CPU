@@ -3,7 +3,6 @@ using XSharp;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ldnull)]
     public class Ldnull : ILOp
     {
         public Ldnull(XSharp.Assembler.Assembler aAsmblr)

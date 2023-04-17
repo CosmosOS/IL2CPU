@@ -3,7 +3,6 @@ using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-  [OpCode(ILOpCode.Code.Ldelem)]
   public class Ldelem : ILOp
   {
     public Ldelem(XSharp.Assembler.Assembler aAsmblr)

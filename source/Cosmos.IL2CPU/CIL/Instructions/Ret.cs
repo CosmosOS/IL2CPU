@@ -3,7 +3,6 @@ using XSharp.Assembler;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Ret)]
     public class Ret : ILOp
     {
         public Ret(Assembler aAsmblr)

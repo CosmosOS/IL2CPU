@@ -12,7 +12,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     /// <summary>
     /// Tests whether an object reference (type O) is an instance of a particular class.
     /// </summary>
-    [OpCode(ILOpCode.Code.Isinst)]
     public class Isinst : ILOp
     {
         public Isinst(Assembler aAsmblr)

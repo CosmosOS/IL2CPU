@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Initobj)]
     public class Initobj : ILOp
     {
         public Initobj(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

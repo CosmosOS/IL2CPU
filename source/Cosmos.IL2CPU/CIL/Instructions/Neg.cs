@@ -5,7 +5,6 @@ using static XSharp.XSRegisters;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
-    [OpCode(ILOpCode.Code.Neg)]
     public class Neg : ILOp
     {
         public Neg(Assembler aAsmblr)

@@ -12,7 +12,6 @@ namespace Cosmos.IL2CPU.CIL.Instructions
     /// <summary>
     /// Pushes an object reference to a new zero-based, one-dimensional array whose elements are of a specific type onto the evaluation stack.
     /// </summary>
-    [OpCode(ILOpCode.Code.Newarr)]
     public class Newarr : ILOp
     {
         public Newarr(Assembler aAsmblr)
