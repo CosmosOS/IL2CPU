@@ -10,7 +10,7 @@ namespace Cosmos.IL2CPU
 
         public static int Run(string[] aArgs, Action<string> aLogMessage, Action<string> aLogError)
         {
-            var debug = Environment.GetEnvironmentVariable(EnvironmentVariables.IL2CPU_DEBUG);
+            var debug = Environment.GetEnvironmentVariable("IL2CPU_DEBUG");
 
             if (string.Equals(debug, bool.TrueString, StringComparison.OrdinalIgnoreCase)
                 || string.Equals(debug, "1", StringComparison.OrdinalIgnoreCase))
