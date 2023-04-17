@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-
 using IL2CPU.API;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     internal class MemberInfoComparer : IEqualityComparer<MemberInfo>
     {

@@ -1,4 +1,5 @@
 using Cosmos.IL2CPU.CIL.ILOpCodes;
+using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.Instructions
 {

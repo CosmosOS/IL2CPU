@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cosmos.IL2CPU.CIL;
 using IL2CPU.Debug.Symbols;
 
-namespace Cosmos.IL2CPU.MethodAnalysis
+namespace Cosmos.IL2CPU.CIL.Utils.MethodAnalysis
 {
     public class ILMethod
     {

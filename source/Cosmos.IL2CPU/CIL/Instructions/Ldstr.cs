@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Cosmos.IL2CPU.CIL.ILOpCodes;
+using Cosmos.IL2CPU.CIL.Utils;
 using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;

@@ -1,5 +1,6 @@
 using System;
 using Cosmos.IL2CPU.CIL.ILOpCodes;
+using Cosmos.IL2CPU.CIL.Utils;
 using Cosmos.IL2CPU.Cosmos;
 using XSharp;
 using XSharp.Assembler;

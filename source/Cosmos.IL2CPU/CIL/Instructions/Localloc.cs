@@ -1,3 +1,4 @@
+using Cosmos.IL2CPU.CIL.Utils;
 using Cosmos.IL2CPU.Cosmos;
 using XSharp.Assembler;
 

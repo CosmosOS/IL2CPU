@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     [DebuggerDisplay("Field = '{Id}', Offset = {Offset}, Size = {Size}")]
     public class _FieldInfo

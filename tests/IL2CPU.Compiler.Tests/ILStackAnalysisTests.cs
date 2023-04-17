@@ -3,11 +3,12 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using Cosmos.IL2CPU;
-using Cosmos.IL2CPU.MethodAnalysis;
 using NUnit.Framework;
 using System.Reflection;
 using System.Collections;
 using Cosmos.IL2CPU.CIL;
+using Cosmos.IL2CPU.CIL.Utils;
+using Cosmos.IL2CPU.CIL.Utils.MethodAnalysis;
 
 namespace IL2CPU.Compiler.Tests
 {
@@ -43,7 +44,7 @@ namespace IL2CPU.Compiler.Tests
                 }
             }
         }
-           
+
     }
 
     public class VoidTextWriter : TextWriter

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Reflection;
-
 using IL2CPU.API.Attribs;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     [ForceInclude]
     public static class ExceptionHelper

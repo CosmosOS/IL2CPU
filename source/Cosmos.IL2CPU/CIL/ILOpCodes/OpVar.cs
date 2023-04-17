@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.CIL.Utils;
+using Cosmos.IL2CPU.CIL.Utils.Extensions;
 
 namespace Cosmos.IL2CPU.CIL.ILOpCodes
 {

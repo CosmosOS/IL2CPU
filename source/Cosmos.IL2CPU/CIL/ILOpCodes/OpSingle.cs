@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL.ILOpCodes {
   public class OpSingle : ILOpCode {

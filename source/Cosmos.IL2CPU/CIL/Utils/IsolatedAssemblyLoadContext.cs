@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
     {

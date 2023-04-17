@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Metadata;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     public class _ExceptionRegionInfo
     {

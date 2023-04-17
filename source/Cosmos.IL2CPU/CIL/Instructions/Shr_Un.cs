@@ -1,4 +1,5 @@
 using System;
+using Cosmos.IL2CPU.CIL.Utils;
 using XSharp;
 using CPUx86 = XSharp.Assembler.x86;
 using CPU = XSharp.Assembler.x86;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cosmos.IL2CPU.CIL.Utils;
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;

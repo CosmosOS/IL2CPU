@@ -9,6 +9,7 @@ using System.Text;
 
 using Cosmos.Build.Common;
 using Cosmos.IL2CPU.CIL;
+using Cosmos.IL2CPU.CIL.Utils;
 using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU

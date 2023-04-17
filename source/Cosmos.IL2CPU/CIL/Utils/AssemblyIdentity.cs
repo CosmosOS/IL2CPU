@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     /// <summary>
     /// Wrapper for <seealso cref="AssemblyName" />, used to compare <seealso cref="AssemblyName" /> objects equality.

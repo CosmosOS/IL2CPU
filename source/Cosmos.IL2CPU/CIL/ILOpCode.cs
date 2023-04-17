@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Metadata;
+using Cosmos.IL2CPU.CIL.Utils;
 
 namespace Cosmos.IL2CPU.CIL
 {

@@ -1,4 +1,5 @@
-using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.CIL.Utils;
+using Cosmos.IL2CPU.CIL.Utils.Extensions;
 using XSharp;
 using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;

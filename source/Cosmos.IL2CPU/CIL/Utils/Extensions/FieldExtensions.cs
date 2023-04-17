@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using IL2CPU.API;
 
-namespace Cosmos.IL2CPU.Extensions
+namespace Cosmos.IL2CPU.CIL.Utils.Extensions
 {
     public static class FieldExtensions
     {

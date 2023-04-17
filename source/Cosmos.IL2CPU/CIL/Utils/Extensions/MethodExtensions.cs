@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-
 using IL2CPU.API;
 using IL2CPU.Debug.Symbols;
 
-namespace Cosmos.IL2CPU.Extensions
+namespace Cosmos.IL2CPU.CIL.Utils.Extensions
 {
     internal static class MethodExtensions
     {

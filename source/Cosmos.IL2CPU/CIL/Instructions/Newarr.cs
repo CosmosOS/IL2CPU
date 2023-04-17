@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using Cosmos.IL2CPU.CIL.Utils;
 using Cosmos.IL2CPU.Cosmos;
 using IL2CPU.API;
 using XSharp;

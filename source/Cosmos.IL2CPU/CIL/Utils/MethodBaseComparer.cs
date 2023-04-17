@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Cosmos.IL2CPU.CIL.Utils.Extensions;
 
-using Cosmos.IL2CPU.Extensions;
-
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.CIL.Utils
 {
     public class MethodBaseComparer : IComparer<MethodBase>, IEqualityComparer<MethodBase>
     {

@@ -1,4 +1,5 @@
 using System;
+using Cosmos.IL2CPU.CIL.Utils;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;

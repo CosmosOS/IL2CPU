@@ -1,3 +1,5 @@
+using Cosmos.IL2CPU.CIL.Utils;
+
 namespace Cosmos.IL2CPU.CIL.Instructions
 {
     [OpCode( ILOpCode.Code.Stelem_R4 )]

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace Cosmos.IL2CPU.Extensions
+namespace Cosmos.IL2CPU.CIL.Utils.Extensions
 {
     public static class TypeExtensions
     {
