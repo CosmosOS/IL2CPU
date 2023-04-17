@@ -5,6 +5,7 @@ using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Cosmos.IL2CPU.Cosmos;
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;

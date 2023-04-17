@@ -13,20 +13,24 @@ using System.Xml;
 #endif
 
 using Cosmos.Build.Common;
+using Cosmos.IL2CPU.CIL;
+using Cosmos.IL2CPU.CIL.ILOpCodes;
+using Cosmos.IL2CPU.CIL.Instructions;
+using Cosmos.IL2CPU.CIL.Utils;
 using Cosmos.IL2CPU.Cosmos;
 using Cosmos.IL2CPU.Cosmos.Plug;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.IL;
-using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using Label = XSharp.Assembler.Label;
 using Cosmos.IL2CPU.MethodAnalysis;
+using ILOpCode = Cosmos.IL2CPU.CIL.ILOpCode;
+using OpCodeAttribute = Cosmos.IL2CPU.CIL.OpCodeAttribute;
 
 namespace Cosmos.IL2CPU
 {
@@ -91,7 +95,7 @@ namespace Cosmos.IL2CPU
                 var xIdxOffset = 0u;
                 if (!aMethod.MethodBase.IsStatic)
                 {
-                    XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", IL.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
+                    XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", CIL.Instructions.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
                     xIdxOffset++;
                 }
 
@@ -100,7 +104,7 @@ namespace Cosmos.IL2CPU
 
                 for (ushort i = 0; i < xParamCount; i++)
                 {
-                    var xOffset = IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
+                    var xOffset = CIL.Instructions.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
                     var xSize = ILOp.SizeOfType(xParams[i].ParameterType);
                     // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
                     XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, xIdxOffset + i));
@@ -212,9 +216,9 @@ namespace Cosmos.IL2CPU
                     {
                         METHODLABELNAME = xMethodLabel,
                         IsArgument = true,
-                        NAME = "this:" + IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
+                        NAME = "this:" + CIL.Instructions.Ldarg.GetArgumentDisplacement(aMethod, 0),
                         INDEXINMETHOD = 0,
-                        OFFSET = IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
+                        OFFSET = CIL.Instructions.Ldarg.GetArgumentDisplacement(aMethod, 0),
                         TYPENAME = aMethod.MethodBase.DeclaringType.FullName
                     });
 
@@ -226,7 +230,7 @@ namespace Cosmos.IL2CPU
 
                 for (ushort i = 0; i < xParamCount; i++)
                 {
-                    var xOffset = IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
+                    var xOffset = CIL.Instructions.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
                     // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
                     xOffset -= (int)ILOp.Align(ILOp.SizeOfType(xParams[i].ParameterType), 4) - 4;
                     mLocals_Arguments_Infos.Add(new LOCAL_ARGUMENT_INFO
@@ -645,7 +649,7 @@ namespace Cosmos.IL2CPU
 
         private void Ldarg(Il2cpuMethodInfo aMethod, int aIndex)
         {
-            IL.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
+            CIL.Instructions.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
         }
 
         private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
@@ -653,11 +657,11 @@ namespace Cosmos.IL2CPU
             uint xSize = 0;
             if (!(aTargetMethod.MethodBase.Name == "Invoke" && aTargetMethod.MethodBase.DeclaringType.Name == "DelegateImpl"))
             {
-                xSize = IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+                xSize = CIL.Instructions.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
             }
             else
             {
-                xSize = IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
+                xSize = CIL.Instructions.Call.GetStackSizeToReservate(aMethod.MethodBase);
             }
             if (xSize > 0)
             {
@@ -689,12 +693,12 @@ namespace Cosmos.IL2CPU
 
         private void Ldflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
-            IL.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
+            CIL.Instructions.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
         }
 
         private void Ldsflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
-            IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
+            CIL.Instructions.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
 
         public static byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
@@ -1330,7 +1334,7 @@ namespace Cosmos.IL2CPU
             Assembler.WriteDebugVideo("Kernel class created.");
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";
             XS.Label(xCurLabel);
-            IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
+            CIL.Instructions.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
             XS.Pop(EBP);
             XS.Return();

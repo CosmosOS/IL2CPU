@@ -8,6 +8,7 @@ using System.Runtime.Loader;
 using System.Text;
 
 using Cosmos.Build.Common;
+using Cosmos.IL2CPU.CIL;
 using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU

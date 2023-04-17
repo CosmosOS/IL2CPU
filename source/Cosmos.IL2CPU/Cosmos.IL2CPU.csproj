@@ -28,4 +28,8 @@
         <ProjectReference Include="..\IL2CPU.Debug.Symbols\IL2CPU.Debug.Symbols.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EditorConfigFiles Include="CIL\ILOpCodes\.editorconfig" />
+    </ItemGroup>
+
 </Project>
