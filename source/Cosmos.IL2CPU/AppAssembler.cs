@@ -813,6 +813,7 @@ namespace Cosmos.IL2CPU
             mILOpsHi[(int)ILOpCode.Code.Starg & 0xFF] = new Starg(Assembler);
             mILOpsHi[(int)ILOpCode.Code.Starg & 0xFF] = new Starg(Assembler);
             mILOpsHi[(int)ILOpCode.Code.Ldloc & 0xFF] = new Ldloc(Assembler);
+            mILOpsHi[(int)ILOpCode.Code.Ldloca & 0xFF] = new Ldloca(Assembler);
             mILOpsHi[(int)ILOpCode.Code.Stloc & 0xFF] = new Stloc(Assembler);
             mILOpsHi[(int)ILOpCode.Code.Localloc & 0xFF] = new Localloc(Assembler);
             mILOpsHi[(int)ILOpCode.Code.Endfilter & 0xFF] = new Endfilter(Assembler);
