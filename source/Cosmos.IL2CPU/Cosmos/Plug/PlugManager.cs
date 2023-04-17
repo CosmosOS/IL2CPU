@@ -39,9 +39,9 @@ namespace Cosmos.IL2CPU.Cosmos.Plug
         public Dictionary<Type, List<Type>> PlugImplsInhrt => mPlugImplsInhrt;
         public IDictionary<Type, IDictionary<string, PlugField>> PlugFields => mPlugFields;
 
-        private TypeResolver _typeResolver;
+        private readonly TypeResolver _typeResolver;
 
-        private Dictionary<string, MethodBase> ResolvedPlugs = new Dictionary<string, MethodBase>();
+        private readonly Dictionary<string, MethodBase> ResolvedPlugs = new Dictionary<string, MethodBase>();
 
         /// <summary>
         /// When the plug method has the same parameters as the original method, we dont have to generate or use any trampoline code

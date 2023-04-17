@@ -35,9 +35,9 @@ namespace Cosmos.IL2CPU
         public const string EndOfMethodLabelNameNormal = ".END__OF__METHOD_NORMAL";
         public const string EndOfMethodLabelNameException = ".END__OF__METHOD_EXCEPTION";
         private const string InitStringIDsLabel = "___INIT__STRINGS_TYPE_ID_S___";
-        private List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new();
-        private ILOp[] mILOpsLo = new ILOp[256];
-        private ILOp[] mILOpsHi = new ILOp[256];
+        private readonly List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new();
+        private readonly ILOp[] mILOpsLo = new ILOp[256];
+        private readonly ILOp[] mILOpsHi = new ILOp[256];
         public DebugInfo DebugInfo { get; set; }
         private TextWriter mLog;
         private string mLogDir;
@@ -48,8 +48,8 @@ namespace Cosmos.IL2CPU
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel;
         public DebugMode DebugMode;
         public bool IgnoreDebugStubAttribute;
-        private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
-        private List<INT3Label> mINT3Labels = new List<INT3Label>();
+        private readonly List<MethodIlOp> mSymbols = new List<MethodIlOp>();
+        private readonly List<INT3Label> mINT3Labels = new List<INT3Label>();
         public readonly CosmosAssembler Assembler;
 
         public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir)

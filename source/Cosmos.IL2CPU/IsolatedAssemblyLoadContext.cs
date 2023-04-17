@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU
 {
     internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
     {
-        private Dictionary<AssemblyIdentity, Lazy<Assembly>> _assemblies;
+        private readonly Dictionary<AssemblyIdentity, Lazy<Assembly>> _assemblies;
 
         public IsolatedAssemblyLoadContext(IEnumerable<string> assemblyPaths)
         {

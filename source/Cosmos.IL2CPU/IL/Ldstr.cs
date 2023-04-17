@@ -54,7 +54,7 @@ namespace Cosmos.IL2CPU.IL
             #endregion
         }
 
-        static Dictionary<string, string> stringLiterals = new Dictionary<string, string>();
+        static readonly Dictionary<string, string> stringLiterals = new Dictionary<string, string>();
 
         /// <summary>
         /// Create a new string literal to be included in the assembly

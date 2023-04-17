@@ -10,7 +10,7 @@ namespace IL2CPU.Debug.Symbols
 {
     public class LocalTypeProvider : ISignatureTypeProvider<Type, LocalTypeGenericContext>
     {
-        private Module mModule;
+        private readonly Module mModule;
 
         public LocalTypeProvider(Module aModule)
         {

@@ -604,7 +604,7 @@ namespace Cosmos.IL2CPU
 
         public static bool IsByRef(Type aType) => aType.IsByRef;
 
-        static Dictionary<Type, uint> Sizes = new Dictionary<Type, uint>();
+        static readonly Dictionary<Type, uint> Sizes = new Dictionary<Type, uint>();
         public static uint SizeOfType(Type aType)
         {
             if (aType == null)

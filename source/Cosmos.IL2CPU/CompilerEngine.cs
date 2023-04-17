@@ -28,9 +28,9 @@ namespace Cosmos.IL2CPU
 
         public static string KernelPkg { get; set; }
 
-        private ICompilerEngineSettings mSettings;
+        private readonly ICompilerEngineSettings mSettings;
 
-        private AssemblyLoadContext _assemblyLoadContext;
+        private readonly AssemblyLoadContext _assemblyLoadContext;
 
         private Dictionary<MethodBase, int?> mBootEntries;
         private List<MemberInfo> mForceIncludes;

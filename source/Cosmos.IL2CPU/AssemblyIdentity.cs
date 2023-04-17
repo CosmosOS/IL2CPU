@@ -9,7 +9,7 @@ namespace Cosmos.IL2CPU
     /// </summary>
     internal class AssemblyIdentity : IEquatable<AssemblyIdentity>
     {
-        private AssemblyName _assemblyName;
+        private readonly AssemblyName _assemblyName;
 
         public AssemblyIdentity(AssemblyName assemblyName)
         {

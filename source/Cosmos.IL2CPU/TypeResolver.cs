@@ -6,7 +6,7 @@ namespace Cosmos.IL2CPU
 {
     internal class TypeResolver
     {
-        private AssemblyLoadContext _assemblyLoadContext;
+        private readonly AssemblyLoadContext _assemblyLoadContext;
 
         public TypeResolver(AssemblyLoadContext assemblyLoadContext)
         {

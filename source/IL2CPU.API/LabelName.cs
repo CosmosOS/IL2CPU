@@ -14,7 +14,7 @@ namespace IL2CPU.API
         /// <summary>
         /// Cache for label names.
         /// </summary>
-        private static Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
+        private static readonly Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
 
         // All label naming code should be changed to use this class.
 

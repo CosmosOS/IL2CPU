@@ -19,7 +19,7 @@ namespace Cosmos.IL2CPU
             mComPort = comPort;
         }
 
-        private int mComPort = 0;
+        private readonly int mComPort = 0;
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
         /// <summary>
