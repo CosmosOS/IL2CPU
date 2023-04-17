@@ -1,14 +1,13 @@
-using IL2CPU.API;
 using System;
-using System.Linq;
-using CPU = XSharp.Assembler;
-using System.Text;
-using XSharp.Assembler;
-using Cosmos.IL2CPU.ILOpCodes;
-using XSharp;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Cosmos.IL2CPU.ILOpCodes;
+using IL2CPU.API;
+using XSharp;
+using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Ldstr)]
     public class LdStr : ILOp

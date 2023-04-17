@@ -5,9 +5,9 @@ using XSharp.Assembler.x86;
 using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ceq)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ceq)]
   public class Ceq : ILOp
   {
     public Ceq(XSharp.Assembler.Assembler aAsmblr)

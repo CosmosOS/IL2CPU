@@ -1,17 +1,14 @@
 using System;
 using System.Linq;
 using System.Reflection;
-
-using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
-
+using IL2CPU.API;
 using XSharp;
-using XSharp.Assembler;
 using CPUx86 = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldsfld)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldsfld)]
   public class Ldsfld : ILOp
   {
     public Ldsfld(XSharp.Assembler.Assembler aAsmblr)

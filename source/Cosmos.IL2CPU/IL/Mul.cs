@@ -1,14 +1,10 @@
-using System;
-using XSharp.Assembler.x86.SSE;
-
 using XSharp;
 using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
-using Label = XSharp.Assembler.Label;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Mul)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Mul)]
     public class Mul : ILOp
     {
         public Mul(XSharp.Assembler.Assembler aAsmblr)

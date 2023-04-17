@@ -2,15 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using Cosmos.IL2CPU.Extensions;
-
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
-
 using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.Cosmos.Plug
 {
     internal class PlugManager
     {
@@ -81,7 +78,7 @@ namespace Cosmos.IL2CPU
                 foreach (var xPlugType in xAsm.GetTypes())
                 {
                     // Foreach, it is possible there could be one plug class with mult plug targets
-                    foreach (var xAttrib in xPlugType.GetCustomAttributes<Plug>(false))
+                    foreach (var xAttrib in xPlugType.GetCustomAttributes<global::IL2CPU.API.Attribs.Plug>(false))
                     {
                         var xTargetType = xAttrib.Target;
                         // If no type is specified, try to find by a specified name.

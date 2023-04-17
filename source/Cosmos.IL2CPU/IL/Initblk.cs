@@ -3,7 +3,7 @@ using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Initblk)]
     public class Initblk : ILOp

@@ -1,11 +1,10 @@
 using System;
-using IL2CPU.API;
 using XSharp;
 using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Initobj)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Initobj)]
     public class Initobj : ILOp
     {
         public Initobj(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

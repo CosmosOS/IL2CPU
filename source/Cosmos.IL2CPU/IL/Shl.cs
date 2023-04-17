@@ -1,12 +1,11 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-
 using XSharp;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Shl )]
+    [global::Cosmos.IL2CPU.OpCode( ILOpCode.Code.Shl )]
     public class Shl : ILOp
     {
         public Shl( XSharp.Assembler.Assembler aAsmblr )

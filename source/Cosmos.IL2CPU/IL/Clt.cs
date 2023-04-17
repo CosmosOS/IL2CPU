@@ -1,23 +1,16 @@
 using System;
-using XSharp.Assembler;
-using Cosmos.IL2CPU.ILOpCodes;
-using CPUx86 = XSharp.Assembler.x86;
-using CPU = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
-using XSharp.Assembler.x86.SSE;
-using XSharp.Assembler.x86.x87;
-
 using XSharp;
+using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     /// <summary>
     /// Compares two values. If the first value is less than the second, the integer value 1 (int32) is pushed onto the evaluation stack;
     /// otherwise 0 (int32) is pushed onto the evaluation stack.
     /// </summary>
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Clt )]
+    [global::Cosmos.IL2CPU.OpCode( ILOpCode.Code.Clt )]
     public class Clt : ILOp
     {
         public Clt( XSharp.Assembler.Assembler aAsmblr )

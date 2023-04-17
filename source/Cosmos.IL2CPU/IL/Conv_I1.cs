@@ -1,10 +1,9 @@
 using System;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
   /// <summary>
   /// Convert to int8, pushing int32 on stack.
@@ -22,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
       var xSource = aOpCode.StackPopTypes[0];
       var xSourceSize = SizeOfType(xSource);
       var xSourceIsFloat = TypeIsFloat(xSource);
-      
+
 
       DoExecute(xSourceSize, xSourceIsFloat, TypeIsSigned(xSource), false, Assembler, aMethod, aOpCode);
     }

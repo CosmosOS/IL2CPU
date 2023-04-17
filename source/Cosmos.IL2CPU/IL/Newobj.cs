@@ -1,16 +1,14 @@
 using System;
 using System.Linq;
 using System.Reflection;
-
-using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
-
+using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Newobj)]
     public class Newobj : ILOp
@@ -270,7 +268,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     // todo: only happening for real methods now, not for ctor's ?
                     XS.Test(ECX, 2);
-                    var xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount.ToString();
+                    var xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount;
                     XS.Jump(CPUx86.ConditionalTestEnum.Equal, xNoErrorLabel);
 
                     PushAlignedParameterSize(constructor);
@@ -296,7 +294,7 @@ namespace Cosmos.IL2CPU.X86.IL
             ParameterInfo[] xParams = aMethod.GetParameters();
 
             uint xSize;
-            XS.Comment("[ Newobj.PushAlignedParameterSize start count = " + xParams.Length.ToString() + " ]");
+            XS.Comment("[ Newobj.PushAlignedParameterSize start count = " + xParams.Length + " ]");
             for (var i = 0; i < xParams.Length; i++)
             {
                 xSize = SizeOfType(xParams[i].ParameterType);

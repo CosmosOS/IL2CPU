@@ -13,14 +13,14 @@ using System.Xml;
 #endif
 
 using Cosmos.Build.Common;
-
+using Cosmos.IL2CPU.Cosmos;
+using Cosmos.IL2CPU.Cosmos.Plug;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using IL2CPU.Debug.Symbols;
 using Cosmos.IL2CPU.Extensions;
+using Cosmos.IL2CPU.IL;
 using Cosmos.IL2CPU.ILOpCodes;
-using Cosmos.IL2CPU.X86.IL;
-
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
@@ -91,7 +91,7 @@ namespace Cosmos.IL2CPU
                 var xIdxOffset = 0u;
                 if (!aMethod.MethodBase.IsStatic)
                 {
-                    XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
+                    XS.Comment(String.Format("Argument[0] $this at EBP+{0}, size = {1}", IL.Ldarg.GetArgumentDisplacement(aMethod, 0), ILOp.Align(ILOp.SizeOfType(aMethod.MethodBase.DeclaringType), 4)));
                     xIdxOffset++;
                 }
 
@@ -100,7 +100,7 @@ namespace Cosmos.IL2CPU
 
                 for (ushort i = 0; i < xParamCount; i++)
                 {
-                    var xOffset = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
+                    var xOffset = IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
                     var xSize = ILOp.SizeOfType(xParams[i].ParameterType);
                     // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
                     XS.Comment(String.Format("Argument[{3}] {0} at EBP+{1}, size = {2}", xParams[i].Name, xOffset, xSize, xIdxOffset + i));
@@ -133,9 +133,9 @@ namespace Cosmos.IL2CPU
             // We issue a second label for GUID. This is increases label count, but for now we need a master label first.
             // We issue a GUID label to reduce amount of work and time needed to construct debugging DB.
             aMethod.DebugMethodLabelUID = DebugInfo.CreateId;
-            XS.Label("GUID_" + aMethod.DebugMethodLabelUID.ToString());
+            XS.Label("GUID_" + aMethod.DebugMethodLabelUID);
 
-            Label.LastFullLabel = "METHOD_" + aMethod.DebugMethodLabelUID.ToString();
+            Label.LastFullLabel = "METHOD_" + aMethod.DebugMethodLabelUID;
 
             if (DebugEnabled && StackCorruptionDetection)
             {
@@ -212,9 +212,9 @@ namespace Cosmos.IL2CPU
                     {
                         METHODLABELNAME = xMethodLabel,
                         IsArgument = true,
-                        NAME = "this:" + X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
+                        NAME = "this:" + IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
                         INDEXINMETHOD = 0,
-                        OFFSET = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
+                        OFFSET = IL.Ldarg.GetArgumentDisplacement(aMethod, 0),
                         TYPENAME = aMethod.MethodBase.DeclaringType.FullName
                     });
 
@@ -226,7 +226,7 @@ namespace Cosmos.IL2CPU
 
                 for (ushort i = 0; i < xParamCount; i++)
                 {
-                    var xOffset = X86.IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
+                    var xOffset = IL.Ldarg.GetArgumentDisplacement(aMethod, (ushort)(i + xIdxOffset));
                     // if last argument is 8 byte long, we need to add 4, so that debugger could read all 8 bytes from this variable in positiv direction
                     xOffset -= (int)ILOp.Align(ILOp.SizeOfType(xParams[i].ParameterType), 4) - 4;
                     mLocals_Arguments_Infos.Add(new LOCAL_ARGUMENT_INFO
@@ -402,7 +402,7 @@ namespace Cosmos.IL2CPU
             XS.Return((uint)xRetSize);
 
             // Final, after all code. Points to op AFTER method.
-            XS.Label("GUID_" + aMethod.EndMethodID.ToString());
+            XS.Label("GUID_" + aMethod.EndMethodID);
         }
 
         public void FinalizeDebugInfo()
@@ -475,7 +475,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception E)
             {
-                throw new Exception("Error compiling method '" + aMethod.MethodBase.GetFullName() + "': " + E.ToString(), E);
+                throw new Exception("Error compiling method '" + aMethod.MethodBase.GetFullName() + "': " + E, E);
             }
         }
 
@@ -645,7 +645,7 @@ namespace Cosmos.IL2CPU
 
         private void Ldarg(Il2cpuMethodInfo aMethod, int aIndex)
         {
-            X86.IL.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
+            IL.Ldarg.DoExecute(Assembler, aMethod, (ushort)aIndex);
         }
 
         private void Call(Il2cpuMethodInfo aMethod, Il2cpuMethodInfo aTargetMethod, string aNextLabel)
@@ -653,11 +653,11 @@ namespace Cosmos.IL2CPU
             uint xSize = 0;
             if (!(aTargetMethod.MethodBase.Name == "Invoke" && aTargetMethod.MethodBase.DeclaringType.Name == "DelegateImpl"))
             {
-                xSize = X86.IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
+                xSize = IL.Call.GetStackSizeToReservate(aTargetMethod.MethodBase);
             }
             else
             {
-                xSize = X86.IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
+                xSize = IL.Call.GetStackSizeToReservate(aMethod.MethodBase);
             }
             if (xSize > 0)
             {
@@ -689,12 +689,12 @@ namespace Cosmos.IL2CPU
 
         private void Ldflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
-            X86.IL.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
+            IL.Ldflda.DoExecute(Assembler, aMethod, aMethod.MethodBase.DeclaringType, aFieldInfo, false, false, aFieldInfo.DeclaringType);
         }
 
         private void Ldsflda(Il2cpuMethodInfo aMethod, _FieldInfo aFieldInfo)
         {
-            X86.IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
+            IL.Ldsflda.DoExecute(Assembler, aMethod, LabelName.GetStaticFieldName(aFieldInfo.Field), aMethod.MethodBase.DeclaringType, null);
         }
 
         public static byte[] AllocateEmptyArray(int aLength, int aElementSize, uint aArrayTypeID)
@@ -1330,7 +1330,7 @@ namespace Cosmos.IL2CPU
             Assembler.WriteDebugVideo("Kernel class created.");
             xCurLabel = CosmosAssembler.EntryPointName + ".CallStart";
             XS.Label(xCurLabel);
-            X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
+            IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
             XS.Pop(EBP);
             XS.Return();

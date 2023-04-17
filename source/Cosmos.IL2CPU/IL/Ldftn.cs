@@ -1,10 +1,9 @@
-using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
-
+using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Ldftn)]
     public class Ldftn : ILOp

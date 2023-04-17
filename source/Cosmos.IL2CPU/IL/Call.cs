@@ -1,14 +1,12 @@
 using System;
 using System.Reflection;
-
-using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
-
+using IL2CPU.API;
 using XSharp;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Call)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Call)]
     public class Call : ILOp
     {
         public Call(XSharp.Assembler.Assembler aAsmblr)

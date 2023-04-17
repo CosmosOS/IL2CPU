@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using Cosmos.IL2CPU.X86.IL;
+using Cosmos.IL2CPU.IL;
 using NUnit.Framework;
 
 namespace IL2CPU.Compiler.Tests

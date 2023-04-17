@@ -3,9 +3,9 @@ using Cosmos.IL2CPU.Extensions;
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldflda)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldflda)]
     public class Ldflda : ILOp
     {
         public Ldflda(XSharp.Assembler.Assembler aAsmblr)

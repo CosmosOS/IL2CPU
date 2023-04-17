@@ -1,4 +1,4 @@
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Volatile)]
     public class Volatile : ILOp

@@ -1,10 +1,9 @@
 using System;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     /// <summary>
     /// Convert to int64, pushing int64 on stack.
@@ -42,7 +41,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xSourceIsFloat)
                 {
-                    /* 
+                    /*
                      * Sadly for x86 there is no way using SSE to convert a float to an Int64... in x64 we could use ConvertPD2DQAndTruncate with
                      * x64 register as a destination... so this one of the few cases in which we need the legacy FPU!
                      */
@@ -62,7 +61,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xSourceIsFloat)
                 {
-                    /* 
+                    /*
                      * Sadly for x86 there is no way using SSE to convert a double to an Int64... in x64 we could use ConvertPD2DQAndTruncate with
                      * x64 register as a destination... so only in this case we need the legacy FPU!
                      */

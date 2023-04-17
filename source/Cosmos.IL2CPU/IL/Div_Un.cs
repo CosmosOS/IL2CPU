@@ -1,12 +1,11 @@
 using System;
-
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
 /* Div.Un is unsigned integer division so the valid input values are uint / ulong and the result is always expressed as unsigned */
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Div_Un)]
     public class Div_Un : ILOp

@@ -1,9 +1,8 @@
 using Cosmos.IL2CPU.ILOpCodes;
-
-using XSharp.Assembler;
 using XSharp;
+using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Sizeof)]
     public class Sizeof : ILOp

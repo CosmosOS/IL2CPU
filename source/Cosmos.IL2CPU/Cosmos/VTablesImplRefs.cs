@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.Cosmos
 {
     public static class VTablesImplRefs
     {

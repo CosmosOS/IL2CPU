@@ -152,12 +152,12 @@ namespace IL2CPU.API
 
             if(aType.Name == "SR" || aType.Name == "PathInternal" || aType.Name.Contains("PrivateImplementationDetails")) //TODO:  we need to deal with this more generally
             {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB;
             }
 
             if (aType.Name == "Error" || aType.Name == "GetEndOfFile")
             {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB;
             }
 
             return xSB.ToString();

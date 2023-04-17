@@ -1,14 +1,10 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
-using XSharp.Assembler.x86.x87;
-
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Sub)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Sub)]
     public class Sub: ILOp
     {
         public Sub(XSharp.Assembler.Assembler aAsmblr)

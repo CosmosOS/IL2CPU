@@ -1,9 +1,6 @@
-using System;
-
-
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldelem_I1 )]
+    [global::Cosmos.IL2CPU.OpCode( ILOpCode.Code.Ldelem_I1 )]
     public class Ldelem_I1 : ILOp
     {
         public Ldelem_I1( XSharp.Assembler.Assembler aAsmblr )

@@ -1,8 +1,7 @@
 using System;
-
 using XSharp.Assembler;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Arglist)]
     public class Arglist : ILOp

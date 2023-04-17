@@ -46,7 +46,7 @@ namespace Cosmos.IL2CPU
 
         public int GetHashCode(MemberInfo aItem)
         {
-            return (aItem.ToString() + GetDeclareTypeString(aItem)).GetHashCode();
+            return (aItem + GetDeclareTypeString(aItem)).GetHashCode();
         }
 
         private static string GetDeclareTypeString(MemberInfo item)

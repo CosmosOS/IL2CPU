@@ -1,7 +1,7 @@
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Rethrow)]
     public class Rethrow : ILOp

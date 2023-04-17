@@ -1,12 +1,10 @@
 using System;
-
 using Cosmos.IL2CPU.ILOpCodes;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
   [OpCode(ILOpCode.Code.Ldobj)]
   public class Ldobj : ILOp

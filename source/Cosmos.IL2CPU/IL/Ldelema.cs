@@ -1,14 +1,13 @@
 using System.Linq;
-using CPUx86 = XSharp.Assembler.x86;
-
 using Cosmos.IL2CPU.ILOpCodes;
 using IL2CPU.API;
 using XSharp;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelema)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelema)]
   public class Ldelema : ILOp
   {
     public Ldelema(XSharp.Assembler.Assembler aAsmblr)

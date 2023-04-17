@@ -51,7 +51,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                aLogError(string.Format("Error occurred: " + e.ToString()));
+                aLogError(string.Format("Error occurred: " + e));
             }
 
             return Failed;
@@ -66,7 +66,7 @@ namespace Cosmos.IL2CPU
                 OnLogError = aLogError,
                 OnLogWarning = m => aLogMessage(string.Format("Warning: {0}", m)),
                 OnLogMessage = aLogMessage,
-                OnLogException = m => aLogError(string.Format("Exception: {0}", m.ToString()))
+                OnLogException = m => aLogError(string.Format("Exception: {0}", m))
             };
 
             return xEngine.Execute();

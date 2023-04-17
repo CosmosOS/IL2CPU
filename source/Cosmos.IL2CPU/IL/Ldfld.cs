@@ -1,13 +1,11 @@
 using System;
-
-using IL2CPU.API;
 using Cosmos.IL2CPU.ILOpCodes;
-
+using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     /// <summary>
     /// Finds the value of a field in the object whose reference is currently on the evaluation stack.
@@ -53,7 +51,7 @@ namespace Cosmos.IL2CPU.X86.IL
             var xOffset = GetFieldOffset(xFieldInfo);
 
             XS.Comment("Field: " + xFieldInfo.Id);
-            XS.Comment("Type: " + xFieldInfo.FieldType.ToString());
+            XS.Comment("Type: " + xFieldInfo.FieldType);
             XS.Comment("Size: " + xFieldInfo.Size);
             XS.Comment("DeclaringType: " + xDeclaringType.FullName);
             XS.Comment("TypeOnStack: " + xStackType.FullName);
@@ -172,7 +170,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         break;
                     }
                 default:
-                    throw new Exception(string.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType.ToString(), xSize));
+                    throw new Exception(string.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType, xSize));
             }
         }
 

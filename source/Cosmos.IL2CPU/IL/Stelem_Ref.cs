@@ -1,14 +1,13 @@
 using System;
-using Cosmos.Debug.Kernel;
 using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 using CPUx86 = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stelem_Ref)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Stelem_Ref)]
     public class Stelem_Ref : ILOp
     {
         public Stelem_Ref(XSharp.Assembler.Assembler aAsmblr)

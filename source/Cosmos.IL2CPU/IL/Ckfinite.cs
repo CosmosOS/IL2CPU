@@ -1,13 +1,11 @@
 using System;
-
 using IL2CPU.API;
-
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Ckfinite)]
     public class Ckfinite : ILOp
@@ -48,7 +46,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 default:
                     throw new NotImplementedException();
             }
-            
+
             XS.Call(LabelName.Get(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef));
 
             XS.Label(xNoThrowLabel);

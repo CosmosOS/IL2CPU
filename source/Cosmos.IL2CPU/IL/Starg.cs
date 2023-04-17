@@ -1,11 +1,11 @@
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
+using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Starg)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Starg)]
   public class Starg : ILOp
   {
     public Starg(XSharp.Assembler.Assembler aAsmblr)

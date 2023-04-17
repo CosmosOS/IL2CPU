@@ -1,10 +1,6 @@
-using System;
-
-using CPUx86 = XSharp.Assembler.x86;
-
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode( ILOpCode.Code.Stelem_R4 )]
+    [global::Cosmos.IL2CPU.OpCode( ILOpCode.Code.Stelem_R4 )]
     public class Stelem_R4 : ILOp
     {
         public Stelem_R4( XSharp.Assembler.Assembler aAsmblr )

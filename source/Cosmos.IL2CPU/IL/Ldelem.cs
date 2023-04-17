@@ -1,8 +1,8 @@
 using Cosmos.IL2CPU.ILOpCodes;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelem)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldelem)]
   public class Ldelem : ILOp
   {
     public Ldelem(XSharp.Assembler.Assembler aAsmblr)

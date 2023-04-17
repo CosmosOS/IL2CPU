@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Cosmos;
+using Cosmos.IL2CPU.Cosmos.Plug;
 using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
@@ -27,7 +28,7 @@ namespace Cosmos.IL2CPU
 
         public override string ToString()
         {
-            return Item.MemberType + " " + Item.ToString();
+            return Item.MemberType + " " + Item;
         }
     }
 
@@ -381,7 +382,7 @@ namespace Cosmos.IL2CPU
                         // to constantly scroll up.
                         foreach (var xItem in xList.Value)
                         {
-                            mLogWriter.WriteLine("<a name=\"Item" + xBookmarks[xItem.Item].ToString() + "_S\"></a>");
+                            mLogWriter.WriteLine("<a name=\"Item" + xBookmarks[xItem.Item] + "_S\"></a>");
                         }
 
                         if (!xBookmarks.TryGetValue(xList.Key, out var xHref))
@@ -391,7 +392,7 @@ namespace Cosmos.IL2CPU
                         mLogWriter.Write("<p>");
                         if (xHref >= 0)
                         {
-                            mLogWriter.WriteLine("<a href=\"#Item" + xHref.ToString() + "_S\">");
+                            mLogWriter.WriteLine("<a href=\"#Item" + xHref + "_S\">");
                             mLogWriter.WriteLine("<a name=\"Item{0}\">", xHref);
                         }
                         if (xList.Key == null)

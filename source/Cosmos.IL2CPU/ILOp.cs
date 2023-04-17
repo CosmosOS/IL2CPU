@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-
+using Cosmos.IL2CPU.Cosmos.Plug;
 using Cosmos.IL2CPU.Extensions;
 
 using IL2CPU.API;
@@ -440,7 +440,7 @@ namespace Cosmos.IL2CPU
                         case ExceptionRegionKind.Fault:
                         default:
                             {
-                                throw new Exception("ExceptionHandlerType '" + aCurrentOpCode.CurrentExceptionRegion.Kind.ToString() +
+                                throw new Exception("ExceptionHandlerType '" + aCurrentOpCode.CurrentExceptionRegion.Kind +
                                                     "' not supported yet!");
                             }
                     }

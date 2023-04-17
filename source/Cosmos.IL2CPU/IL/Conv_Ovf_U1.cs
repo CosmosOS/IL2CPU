@@ -1,6 +1,6 @@
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_U1)]
+	[global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_U1)]
 	public class Conv_Ovf_U1: ILOp
 	{
 		//Convert to an unsigned int8(on the stack as int32) and throw an exception if overflow

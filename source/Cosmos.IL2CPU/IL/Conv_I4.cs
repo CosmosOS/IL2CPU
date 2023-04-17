@@ -1,10 +1,9 @@
 using System;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
   /// <summary>
   /// Convert to int32, pushing int32 on stack.
@@ -40,7 +39,7 @@ namespace Cosmos.IL2CPU.X86.IL
         }
         else
         {
-          if(checkOverflow) 
+          if(checkOverflow)
           {
             ConvOverflowChecks.CheckOverflowForSmall(4, xSourceIsSigned, true, assembler, aMethod, aOpCode, xSuccessLabel, xOverflowLabel);
           }

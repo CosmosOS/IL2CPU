@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using XSharp.Assembler.x86.SSE;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Beq)]
     [OpCode(ILOpCode.Code.Bge)]

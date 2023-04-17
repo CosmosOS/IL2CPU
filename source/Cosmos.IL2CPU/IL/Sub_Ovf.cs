@@ -1,13 +1,12 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
-using XSharp;
-using static XSharp.XSRegisters;
 using System.Reflection;
+using XSharp;
+using XSharp.Assembler.x86;
+using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Sub_Ovf)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Sub_Ovf)]
   public class Sub_Ovf : ILOp
   {
     public Sub_Ovf(XSharp.Assembler.Assembler aAsmblr) : base(aAsmblr)

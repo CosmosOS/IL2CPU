@@ -1,7 +1,7 @@
 using XSharp;
 using XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Switch)]
     public class Switch : ILOp

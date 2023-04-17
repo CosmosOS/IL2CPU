@@ -1,11 +1,7 @@
 ﻿using Dapper;
-using DapperExtensions;
-using DapperExtensions.Mapper;
-using DapperExtensions.Sql;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;

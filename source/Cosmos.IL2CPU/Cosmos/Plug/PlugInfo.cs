@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cosmos.IL2CPU
+namespace Cosmos.IL2CPU.Cosmos.Plug
 {
     public class PlugInfo
     {

@@ -1,17 +1,15 @@
 using System;
 using System.Linq;
 using System.Reflection;
-
+using Cosmos.IL2CPU.Cosmos;
 using Cosmos.IL2CPU.ILOpCodes;
-
 using IL2CPU.API;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 using CPU = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Callvirt)]
     public class Callvirt : ILOp

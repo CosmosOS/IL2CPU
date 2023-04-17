@@ -1,9 +1,8 @@
 using System;
-
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Xor)]
     public class Xor : ILOp

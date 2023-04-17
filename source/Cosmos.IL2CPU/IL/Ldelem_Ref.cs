@@ -1,12 +1,11 @@
 using System;
-
-using CPUx86 = XSharp.Assembler.x86;
 using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
+using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
   [OpCode(ILOpCode.Code.Ldelem_Ref)]
   public class Ldelem_Ref : ILOp

@@ -48,7 +48,7 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Mkrefany:
           return 1;
         default:
-          throw new NotImplementedException("OpCode '" + OpCode + "' not implemented! Encountered in method " + aMethod.ToString());
+          throw new NotImplementedException("OpCode '" + OpCode + "' not implemented! Encountered in method " + aMethod);
       }
     }
 

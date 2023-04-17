@@ -1,10 +1,8 @@
-using System;
 using XSharp;
 using XSharp.Assembler;
-
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Refanytype)]
     public class Refanytype : ILOp

@@ -1,12 +1,11 @@
 using System;
-
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-  [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_I8)]
+  [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_I8)]
   public class Conv_Ovf_I8 : ILOp
   {
     public Conv_Ovf_I8(XSharp.Assembler.Assembler aAsmblr)

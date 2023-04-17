@@ -1,6 +1,6 @@
 using System;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Cpobj)]
     public class Cpobj : ILOp

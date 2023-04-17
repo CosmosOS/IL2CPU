@@ -5,7 +5,7 @@ using XSharp;
 using CPUx86 = XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Stfld)]
     public class Stfld : ILOp
@@ -18,7 +18,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             var xOpCode = (ILOpCodes.OpField)aOpCode;
             var xField = xOpCode.Value;
-            XS.Comment("Operand type: " + aOpCode.StackPopTypes[1].ToString());
+            XS.Comment("Operand type: " + aOpCode.StackPopTypes[1]);
             DoExecute(Assembler, aMethod, xField, DebugEnabled, IsReferenceType(aOpCode.StackPopTypes[1]));
         }
 
@@ -30,7 +30,7 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Comment("DeclaringObject: " + aDeclaringObject.Name);
             XS.Comment("Field: " + xFieldInfo.Id);
             var fieldType = xFieldInfo.FieldType;
-            XS.Comment("Type: " + fieldType.ToString());
+            XS.Comment("Type: " + fieldType);
             XS.Comment("Size: " + xFieldInfo.Size);
             XS.Comment("Offset: " + xActualOffset + " (includes object header)");
 

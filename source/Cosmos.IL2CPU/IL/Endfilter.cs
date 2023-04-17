@@ -1,7 +1,4 @@
-using System;
-
-
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Endfilter)]
     public class Endfilter : ILOp

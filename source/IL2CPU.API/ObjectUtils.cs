@@ -1,5 +1,3 @@
-using System;
-
 namespace IL2CPU.API
 {
     public static class ObjectUtils

@@ -1,14 +1,13 @@
-using Cosmos.IL2CPU.ILOpCodes;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-    [Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldarg)]
+    [global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Ldarg)]
     public class Ldarg : ILOp
     {
         public Ldarg(XSharp.Assembler.Assembler aAsmblr)

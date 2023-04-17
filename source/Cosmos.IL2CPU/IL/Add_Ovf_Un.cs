@@ -1,11 +1,11 @@
 using System;
-using XSharp.Assembler.x86;
-using XSharp;
-using static XSharp.XSRegisters;
 using System.Reflection;
+using XSharp;
+using XSharp.Assembler.x86;
+using static XSharp.XSRegisters;
 
 /* Add.Ovf is unsigned integer addition with check for overflow */
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Add_Ovf_Un)]
     public class Add_Ovf_Un : ILOp

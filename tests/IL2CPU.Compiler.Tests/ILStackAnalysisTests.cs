@@ -6,7 +6,6 @@ using Cosmos.IL2CPU;
 using Cosmos.IL2CPU.MethodAnalysis;
 using NUnit.Framework;
 using System.Reflection;
-using System.Linq;
 using System.Collections;
 
 namespace IL2CPU.Compiler.Tests

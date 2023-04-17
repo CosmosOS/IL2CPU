@@ -1,18 +1,12 @@
 using System;
-using CPUx86 = XSharp.Assembler.x86;
-using CPU = XSharp.Assembler.x86;
-using XSharp.Assembler.x86;
-using XSharp.Assembler;
-using XSharp.Assembler.x86.SSE;
-using XSharp.Assembler.x86.x87;
-
 using XSharp;
+using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 using static XSharp.Assembler.x86.SSE.ComparePseudoOpcodes;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Cgt)]
+	[global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Cgt)]
 	public class Cgt : ILOp
 	{
 		public Cgt(XSharp.Assembler.Assembler aAsmblr)

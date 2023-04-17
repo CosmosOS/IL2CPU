@@ -1,13 +1,10 @@
-using System;
 using Cosmos.IL2CPU.Extensions;
 using Cosmos.IL2CPU.ILOpCodes;
-using IL2CPU.API;
 using XSharp;
 using XSharp.Assembler;
 using static XSharp.XSRegisters;
-using CPU = XSharp.Assembler.x86;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     [OpCode(ILOpCode.Code.Stloc)]
     public class Stloc : ILOp

@@ -1,12 +1,12 @@
 using System;
-
+using Cosmos.IL2CPU.Cosmos;
 using Cosmos.IL2CPU.ILOpCodes;
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
 using static XSharp.XSRegisters;
 
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
     /// <summary>
     /// Tests whether an object reference (type O) is an instance of a particular class.

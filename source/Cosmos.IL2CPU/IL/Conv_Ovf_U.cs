@@ -1,6 +1,6 @@
-namespace Cosmos.IL2CPU.X86.IL
+namespace Cosmos.IL2CPU.IL
 {
-	[Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_U)]
+	[global::Cosmos.IL2CPU.OpCode(ILOpCode.Code.Conv_Ovf_U)]
 	public class Conv_Ovf_U: ILOp
 	{
 		public Conv_Ovf_U(XSharp.Assembler.Assembler aAsmblr):base(aAsmblr)
