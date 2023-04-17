@@ -698,7 +698,7 @@ namespace Cosmos.IL2CPU
             mILOpsLo[(int)ILOpCode.Code.Add] = new CIL.Instructions.Add(Assembler);
             mILOpsLo[(int)ILOpCode.Code.Sub] = new CIL.Instructions.Sub(Assembler);
             mILOpsLo[(int)ILOpCode.Code.Mul] = new Mul(Assembler);
-            mILOpsLo[(int)ILOpCode.Code.Mul] = new Mul(Assembler);
+            mILOpsLo[(int)ILOpCode.Code.Div] = new Div(Assembler);
             mILOpsLo[(int)ILOpCode.Code.Div_Un] = new Div_Un(Assembler);
             mILOpsLo[(int)ILOpCode.Code.Rem] = new Rem(Assembler);
             mILOpsLo[(int)ILOpCode.Code.Rem_Un] = new Rem_Un(Assembler);
