@@ -38,7 +38,6 @@ namespace Cosmos.IL2CPU
         private List<LOCAL_ARGUMENT_INFO> mLocals_Arguments_Infos = new();
         private ILOp[] mILOpsLo = new ILOp[256];
         private ILOp[] mILOpsHi = new ILOp[256];
-        public bool ShouldOptimize = false;
         public DebugInfo DebugInfo { get; set; }
         private TextWriter mLog;
         private string mLogDir;
@@ -1335,11 +1334,6 @@ namespace Cosmos.IL2CPU
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
             XS.Pop(EBP);
             XS.Return();
-
-            if (ShouldOptimize)
-            {
-                Optimizer.Optimize(Assembler);
-            }
         }
 
 #pragma warning disable CA1822 // Mark members as static

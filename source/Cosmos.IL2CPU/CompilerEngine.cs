@@ -27,7 +27,7 @@ namespace Cosmos.IL2CPU
         public static TypeResolver TypeResolver { get; private set; }
 
         public static string KernelPkg { get; set; }
-        
+
         private ICompilerEngineSettings mSettings;
 
         private AssemblyLoadContext _assemblyLoadContext;
@@ -155,10 +155,6 @@ namespace Cosmos.IL2CPU
                     xAsm.DebugMode = mSettings.DebugMode;
                     xAsm.TraceAssemblies = mSettings.TraceAssemblies;
                     xAsm.IgnoreDebugStubAttribute = mSettings.IgnoreDebugStubAttribute;
-                    if (!mSettings.EnableDebug)
-                    {
-                        xAsm.ShouldOptimize = true;
-                    }
 
                     bool VBEMultiboot = mSettings.CompileVBEMultiboot;
                     string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;

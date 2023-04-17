@@ -42,7 +42,7 @@ namespace Cosmos.IL2CPU
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)
             {
-                _ = new Comment("DebugVideo '" + aText + "'");
+                XS.Comment("DebugVideo '" + aText + "'");
                 uint xVideo = 0xB8000;
 
                 for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)
