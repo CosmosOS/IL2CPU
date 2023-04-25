@@ -348,7 +348,7 @@ namespace Cosmos.IL2CPU
                 SourceReg = RegistersEnum.EBX
             };
 
-            XS.Call("SystemVoidCosmosCoreMultiboot2Init");
+            XS.Call("SystemVoidCosmosCoreMultibootMultiboot2Init");
 
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");

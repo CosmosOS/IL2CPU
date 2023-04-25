@@ -107,7 +107,7 @@ namespace Cosmos.IL2CPU
             }
             catch (Exception e)
             {
-                var builder = new StringBuilder();
+                StringBuilder builder = new();
                 builder.Append("Error while initializing Cosmos paths");
                 for (Exception scannedException = e; null != scannedException; scannedException = scannedException.InnerException)
                 {
@@ -171,7 +171,7 @@ namespace Cosmos.IL2CPU
                         xAsm.Assembler.EmitAsmLabels = false;
                     }
 
-                    using (var xScanner = new ILScanner(xAsm, new TypeResolver(_assemblyLoadContext), LogException, LogWarning))
+                    using (ILScanner xScanner = new(xAsm, new TypeResolver(_assemblyLoadContext), LogException, LogWarning))
                     {
                         CompilerHelpers.DebugEvent += LogMessage;
                         if (mSettings.EnableLogging)
