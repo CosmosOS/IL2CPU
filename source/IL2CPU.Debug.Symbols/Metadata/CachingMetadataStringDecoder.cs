@@ -27,7 +27,7 @@ namespace IL2CPU.Debug.Symbols.Metadata
         private const int BucketSize = 4;
 
         // The table of cached entries. The size of the table has to be power of 2.
-        private Entry[] _table;
+        private readonly Entry[] _table;
 
         // The next candidate in the bucket range for eviction
         private int _evictionHint;

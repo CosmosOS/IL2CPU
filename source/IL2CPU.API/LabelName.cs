@@ -14,7 +14,7 @@ namespace IL2CPU.API
         /// <summary>
         /// Cache for label names.
         /// </summary>
-        private static Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
+        private static readonly Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
 
         // All label naming code should be changed to use this class.
 
@@ -152,12 +152,12 @@ namespace IL2CPU.API
 
             if(aType.Name == "SR" || aType.Name == "PathInternal" || aType.Name.Contains("PrivateImplementationDetails")) //TODO:  we need to deal with this more generally
             {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB;
             }
 
             if (aType.Name == "Error" || aType.Name == "GetEndOfFile")
             {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
+                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB;
             }
 
             return xSB.ToString();

@@ -125,8 +125,8 @@ namespace IL2CPU.Debug.Symbols.Pdb
             }
         }
 
-        private static IMetaDataDispenser s_metadataDispenser;
-        private static ISymUnmanagedBinder s_symBinder;
+        private static readonly IMetaDataDispenser s_metadataDispenser;
+        private static readonly ISymUnmanagedBinder s_symBinder;
 
         public static PdbSymbolReader TryOpenSymbolReaderForMetadataFile(string metadataFileName, string searchPath)
         {
@@ -161,7 +161,7 @@ namespace IL2CPU.Debug.Symbols.Pdb
             }
         }
 
-        private ISymUnmanagedReader _symUnmanagedReader;
+        private readonly ISymUnmanagedReader _symUnmanagedReader;
 
         private UnmanagedPdbSymbolReader(ISymUnmanagedReader symUnmanagedReader)
         {

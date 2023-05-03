@@ -5,6 +5,7 @@ using IL2CPU.API.Attribs;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Cosmos.IL2CPU.Cosmos;
 using XSharp;
 using XSharp.Assembler;
 using XSharp.Assembler.x86;
@@ -19,7 +20,7 @@ namespace Cosmos.IL2CPU
             mComPort = comPort;
         }
 
-        private int mComPort = 0;
+        private readonly int mComPort = 0;
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
         /// <summary>
@@ -37,12 +38,11 @@ namespace Cosmos.IL2CPU
             // at this point we need ASM as simple as possible and completely transparent.
             // No stack changes, no register mods, etc.
 
-            // TODO: Add an option on the debug project properties to turn this off.
             // Also see TokenPatterns.cs Checkpoint in X#
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)
             {
-                _ = new Comment("DebugVideo '" + aText + "'");
+                XS.Comment("DebugVideo '" + aText + "'");
                 uint xVideo = 0xB8000;
 
                 for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)

@@ -8,6 +8,8 @@ using System.Runtime.Loader;
 using System.Text;
 
 using Cosmos.Build.Common;
+using Cosmos.IL2CPU.CIL;
+using Cosmos.IL2CPU.CIL.Utils;
 using IL2CPU.Debug.Symbols;
 
 namespace Cosmos.IL2CPU
@@ -27,10 +29,10 @@ namespace Cosmos.IL2CPU
         public static TypeResolver TypeResolver { get; private set; }
 
         public static string KernelPkg { get; set; }
-        
-        private ICompilerEngineSettings mSettings;
 
-        private AssemblyLoadContext _assemblyLoadContext;
+        private readonly ICompilerEngineSettings mSettings;
+
+        private readonly AssemblyLoadContext _assemblyLoadContext;
 
         private Dictionary<MethodBase, int?> mBootEntries;
         private List<MemberInfo> mForceIncludes;
@@ -155,10 +157,6 @@ namespace Cosmos.IL2CPU
                     xAsm.DebugMode = mSettings.DebugMode;
                     xAsm.TraceAssemblies = mSettings.TraceAssemblies;
                     xAsm.IgnoreDebugStubAttribute = mSettings.IgnoreDebugStubAttribute;
-                    if (!mSettings.EnableDebug)
-                    {
-                        xAsm.ShouldOptimize = true;
-                    }
 
                     bool VBEMultiboot = mSettings.CompileVBEMultiboot;
                     string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;

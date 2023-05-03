@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Moq;
 
 using Cosmos.IL2CPU;
+using Cosmos.IL2CPU.CIL;
 using NUnit.Framework;
 
 namespace IL2CPU.Compiler.Tests

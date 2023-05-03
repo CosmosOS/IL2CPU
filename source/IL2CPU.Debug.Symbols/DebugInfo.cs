@@ -1,15 +1,14 @@
 ﻿using Dapper;
-using DapperExtensions;
-using DapperExtensions.Mapper;
-using DapperExtensions.Sql;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using DapperExtensions;
+using DapperExtensions.Mapper;
+using DapperExtensions.Sql;
 
 namespace IL2CPU.Debug.Symbols
 {
@@ -331,7 +330,7 @@ namespace IL2CPU.Debug.Symbols
             aSymbols.Add(xMap);
         }
 
-        private List<string> mLocalFieldInfoNames = new List<string>();
+        private readonly List<string> mLocalFieldInfoNames = new List<string>();
         public void WriteFieldInfoToFile(IList<FIELD_INFO> aFields)
         {
             var itemsToAdd = new List<FIELD_INFO>(aFields.Count);
@@ -381,7 +380,7 @@ namespace IL2CPU.Debug.Symbols
             return xSeqPoints.ToArray();
         }
 
-        private List<Method> mMethods = new List<Method>();
+        private readonly List<Method> mMethods = new List<Method>();
         public void AddMethod(Method aMethod, bool aFlush = false)
         {
             if (aMethod != null)
@@ -421,7 +420,7 @@ namespace IL2CPU.Debug.Symbols
         }
 
         public Dictionary<string, long> DocumentGUIDs = new Dictionary<string, long>();
-        List<Document> xDocuments = new List<Document>(1);
+        readonly List<Document> xDocuments = new List<Document>(1);
         public void AddDocument(string aPathname, bool aFlush = false)
         {
             var connection = GetNewConnection();

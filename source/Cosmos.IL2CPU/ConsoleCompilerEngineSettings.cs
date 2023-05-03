@@ -32,13 +32,13 @@ namespace Cosmos.IL2CPU
         public string ResponseFile => GetOption<string>(nameof(ResponseFile));
 
         private Action<string> mLogMessage;
-        private Action<string> mLogError;
+        private readonly Action<string> mLogError;
 
-        private List<string> mReferences;
-        private List<string> mPlugsReferences;
-        private List<string> mAssemblySearchDirs;
+        private readonly List<string> mReferences;
+        private readonly List<string> mPlugsReferences;
+        private readonly List<string> mAssemblySearchDirs;
 
-        private Dictionary<string, string> mCmdOptions;
+        private readonly Dictionary<string, string> mCmdOptions;
 
         public bool RemoveBootDebugOutput => GetOption<bool>(nameof(RemoveBootDebugOutput));
         public bool CompileVBEMultiboot => GetOption<bool>(nameof(CompileVBEMultiboot));
