@@ -45,7 +45,7 @@ namespace IL2CPU.Debug.Symbols
         // Please beware this field, it may cause issues if used incorrectly.
         public static DebugInfo CurrentInstance { get; private set; }
 
-        SqliteConnection initConnection;
+        readonly SqliteConnection initConnection;
 
         public class Field_Map
         {
@@ -55,7 +55,7 @@ namespace IL2CPU.Debug.Symbols
 
         // Dont use DbConnectionStringBuilder class, it doesnt work with LocalDB properly.
         //protected mDataSouce = @".\SQLEXPRESS";
-        private string mConnStr;
+        private readonly string mConnStr;
 
         public DebugInfo(string aPathname, bool aCreate = false, bool aCreateIndexes = false)
         {
@@ -256,7 +256,7 @@ namespace IL2CPU.Debug.Symbols
             return xLabels;
         }
 
-        private List<string> local_MappingTypeNames = new List<string>();
+        private readonly List<string> local_MappingTypeNames = new List<string>();
         public void WriteFieldMappingToFile(IEnumerable<Field_Map> aMapping)
         {
             var xMaps = aMapping.Where(delegate (Field_Map mp)
@@ -396,7 +396,7 @@ namespace IL2CPU.Debug.Symbols
         // Quick look up of assemblies so we dont have to go to the database and compare by fullname.
         // This and other GUID lists contain only a few members, and save us from issuing a lot of selects to SQL.
         public Dictionary<Assembly, long> AssemblyGUIDs = new Dictionary<Assembly, long>();
-        List<AssemblyFile> xAssemblies = new List<AssemblyFile>();
+        readonly List<AssemblyFile> xAssemblies = new List<AssemblyFile>();
 
         public void AddAssemblies(List<Assembly> aAssemblies, bool aFlush = false)
         {
