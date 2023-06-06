@@ -287,8 +287,12 @@ namespace IL2CPU.Debug.Symbols
             }
             // TODO: Can we really not cache the results somewhere, currently these are many small calls
             var connection = GetNewConnection();
-            BulkInsert<FIELD_MAPPING>(connection,"FIELD_MAPPINGS", xItemsToAdd);
-            connection.Close();
+
+            lock (connection)
+            {
+                BulkInsert(connection, "FIELD_MAPPINGS", xItemsToAdd);
+                connection.Close();
+            }
         }
 
         private Field_Map DoGetFieldMap(SqliteConnection mConnection, string aName)
@@ -485,75 +489,78 @@ namespace IL2CPU.Debug.Symbols
         // So as a compromise, we collect 2500 records then bulk insert.
         public void BulkInsert<T>(SqliteConnection mConnection, string aTableName, IList<T> aList, int aFlushSize = 0, bool aFlush = false) where T : class
         {
-            if (aList.Count >= aFlushSize || aFlush)
+            lock (mConnection)
             {
-                if (aList.Count > 0)
+                if (aList.Count >= aFlushSize || aFlush)
                 {
-                    using (var xBulkCopy = new SqliteBulkCopy(mConnection))
+                    if (aList.Count > 0)
                     {
-                        xBulkCopy.DestinationTableName = aTableName;
-                        #region debug
-                        // for now dump to disk:
-                        //using (var reader = new ObjectReader<T>(aList.ToArray()))
-                        //{
-                        //  var dumpIdx = Interlocked.Increment(ref DataDumpIndex);
-                        //  using (var writer = new StreamWriter(@"e:\Temp\sqls\" + dumpIdx.ToString("D8") + ".dmp"))
-                        //  {
-                        //    writer.WriteLine(typeof(T).FullName);
-                        //    writer.WriteLine("Flush = {0}, flush-size = {1}", aFlush, aFlushSize);
-                        //    bool first = true;
-                        //    while (reader.Read())
-                        //    {
-                        //      if (first)
-                        //      {
-                        //        first = false;
-                        //        for (int i = 0; i < reader.FieldCount; i++)
-                        //        {
-                        //          writer.Write(reader.GetName(i));
-                        //          if (i < (reader.FieldCount - 1))
-                        //          {
-                        //            writer.Write("\t");
-                        //          }
-                        //        }
-                        //        writer.WriteLine();
-                        //      }
-                        //      for (int i = 0; i < reader.FieldCount; i++)
-                        //      {
-                        //        writer.Write(reader.GetValue(i));
-                        //        if (i < (reader.FieldCount - 1))
-                        //        {
-                        //          writer.Write("\t");
-                        //        }
-                        //      }
-                        //      writer.WriteLine();
-                        //    }
-                        //  }
-                        //}
-                        #endregion region debug
-                        //using (var db = DB())
-                        //{
-                        //    db.Set(typeof(T)).AddRange(aList);
-                        //    db.SaveChanges();
-                        //}
-                        //using (var trans = mConnection.BeginTransaction())
-                        //{
-                        //    try
-                        //    {
-                        //        mConnection.Insert<T>(aList);
-                        //        trans.Commit();
-                        //    }
-                        //    catch(Exception E)
-                        //    {
-                        //        trans.Rollback();
-                        //    }
-                        //}
-                        using (var reader = new ObjectReader<T>(aList))
+                        using (var xBulkCopy = new SqliteBulkCopy(mConnection))
                         {
-                            xBulkCopy.WriteToServer(reader);
+                            xBulkCopy.DestinationTableName = aTableName;
+                            #region debug
+                            // for now dump to disk:
+                            //using (var reader = new ObjectReader<T>(aList.ToArray()))
+                            //{
+                            //  var dumpIdx = Interlocked.Increment(ref DataDumpIndex);
+                            //  using (var writer = new StreamWriter(@"e:\Temp\sqls\" + dumpIdx.ToString("D8") + ".dmp"))
+                            //  {
+                            //    writer.WriteLine(typeof(T).FullName);
+                            //    writer.WriteLine("Flush = {0}, flush-size = {1}", aFlush, aFlushSize);
+                            //    bool first = true;
+                            //    while (reader.Read())
+                            //    {
+                            //      if (first)
+                            //      {
+                            //        first = false;
+                            //        for (int i = 0; i < reader.FieldCount; i++)
+                            //        {
+                            //          writer.Write(reader.GetName(i));
+                            //          if (i < (reader.FieldCount - 1))
+                            //          {
+                            //            writer.Write("\t");
+                            //          }
+                            //        }
+                            //        writer.WriteLine();
+                            //      }
+                            //      for (int i = 0; i < reader.FieldCount; i++)
+                            //      {
+                            //        writer.Write(reader.GetValue(i));
+                            //        if (i < (reader.FieldCount - 1))
+                            //        {
+                            //          writer.Write("\t");
+                            //        }
+                            //      }
+                            //      writer.WriteLine();
+                            //    }
+                            //  }
+                            //}
+                            #endregion region debug
+                            //using (var db = DB())
+                            //{
+                            //    db.Set(typeof(T)).AddRange(aList);
+                            //    db.SaveChanges();
+                            //}
+                            //using (var trans = mConnection.BeginTransaction())
+                            //{
+                            //    try
+                            //    {
+                            //        mConnection.Insert<T>(aList);
+                            //        trans.Commit();
+                            //    }
+                            //    catch(Exception E)
+                            //    {
+                            //        trans.Rollback();
+                            //    }
+                            //}
+                            using (var reader = new ObjectReader<T>(aList))
+                            {
+                                xBulkCopy.WriteToServer(reader);
+                            }
                         }
-                    }
 
-                    aList.Clear();
+                        aList.Clear();
+                    }
                 }
             }
         }

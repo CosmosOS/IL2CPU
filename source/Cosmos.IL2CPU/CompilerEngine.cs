@@ -9,6 +9,7 @@ using System.Text;
 
 using Cosmos.Build.Common;
 using IL2CPU.Debug.Symbols;
+using System.Threading.Tasks;
 
 namespace Cosmos.IL2CPU
 {
@@ -31,13 +32,6 @@ namespace Cosmos.IL2CPU
         private ICompilerEngineSettings mSettings;
 
         private AssemblyLoadContext _assemblyLoadContext;
-
-        private Dictionary<MethodBase, int?> mBootEntries;
-        private List<MemberInfo> mForceIncludes;
-
-        protected void LogTime(string message)
-        {
-        }
 
         protected void LogMessage(string aMsg)
         {
@@ -123,13 +117,11 @@ namespace Cosmos.IL2CPU
             try
             {
                 LogMessage("Executing IL2CPU on assembly");
-                LogTime("Engine execute started");
 
                 // Gen2
                 // Find the kernel's entry point. We are looking for a public class Kernel, with public static void Boot()
-                MethodBase xKernelCtor = null;
+                MethodBase xKernelCtor = LoadAssemblies();
 
-                xKernelCtor = LoadAssemblies();
                 if (xKernelCtor == null)
                 {
                     return false;
@@ -224,7 +216,6 @@ namespace Cosmos.IL2CPU
                     //    (int)xDebugInfo.FlateningDuration.TotalSeconds,
                     //    (int)xDebugInfo.PersistanceDuration.TotalSeconds));
                 }
-                LogTime("Engine execute finished");
                 return true;
             }
             catch (Exception ex)

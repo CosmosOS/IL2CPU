@@ -6,6 +6,7 @@
         <IsPackable>True</IsPackable>
         <NoWarn>CA1707;$(NoWarn)</NoWarn>
         <Configurations>Debug;Release;TEST</Configurations>
+        <Optimize>true</Optimize>
     </PropertyGroup>
 
 </Project>

@@ -142,7 +142,7 @@ namespace Cosmos.IL2CPU
                     value = Path.GetFullPath(value);
                     mReferences.Add(value);
                 }
-                else if (String.Equals(key, "PlugsReferences", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(key, "PlugsReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     value = Path.GetFullPath(value);
                     mPlugsReferences.Add(value);

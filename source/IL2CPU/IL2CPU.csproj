@@ -8,6 +8,7 @@
         <Platforms>AnyCPU</Platforms>
         <Prefer32Bit>true</Prefer32Bit>
         <Configurations>Debug;Release;TEST</Configurations>
+        <Optimize>true</Optimize>
     </PropertyGroup>
 
     <ItemGroup>

@@ -408,14 +408,17 @@ namespace Cosmos.IL2CPU
 
         public void FinalizeDebugInfo()
         {
-            DebugInfo.AddDocument(null, true);
-            DebugInfo.AddAssemblies(null, true);
-            DebugInfo.AddMethod(null, true);
-            DebugInfo.WriteAllLocalsArgumentsInfos(mLocals_Arguments_Infos);
-            DebugInfo.AddSymbols(mSymbols, true);
-            var connection = DebugInfo.GetNewConnection();
-            DebugInfo.AddINT3Labels(connection, mINT3Labels, true);
-            connection.Close();
+            lock (DebugInfo)
+            {
+                DebugInfo.AddDocument(null, true);
+                DebugInfo.AddAssemblies(null, true);
+                DebugInfo.AddMethod(null, true);
+                DebugInfo.WriteAllLocalsArgumentsInfos(mLocals_Arguments_Infos);
+                DebugInfo.AddSymbols(mSymbols, true);
+                var connection = DebugInfo.GetNewConnection();
+                DebugInfo.AddINT3Labels(connection, mINT3Labels, true);
+                connection.Close();
+            }
         }
 
         public static uint GetResultCodeOffset(uint aResultSize, uint aTotalArgumentSize)

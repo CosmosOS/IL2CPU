@@ -7,6 +7,7 @@
         <IsPackable>True</IsPackable>
         <Configurations>Debug;Release;TEST</Configurations>
         <EnableDefaultItems>false</EnableDefaultItems>
+        <Optimize>true</Optimize>
     </PropertyGroup>
 
     <ItemGroup>
