@@ -77,8 +77,8 @@ namespace IL2CPU.Debug.Symbols
             // Use the SQLiteConnectionFactory as the default database connection
             // Do not open mConnection before mEntities.CreateDatabase
             var xDir = IntPtr.Size == 4 ? "x86" : "x64";
-            var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? "win" : "linux";
-            char path_separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? ';' : ':';
+            var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" : "linux";
+            char path_separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':';
 
             Environment.SetEnvironmentVariable("PATH", // add path so that it finds SQLitePCLRaw.nativelibrary
                 String.Join(path_separator.ToString(), Environment.GetEnvironmentVariable("PATH"),
@@ -287,12 +287,8 @@ namespace IL2CPU.Debug.Symbols
             }
             // TODO: Can we really not cache the results somewhere, currently these are many small calls
             var connection = GetNewConnection();
-
-            lock (connection)
-            {
-                BulkInsert(connection, "FIELD_MAPPINGS", xItemsToAdd);
-                connection.Close();
-            }
+            BulkInsert(connection, "FIELD_MAPPINGS", xItemsToAdd);
+            connection.Close();
         }
 
         private Field_Map DoGetFieldMap(SqliteConnection mConnection, string aName)
@@ -392,9 +388,22 @@ namespace IL2CPU.Debug.Symbols
             {
                 mMethods.Add(aMethod);
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "Methods", mMethods, 2500, aFlush);
-            connection.Close();
+
+            if (aMethod != null)
+            {
+                lock (aMethod)
+                {
+                    var connection = GetNewConnection();
+                    BulkInsert(connection, "Methods", mMethods, 2500, aFlush);
+                    connection.Close();
+                }
+            }
+            else
+            {
+                var connection = GetNewConnection();
+                BulkInsert(connection, "Methods", mMethods, 2500, aFlush);
+                connection.Close();
+            }
         }
 
         // Quick look up of assemblies so we dont have to go to the database and compare by fullname.
@@ -498,61 +507,7 @@ namespace IL2CPU.Debug.Symbols
                         using (var xBulkCopy = new SqliteBulkCopy(mConnection))
                         {
                             xBulkCopy.DestinationTableName = aTableName;
-                            #region debug
-                            // for now dump to disk:
-                            //using (var reader = new ObjectReader<T>(aList.ToArray()))
-                            //{
-                            //  var dumpIdx = Interlocked.Increment(ref DataDumpIndex);
-                            //  using (var writer = new StreamWriter(@"e:\Temp\sqls\" + dumpIdx.ToString("D8") + ".dmp"))
-                            //  {
-                            //    writer.WriteLine(typeof(T).FullName);
-                            //    writer.WriteLine("Flush = {0}, flush-size = {1}", aFlush, aFlushSize);
-                            //    bool first = true;
-                            //    while (reader.Read())
-                            //    {
-                            //      if (first)
-                            //      {
-                            //        first = false;
-                            //        for (int i = 0; i < reader.FieldCount; i++)
-                            //        {
-                            //          writer.Write(reader.GetName(i));
-                            //          if (i < (reader.FieldCount - 1))
-                            //          {
-                            //            writer.Write("\t");
-                            //          }
-                            //        }
-                            //        writer.WriteLine();
-                            //      }
-                            //      for (int i = 0; i < reader.FieldCount; i++)
-                            //      {
-                            //        writer.Write(reader.GetValue(i));
-                            //        if (i < (reader.FieldCount - 1))
-                            //        {
-                            //          writer.Write("\t");
-                            //        }
-                            //      }
-                            //      writer.WriteLine();
-                            //    }
-                            //  }
-                            //}
-                            #endregion region debug
-                            //using (var db = DB())
-                            //{
-                            //    db.Set(typeof(T)).AddRange(aList);
-                            //    db.SaveChanges();
-                            //}
-                            //using (var trans = mConnection.BeginTransaction())
-                            //{
-                            //    try
-                            //    {
-                            //        mConnection.Insert<T>(aList);
-                            //        trans.Commit();
-                            //    }
-                            //    catch(Exception E)
-                            //    {
-                            //        trans.Rollback();
-                            //    }
-                            //}
+
                             using (var reader = new ObjectReader<T>(aList))
                             {
                                 xBulkCopy.WriteToServer(reader);
@@ -579,7 +534,7 @@ namespace IL2CPU.Debug.Symbols
         public void Dispose()
         {
             CurrentInstance = null;
-            if(initConnection != null)
+            if (initConnection != null)
             {
                 initConnection.Close();
             }

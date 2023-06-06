@@ -29,45 +29,51 @@ namespace IL2CPU.Debug.Symbols
 
         public void WriteToServer(IDataReader reader)
         {
-            if (reader.Read())
+            lock (reader)
             {
-                // initialize bulk copy
-
-                using (var trans = mConnection.BeginTransaction())
+                lock (mConnection)
                 {
-                    using (var command = mConnection.CreateCommand())
+                    if (reader.Read())
                     {
-                        var fieldNames = "";
-                        var paramNames = "";
-                        SqliteParameter[] parms = new SqliteParameter[reader.FieldCount];
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            string xFieldName = reader.GetName(i);
-                            fieldNames += $"{xFieldName},";
-                            paramNames += $"@_{xFieldName},";
-                            parms[i] = new SqliteParameter($"@_{xFieldName}", SqliteType.Text);
-                            command.Parameters.Add(parms[i]);
-                        }
-                        fieldNames = fieldNames.TrimEnd(',');
-                        paramNames = paramNames.TrimEnd(',');
+                        // initialize bulk copy
 
-                        command.Transaction = trans;
-                        command.CommandText = $"insert into [{DestinationTableName}] ({fieldNames}) values ({paramNames})";
-                        command.Prepare();
-                        do
+                        using (var trans = mConnection.BeginTransaction())
                         {
-                            for (int i = 0; i < reader.FieldCount; i++)
+                            using (var command = mConnection.CreateCommand())
                             {
-                                if (parms[i] != null)
+                                var fieldNames = "";
+                                var paramNames = "";
+                                SqliteParameter[] parms = new SqliteParameter[reader.FieldCount];
+                                for (int i = 0; i < reader.FieldCount; i++)
                                 {
-                                    parms[i].Value = reader.GetValue(i);
+                                    string xFieldName = reader.GetName(i);
+                                    fieldNames += $"{xFieldName},";
+                                    paramNames += $"@_{xFieldName},";
+                                    parms[i] = new SqliteParameter($"@_{xFieldName}", SqliteType.Text);
+                                    command.Parameters.Add(parms[i]);
                                 }
+                                fieldNames = fieldNames.TrimEnd(',');
+                                paramNames = paramNames.TrimEnd(',');
+
+                                command.Transaction = trans;
+                                command.CommandText = $"insert into [{DestinationTableName}] ({fieldNames}) values ({paramNames})";
+                                command.Prepare();
+                                do
+                                {
+                                    for (int i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        if (parms[i] != null)
+                                        {
+                                            parms[i].Value = reader.GetValue(i);
+                                        }
+                                    }
+                                    command.ExecuteNonQuery();
+                                }
+                                while (reader.Read());
                             }
-                            command.ExecuteNonQuery();
+                            trans.Commit();
                         }
-                        while (reader.Read());
                     }
-                    trans.Commit();
                 }
             }
         }

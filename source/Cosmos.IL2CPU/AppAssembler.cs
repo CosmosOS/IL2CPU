@@ -245,36 +245,39 @@ namespace Cosmos.IL2CPU
 
         public DebugInfo.SequencePoint[] GenerateDebugSequencePoints(Il2cpuMethodInfo aMethod, DebugMode aDebugMode)
         {
-            if (aDebugMode == DebugMode.Source)
+            lock (DebugInfo)
             {
-                // Would be nice to use xMethodSymbols.GetSourceStartEnd but we cant
-                // because its not implemented by the unmanaged code underneath.
-                DebugInfo.SequencePoint[] mSequences = DebugInfo.GetSequencePoints(aMethod.MethodBase, true);
-                if (mSequences.Length > 0)
+                if (aDebugMode == DebugMode.Source)
                 {
-                    DebugInfo.AddDocument(mSequences[0].Document);
+                    // Would be nice to use xMethodSymbols.GetSourceStartEnd but we cant
+                    // because its not implemented by the unmanaged code underneath.
+                    DebugInfo.SequencePoint[] mSequences = DebugInfo.GetSequencePoints(aMethod.MethodBase, true);
+                    if (mSequences.Length > 0)
+                    {
+                        DebugInfo.AddDocument(mSequences[0].Document);
 
-                    var xMethod = new Method
-                    {
-                        ID = aMethod.DebugMethodUID,
-                        TypeToken = aMethod.MethodBase.DeclaringType.GetMetadataToken(),
-                        MethodToken = aMethod.MethodBase.MetadataToken,
-                        LabelStartID = aMethod.DebugMethodLabelUID,
-                        LabelEndID = aMethod.EndMethodID,
-                        LabelCall = aMethod.MethodLabel
-                    };
-                    if (DebugInfo.AssemblyGUIDs.TryGetValue(aMethod.MethodBase.DeclaringType.Assembly, out var xAssemblyFileID))
-                    {
-                        xMethod.AssemblyFileID = xAssemblyFileID;
+                        var xMethod = new Method
+                        {
+                            ID = aMethod.DebugMethodUID,
+                            TypeToken = aMethod.MethodBase.DeclaringType.GetMetadataToken(),
+                            MethodToken = aMethod.MethodBase.MetadataToken,
+                            LabelStartID = aMethod.DebugMethodLabelUID,
+                            LabelEndID = aMethod.EndMethodID,
+                            LabelCall = aMethod.MethodLabel
+                        };
+                        if (DebugInfo.AssemblyGUIDs.TryGetValue(aMethod.MethodBase.DeclaringType.Assembly, out var xAssemblyFileID))
+                        {
+                            xMethod.AssemblyFileID = xAssemblyFileID;
+                        }
+                        xMethod.DocumentID = DebugInfo.DocumentGUIDs[mSequences[0].Document.ToLower()];
+                        xMethod.LineColStart = ((long)mSequences[0].LineStart << 32) + mSequences[0].ColStart;
+                        xMethod.LineColEnd = ((long)mSequences[mSequences.Length - 1].LineEnd << 32) + mSequences[mSequences.Length - 1].ColEnd;
+                        DebugInfo.AddMethod(xMethod);
                     }
-                    xMethod.DocumentID = DebugInfo.DocumentGUIDs[mSequences[0].Document.ToLower()];
-                    xMethod.LineColStart = ((long)mSequences[0].LineStart << 32) + mSequences[0].ColStart;
-                    xMethod.LineColEnd = ((long)mSequences[mSequences.Length - 1].LineEnd << 32) + mSequences[mSequences.Length - 1].ColEnd;
-                    DebugInfo.AddMethod(xMethod);
+                    return mSequences;
                 }
-                return mSequences;
-            }
             return new DebugInfo.SequencePoint[0];
+            }
         }
 
         private void MethodEnd(Il2cpuMethodInfo aMethod)
@@ -497,86 +500,53 @@ namespace Cosmos.IL2CPU
             foreach (var xOpCode in aCurrentGroup)
             {
                 ushort xOpCodeVal = (ushort)xOpCode.OpCode;
-                ILOp xILOp;
-                if (xOpCodeVal <= 0xFF)
+
+                lock (mILOpsLo)
                 {
-                    xILOp = mILOpsLo[xOpCodeVal];
-                }
-                else
-                {
-                    xILOp = mILOpsHi[xOpCodeVal & 0xFF];
-                }
-                mLog.Flush();
-
-                int? xLocalsSize = null;
-                //calculate local size once
-                if (aMethod.MethodBase != null)
-                {
-                    var xLocals = aMethod.MethodBase.GetLocalVariables();
-                    xLocalsSize = (from item in xLocals
-                                   select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
-                }
-
-                //Only emit INT3 as per conditions above...
-                BeforeOp(aMethod, xOpCode, emitINT3 && !(xILOp is Nop), out var INT3Emitted, true, xLocalsSize);
-                //Emit INT3 on the first non-NOP instruction immediately after a NOP
-                // - This is because TracePoints for NOP are automatically ignored in code called below this
-
-                XS.Comment(xILOp.ToString());
-                var xNextPosition = xOpCode.Position + 1;
-
-                #region Exception handling support code
-
-                _ExceptionRegionInfo xCurrentExceptionRegion = null;
-                // todo: add support for nested handlers using a stack or so..
-                foreach (_ExceptionRegionInfo xHandler in aMethod.MethodBase.GetExceptionRegionInfos())
-                {
-                    if (xHandler.TryOffset > 0)
+                    ILOp xILOp;
+                    if (xOpCodeVal <= 0xFF)
                     {
-                        if (xHandler.TryOffset <= xNextPosition && xHandler.TryLength + xHandler.TryOffset > xNextPosition)
-                        {
-                            if (xCurrentExceptionRegion == null)
-                            {
-                                xCurrentExceptionRegion = xHandler;
-                                continue;
-                            }
-                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && xHandler.TryLength + xHandler.TryOffset < xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset)
-                            {
-                                // only replace if the current found handler is narrower
-                                xCurrentExceptionRegion = xHandler;
-                                continue;
-                            }
-                        }
+                        xILOp = mILOpsLo[xOpCodeVal];
                     }
-                    if (xHandler.HandlerOffset > 0)
+                    else
                     {
-                        if (xHandler.HandlerOffset <= xNextPosition && xHandler.HandlerOffset + xHandler.HandlerLength > xNextPosition)
-                        {
-                            if (xCurrentExceptionRegion == null)
-                            {
-                                xCurrentExceptionRegion = xHandler;
-                                continue;
-                            }
-                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && xHandler.HandlerOffset + xHandler.HandlerLength < xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength)
-                            {
-                                // only replace if the current found handler is narrower
-                                xCurrentExceptionRegion = xHandler;
-                                continue;
-                            }
-                        }
+                        xILOp = mILOpsHi[xOpCodeVal & 0xFF];
                     }
-                    if (xHandler.Kind.HasFlag(ExceptionRegionKind.Filter))
+                    mLog.Flush();
+
+                    int? xLocalsSize = null;
+                    //calculate local size once
+                    if (aMethod.MethodBase != null)
                     {
-                        if (xHandler.FilterOffset > 0)
+                        var xLocals = aMethod.MethodBase.GetLocalVariables();
+                        xLocalsSize = (from item in xLocals
+                                       select (int)ILOp.Align(ILOp.SizeOfType(item.LocalType), 4)).Sum();
+                    }
+
+                    //Only emit INT3 as per conditions above...
+                    BeforeOp(aMethod, xOpCode, emitINT3 && !(xILOp is Nop), out var INT3Emitted, true, xLocalsSize);
+                    //Emit INT3 on the first non-NOP instruction immediately after a NOP
+                    // - This is because TracePoints for NOP are automatically ignored in code called below this
+
+                    XS.Comment(xILOp.ToString());
+                    var xNextPosition = xOpCode.Position + 1;
+
+                    #region Exception handling support code
+
+                    _ExceptionRegionInfo xCurrentExceptionRegion = null;
+                    // todo: add support for nested handlers using a stack or so..
+                    foreach (_ExceptionRegionInfo xHandler in aMethod.MethodBase.GetExceptionRegionInfos())
+                    {
+                        if (xHandler.TryOffset > 0)
                         {
-                            if (xHandler.FilterOffset <= xNextPosition)
+                            if (xHandler.TryOffset <= xNextPosition && xHandler.TryLength + xHandler.TryOffset > xNextPosition)
                             {
                                 if (xCurrentExceptionRegion == null)
                                 {
                                     xCurrentExceptionRegion = xHandler;
                                     continue;
                                 }
-                                else if (xHandler.FilterOffset > xCurrentExceptionRegion.FilterOffset)
+                                else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && xHandler.TryLength + xHandler.TryOffset < xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset)
                                 {
                                     // only replace if the current found handler is narrower
                                     xCurrentExceptionRegion = xHandler;
@@ -584,26 +554,63 @@ namespace Cosmos.IL2CPU
                                 }
                             }
                         }
+                        if (xHandler.HandlerOffset > 0)
+                        {
+                            if (xHandler.HandlerOffset <= xNextPosition && xHandler.HandlerOffset + xHandler.HandlerLength > xNextPosition)
+                            {
+                                if (xCurrentExceptionRegion == null)
+                                {
+                                    xCurrentExceptionRegion = xHandler;
+                                    continue;
+                                }
+                                else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && xHandler.HandlerOffset + xHandler.HandlerLength < xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength)
+                                {
+                                    // only replace if the current found handler is narrower
+                                    xCurrentExceptionRegion = xHandler;
+                                    continue;
+                                }
+                            }
+                        }
+                        if (xHandler.Kind.HasFlag(ExceptionRegionKind.Filter))
+                        {
+                            if (xHandler.FilterOffset > 0)
+                            {
+                                if (xHandler.FilterOffset <= xNextPosition)
+                                {
+                                    if (xCurrentExceptionRegion == null)
+                                    {
+                                        xCurrentExceptionRegion = xHandler;
+                                        continue;
+                                    }
+                                    else if (xHandler.FilterOffset > xCurrentExceptionRegion.FilterOffset)
+                                    {
+                                        // only replace if the current found handler is narrower
+                                        xCurrentExceptionRegion = xHandler;
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
                     }
+
+                    #endregion
+
+                    var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
+                                              ((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
+                                               || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
+                                                   && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
+                                              && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch;
+                    if (xNeedsExceptionPush)
+                    {
+                        XS.Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
+                        XS.Push(0);
+                    }
+
+                    xILOp.DebugEnabled = DebugEnabled;
+                    xILOp.Execute(aMethod, xOpCode);
+
+                    AfterOp(aMethod, xOpCode);
                 }
-
-                #endregion
-
-                var xNeedsExceptionPush = xCurrentExceptionRegion != null &&
-                                          ((xCurrentExceptionRegion.HandlerOffset > 0 && xCurrentExceptionRegion.HandlerOffset == xOpCode.Position)
-                                           || (xCurrentExceptionRegion.Kind.HasFlag(ExceptionRegionKind.Filter) && xCurrentExceptionRegion.FilterOffset > 0
-                                               && xCurrentExceptionRegion.FilterOffset == xOpCode.Position))
-                                          && xCurrentExceptionRegion.Kind == ExceptionRegionKind.Catch;
-                if (xNeedsExceptionPush)
-                {
-                    XS.Push(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), true);
-                    XS.Push(0);
-                }
-
-                xILOp.DebugEnabled = DebugEnabled;
-                xILOp.Execute(aMethod, xOpCode);
-
-                AfterOp(aMethod, xOpCode);
             }
         }
 
@@ -1106,66 +1113,75 @@ namespace Cosmos.IL2CPU
             string xFieldName = LabelName.GetStaticFieldName(aField);
             string xFieldContentsName = $"{xFieldName}__Contents";
 
-            if (XSharp.Assembler.Assembler.CurrentInstance.DataMembers.Count(x => x.Name == xFieldName) == 0)
+            var Parallel = XSharp.Assembler.Assembler.CurrentInstance.DataMembers.AsParallel();
+
+            if (Parallel.Count(x => x.Name == xFieldName) == 0)
             {
-                var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
-                object xItem = null;
-                if (xItemList.Count != 0)
+                lock (Assembler)
                 {
-                    xItem = xItemList.First();
-                }
-                string xManifestResourceName = null;
-                if (xItem != null)
-                {
-                    var xItemType = xItem.GetType();
-                    xManifestResourceName = (string)xItemType.GetProperty("ResourceName")?.GetValue(xItem);
-                }
-                if (xManifestResourceName != null)
-                {
-                    if (aField.FieldType != typeof(byte[]))
+                    var xItemList = aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).ToList();
+                    object xItem = null;
+
+                    if (xItemList.Count != 0)
                     {
-                        throw new Exception("ManifestResourceStreams are only supported on static byte arrays");
+                        xItem = xItemList.First();
                     }
-                    var xTarget = new StringBuilder();
-                    byte[] xData;
-                    using (var xStream = aField.DeclaringType?.Assembly.GetManifestResourceStream(xManifestResourceName))
+
+                    string xManifestResourceName = null;
+
+                    if (xItem != null)
                     {
-                        if (xStream == null)
+                        var xItemType = xItem.GetType();
+                        xManifestResourceName = (string)xItemType.GetProperty("ResourceName")?.GetValue(xItem);
+                    }
+                    if (xManifestResourceName != null)
+                    {
+                        if (aField.FieldType != typeof(byte[]))
                         {
-                            throw new Exception("Resource '" + xManifestResourceName + "' not found!");
+                            throw new Exception("ManifestResourceStreams are only supported on static byte arrays");
                         }
+                        var xTarget = new StringBuilder();
+                        byte[] xData;
 
-                        uint xArrayTypeID = 0;
-                        xData = AllocateEmptyArray((int)xStream.Length, 1, xArrayTypeID);
-                        xStream.Read(xData, 16, (int)xStream.Length);
-                    }
+                            using (var xStream = aField.DeclaringType?.Assembly.GetManifestResourceStream(xManifestResourceName))
+                            {
+                                if (xStream == null)
+                                {
+                                    throw new Exception("Resource '" + xManifestResourceName + "' not found!");
+                                }
 
-                    XS.DataMemberBytes(xFieldContentsName, xData);
-                    XS.DataMember(xFieldName, 1, "dd", "0");
-                    XS.DataMember("", 1, "dd", xFieldContentsName);
+                                uint xArrayTypeID = 0;
+                                xData = AllocateEmptyArray((int)xStream.Length, 1, xArrayTypeID);
+                                xStream.Read(xData, 16, (int)xStream.Length);
+                            }
 
-                    //Assembler.DataMembers.Add(new DataMember(xFieldContentsName, "db", xTarget.ToString()));
-                    //Assembler.DataMembers.Add(new DataMember(xFieldName, "dd", xFieldContentsName));
-                }
-                else
-                {
-                    var xFieldType = aField.FieldType;
-                    uint xFieldSize = ILOp.SizeOfType(aField.FieldType);
-                    byte[] xData = new byte[xFieldSize];
+                        XS.DataMemberBytes(xFieldContentsName, xData);
+                        XS.DataMember(xFieldName, 1, "dd", "0");
+                        XS.DataMember("", 1, "dd", xFieldContentsName);
 
-                    if (xFieldType.IsValueType)
-                    {
-                        DebugSymbolReader.TryGetStaticFieldValue(aField.Module, aField.MetadataToken, ref xData);
-                    }
-
-                    var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
-                    if (xAsmLabelAttributes.Any())
-                    {
-                        Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
+                        //Assembler.DataMembers.Add(new DataMember(xFieldContentsName, "db", xTarget.ToString()));
+                        //Assembler.DataMembers.Add(new DataMember(xFieldName, "dd", xFieldContentsName));
                     }
                     else
                     {
-                        Assembler.DataMembers.Add(new DataMember(xFieldName, xData));
+                        var xFieldType = aField.FieldType;
+                        uint xFieldSize = ILOp.SizeOfType(aField.FieldType);
+                        byte[] xData = new byte[xFieldSize];
+
+                        if (xFieldType.IsValueType)
+                        {
+                            DebugSymbolReader.TryGetStaticFieldValue(aField.Module, aField.MetadataToken, ref xData);
+                        }
+
+                        var xAsmLabelAttributes = aField.GetCustomAttributes<AsmLabel>();
+                        if (xAsmLabelAttributes.Any())
+                        {
+                            Assembler.DataMembers.Add(new DataMember(xFieldName, xAsmLabelAttributes.Select(a => a.Label), xData));
+                        }
+                        else
+                        {
+                            Assembler.DataMembers.Add(new DataMember(xFieldName, xData));
+                        }
                     }
                 }
             }
@@ -1353,99 +1369,108 @@ namespace Cosmos.IL2CPU
 
         private void BeforeOp(Il2cpuMethodInfo aMethod, ILOpCode aOpCode, bool emitInt3NotNop, out bool INT3Emitted, bool hasSourcePoint, int? xLocalsSize)
         {
-            if (DebugMode == DebugMode.Source || DebugMode == DebugMode.None)
+            lock (Assembler)
             {
-                Assembler.EmitAsmLabels = false;
-            }
-
-            string xLabel = TmpPosLabel(aMethod, aOpCode);
-            Label.LastFullLabel = xLabel;
-            XS.Label(xLabel);
-
-            uint? xStackDifference = null;
-
-            if (mSymbols != null && aOpCode.OpCode != ILOpCode.Code.Nop)
-            {
-                var xMLSymbol = new MethodIlOp
+                if (DebugMode == DebugMode.Source || DebugMode == DebugMode.None)
                 {
-                    LabelName = xLabel
-                };
-
-                var xStackSize = aOpCode.StackOffsetBeforeExecution.Value;
-
-                xMLSymbol.StackDiff = -1;
-                if (aMethod.MethodBase != null)
-                {
-                    xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
-                    xStackDifference = (uint?)xMLSymbol.StackDiff;
-                }
-                xMLSymbol.IlOffset = aOpCode.Position;
-                xMLSymbol.MethodID = aMethod.DebugMethodUID;
-
-                mSymbols.Add(xMLSymbol);
-                // Are we not calling this way too often?
-                DebugInfo.AddSymbols(mSymbols, false);
-            }
-
-            EmitTracer(aMethod, aOpCode, aMethod.MethodBase.DeclaringType.Namespace, emitInt3NotNop,
-                out INT3Emitted, out var INT3PlaceholderEmitted, hasSourcePoint);
-
-            if (INT3Emitted || INT3PlaceholderEmitted)
-            {
-                var xINT3Label = new INT3Label
-                {
-                    LabelName = xLabel,
-                    MethodID = aMethod.DebugMethodUID,
-                    LeaveAsINT3 = INT3Emitted
-                };
-                mINT3Labels.Add(xINT3Label);
-                var connection = DebugInfo.GetNewConnection(); //TODO: Do we have to do this every time? Looks like something we should only do at the end
-                DebugInfo.AddINT3Labels(connection, mINT3Labels);
-                connection.Close();
-            }
-
-            if (DebugEnabled && StackCorruptionDetection && StackCorruptionDetectionLevel == StackCorruptionDetectionLevel.AllInstructions
-                && (aOpCode.OpCode != ILOpCode.Code.Nop || aOpCode.StackOffsetBeforeExecution != null))
-            {
-                // if debugstub is active, emit a stack corruption detection. at this point, the difference between EBP and ESP
-                // should be equal to the local variables sizes and the IL stack.
-                // if not, we should break here.
-
-                // first, calculate the expected difference
-                if (xStackDifference == null)
-                {
-                    xStackDifference = aMethod.LocalVariablesSize;
-                    xStackDifference += aOpCode.StackOffsetBeforeExecution;
+                    Assembler.EmitAsmLabels = false;
                 }
 
-                XS.Comment("Stack difference = " + xStackDifference);
+                string xLabel = TmpPosLabel(aMethod, aOpCode);
+                Label.LastFullLabel = xLabel;
+                XS.Label(xLabel);
 
-                // if debugstub is active, emit a stack corruption detection. at this point EBP and ESP should have the same value.
-                // if not, we should somehow break here.
-                XS.Set(EAX, ESP);
-                XS.Set(EBX, EBP);
-                if (xStackDifference != 0)
+                uint? xStackDifference = null;
+
+                if (mSymbols != null && aOpCode.OpCode != ILOpCode.Code.Nop)
                 {
-                    XS.Add(EAX, xStackDifference.Value);
-                }
-                XS.Compare(EAX, EBX);
-                XS.Jump(ConditionalTestEnum.Equal, xLabel + ".StackCorruptionCheck_End");
-                XS.Push(EAX);
-                XS.Push(EBX);
-                XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
-                XS.Add(ESP, 4);
-                XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
+                    var xMLSymbol = new MethodIlOp
+                    {
+                        LabelName = xLabel
+                    };
 
-                XS.ClearInterruptFlag();
-                // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
-                XS.Call(xLabel + ".StackCorruptionCheck_GetAddress");
-                XS.Label(xLabel + ".StackCorruptionCheck_GetAddress");
-                XS.Exchange(BX, BX);
-                XS.Pop(EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
-                XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackCorruptedEvent]);
-                XS.Halt();
-                XS.Label(xLabel + ".StackCorruptionCheck_End");
+                    var xStackSize = aOpCode.StackOffsetBeforeExecution.Value;
+
+                    xMLSymbol.StackDiff = -1;
+                    if (aMethod.MethodBase != null)
+                    {
+                        xMLSymbol.StackDiff = checked((int)(xLocalsSize + xStackSize));
+                        xStackDifference = (uint?)xMLSymbol.StackDiff;
+                    }
+                    xMLSymbol.IlOffset = aOpCode.Position;
+                    xMLSymbol.MethodID = aMethod.DebugMethodUID;
+
+                    mSymbols.Add(xMLSymbol);
+                    // Are we not calling this way too often?
+                    DebugInfo.AddSymbols(mSymbols, false);
+                }
+
+                EmitTracer(aMethod, aOpCode, aMethod.MethodBase.DeclaringType.Namespace, emitInt3NotNop,
+                    out INT3Emitted, out var INT3PlaceholderEmitted, hasSourcePoint);
+
+                if (INT3Emitted || INT3PlaceholderEmitted)
+                {
+                    var xINT3Label = new INT3Label
+                    {
+                        LabelName = xLabel,
+                        MethodID = aMethod.DebugMethodUID,
+                        LeaveAsINT3 = INT3Emitted
+                    };
+                    mINT3Labels.Add(xINT3Label);
+                    var connection = DebugInfo.GetNewConnection(); //TODO: Do we have to do this every time? Looks like something we should only do at the end
+                    lock (DebugInfo)
+                    {
+                        lock (connection)
+                        {
+                            DebugInfo.AddINT3Labels(connection, mINT3Labels);
+                            connection.Close();
+                        }
+                    }
+                }
+
+                if (DebugEnabled && StackCorruptionDetection && StackCorruptionDetectionLevel == StackCorruptionDetectionLevel.AllInstructions
+                    && (aOpCode.OpCode != ILOpCode.Code.Nop || aOpCode.StackOffsetBeforeExecution != null))
+                {
+                    // if debugstub is active, emit a stack corruption detection. at this point, the difference between EBP and ESP
+                    // should be equal to the local variables sizes and the IL stack.
+                    // if not, we should break here.
+
+                    // first, calculate the expected difference
+                    if (xStackDifference == null)
+                    {
+                        xStackDifference = aMethod.LocalVariablesSize;
+                        xStackDifference += aOpCode.StackOffsetBeforeExecution;
+                    }
+
+                    XS.Comment("Stack difference = " + xStackDifference);
+
+                    // if debugstub is active, emit a stack corruption detection. at this point EBP and ESP should have the same value.
+                    // if not, we should somehow break here.
+                    XS.Set(EAX, ESP);
+                    XS.Set(EBX, EBP);
+                    if (xStackDifference != 0)
+                    {
+                        XS.Add(EAX, xStackDifference.Value);
+                    }
+                    XS.Compare(EAX, EBX);
+                    XS.Jump(ConditionalTestEnum.Equal, xLabel + ".StackCorruptionCheck_End");
+                    XS.Push(EAX);
+                    XS.Push(EBX);
+                    XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
+                    XS.Add(ESP, 4);
+                    XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
+
+                    XS.ClearInterruptFlag();
+                    // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
+                    XS.Call(xLabel + ".StackCorruptionCheck_GetAddress");
+                    XS.Label(xLabel + ".StackCorruptionCheck_GetAddress");
+                    XS.Exchange(BX, BX);
+                    XS.Pop(EAX);
+                    XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
+                    XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackCorruptedEvent]);
+                    XS.Halt();
+                    XS.Label(xLabel + ".StackCorruptionCheck_End");
+                }
             }
         }
 

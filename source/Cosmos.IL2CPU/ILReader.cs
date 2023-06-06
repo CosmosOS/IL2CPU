@@ -183,9 +183,9 @@ namespace Cosmos.IL2CPU
 
             #region RuntimeTypeHandle
 
-            if(aMethod.DeclaringType.Name == "RuntimeType")
+            if (aMethod.DeclaringType.Name == "RuntimeType")
             {
-                if(aMethod.Name == ".ctor")
+                if (aMethod.Name == ".ctor")
                 {
                     var op = new ILOpCodes.OpNone(ILOpCode.Code.Ret, 0, 1, null);
                     op.InitStackAnalysis(aMethod);
@@ -203,8 +203,9 @@ namespace Cosmos.IL2CPU
                     // the idea of this method is to first create a RuntimeType object, set its handle and then create a RuntimeTypeHandle from it
                     // we are manually coding in il here since we have to call a internal method on an internal class
                     var runtimeType = Type.GetType("System.RuntimeType");
-                    var ctor = runtimeType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] {  }, null);
-                    xResult.Add(new ILOpCodes.OpMethod(ILOpCode.Code.Newobj, 0, 1, ctor, null) {
+                    var ctor = runtimeType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { }, null);
+                    xResult.Add(new ILOpCodes.OpMethod(ILOpCode.Code.Newobj, 0, 1, ctor, null)
+                    {
                         StackPopTypes = Array.Empty<Type>(),
                         StackPushTypes = new[] { runtimeType },
                     });
@@ -213,13 +214,15 @@ namespace Cosmos.IL2CPU
                         StackPopTypes = new[] { runtimeType },
                         StackPushTypes = new[] { runtimeType, runtimeType }
                     });
-                    xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 2, 3, 0, null) {
+                    xResult.Add(new ILOpCodes.OpVar(ILOpCode.Code.Ldarg, 2, 3, 0, null)
+                    {
                         StackPopTypes = Array.Empty<Type>(),
                         StackPushTypes = new[] { typeof(int) },
                     });
                     var m_handle = runtimeType.GetField("m_handle", BindingFlags.Instance | BindingFlags.NonPublic);
-                    xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 3, 4, m_handle, null) {
-                        StackPopTypes = new[] {typeof(int), runtimeType},
+                    xResult.Add(new ILOpCodes.OpField(ILOpCode.Code.Stfld, 3, 4, m_handle, null)
+                    {
+                        StackPopTypes = new[] { typeof(int), runtimeType },
                         StackPushTypes = Array.Empty<Type>(),
                     });
                     var runtimeTypeHandle = Type.GetType("System.RuntimeTypeHandle");
