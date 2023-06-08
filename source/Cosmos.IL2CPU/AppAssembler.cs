@@ -414,9 +414,10 @@ namespace Cosmos.IL2CPU
             DebugInfo.AddMethod(null, true);
             DebugInfo.WriteAllLocalsArgumentsInfos(mLocals_Arguments_Infos);
             DebugInfo.AddSymbols(mSymbols, true);
+
             if (DebugInfo != null && DebugInfo.initConnection != null)
             {
-                DebugInfo.AddINT3Labels(DebugInfo.initConnection, mINT3Labels, true);
+                DebugInfo.AddINT3Labels(mINT3Labels, true);
             }
         }
 
@@ -459,6 +460,7 @@ namespace Cosmos.IL2CPU
                 MethodBegin(aMethod);
                 mLog.WriteLine("Method '{0}', ID = '{1}'", aMethod.MethodBase.GetFullName(), aMethod.UID);
                 mLog.Flush();
+
                 if (aMethod.MethodAssembler != null)
                 {
                     var xAssembler = (AssemblerMethod)Activator.CreateInstance(aMethod.MethodAssembler);
@@ -474,6 +476,7 @@ namespace Cosmos.IL2CPU
 
                     EmitInstructions(aMethod, aOpCodes, false);
                 }
+
                 MethodEnd(aMethod);
             }
             catch (Exception E)
@@ -1398,7 +1401,7 @@ namespace Cosmos.IL2CPU
                     LeaveAsINT3 = INT3Emitted
                 };
                 mINT3Labels.Add(xINT3Label);
-                DebugInfo.AddINT3Labels(DebugInfo.initConnection, mINT3Labels);
+                DebugInfo.AddINT3Labels(mINT3Labels);
             }
 
             if (DebugEnabled && StackCorruptionDetection && StackCorruptionDetectionLevel == StackCorruptionDetectionLevel.AllInstructions

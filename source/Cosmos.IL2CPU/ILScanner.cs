@@ -159,8 +159,6 @@ namespace Cosmos.IL2CPU
             }
         }
 
-        #region Gen2
-
         public void Execute(MethodBase aStartMethod, IEnumerable<Assembly> plugsAssemblies)
         {
             if (aStartMethod == null)
@@ -275,8 +273,6 @@ namespace Cosmos.IL2CPU
 
             mAsmblr.EmitEntrypoint(aStartMethod);
         }
-
-        #endregion Gen2
 
         public void QueueMethod(MethodBase method)
         {
