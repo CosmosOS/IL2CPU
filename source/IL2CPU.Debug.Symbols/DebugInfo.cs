@@ -45,7 +45,7 @@ namespace IL2CPU.Debug.Symbols
         // Please beware this field, it may cause issues if used incorrectly.
         public static DebugInfo CurrentInstance { get; private set; }
 
-        readonly SqliteConnection initConnection;
+        public readonly SqliteConnection initConnection;
 
         public class Field_Map
         {
@@ -286,9 +286,10 @@ namespace IL2CPU.Debug.Symbols
                 }
             }
             // TODO: Can we really not cache the results somewhere, currently these are many small calls
-            var connection = GetNewConnection();
-            BulkInsert<FIELD_MAPPING>(connection,"FIELD_MAPPINGS", xItemsToAdd);
-            connection.Close();
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "FIELD_MAPPINGS", xItemsToAdd);
+            }
         }
 
         private Field_Map DoGetFieldMap(SqliteConnection mConnection, string aName)
@@ -344,9 +345,11 @@ namespace IL2CPU.Debug.Symbols
                     itemsToAdd.Add(xItem);
                 }
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "FIELD_INFOS", itemsToAdd, 2500, true);
-            connection.Close();
+
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "FIELD_INFOS", itemsToAdd, 2500, true);
+            }
         }
 
         public class SequencePoint
@@ -388,9 +391,11 @@ namespace IL2CPU.Debug.Symbols
             {
                 mMethods.Add(aMethod);
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "Methods", mMethods, 2500, aFlush);
-            connection.Close();
+
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "Methods", mMethods, 2500, aFlush);
+            }
         }
 
         // Quick look up of assemblies so we dont have to go to the database and compare by fullname.
@@ -415,16 +420,17 @@ namespace IL2CPU.Debug.Symbols
                     AssemblyGUIDs.Add(xAsm, xRow.ID);
                 }
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "AssemblyFiles", xAssemblies, 2500, aFlush);
-            connection.Close();
+
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "AssemblyFiles", xAssemblies, 2500, aFlush);
+            }
         }
 
         public Dictionary<string, long> DocumentGUIDs = new Dictionary<string, long>();
         List<Document> xDocuments = new List<Document>(1);
         public void AddDocument(string aPathname, bool aFlush = false)
         {
-            var connection = GetNewConnection();
             if (aPathname != null)
             {
                 aPathname = aPathname.ToLower();
@@ -441,14 +447,20 @@ namespace IL2CPU.Debug.Symbols
                     // open so its probably faster than using EF, and its about the same amount of code.
                     // Need to insert right away so RI will be ok when dependents are inserted.
                     xDocuments.Add(xRow);
-                    BulkInsert(connection, "Documents", xDocuments, 2500, aFlush);
+
+                    if (initConnection != null)
+                    {
+                        BulkInsert(initConnection, "Documents", xDocuments, 2500, aFlush);
+                    }
                 }
             }
             else
             {
-                BulkInsert(connection, "Documents", xDocuments, 2500, aFlush);
+                if (initConnection != null)
+                {
+                    BulkInsert(initConnection, "Documents", xDocuments, 2500, aFlush);
+                }
             }
-            connection.Close();
         }
 
         public void AddSymbols(IList<MethodIlOp> aSymbols, bool aFlush = false)
@@ -458,9 +470,10 @@ namespace IL2CPU.Debug.Symbols
                 var val = ++mLastGuid;
                 x.ID = val;
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "MethodIlOps", aSymbols, 2500, aFlush);
-            connection.Close();
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "MethodIlOps", aSymbols, 2500, aFlush);
+            }
         }
 
         public void WriteAllLocalsArgumentsInfos(IList<LOCAL_ARGUMENT_INFO> aInfos)
@@ -469,9 +482,11 @@ namespace IL2CPU.Debug.Symbols
             {
                 x.ID = CreateId;
             }
-            var connection = GetNewConnection();
-            BulkInsert(connection, "LOCAL_ARGUMENT_INFOS", aInfos, aFlush: true);
-            connection.Close();
+
+            if (initConnection != null)
+            {
+                BulkInsert(initConnection, "LOCAL_ARGUMENT_INFOS", aInfos, aFlush: true);
+            }
         }
 
         // EF is slow on bulk operations. But we want to retain explicit bindings to the model to avoid unbound mistakes.
@@ -572,10 +587,7 @@ namespace IL2CPU.Debug.Symbols
         public void Dispose()
         {
             CurrentInstance = null;
-            if(initConnection != null)
-            {
-                initConnection.Close();
-            }
+            initConnection?.Close();
             DebugSymbolReader.DisposeStatic();
             //https://stackoverflow.com/questions/8511901/system-data-sqlite-close-not-releasing-database-file
             SqliteConnection.ClearAllPools();

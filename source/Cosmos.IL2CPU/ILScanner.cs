@@ -278,59 +278,6 @@ namespace Cosmos.IL2CPU
 
         #endregion Gen2
 
-        #region Gen3
-
-        public void Execute(MethodBase[] aBootEntries, List<MemberInfo> aForceIncludes, IEnumerable<Assembly> plugsAssemblies)
-        {
-            foreach (var xBootEntry in aBootEntries)
-            {
-                Queue(xBootEntry.DeclaringType, null, "Boot Entry Declaring Type");
-                Queue(xBootEntry, null, "Boot Entry");
-            }
-
-            foreach (var xForceInclude in aForceIncludes)
-            {
-                Queue(xForceInclude, null, "Force Include");
-            }
-
-            mPlugManager.FindPlugImpls(plugsAssemblies);
-            // Now that we found all plugs, scan them.
-            // We have to scan them after we find all plugs, because
-            // plugs can use other plugs
-            mPlugManager.ScanFoundPlugs();
-            foreach (var xPlug in mPlugManager.PlugImpls)
-            {
-                CompilerHelpers.Debug($"Plug found: '{xPlug.Key.FullName}' in '{xPlug.Key.Assembly.FullName}'");
-            }
-
-            ILOp.PlugManager = mPlugManager;
-
-            // Pull in extra implementations, GC etc.
-            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
-            // Pull in Array constructor
-            Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
-
-            // Pull in MulticastDelegate.GetInvocationList, needed by the Invoke plug
-            Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
-
-            mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
-
-            ScanQueue();
-            UpdateAssemblies();
-            Assemble();
-
-            mAsmblr.EmitEntrypoint(null, aBootEntries);
-        }
-
-        #endregion Gen3
-
         public void QueueMethod(MethodBase method)
         {
             Queue(method, null, "Explicit entry via QueueMethod");

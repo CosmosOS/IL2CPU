@@ -18,11 +18,16 @@ namespace IL2CPU.Debug.Symbols
             GC.SuppressFinalize(this);
         }
 
+        private readonly SqliteTransaction mTransaction;
         private readonly SqliteConnection mConnection;
+        private readonly SqliteCommand mCommand;
 
         public SqliteBulkCopy(SqliteConnection connection)
         {
             mConnection = connection;
+            mTransaction = mConnection.BeginTransaction();
+            mCommand = mConnection.CreateCommand();
+            mCommand.Transaction = mTransaction;
         }
 
         public string DestinationTableName { get; set; }
@@ -33,42 +38,34 @@ namespace IL2CPU.Debug.Symbols
             {
                 // initialize bulk copy
 
-                using (var trans = mConnection.BeginTransaction())
+                var fieldNames = "";
+                var paramNames = "";
+                SqliteParameter[] parms = new SqliteParameter[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    using (var command = mConnection.CreateCommand())
-                    {
-                        var fieldNames = "";
-                        var paramNames = "";
-                        SqliteParameter[] parms = new SqliteParameter[reader.FieldCount];
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            string xFieldName = reader.GetName(i);
-                            fieldNames += $"{xFieldName},";
-                            paramNames += $"@_{xFieldName},";
-                            parms[i] = new SqliteParameter($"@_{xFieldName}", SqliteType.Text);
-                            command.Parameters.Add(parms[i]);
-                        }
-                        fieldNames = fieldNames.TrimEnd(',');
-                        paramNames = paramNames.TrimEnd(',');
-
-                        command.Transaction = trans;
-                        command.CommandText = $"insert into [{DestinationTableName}] ({fieldNames}) values ({paramNames})";
-                        command.Prepare();
-                        do
-                        {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                if (parms[i] != null)
-                                {
-                                    parms[i].Value = reader.GetValue(i);
-                                }
-                            }
-                            command.ExecuteNonQuery();
-                        }
-                        while (reader.Read());
-                    }
-                    trans.Commit();
+                    string xFieldName = reader.GetName(i);
+                    fieldNames += $"{xFieldName},";
+                    paramNames += $"@_{xFieldName},";
+                    parms[i] = new SqliteParameter($"@_{xFieldName}", SqliteType.Text);
+                    mCommand.Parameters.Add(parms[i]);
                 }
+                fieldNames = fieldNames.TrimEnd(',');
+                paramNames = paramNames.TrimEnd(',');
+
+                mCommand.CommandText = $"insert into [{DestinationTableName}] ({fieldNames}) values ({paramNames})";
+                mCommand.Prepare();
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        if (parms[i] != null)
+                        {
+                            parms[i].Value = reader.GetValue(i);
+                        }
+                    }
+                    mCommand.ExecuteNonQuery();
+                }
+                mTransaction.Commit();
             }
         }
     }
