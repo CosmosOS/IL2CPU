@@ -52,7 +52,7 @@ namespace Cosmos.IL2CPU
         private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         public readonly CosmosAssembler Assembler;
-
+        
         public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir)
         {
             Assembler = aAssembler;
@@ -68,6 +68,7 @@ namespace Cosmos.IL2CPU
                 mLog.Dispose();
                 mLog = null;
             }
+            DebugInfo.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -413,9 +414,11 @@ namespace Cosmos.IL2CPU
             DebugInfo.AddMethod(null, true);
             DebugInfo.WriteAllLocalsArgumentsInfos(mLocals_Arguments_Infos);
             DebugInfo.AddSymbols(mSymbols, true);
-            var connection = DebugInfo.GetNewConnection();
-            DebugInfo.AddINT3Labels(connection, mINT3Labels, true);
-            connection.Close();
+
+            if (DebugInfo != null && DebugInfo.initConnection != null)
+            {
+                DebugInfo.AddINT3Labels(mINT3Labels, true);
+            }
         }
 
         public static uint GetResultCodeOffset(uint aResultSize, uint aTotalArgumentSize)
@@ -457,6 +460,7 @@ namespace Cosmos.IL2CPU
                 MethodBegin(aMethod);
                 mLog.WriteLine("Method '{0}', ID = '{1}'", aMethod.MethodBase.GetFullName(), aMethod.UID);
                 mLog.Flush();
+
                 if (aMethod.MethodAssembler != null)
                 {
                     var xAssembler = (AssemblerMethod)Activator.CreateInstance(aMethod.MethodAssembler);
@@ -472,6 +476,7 @@ namespace Cosmos.IL2CPU
 
                     EmitInstructions(aMethod, aOpCodes, false);
                 }
+
                 MethodEnd(aMethod);
             }
             catch (Exception E)
@@ -1396,9 +1401,7 @@ namespace Cosmos.IL2CPU
                     LeaveAsINT3 = INT3Emitted
                 };
                 mINT3Labels.Add(xINT3Label);
-                var connection = DebugInfo.GetNewConnection(); //TODO: Do we have to do this every time? Looks like something we should only do at the end
-                DebugInfo.AddINT3Labels(connection, mINT3Labels);
-                connection.Close();
+                DebugInfo.AddINT3Labels(mINT3Labels);
             }
 
             if (DebugEnabled && StackCorruptionDetection && StackCorruptionDetectionLevel == StackCorruptionDetectionLevel.AllInstructions

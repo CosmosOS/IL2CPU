@@ -123,13 +123,11 @@ namespace Cosmos.IL2CPU
             try
             {
                 LogMessage("Executing IL2CPU on assembly");
-                LogTime("Engine execute started");
 
                 // Gen2
                 // Find the kernel's entry point. We are looking for a public class Kernel, with public static void Boot()
-                MethodBase xKernelCtor = null;
+                MethodBase xKernelCtor = LoadAssemblies();
 
-                xKernelCtor = LoadAssemblies();
                 if (xKernelCtor == null)
                 {
                     return false;
