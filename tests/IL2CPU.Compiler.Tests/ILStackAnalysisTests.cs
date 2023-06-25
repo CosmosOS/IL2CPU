@@ -71,7 +71,7 @@ namespace IL2CPU.Compiler.Tests
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
             var methodBase = new Il2cpuMethodInfo(method, 1, Il2cpuMethodInfo.TypeEnum.Normal, null);
 
-            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
+            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "", "")
             {
                 DebugMode = Cosmos.Build.Common.DebugMode.None
             };
@@ -105,7 +105,7 @@ namespace IL2CPU.Compiler.Tests
             var method = aType.GetMethod(aMethodName, 0, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, aArgs, null);
             var methodBase = new Il2cpuMethodInfo(method, 1, Il2cpuMethodInfo.TypeEnum.Normal, null);
 
-            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "")
+            var appAssembler = new AppAssembler(null, new VoidTextWriter(), "", "")
             {
                 DebugMode = Cosmos.Build.Common.DebugMode.None
             };
