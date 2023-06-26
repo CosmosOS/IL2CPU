@@ -63,12 +63,8 @@ namespace Cosmos.IL2CPU
 
         public void Dispose()
         {
-            if (mLog != null)
-            {
-                mLog.Dispose();
-                mLog = null;
-            }
-            DebugInfo.Dispose();
+            mLog?.Dispose();
+            DebugInfo?.Dispose();
             GC.SuppressFinalize(this);
         }
 
