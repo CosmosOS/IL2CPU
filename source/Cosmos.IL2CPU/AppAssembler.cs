@@ -42,6 +42,7 @@ namespace Cosmos.IL2CPU
         public DebugInfo DebugInfo { get; set; }
         private TextWriter mLog;
         private string mLogDir;
+        private string mOutputDir;
         private Dictionary<string, ModuleDefinition> mLoadedModules = new Dictionary<string, ModuleDefinition>();
         public TraceAssemblies TraceAssemblies;
         public bool DebugEnabled = false;
@@ -51,13 +52,15 @@ namespace Cosmos.IL2CPU
         public bool IgnoreDebugStubAttribute;
         private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
+        private int incBinCounter = 0;
         public readonly CosmosAssembler Assembler;
         
-        public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir)
+        public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir, string aOutputDir)
         {
             Assembler = aAssembler;
             mLog = aLog;
             mLogDir = aLogDir;
+            mOutputDir = aOutputDir;
             InitILOps();
         }
 
@@ -1138,9 +1141,13 @@ namespace Cosmos.IL2CPU
                         xStream.Read(xData, 16, (int)xStream.Length);
                     }
 
-                    XS.DataMemberBytes(xFieldContentsName, xData);
+                    File.WriteAllBytes(Path.Join(mOutputDir, "bin" + incBinCounter + ".bin"), xData);
+
+                    XS.DataMember(xFieldContentsName, "bin" + incBinCounter + ".bin", true);
                     XS.DataMember(xFieldName, 1, "dd", "0");
                     XS.DataMember("", 1, "dd", xFieldContentsName);
+
+                    incBinCounter++;
 
                     //Assembler.DataMembers.Add(new DataMember(xFieldContentsName, "db", xTarget.ToString()));
                     //Assembler.DataMembers.Add(new DataMember(xFieldName, "dd", xFieldContentsName));
