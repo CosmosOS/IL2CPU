@@ -54,7 +54,7 @@ namespace Cosmos.IL2CPU
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         private int incBinCounter = 0;
         public readonly CosmosAssembler Assembler;
-        
+
         public AppAssembler(CosmosAssembler aAssembler, TextWriter aLog, string aLogDir, string aOutputDir)
         {
             Assembler = aAssembler;
@@ -495,8 +495,10 @@ namespace Cosmos.IL2CPU
 
         private void EmitInstructions(Il2cpuMethodInfo aMethod, List<ILOpCode> aCurrentGroup, bool emitINT3)
         {
-            foreach (var xOpCode in aCurrentGroup)
+            foreach (var xOpCodeItem in aCurrentGroup.Select((value, i) => new { i, value }))
             {
+                var xOpCode = xOpCodeItem.value;
+                var index = xOpCodeItem.i;
                 ushort xOpCodeVal = (ushort)xOpCode.OpCode;
                 ILOp xILOp;
                 if (xOpCodeVal <= 0xFF)
@@ -602,7 +604,14 @@ namespace Cosmos.IL2CPU
                 }
 
                 xILOp.DebugEnabled = DebugEnabled;
-                xILOp.Execute(aMethod, xOpCode);
+                try
+                {
+                    xILOp.Execute(aMethod, xOpCode);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($@"{aMethod.MethodLabel}: OpCodeIndex = {index}", e);
+                }
 
                 AfterOp(aMethod, xOpCode);
             }
