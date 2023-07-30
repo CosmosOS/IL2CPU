@@ -34,7 +34,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"OpCode data: xSource={xSource}, xSourceSize={xSourceSize}, xSourceIsFloat={xSourceIsFloat}");
                     }
                 }
             }
@@ -62,7 +62,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"OpCode data: xSource={xSource}, xSourceSize={xSourceSize}, xSourceIsFloat={xSourceIsFloat}");
                     }
                 }
             }

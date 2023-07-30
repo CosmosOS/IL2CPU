@@ -24,7 +24,8 @@ namespace Cosmos.IL2CPU.X86.IL
             var xStackTop2Size = SizeOfType(xStackTop2);
             if (xStackTopSize != xStackTop2Size)
             {
-                throw new Exception("Different size for substract: " + aMethod.MethodBase + "!");
+
+                throw new Exception($"Different size for subtract: {aMethod.MethodBase}!, xStackTopSize={xStackTopSize} xStackTop2Size={xStackTop2Size}");
             }
 
             var xStackTopIsFloat = TypeIsFloat(xStackTop);
@@ -69,7 +70,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     }
                     break;
                 default:
-                    throw new NotImplementedException("not implemented");
+                    throw new NotImplementedException($"not implemented xStackTopSize={xStackTopSize}");
             }
         }
     }

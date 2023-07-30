@@ -21,8 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
-            if (aOpCode.OpCode == ILOpCode.Code.Stind_I8
-                || aOpCode.OpCode == ILOpCode.Code.Stind_R8
+            if (aOpCode.OpCode is ILOpCode.Code.Stind_I8 or ILOpCode.Code.Stind_R8
                 || aOpCode.OpCode == ILOpCode.Code.Stind_Ref)
             {
                 DoNullReferenceCheck(Assembler, DebugEnabled, 8);
