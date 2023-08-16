@@ -62,7 +62,6 @@ namespace IL2CPU.Debug.Symbols
                             var v = reader.GetValue(i);
 
                             if(v == null) {
-                                Console.WriteLine("WARNING: Tried to insert null value");
                                 skipRow = true;
                             }
                             
