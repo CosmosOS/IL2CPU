@@ -50,17 +50,26 @@ namespace IL2CPU.Debug.Symbols
 
                 mCommand.CommandText = $"insert into [{DestinationTableName}] ({mFieldNames.ToString().TrimEnd(',')}) values ({mParamNames.ToString().TrimEnd(',')})";
                 mCommand.Prepare();
-
+                
                 while (reader.Read())
                 {
+                    bool skipRow = false;
+                    
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
                         if (parms[i] != null)
                         {
-                            parms[i].Value = reader.GetValue(i);
+                            var v = reader.GetValue(i);
+
+                            if(v == null) {
+                                skipRow = true;
+                            }
+                            
+                            parms[i].Value = v;
                         }
                     }
-                    mCommand.ExecuteNonQuery();
+                    
+                    if(!skipRow) mCommand.ExecuteNonQuery();
                 }
 
                 mTransaction.Commit();
