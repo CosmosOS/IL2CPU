@@ -301,6 +301,12 @@ namespace Cosmos.IL2CPU
             DataMembers.Add(new DataMember("Kernel_Stack", Array.Empty<byte>()));
             DataMembers.Add(new DataMember("MultiBootInfo_Structure", new uint[1]));
 
+            // paging
+            DataMembers.Add(new DataMember("align", "4096", true));
+            DataMembers.Add(new DataMember("boot_page_directory", new byte[4096]));
+            DataMembers.Add(new DataMember("align", "4096", true));
+            DataMembers.Add(new DataMember("boot_page_table1", new byte[4096]));
+
             // constants
             DataMembers.Add(new DataMember("align", "16", true));
             DataMembers.Add(new DataMember(@"__uint2double_const", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x41 }));
@@ -352,6 +358,7 @@ namespace Cosmos.IL2CPU
 
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
+
             WriteDebugVideo("Creating GDT.");
             CreateGDT();
 
@@ -389,6 +396,9 @@ namespace Cosmos.IL2CPU
             //Initiate Memory
             WriteDebugVideo("Initiating Memory");
             XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
+
+            WriteDebugVideo("Configuring Paging");
+            XS.Call("SystemVoidCosmosCorePagingInit");
 
             // Jump to Kernel entry point
             WriteDebugVideo("Jumping to kernel.");
