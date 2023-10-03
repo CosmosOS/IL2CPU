@@ -107,7 +107,7 @@ namespace Cosmos.IL2CPU
             return true;
         }
 
-        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType)
+        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, List<string> aSourceItems = null)
         {
             CompilerHelpers.Debug($"Enqueing: {aItem.DeclaringType?.Name ?? ""}.{aItem.Name} from {aSrc}");
             if (aItem == null)
@@ -151,66 +151,20 @@ namespace Cosmos.IL2CPU
                 mItems.Add(aItem);
                 mItemsList.Add(aItem);
 
-                if (aSrc is MethodBase xMethodBaseSrc)
+                if (aSourceItems != null)
                 {
-                    aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
+                    if (aSrc is MethodBase xMethodBaseSrc)
+                    {
+                        // aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
+                        aSourceItems.Add(DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xMethodBaseSrc)));
+                    }
+
+                    mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType, aSourceItems));
                 }
-
-                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType));
-            }
-        }
-
-        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, List<string> aSourceItems)
-        {
-            CompilerHelpers.Debug($"Enqueing: {aItem.DeclaringType?.Name ?? ""}.{aItem.Name} from {aSrc}");
-            if (aItem == null)
-            {
-                throw new ArgumentNullException(nameof(aItem));
-            }
-
-            //TODO: fix this, as each label/symbol should also contain an assembly specifier.
-
-            //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
-            //    && (xMemInfo.DeclaringType.FullName == "System.ThrowHelper")
-            //    && (xMemInfo.DeclaringType.Assembly.GetName().Name != "mscorlib"))
-            //{
-            // System.ThrowHelper exists in MS .NET twice...
-            // Its an internal class that exists in both mscorlib and system assemblies.
-            // They are separate types though, so normally the scanner scans both and
-            // then we get conflicting labels. MS included it twice to make exception
-            // throwing code smaller. They are internal though, so we cannot
-            // reference them directly and only via finding them as they come along.
-            // We find it here, not via QueueType so we only check it here. Later
-            // we might have to checkin QueueType also.
-            // So now we accept both types, but emit code for only one. This works
-            // with the current Yasm assembler as we resolve by name in the assembler.
-            // However with other assemblers this approach may not work.
-            // If AssemblerYASM adds assembly name to the label, this will allow
-            // both to exist as they do in BCL.
-            // So in the future we might be able to remove this hack, or change
-            // how it works.
-            //
-            // Do nothing
-            //
-            //}
-            /*else*/
-            if (!mItems.Contains(aItem))
-            {
-                if (mLogEnabled)
+                else
                 {
-                    LogMapPoint(aSrc, aSrcType, aItem);
+                    mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType));
                 }
-
-                mItems.Add(aItem);
-                mItemsList.Add(aItem);
-
-                if (aSrc is MethodBase xMethodBaseSrc)
-                {
-                    aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
-                    aSourceItems.Add(DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xMethodBaseSrc)));
-                }
-
-                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType, aSourceItems));
             }
         }
 
