@@ -9,6 +9,7 @@ using Cosmos.IL2CPU.Extensions;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using XSharp.Assembler;
+using static XSharp.x86.Register;
 
 namespace Cosmos.IL2CPU
 {
@@ -16,13 +17,13 @@ namespace Cosmos.IL2CPU
     {
         public MemberInfo Item { get; }
         public string QueueReason { get; }
-        public string SourceItem { get; }
+        public List<string> SourceItems { get; set; }
 
-        public ScannerQueueItem(MemberInfo aMemberInfo, string aQueueReason, string aSourceItem)
+        public ScannerQueueItem(MemberInfo aMemberInfo, string aQueueReason, List<string> aSourceItems = null)
         {
             Item = aMemberInfo;
             QueueReason = aQueueReason;
-            SourceItem = aSourceItem;
+            SourceItems = aSourceItems;
         }
 
         public override string ToString()
@@ -106,7 +107,7 @@ namespace Cosmos.IL2CPU
             return true;
         }
 
-        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, string sourceItem = null)
+        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType)
         {
             CompilerHelpers.Debug($"Enqueing: {aItem.DeclaringType?.Name ?? ""}.{aItem.Name} from {aSrc}");
             if (aItem == null)
@@ -155,7 +156,61 @@ namespace Cosmos.IL2CPU
                     aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
                 }
 
-                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType, aSrc + Environment.NewLine + sourceItem));
+                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType));
+            }
+        }
+
+        protected void Queue(MemberInfo aItem, object aSrc, string aSrcType, List<string> aSourceItems)
+        {
+            CompilerHelpers.Debug($"Enqueing: {aItem.DeclaringType?.Name ?? ""}.{aItem.Name} from {aSrc}");
+            if (aItem == null)
+            {
+                throw new ArgumentNullException(nameof(aItem));
+            }
+
+            //TODO: fix this, as each label/symbol should also contain an assembly specifier.
+
+            //if ((xMemInfo != null) && (xMemInfo.DeclaringType != null)
+            //    && (xMemInfo.DeclaringType.FullName == "System.ThrowHelper")
+            //    && (xMemInfo.DeclaringType.Assembly.GetName().Name != "mscorlib"))
+            //{
+            // System.ThrowHelper exists in MS .NET twice...
+            // Its an internal class that exists in both mscorlib and system assemblies.
+            // They are separate types though, so normally the scanner scans both and
+            // then we get conflicting labels. MS included it twice to make exception
+            // throwing code smaller. They are internal though, so we cannot
+            // reference them directly and only via finding them as they come along.
+            // We find it here, not via QueueType so we only check it here. Later
+            // we might have to checkin QueueType also.
+            // So now we accept both types, but emit code for only one. This works
+            // with the current Yasm assembler as we resolve by name in the assembler.
+            // However with other assemblers this approach may not work.
+            // If AssemblerYASM adds assembly name to the label, this will allow
+            // both to exist as they do in BCL.
+            // So in the future we might be able to remove this hack, or change
+            // how it works.
+            //
+            // Do nothing
+            //
+            //}
+            /*else*/
+            if (!mItems.Contains(aItem))
+            {
+                if (mLogEnabled)
+                {
+                    LogMapPoint(aSrc, aSrcType, aItem);
+                }
+
+                mItems.Add(aItem);
+                mItemsList.Add(aItem);
+
+                if (aSrc is MethodBase xMethodBaseSrc)
+                {
+                    aSrc = xMethodBaseSrc.DeclaringType + "::" + aSrc;
+                    aSourceItems.Add(DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(xMethodBaseSrc)));
+                }
+
+                mQueue.Enqueue(new ScannerQueueItem(aItem, aSrcType, aSourceItems));
             }
         }
 
@@ -383,12 +438,11 @@ namespace Cosmos.IL2CPU
             return "Other: " + aItem;
         }
 
-        protected void ScanMethod(MethodBase aMethod, bool aIsPlug, string sourceItem)
+        protected void ScanMethod(MethodBase aMethod, bool aIsPlug, List<string> sourceItems)
         {
             CompilerHelpers.Debug($"ILScanner: ScanMethod");
             CompilerHelpers.Debug($"Method = '{aMethod}'");
             CompilerHelpers.Debug($"IsPlug = '{aIsPlug}'");
-            CompilerHelpers.Debug($"Source = '{sourceItem}'");
 
             var xParams = aMethod.GetParameters();
             var xParamTypes = new Type[xParams.Length];
@@ -565,7 +619,7 @@ namespace Cosmos.IL2CPU
                         + "  Need plug for: " + LabelName.GetFullName(aMethod) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)) + " ). " + Environment.NewLine
                         + "  Static: " + aMethod.IsStatic + Environment.NewLine
                         + "  Assembly: " + aMethod.DeclaringType.Assembly.FullName + Environment.NewLine
-                        + "  Called from:" + Environment.NewLine + sourceItem + Environment.NewLine);
+                        + "  Called from:" + Environment.NewLine + string.Join("\n", sourceItems.Distinct().ToArray()) + Environment.NewLine);
                 }
 
                 //TODO: As we scan each method, we could update or put in a new list
@@ -589,7 +643,7 @@ namespace Cosmos.IL2CPU
                     {
                         if (xOpCode is ILOpCodes.OpMethod)
                         {
-                            Queue(((ILOpCodes.OpMethod)xOpCode).Value, aMethod, "Call", sourceItem);
+                            Queue(((ILOpCodes.OpMethod)xOpCode).Value, aMethod, "Call", sourceItems);
                         }
                         else if (xOpCode is ILOpCodes.OpType xOpType)
                         {
@@ -748,7 +802,11 @@ namespace Cosmos.IL2CPU
                 // and will reduce compares
                 if (xItem.Item is MethodBase xMethod)
                 {
-                    ScanMethod(xMethod, false, xItem.SourceItem);
+                    if (xItem.SourceItems == null)
+                    {
+                        xItem.SourceItems = new List<string>();
+                    }
+                    ScanMethod(xMethod, false, xItem.SourceItems);
                 }
                 else if (xItem.Item is Type xType)
                 {
