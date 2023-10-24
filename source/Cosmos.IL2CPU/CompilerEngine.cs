@@ -32,9 +32,6 @@ namespace Cosmos.IL2CPU
 
         private AssemblyLoadContext _assemblyLoadContext;
 
-        private Dictionary<MethodBase, int?> mBootEntries;
-        private List<MemberInfo> mForceIncludes;
-
         protected void LogTime(string message)
         {
         }
