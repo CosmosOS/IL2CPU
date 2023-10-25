@@ -15,7 +15,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode )
         {
-            XS.Noop();
+            // we might have to emit a noop for the debugger to work
         }
 
     }

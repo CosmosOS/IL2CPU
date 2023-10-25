@@ -562,7 +562,7 @@ namespace Cosmos.IL2CPU
                     throw new Exception("Native code encountered, plug required. Check build output for more information." + Environment.NewLine
                                         + "  DO NOT REPORT THIS AS A BUG." + Environment.NewLine
                                         + "  Please see http://www.gocosmos.org/docs/plugs/missing/" + Environment.NewLine
-                        + "  Need plug for: " + LabelName.GetFullName(aMethod) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)) + " ). " + Environment.NewLine
+                        + "  Need plug for: " + LabelName.GetFullName(aMethod, false) + "(Plug Signature: " + DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod, false)) + " ). " + Environment.NewLine
                         + "  Static: " + aMethod.IsStatic + Environment.NewLine
                         + "  Assembly: " + aMethod.DeclaringType.Assembly.FullName + Environment.NewLine
                         + "  Called from:" + Environment.NewLine + sourceItem + Environment.NewLine);
