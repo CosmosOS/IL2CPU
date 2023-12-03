@@ -50,6 +50,7 @@ namespace Cosmos.IL2CPU
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel;
         public DebugMode DebugMode;
         public bool IgnoreDebugStubAttribute;
+        public string TargetArchitecture;
         private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         private int incBinCounter = 0;

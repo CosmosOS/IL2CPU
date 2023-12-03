@@ -150,6 +150,7 @@ namespace Cosmos.IL2CPU
                     xAsm.DebugMode = mSettings.DebugMode;
                     xAsm.TraceAssemblies = mSettings.TraceAssemblies;
                     xAsm.IgnoreDebugStubAttribute = mSettings.IgnoreDebugStubAttribute;
+                    xAsm.TargetArchitecture = mSettings.TargetArchitecture;
                     if (!mSettings.EnableDebug)
                     {
                         xAsm.ShouldOptimize = true;
@@ -159,6 +160,7 @@ namespace Cosmos.IL2CPU
                     string VBEResolution = string.IsNullOrEmpty(mSettings.VBEResolution) ? "800x600x32" : mSettings.VBEResolution;
 
                     xAsm.Assembler.RemoveBootDebugOutput = mSettings.RemoveBootDebugOutput;
+                    xAsm.Assembler.TargetArchitecture = mSettings.TargetArchitecture;
                     xAsm.Assembler.Initialize(VBEMultiboot, VBEResolution);
 
                     if (mSettings.DebugMode != DebugMode.IL)
