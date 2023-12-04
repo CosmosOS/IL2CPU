@@ -597,10 +597,8 @@ namespace Cosmos.IL2CPU
             aOutput.WriteLine("section .data");
         }
 
-        protected override void OnBeforeFlush(TextWriter output)
+        protected override void OnBeforeFlush()
         {
-           // DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
-            //output.WriteLine("section .text");
         }
 
         protected override void OnFlushTextAfterEmitEverything(TextWriter aOutput)
