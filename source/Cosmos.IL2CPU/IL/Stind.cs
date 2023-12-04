@@ -34,30 +34,30 @@ namespace Cosmos.IL2CPU.X86.IL
             switch (aOpCode.OpCode)
             {
                 case ILOpCode.Code.Stind_I1:
-                    XS.Pop(ECX);
-                    XS.Pop(EAX);
-                    XS.Set(EAX, CL, destinationIsIndirect: true);
+                    XS.Pop(RCX);
+                    XS.Pop(RAX);
+                    XS.Set(RAX, CL, destinationIsIndirect: true);
                     break;
                 case ILOpCode.Code.Stind_I2:
-                    XS.Pop(ECX);
-                    XS.Pop(EAX);
-                    XS.Set(EAX, CX, destinationIsIndirect: true);
+                    XS.Pop(RCX);
+                    XS.Pop(RAX);
+                    XS.Set(RAX, CX, destinationIsIndirect: true);
                     break;
                 case ILOpCode.Code.Stind_I:
                 case ILOpCode.Code.Stind_I4:
                 case ILOpCode.Code.Stind_R4:
-                    XS.Pop(ECX);
-                    XS.Pop(EAX);
-                    XS.Set(EAX, ECX, destinationIsIndirect: true);
+                    XS.Pop(RCX);
+                    XS.Pop(RAX);
+                    XS.Set(RAX, RCX, destinationIsIndirect: true);
                     break;
                 case ILOpCode.Code.Stind_I8:
                 case ILOpCode.Code.Stind_R8:
                 case ILOpCode.Code.Stind_Ref:
-                    XS.Pop(ECX);
-                    XS.Pop(EBX);
-                    XS.Pop(EAX);
-                    XS.Set(EAX, ECX, destinationIsIndirect: true);
-                    XS.Set(EAX, EBX, destinationDisplacement: 4);
+                    XS.Pop(RCX);
+                    XS.Pop(RBX);
+                    XS.Pop(RAX);
+                    XS.Set(RAX, RCX, destinationIsIndirect: true);
+                    XS.Set(RAX, RBX, destinationDisplacement: 4);
                     break;
             }
         }

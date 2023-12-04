@@ -37,17 +37,17 @@ namespace Cosmos.IL2CPU.X86.IL
                 // [ESP + 4] is high part
                 // [ESP + 8] is low part
                 // [ESP + 12] is high part
-                XS.Pop(EAX);
-                XS.Pop(EDX);
+                XS.Pop(RAX);
+                XS.Pop(RDX);
                 // [ESP] is low part
                 // [ESP + 4] is high part
-                XS.Or(ESP, EAX, destinationIsIndirect: true);
-                XS.Or(ESP, EDX, destinationDisplacement: 4);
+                XS.Or(RSP, RAX, destinationIsIndirect: true);
+                XS.Or(RSP, RDX, destinationDisplacement: 4);
             }
             else
             {
-                XS.Pop(EAX);
-                XS.Or(ESP, EAX, destinationIsIndirect: true);
+                XS.Pop(RAX);
+                XS.Or(RSP, RAX, destinationIsIndirect: true);
             }
         }
     }

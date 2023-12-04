@@ -26,37 +26,37 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             DoNullReferenceCheck(Assembler, DebugEnabled, 0);
 
-            XS.Pop(EAX);
+            XS.Pop(RAX);
 
             switch (aOpCode.OpCode)
             {
                 case ILOpCode.Code.Ldind_I1:
-                    XS.MoveSignExtend(EAX, EAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
-                    XS.Push(EAX);
+                    XS.MoveSignExtend(RAX, RAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
+                    XS.Push(RAX);
                     break;
                 case ILOpCode.Code.Ldind_I2:
-                    XS.MoveSignExtend(EAX, EAX, sourceIsIndirect: true, size: RegisterSize.Short16);
-                    XS.Push(EAX);
+                    XS.MoveSignExtend(RAX, RAX, sourceIsIndirect: true, size: RegisterSize.Short16);
+                    XS.Push(RAX);
                     break;
                 case ILOpCode.Code.Ldind_U1:
-                    XS.MoveZeroExtend(EAX, EAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
-                    XS.Push(EAX);
+                    XS.MoveZeroExtend(RAX, RAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
+                    XS.Push(RAX);
                     break;
                 case ILOpCode.Code.Ldind_U2:
-                    XS.MoveZeroExtend(EAX, EAX, sourceIsIndirect: true, size: RegisterSize.Short16);
-                    XS.Push(EAX);
+                    XS.MoveZeroExtend(RAX, RAX, sourceIsIndirect: true, size: RegisterSize.Short16);
+                    XS.Push(RAX);
                     break;
                 case ILOpCode.Code.Ldind_I:
                 case ILOpCode.Code.Ldind_I4:
                 case ILOpCode.Code.Ldind_U4:
                 case ILOpCode.Code.Ldind_R4:
-                    XS.Push(EAX, isIndirect: true);
+                    XS.Push(RAX, isIndirect: true);
                     break;
                 case ILOpCode.Code.Ldind_I8:
                 case ILOpCode.Code.Ldind_R8:
                 case ILOpCode.Code.Ldind_Ref:
-                    XS.Push(EAX, displacement: 4);
-                    XS.Push(EAX, isIndirect: true);
+                    XS.Push(RAX, displacement: 4);
+                    XS.Push(RAX, isIndirect: true);
                     break;
             }
         }

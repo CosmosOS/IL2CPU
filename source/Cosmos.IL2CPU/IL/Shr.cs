@@ -20,7 +20,7 @@ namespace Cosmos.IL2CPU.X86.IL
 			var xStackItem_Value = aOpCode.StackPopTypes[1];
             var xStackItem_Value_Size = SizeOfType(xStackItem_Value);
 
-            XS.Pop(XSRegisters.ECX); // shift amount
+            XS.Pop(XSRegisters.RCX); // shift amount
 #if DOTNETCOMPATIBLE
 			if (xStackItem_Value.Size == 4)
 #else
@@ -29,7 +29,7 @@ namespace Cosmos.IL2CPU.X86.IL
 			{
                 // To retain the sign bit we must use ShiftRightArithmetic and not ShiftRight!
                 //XS.ShiftRight(XSRegisters.ESP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Int32);
-                XS.ShiftRightArithmetic(XSRegisters.ESP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Int32);
+                XS.ShiftRightArithmetic(XSRegisters.RSP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Long64);
             }
 #if DOTNETCOMPATIBLE
 			else if (xStackItem_Value_Size == 8)
@@ -45,17 +45,17 @@ namespace Cosmos.IL2CPU.X86.IL
 				// [ESP + 4] is high part
 
 				// move high part in EAX
-				XS.Set(XSRegisters.EAX, XSRegisters.ESP, sourceDisplacement: 4);
+				XS.Set(XSRegisters.RAX, XSRegisters.RSP, sourceDisplacement: 4);
 
 				XS.Compare(XSRegisters.CL, 32, size: RegisterSize.Byte8);
 				XS.Jump(CPU.ConditionalTestEnum.AboveOrEqual, HighPartIsZero);
 
 				// shift lower part
-                XS.ShiftRightDouble(ESP, EAX, CL, destinationIsIndirect: true);
+                XS.ShiftRightDouble(RSP, RAX, CL, destinationIsIndirect: true);
                 // shift higher part
                 // To retain the sign bit we must use ShiftRightArithmetic and not ShiftRight!
                 //XS.ShiftRight(ESP, CL, destinationDisplacement: 4, size: RegisterSize.Int32);
-                XS.ShiftRightArithmetic(ESP, CL, destinationDisplacement: 4, size: RegisterSize.Int32);
+                XS.ShiftRightArithmetic(RSP, CL, destinationDisplacement: 4, size: RegisterSize.Long64);
                 XS.Jump(End_Shr);
 
 				XS.Label(HighPartIsZero);
@@ -65,10 +65,10 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 // shift high part and move it in low part
                 // To retain the sign bit we must use ShiftRightArithmetic and not ShiftRight!
-                XS.ShiftRightArithmetic(XSRegisters.EAX, XSRegisters.CL);
-                XS.Set(ESP, EAX, destinationIsIndirect: true);
+                XS.ShiftRightArithmetic(XSRegisters.RAX, XSRegisters.CL);
+                XS.Set(RSP, RAX, destinationIsIndirect: true);
                 // replace unknown high part with a zero
-                XS.Set(ESP, 0, destinationIsIndirect: true, destinationDisplacement: 4);
+                XS.Set(RSP, 0, destinationIsIndirect: true, destinationDisplacement: 4);
 				//new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ESP, DestinationIsIndirect = true, DestinationDisplacement = 4, SourceValue = 0};
 
 				XS.Label(End_Shr);

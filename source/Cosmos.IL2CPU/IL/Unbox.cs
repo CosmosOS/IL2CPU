@@ -24,7 +24,7 @@ namespace Cosmos.IL2CPU.X86.IL
             var xAfterIsInstanceCallLabel = xOpLabel + ".AfterIsInstanceCall";
             var xAfterInstanceCheckLabel = xOpLabel + ".AfterInstanceCheck";
 
-            XS.Add(ESP, 4);
+            XS.Add(RSP, 4);
 
             var xIsNullable = xType.IsGenericType && xType.GetGenericTypeDefinition() == typeof(Nullable<>);
 
@@ -32,7 +32,7 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 xType = xType.GenericTypeArguments[0];
 
-                XS.Compare(ESP, 0, destinationIsIndirect: true);
+                XS.Compare(RSP, 0, destinationIsIndirect: true);
                 XS.Jump(ConditionalTestEnum.Equal, xAfterInstanceCheckLabel);
             }
             else
@@ -42,17 +42,17 @@ namespace Cosmos.IL2CPU.X86.IL
 
             var xTypeId = GetTypeIDLabel(xType);
 
-            XS.Set(EAX, ESP, sourceIsIndirect: true);
-            XS.Push(EAX, isIndirect: true);
+            XS.Set(RAX, RSP, sourceIsIndirect: true);
+            XS.Push(RAX, isIndirect: true);
             XS.Push(xTypeId, isIndirect: true);
             XS.Push(Convert.ToUInt32(xType.IsInterface));
             Call.DoExecute(Assembler, aMethod, VTablesImplRefs.IsInstanceRef, aOpCode, GetLabel(aMethod, aOpCode), xAfterIsInstanceCallLabel, DebugEnabled);
 
             XS.Label(xAfterIsInstanceCallLabel);
 
-            XS.Pop(EAX);
+            XS.Pop(RAX);
 
-            XS.Compare(EAX, 0);
+            XS.Compare(RAX, 0);
             XS.Jump(ConditionalTestEnum.NotEqual, xAfterInstanceCheckLabel);
 
             XS.Call(LabelName.Get(ExceptionHelperRefs.ThrowInvalidCastExceptionRef));
@@ -80,7 +80,7 @@ namespace Cosmos.IL2CPU.X86.IL
             }
 
             // the result is a managed pointer, it should be tracked by GC
-            XS.Add(ESP, ObjectUtils.FieldDataOffset, destinationIsIndirect: true);
+            XS.Add(RSP, ObjectUtils.FieldDataOffset, destinationIsIndirect: true);
         }
     }
 }

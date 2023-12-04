@@ -30,6 +30,7 @@ namespace Cosmos.IL2CPU
 #pragma warning restore CA2211 // Non-constant fields should not be visible
 
         public bool RemoveBootDebugOutput = false;
+        public string TargetArchitecture = "amd64";
 
         public virtual void WriteDebugVideo(string aText)
         {
@@ -90,11 +91,11 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = 2,
                 SourceRef = ElementReference.New("_NATIVE_GDT_Contents")
             };
-            XS.Set(EAX, "_NATIVE_GDT_Pointer");
-            XS.LoadGdt(EAX, isIndirect: true);
+            XS.Set(RAX, "_NATIVE_GDT_Pointer");
+            XS.LoadGdt(RAX, isIndirect: true);
 
             XS.Comment("Set data segments");
-            XS.Set(EAX, mGdData);
+            XS.Set(RAX, mGdData);
             XS.Set(DS, AX);
             XS.Set(ES, AX);
             XS.Set(FS, AX);
@@ -114,7 +115,7 @@ namespace Cosmos.IL2CPU
         protected void SetIdtDescriptor(int aNo, string aLabel, bool aDisableInts)
         {
             int xOffset = aNo * 8;
-            XS.Set(EAX, aLabel);
+            XS.Set(RAX, aLabel);
             var xIDT = ElementReference.New("_NATIVE_IDT_Contents");
             new Mov
             {
@@ -130,7 +131,7 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = xOffset + 1,
                 SourceReg = RegistersEnum.AH
             };
-            XS.ShiftRight(EAX, 16);
+            XS.ShiftRight(RAX, 16);
             new Mov
             {
                 DestinationRef = xIDT,
@@ -209,20 +210,22 @@ namespace Cosmos.IL2CPU
                                                                   {
                                                                       xIdtSize, 0, 0
                                                                   }));
+
+            XS.Set(R10, "_NATIVE_IDT_Contents", sourceIsIndirect: true);
             new Mov
             {
                 DestinationRef = ElementReference.New("_NATIVE_IDT_Pointer"),
                 DestinationIsIndirect = true,
                 DestinationDisplacement = 2,
-                SourceRef = ElementReference.New("_NATIVE_IDT_Contents")
+                SourceReg = R10
             };
 
-            XS.Set(EAX, "_NATIVE_IDT_Pointer");
+            XS.Set(RAX, "_NATIVE_IDT_Pointer");
 
             if (mComPort > 0)
             {
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.Processor_IntsEnabled], 1, destinationIsIndirect: true, size: RegisterSize.Byte8);
-                XS.LoadIdt(EAX, isIndirect: true);
+                XS.LoadIdt(RAX, isIndirect: true);
             }
             XS.Label("AfterCreateIDT");
             new Comment(this, "END - Create IDT");
@@ -233,66 +236,80 @@ namespace Cosmos.IL2CPU
             uint xSig = 0xe85250d6;
 
             //Multiboot header
-            DataMembers.Add(new DataMember("align", "8", true));
-            DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
-            DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
-            DataMembers.Add(new DataMember("MultibootArchitecture", 0));
-            DataMembers.Add(new DataMember("MultibootLenght", "MultibootHeaderEnd - MultibootHeader", typeof(uint)));
-            DataMembers.Add(new DataMember("MultibootChecksum", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", typeof(uint)));
 
-            if (enableVBE)
+            if (TargetArchitecture != "x86" && TargetArchitecture != "amd64")
             {
-                try
-                {
-                    string[] res = VBEResolution.Split('x');
-
-                    //Framebuffer Tag
-                    DataMembers.Add(new DataMember("align", "8", true));
-                    DataMembers.Add(new DataMember("MultibootFramebufferTag", Array.Empty<byte>()));
-                    DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
-                    DataMembers.Add(new DataMember("MultibootFramebufferOptional", (ushort)1));
-                    DataMembers.Add(new DataMember("MultibootFramebufferLenght", "MultibootFramebufferTagEnd - MultibootFramebufferTag", typeof(uint)));
-                    DataMembers.Add(new DataMember("", Int32.Parse(res[0])));
-                    DataMembers.Add(new DataMember("", Int32.Parse(res[1])));
-                    DataMembers.Add(new DataMember("", Int32.Parse(res[2])));
-
-                    DataMembers.Add(new DataMember("MultibootFramebufferTagEnd", Array.Empty<byte>()));
-                }
-                catch
-                {
-                    Console.WriteLine("VBE Resolution must be this format: 1920x1080x32");
-                }
+                throw new Exception("Unknown TargetArchitecture: " + TargetArchitecture);
             }
+            XS.Architecture = TargetArchitecture;
 
-            // memory
-            DataMembers.Add(new DataMember("align", "8", true));
-            DataMembers.Add(new DataMember("MultibootMemoryTag", Array.Empty<byte>()));
-            DataMembers.Add(new DataMember("MultibootMemoryTagType", (ushort)2));
-            DataMembers.Add(new DataMember("MultibootMemoryTagOptional", (ushort)1));
-            DataMembers.Add(new DataMember("MultibootMemoryTagLenght", "MultibootMemoryTagEnd - MultibootMemoryTag", typeof(uint)));
-            DataMembers.Add(new DataMember("MultibootHeaderAddr", ElementReference.New("MultibootSignature")));
-            DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
-            DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
-            DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
-            DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
+            // Limine protocol does not support x86
+            if (TargetArchitecture == "x86")
+            {
+                DataMembers.Add(new DataMember("align", "8", true));
+                DataMembers.Add(new DataMember("MultibootHeader", Array.Empty<byte>()));
+                DataMembers.Add(new DataMember("MultibootSignature", new uint[] { xSig }));
+                DataMembers.Add(new DataMember("MultibootArchitecture", 0));
+                DataMembers.Add(new DataMember("MultibootLenght", "MultibootHeaderEnd - MultibootHeader", typeof(uint)));
+                DataMembers.Add(new DataMember("MultibootChecksum", "0x100000000 - (0xe85250d6 + 0 + (MultibootHeaderEnd - MultibootHeader))", typeof(uint)));
 
-            //Entry Address
-            DataMembers.Add(new DataMember("align", "8", true));
-            DataMembers.Add(new DataMember("MultibootEntryTag", Array.Empty<byte>()));
-            DataMembers.Add(new DataMember("MultibootEntryTagType", (ushort)3));
-            DataMembers.Add(new DataMember("MultibootEntryTagOptional", (ushort)1));
-            DataMembers.Add(new DataMember("MultibootEntryTagLenght", "MultibootEntryTagEnd - MultibootEntryTag", typeof(uint)));
-            DataMembers.Add(new DataMember("MultibootEntryAddr", ElementReference.New("Kernel_Start")));
-            DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
+                if (enableVBE)
+                {
+                    try
+                    {
+                        string[] res = VBEResolution.Split('x');
 
-            //End Tag
-            DataMembers.Add(new DataMember("align", "8", true));
-            DataMembers.Add(new DataMember("MultibootEndTag", Array.Empty<byte>()));
-            DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
-            DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
-            DataMembers.Add(new DataMember("MultibootEndTagEnd", Array.Empty<byte>()));
+                        //Framebuffer Tag
+                        DataMembers.Add(new DataMember("align", "8", true));
+                        DataMembers.Add(new DataMember("MultibootFramebufferTag", Array.Empty<byte>()));
+                        DataMembers.Add(new DataMember("MultibootFramebufferType", (ushort)5));
+                        DataMembers.Add(new DataMember("MultibootFramebufferOptional", (ushort)1));
+                        DataMembers.Add(new DataMember("MultibootFramebufferLenght", "MultibootFramebufferTagEnd - MultibootFramebufferTag", typeof(uint)));
+                        DataMembers.Add(new DataMember("", Int32.Parse(res[0])));
+                        DataMembers.Add(new DataMember("", Int32.Parse(res[1])));
+                        DataMembers.Add(new DataMember("", Int32.Parse(res[2])));
 
-            DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
+                        DataMembers.Add(new DataMember("MultibootFramebufferTagEnd", Array.Empty<byte>()));
+                    }
+                    catch
+                    {
+                        Console.WriteLine("VBE Resolution must be this format: 1920x1080x32");
+                    }
+                }
+
+                DataMembers.Add(new DataMember("align", "8", true));
+                DataMembers.Add(new DataMember("MultibootMemoryTag", Array.Empty<byte>()));
+                DataMembers.Add(new DataMember("MultibootMemoryTagType", (ushort)2));
+                DataMembers.Add(new DataMember("MultibootMemoryTagOptional", (ushort)1));
+                DataMembers.Add(new DataMember("MultibootMemoryTagLenght", "MultibootMemoryTagEnd - MultibootMemoryTag", typeof(uint)));
+                DataMembers.Add(new DataMember("MultibootHeaderAddr", ElementReference.New("MultibootSignature")));
+                DataMembers.Add(new DataMember("MultibootLoadAddr", ElementReference.New("MultibootSignature")));
+                DataMembers.Add(new DataMember("MultibootLoadEndAddr", ElementReference.New("_end_code")));
+                DataMembers.Add(new DataMember("MultibootBSSEndAddr", ElementReference.New("_end_code")));
+                DataMembers.Add(new DataMember("MultibootMemoryTagEnd", Array.Empty<byte>()));
+
+                //Entry Address
+                DataMembers.Add(new DataMember("align", "8", true));
+                DataMembers.Add(new DataMember("MultibootEntryTag", Array.Empty<byte>()));
+                DataMembers.Add(new DataMember("MultibootEntryTagType", (ushort)3));
+                DataMembers.Add(new DataMember("MultibootEntryTagOptional", (ushort)1));
+                DataMembers.Add(new DataMember("MultibootEntryTagLenght", "MultibootEntryTagEnd - MultibootEntryTag", typeof(uint)));
+                DataMembers.Add(new DataMember("MultibootEntryAddr", ElementReference.New("Kernel_Start")));
+                DataMembers.Add(new DataMember("MultibootEntryTagEnd", Array.Empty<byte>()));
+
+                //End Tag
+                DataMembers.Add(new DataMember("align", "8", true));
+                DataMembers.Add(new DataMember("MultibootEndTag", Array.Empty<byte>()));
+                DataMembers.Add(new DataMember("MultibootEndTagType", (ushort)0));
+                DataMembers.Add(new DataMember("MultibootEndTagOptional", (ushort)0));
+                DataMembers.Add(new DataMember("MultibootEndTagEnd", Array.Empty<byte>()));
+
+                DataMembers.Add(new DataMember("MultibootHeaderEnd", Array.Empty<byte>()));
+            }
+            else
+            {
+                DataMembers.Add(new DataMember("limine_base_revision", new ulong[] { 0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 1 }));
+            }
 
             //memory
             DataMembers.Add(new DataMember("align", "16", true));
@@ -318,7 +335,7 @@ namespace Cosmos.IL2CPU
 
             // This is our first entry point. Multiboot uses this as Cosmos entry point.
             new Label("Kernel_Start", isGlobal: true);
-            XS.Set(ESP, "Kernel_Stack");
+            //XS.Set(RSP, "Kernel_Stack"); // limine protocol already sets up stack (64KB)
 
             // Displays "Cosmos" in top left. Used to make sure Cosmos is booted in case of hang.
             // ie bootloader debugging. This must be the FIRST code, even before setup so we know
@@ -327,7 +344,7 @@ namespace Cosmos.IL2CPU
             WriteDebugVideo("Cosmos pre boot");
 
             // For when using Bochs, causes a break ASAP on entry after initial Cosmos display.
-            //new LiteralAssemblerCode("xchg bx, bx");
+            new LiteralAssemblerCode("xchg bx, bx");
 
             // CLI ASAP
             WriteDebugVideo("Clearing interrupts.");
@@ -348,16 +365,16 @@ namespace Cosmos.IL2CPU
                 SourceReg = RegistersEnum.EBX
             };
 
-            XS.Call(LabelName.Get(CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.Multiboot.Multiboot2, Cosmos.Core", true).GetMethod("Init")));
+            //XS.Call(LabelName.Get(CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.Multiboot.Multiboot2, Cosmos.Core", true).GetMethod("Init")));
 
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
             WriteDebugVideo("Creating GDT.");
-            CreateGDT();
-
+            //CreateGDT(); //limine creates the GDT for us
+            new LiteralAssemblerCode("xchg bx, bx");
             WriteDebugVideo("Configuring PIC");
             ConfigurePIC();
-
+            new LiteralAssemblerCode("xchg bx, bx");
             WriteDebugVideo("Creating IDT.");
             CreateIDT();
 
@@ -385,7 +402,7 @@ namespace Cosmos.IL2CPU
                 WriteDebugVideo("Initializing DebugStub.");
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_Init]);
             }
-
+            new LiteralAssemblerCode("xchg bx, bx");
             //Initiate Memory
             WriteDebugVideo("Initiating Memory");
             XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
@@ -477,7 +494,7 @@ namespace Cosmos.IL2CPU
             Action<byte, byte> xOutBytes = (port, value) =>
             {
                 XS.Set(DX, port);
-                XS.Set(EAX, value);
+                XS.Set(RAX, value);
                 XS.WriteToPortDX(AL);
             };
 
@@ -576,16 +593,12 @@ namespace Cosmos.IL2CPU
         protected override void BeforeFlushText(TextWriter aOutput)
         {
             base.BeforeFlushText(aOutput);
-            aOutput.WriteLine("%ifndef ELF_COMPILATION");
-            aOutput.WriteLine("use32");
-            aOutput.WriteLine("org 0x1000000");
-            aOutput.WriteLine("[map all main.map]");
-            aOutput.WriteLine("%endif");
+            aOutput.WriteLine("BITS 64");
+            aOutput.WriteLine("section .data");
         }
 
         protected override void OnBeforeFlush()
         {
-            DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
         }
 
         protected override void OnFlushTextAfterEmitEverything(TextWriter aOutput)
@@ -594,7 +607,7 @@ namespace Cosmos.IL2CPU
 
             aOutput.WriteLine("SystemExceptionOccurred:");
             aOutput.WriteLine("\tret");
-            aOutput.WriteLine("global Kernel_Start");
+            //aOutput.WriteLine("global Kernel_Start");
             aOutput.WriteLine("_end_code:");
         }
     }

@@ -31,11 +31,11 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xIsFloat)
                 {
-                    XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 8);
-                    XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+                    XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 8);
+                    XS.SSE2.MoveSD(XMM1, RSP, sourceIsIndirect: true);
                     XS.SSE2.DivSD(XMM1, XMM0);
-                    XS.SSE2.MoveSD(ESP, XMM1, destinationIsIndirect: true);
+                    XS.SSE2.MoveSD(RSP, XMM1, destinationIsIndirect: true);
                 }
                 else
                 {
@@ -46,13 +46,13 @@ namespace Cosmos.IL2CPU.X86.IL
 
                     // divisor
                     // low
-                    XS.Pop(ESI);
+                    XS.Pop(RSI);
                     // high
-                    XS.Pop(EDI);
+                    XS.Pop(RDI);
 
-                    XS.Xor(EAX, EAX);
-                    XS.Or(EAX, ESI);
-                    XS.Or(EAX, EDI);
+                    XS.Xor(RAX, RAX);
+                    XS.Or(RAX, RSI);
+                    XS.Or(RAX, RDI);
                     XS.Jump(ConditionalTestEnum.NotZero, xNoDivideByZeroExceptionLabel);
 
                     XS.Call(GetLabel(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef));
@@ -61,83 +61,83 @@ namespace Cosmos.IL2CPU.X86.IL
 
                     // dividend
                     // low
-                    XS.Pop(EAX);
+                    XS.Pop(RAX);
                     // high
-                    XS.Pop(EDX);
+                    XS.Pop(RDX);
 
                     // set flags
-                    XS.Or(EDI, EDI);
+                    XS.Or(RDI, RDI);
                     // if high dword of divisor is already zero, we dont need the loop
                     XS.Jump(ConditionalTestEnum.Zero, LabelNoLoop);
 
                     // set ecx to zero for counting the shift operations
-                    XS.Xor(ECX, ECX);
+                    XS.Xor(RCX, RCX);
 
                     // push most significant bit of result
-                    XS.Set(EBX, EDI);
-                    XS.Xor(EBX, EDX);
-                    XS.Push(EBX);
+                    XS.Set(RBX, RDI);
+                    XS.Xor(RBX, RDX);
+                    XS.Push(RBX);
 
-                    XS.Compare(EDI, 0x80000000);
+                    XS.Compare(RDI, 0x80000000);
                     XS.Jump(ConditionalTestEnum.Below, BaseLabel + "divisor_no_neg");
 
-                    XS.Negate(ESI);
-                    XS.AddWithCarry(EDI, 0);
-                    XS.Negate(EDI);
+                    XS.Negate(RSI);
+                    XS.AddWithCarry(RDI, 0);
+                    XS.Negate(RDI);
 
                     XS.Label(BaseLabel + "divisor_no_neg");
 
-                    XS.Compare(EDX, 0x80000000);
+                    XS.Compare(RDX, 0x80000000);
                     XS.Jump(ConditionalTestEnum.Below, BaseLabel + "dividend_no_neg");
 
-                    XS.Negate(EAX);
-                    XS.AddWithCarry(EDX, 0);
-                    XS.Negate(EDX);
+                    XS.Negate(RAX);
+                    XS.AddWithCarry(RDX, 0);
+                    XS.Negate(RDX);
 
                     XS.Label(BaseLabel + "dividend_no_neg");
 
                     XS.Label(LabelShiftRight);
 
                     // shift divisor 1 bit right
-                    XS.ShiftRightDouble(ESI, EDI, 1);
-                    XS.ShiftRight(EDI, 1);
+                    XS.ShiftRightDouble(RSI, RDI, 1);
+                    XS.ShiftRight(RDI, 1);
 
                     // increment shift counter
-                    XS.Increment(ECX);
+                    XS.Increment(RCX);
 
                     // set flags
                     //XS.Or(EDI, EDI);
-                    XS.Set(EBX, ESI);
-                    XS.And(EBX, 0x80000000);
-                    XS.Or(EBX, EDI);
+                    XS.Set(RBX, RSI);
+                    XS.And(RBX, 0x80000000);
+                    XS.Or(RBX, RDI);
                     // loop while high dword of divisor is not zero or most significant bit of low dword of divisor is set
                     XS.Jump(ConditionalTestEnum.NotZero, LabelShiftRight);
 
                     // shift the dividend now in one step
-                    XS.ShiftRightDouble(EAX, EDX, CL);
+                    XS.ShiftRightDouble(RAX, RDX, CL);
                     // shift dividend CL bits right
-                    XS.ShiftRight(EDX, CL);
+                    XS.ShiftRight(RDX, CL);
 
                     // so we shifted both, so we have near the same relation as original values
                     // divide this
-                    XS.IntegerDivide(ESI);
+                    XS.IntegerDivide(RSI);
 
                     // pop most significant bit of result
-                    XS.Pop(EBX);
+                    XS.Pop(RBX);
 
-                    XS.Compare(EBX, 0x80000000);
+                    XS.Compare(RBX, 0x80000000);
                     XS.Jump(ConditionalTestEnum.Below, BaseLabel + "_result_no_neg");
 
-                    XS.Negate(EAX);
+                    XS.Negate(RAX);
 
                     XS.Label(BaseLabel + "_result_no_neg");
 
                     // sign extend
-                    XS.SignExtendAX(RegisterSize.Int32);
+                    XS.SignExtendAX(RegisterSize.Long64);
 
                     // save result to stack
-                    XS.Push(EDX);
-                    XS.Push(EAX);
+                    XS.Push(RDX);
+                    XS.Push(RAX);
 
                     //TODO: implement proper derivation correction and overflow detection
 
@@ -145,20 +145,20 @@ namespace Cosmos.IL2CPU.X86.IL
 
                     XS.Label(LabelNoLoop);
                     // save high dividend
-                    XS.Set(ECX, EAX);
-                    XS.Set(EAX, EDX);
+                    XS.Set(RCX, RAX);
+                    XS.Set(RAX, RDX);
 
                     // extend that sign is in edx
-                    XS.SignExtendAX(RegisterSize.Int32);
+                    XS.SignExtendAX(RegisterSize.Long64);
                     // divide high part
-                    XS.IntegerDivide(ESI);
+                    XS.IntegerDivide(RSI);
                     // save high result
-                    XS.Push(EAX);
-                    XS.Set(EAX, ECX);
+                    XS.Push(RAX);
+                    XS.Set(RAX, RCX);
                     // divide low part
-                    XS.Divide(ESI);
+                    XS.Divide(RSI);
                     // save low result
-                    XS.Push(EAX);
+                    XS.Push(RAX);
 
                     XS.Label(LabelEnd);
                 }
@@ -167,29 +167,29 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xIsFloat)
                 {
-                    XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 4);
-                    XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
+                    XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 4);
+                    XS.SSE.MoveSS(XMM1, RSP, sourceIsIndirect: true);
                     XS.SSE.DivSS(XMM1, XMM0);
-                    XS.SSE.MoveSS(ESP, XMM1, destinationIsIndirect: true);
+                    XS.SSE.MoveSS(RSP, XMM1, destinationIsIndirect: true);
                 }
                 else
                 {
-                    XS.Pop(ECX);
+                    XS.Pop(RCX);
 
-                    XS.Test(ECX, ECX);
+                    XS.Test(RCX, RCX);
                     XS.Jump(ConditionalTestEnum.NotZero, xNoDivideByZeroExceptionLabel);
 
                     XS.Call(GetLabel(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef));
 
                     XS.Label(xNoDivideByZeroExceptionLabel);
 
-                    XS.Pop(EAX);
+                    XS.Pop(RAX);
 
-                    XS.SignExtendAX(RegisterSize.Int32);
+                    XS.SignExtendAX(RegisterSize.Long64);
 
-                    XS.IntegerDivide(ECX);
-                    XS.Push(EAX);
+                    XS.IntegerDivide(RCX);
+                    XS.Push(RAX);
                 }
             }
         }

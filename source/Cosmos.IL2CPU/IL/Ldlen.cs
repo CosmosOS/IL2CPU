@@ -25,10 +25,10 @@ namespace Cosmos.IL2CPU.X86.IL
                 DoNullReferenceCheck(aAssembler, debugEnabled, 4);
             }
 
-            XS.Add(ESP, 4);
-            XS.Pop(EAX);
+            XS.Add(RSP, 4);
+            XS.Pop(RAX);
 
-            XS.Push(EAX, displacement: 8);
+            XS.Push(RAX, displacement: 8);
         }
     }
 }

@@ -27,38 +27,38 @@ namespace Cosmos.IL2CPU.X86.IL
       var xBaseLabel = GetLabel(aMethod, aOpCode);
       var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
       var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
-      XS.Pop(EBX); //get Position _, array, 0, index -> _, array, 0
-      XS.Push(ESP, true, 4); // _, array, 0 => _, array, 0, array
-      XS.Push(ESP, true, 12); // _, array, 0, array => _, array, 0, array, 0
+      XS.Pop(RBX); //get Position _, array, 0, index -> _, array, 0
+      XS.Push(RSP, true, 4); // _, array, 0 => _, array, 0, array
+      XS.Push(RSP, true, 12); // _, array, 0, array => _, array, 0, array, 0
       Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, array, 0 -> _, array, 0, length
-      XS.Pop(EAX); //Length of array _, array, 0, length -> _, array, 0
-      XS.Compare(EAX, EBX);
+      XS.Pop(RAX); //Length of array _, array, 0, length -> _, array, 0
+      XS.Compare(RAX, RBX);
       XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
 
       // Check if EBX is negative
-      XS.Compare(EBX, 0);
+      XS.Compare(RBX, 0);
       XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 
       XS.Label(xIndexOutOfRangeExeptionLabel);
-      XS.Pop(EAX);
-      XS.Pop(EAX);
+      XS.Pop(RAX);
+      XS.Pop(RAX);
       Call.DoExecute(aAssembler, aMethod, ExceptionHelperRefs.ThrowIndexOutOfRangeException, aOpCode, xNoIndexOutOfRangeExeptionLabel, debugEnabled);
 
       XS.Label(xNoIndexOutOfRangeExeptionLabel);
-      XS.Push(EBX); //_, array, 0 -> _, array, 0, index
+      XS.Push(RBX); //_, array, 0 -> _, array, 0, index
 
       // calculate element offset into array memory (including header)
-      XS.Pop(EAX);
-      XS.Set(EDX, aElementSize);
-      XS.Multiply(EDX);
-      XS.Add(EAX, (uint)(ObjectUtils.FieldDataOffset + 4));
+      XS.Pop(RAX);
+      XS.Set(RDX, aElementSize);
+      XS.Multiply(RDX);
+      XS.Add(RAX, (uint)(ObjectUtils.FieldDataOffset + 4));
 
       // pop the array now
-      XS.Add(ESP, 4);
-      XS.Pop(EDX);
+      XS.Add(RSP, 4);
+      XS.Pop(RDX);
 
-      XS.Add(EDX, EAX);
-      XS.Push(EDX);
+      XS.Add(RDX, RAX);
+      XS.Push(RDX);
     }
 
     public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)

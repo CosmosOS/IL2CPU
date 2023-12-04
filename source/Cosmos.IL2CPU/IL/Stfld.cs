@@ -49,46 +49,46 @@ namespace Cosmos.IL2CPU.X86.IL
             // Determine field in obejct position
             if (aNeedsGC)
             {
-                XS.Set(ECX, ESP, sourceDisplacement: (int)xRoundedSize + 4);
+                XS.Set(RCX, RSP, sourceDisplacement: (int)xRoundedSize + 4);
             }
             else
             {
-                XS.Set(ECX, ESP, sourceDisplacement: (int)xRoundedSize);
+                XS.Set(RCX, RSP, sourceDisplacement: (int)xRoundedSize);
             }
 
             if (xActualOffset != 0)
             {
-                XS.Add(ECX, (uint)xActualOffset);
+                XS.Add(RCX, (uint)xActualOffset);
             }
 
             //TODO: Can't we use an x86 op to do a byte copy instead and be faster?
             for (int i = 0; i < xSize / 4; i++)
             {
-                XS.Pop(EAX);
-                XS.Set(ECX, EAX, destinationDisplacement: (int)(i * 4));
+                XS.Pop(RAX);
+                XS.Set(RCX, RAX, destinationDisplacement: (int)(i * 4));
             }
 
             switch (xSize % 4)
             {
                 case 1:
                     {
-                        XS.Pop(EAX);
+                        XS.Pop(RAX);
                         new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize / 4 * 4), SourceReg = CPUx86.RegistersEnum.AL };
                         break;
                     }
                 case 2:
                     {
-                        XS.Pop(EAX);
+                        XS.Pop(RAX);
                         new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize / 4 * 4), SourceReg = CPUx86.RegistersEnum.AX };
                         break;
                     }
                 case 3:
                     {
-                        XS.Pop(EAX);
+                        XS.Pop(RAX);
                         // move 2 lower bytes
                         new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize / 4 * 4), SourceReg = CPUx86.RegistersEnum.AX };
                         // shift third byte to lowest
-                        XS.ShiftRight(EAX, 16);
+                        XS.ShiftRight(RAX, 16);
                         new CPUx86.Mov { DestinationReg = CPUx86.RegistersEnum.ECX, DestinationIsIndirect = true, DestinationDisplacement = (int)(xSize / 4 * 4) + 2, SourceReg = CPUx86.RegistersEnum.AL };
                         break;
                     }
@@ -101,10 +101,10 @@ namespace Cosmos.IL2CPU.X86.IL
             }
 
             // remove object from stack
-            XS.Add(ESP, 4);
+            XS.Add(RSP, 4);
             if (aNeedsGC)
             {
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
             }
         }
 

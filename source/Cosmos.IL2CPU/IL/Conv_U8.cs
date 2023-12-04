@@ -31,12 +31,12 @@ namespace Cosmos.IL2CPU.X86.IL
       if (IsReferenceType(xSource))
       {
         // todo: Stop GC tracking
-        XS.Add(ESP, SizeOfType(typeof(UIntPtr)));
+        XS.Add(RSP, SizeOfType(typeof(UIntPtr)));
 
         // todo: x64
-        XS.Pop(EAX);
+        XS.Pop(RAX);
         XS.Push(0);
-        XS.Push(EAX);
+        XS.Push(RAX);
       }
       else if (IsByRef(xSource))
       {
@@ -47,25 +47,25 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         if (xSourceIsFloat)
         {
-          XS.FPU.FloatLoad(ESP, destinationIsIndirect: true, size: RegisterSize.Int32);
-          XS.Sub(ESP, 4);
-          XS.FPU.IntStoreWithTruncate(ESP, isIndirect: true, size: RegisterSize.Long64);
+          XS.FPU.FloatLoad(RSP, destinationIsIndirect: true, size: RegisterSize.Long64);
+          XS.Sub(RSP, 4);
+          XS.FPU.IntStoreWithTruncate(RSP, isIndirect: true, size: RegisterSize.Long64);
         }
         else
         {
-          XS.Pop(EAX);
+          XS.Pop(RAX);
           XS.Push(0);
-          XS.Push(EAX);
+          XS.Push(RAX);
         }
       }
       else if (xSourceSize <= 8)
       {
         if (xSourceIsFloat)
         {
-          XS.FPU.FloatLoad(ESP, destinationIsIndirect: true, size: RegisterSize.Long64);
+          XS.FPU.FloatLoad(RSP, destinationIsIndirect: true, size: RegisterSize.Long64);
           /* The sign of the value should not be changed a negative value is simply converted to its corresponding ulong value */
           //XS.FPU.FloatAbs();
-          XS.FPU.IntStoreWithTruncate(ESP, isIndirect: true, size: RegisterSize.Long64);
+          XS.FPU.IntStoreWithTruncate(RSP, isIndirect: true, size: RegisterSize.Long64);
         }
       }
       else

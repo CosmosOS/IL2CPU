@@ -27,17 +27,17 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (xSourceIsFloat)
                 {
-                    XS.SSE2.ConvertSS2SD(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Sub(ESP, 4);
-                    XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
+                    XS.SSE2.ConvertSS2SD(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Sub(RSP, 4);
+                    XS.SSE2.MoveSD(RSP, XMM0, destinationIsIndirect: true);
                 }
                 else
                 {
                     if (xSourceSize <= 2 || TypeIsSigned(xSource))
                     {
-                        XS.SSE2.ConvertSI2SD(XMM0, ESP, sourceIsIndirect: true);
-                        XS.Sub(ESP, 4);
-                        XS.SSE2.MoveSD(ESP, XMM0, destinationIsIndirect: true);
+                        XS.SSE2.ConvertSI2SD(XMM0, RSP, sourceIsIndirect: true);
+                        XS.Sub(RSP, 4);
+                        XS.SSE2.MoveSD(RSP, XMM0, destinationIsIndirect: true);
                     }
                     else
                     {
@@ -51,8 +51,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     if (TypeIsSigned(xSource))
                     {
-                        XS.FPU.IntLoad(ESP, isIndirect: true, size: RegisterSize.Long64);
-                        XS.FPU.FloatStoreAndPop(ESP, isIndirect: true, size: RegisterSize.Long64);
+                        XS.FPU.IntLoad(RSP, isIndirect: true, size: RegisterSize.Long64);
+                        XS.FPU.FloatStoreAndPop(RSP, isIndirect: true, size: RegisterSize.Long64);
                     }
                     else
                     {

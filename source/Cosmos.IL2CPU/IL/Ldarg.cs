@@ -150,20 +150,20 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 if (TypeIsSigned(xType))
                 {
-                    XS.MoveSignExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: xDisplacement, size: (RegisterSize)(8 * xArgRealSize));
+                    XS.MoveSignExtend(RAX, RBP, sourceIsIndirect: true, sourceDisplacement: xDisplacement, size: (RegisterSize)(8 * xArgRealSize));
                 }
                 else
                 {
-                    XS.MoveZeroExtend(EAX, EBP, sourceIsIndirect: true, sourceDisplacement: xDisplacement, size: (RegisterSize)(8 * xArgRealSize));
+                    XS.MoveZeroExtend(RAX, RBP, sourceIsIndirect: true, sourceDisplacement: xDisplacement, size: (RegisterSize)(8 * xArgRealSize));
                 }
 
-                XS.Push(EAX);
+                XS.Push(RAX);
             }
             else
             {
                 for (int i = 0; i < xArgSize / 4; i++)
                 {
-                    XS.Push(EBP, isIndirect: true, displacement: xDisplacement - i * 4);
+                    XS.Push(RBP, isIndirect: true, displacement: xDisplacement - i * 4);
                 }
             }
         }

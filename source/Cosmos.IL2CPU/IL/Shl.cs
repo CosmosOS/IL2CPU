@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode )
         {
-            XS.Pop(XSRegisters.ECX); // shift amount
+            XS.Pop(XSRegisters.RCX); // shift amount
             var xStackItem_ShiftAmount = aOpCode.StackPopTypes[0];
 			var xStackItem_Value = aOpCode.StackPopTypes[1];
             var xStackItem_Value_Size = SizeOfType(xStackItem_Value);
@@ -26,7 +26,7 @@ namespace Cosmos.IL2CPU.X86.IL
 			if (xStackItem_Value_Size <= 4)
 #endif
 			{
-				XS.ShiftLeft(XSRegisters.ESP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Int32);
+				XS.ShiftLeft(XSRegisters.RSP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Long64);
 			}
 #if DOTNETCOMPATIBLE
 			else if (xStackItem_Value.Size == 8)
@@ -42,16 +42,16 @@ namespace Cosmos.IL2CPU.X86.IL
 				// [ESP + 4] is high part
 
 				// move low part to eax
-				XS.Set(EAX, ESP, sourceIsIndirect: true);
+				XS.Set(RAX, RSP, sourceIsIndirect: true);
 
 				XS.Compare(XSRegisters.CL, 32, size: RegisterSize.Byte8);
 				XS.Jump(CPUx86.ConditionalTestEnum.AboveOrEqual, LowPartIsZero);
 
 				// shift higher part
-				XS.ShiftLeftDouble(ESP, EAX, CL, destinationDisplacement: 4);
+				XS.ShiftLeftDouble(RSP, RAX, CL, destinationDisplacement: 4);
                 // shift lower part
                 // To retain the sign bit we must use ShiftLeftArithmetic and not ShiftLeft!
-                XS.ShiftLeftArithmetic(XSRegisters.ESP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Int32);
+                XS.ShiftLeftArithmetic(XSRegisters.RSP, XSRegisters.CL, destinationIsIndirect: true, size: RegisterSize.Long64);
 				XS.Jump(End_Shl);
 
 				XS.Label(LowPartIsZero);
@@ -59,10 +59,10 @@ namespace Cosmos.IL2CPU.X86.IL
 				XS.And(XSRegisters.CL, 0x1f, size: RegisterSize.Byte8);
                 // shift low part in EAX and move it in high part
                 // To retain the sign bit we must use ShiftLeftArithmetic and not ShiftLeft!
-                XS.ShiftLeftArithmetic(EAX, CL);
-				XS.Set(ESP, EAX, destinationDisplacement: 4);
+                XS.ShiftLeftArithmetic(RAX, CL);
+				XS.Set(RSP, RAX, destinationDisplacement: 4);
 				// replace unknown low part with a zero, if <= 32
-				XS.Set(XSRegisters.ESP, 0, destinationIsIndirect: true);
+				XS.Set(XSRegisters.RSP, 0, destinationIsIndirect: true);
 
 				XS.Label(End_Shl);
 			}

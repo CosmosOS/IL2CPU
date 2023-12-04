@@ -50,6 +50,7 @@ namespace Cosmos.IL2CPU
         public StackCorruptionDetectionLevel StackCorruptionDetectionLevel;
         public DebugMode DebugMode;
         public bool IgnoreDebugStubAttribute;
+        public string TargetArchitecture;
         private List<MethodIlOp> mSymbols = new List<MethodIlOp>();
         private List<INT3Label> mINT3Labels = new List<INT3Label>();
         private int incBinCounter = 0;
@@ -141,16 +142,16 @@ namespace Cosmos.IL2CPU
             if (DebugEnabled && StackCorruptionDetection)
             {
                 // if StackCorruption detection is active, we're also going to emit a stack overflow detection
-                XS.Set(EAX, "Before_Kernel_Stack");
-                XS.Compare(EAX, ESP);
+                XS.Set(RAX, "Before_Kernel_Stack");
+                XS.Compare(RAX, RSP);
                 XS.Jump(ConditionalTestEnum.LessThan, ".StackOverflowCheck_End");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".StackOverflowCheck_GetAddress");
                 XS.Label(".StackOverflowCheck_GetAddress");
                 XS.Exchange(BX, BX);
-                XS.Pop(EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
+                XS.Pop(RAX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], RAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackOverflowEvent]);
                 XS.Halt();
                 XS.Label(".StackOverflowCheck_End");
@@ -168,13 +169,13 @@ namespace Cosmos.IL2CPU
                 XS.Set(xName, 1, destinationIsIndirect: true, size: RegisterSize.Byte8);
                 XS.Jump(".AfterCCTorAlreadyCalledCheck");
                 XS.Label(".BeforeQuickReturn");
-                XS.Set(ECX, 0);
+                XS.Set(RCX, 0);
                 XS.Return();
                 XS.Label(".AfterCCTorAlreadyCalledCheck");
             }
 
-            XS.Push(EBP);
-            XS.Set(EBP, ESP);
+            XS.Push(RBP);
+            XS.Set(RBP, RSP);
 
             if (aMethod.MethodAssembler == null && aMethod.PlugMethod == null && !aMethod.IsInlineAssembler)
             {
@@ -286,9 +287,10 @@ namespace Cosmos.IL2CPU
             var xMethodLabel = ILOp.GetLabel(aMethod);
             XS.Label(xMethodLabel + EndOfMethodLabelNameNormal);
             XS.Comment("Following code is for debugging. Adjust accordingly!");
-            XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], xMethodLabel + EndOfMethodLabelNameNormal, destinationIsIndirect: true);
+            XS.Set(R10, xMethodLabel + EndOfMethodLabelNameNormal, size: RegisterSize.Long64);
+            XS.Set(AsmMarker.Labels[AsmMarker.Type.Int_LastKnownAddress], R10, true);
 
-            XS.Set(ECX, 0);
+            XS.Set(RCX, 0);
 
             // Determine size of return value
             uint xReturnSize = 0;
@@ -340,8 +342,8 @@ namespace Cosmos.IL2CPU
                 // move return value
                 for (int i = 0; i < (int)(xReturnSize / 4); i++)
                 {
-                    XS.Pop(EAX);
-                    XS.Set(EBP, EAX, destinationDisplacement: (int)(xOffset + (i + 0) * 4));
+                    XS.Pop(RAX);
+                    XS.Set(RBP, RAX, destinationDisplacement: (int)(xOffset + (i + 0) * 4));
                 }
             }
             // extra stack space is the space reserved for example when a "public static int TestMethod();" method is called, 4 bytes is pushed, to make room for result;
@@ -359,13 +361,13 @@ namespace Cosmos.IL2CPU
 
                     if (xLocalsSize >= 256)
                     {
-                        XS.Add(ESP, 255);
+                        XS.Add(RSP, 255);
                         xLocalsSize -= 255;
                     }
                 }
                 if (xLocalsSize > 0)
                 {
-                    XS.Add(ESP, xLocalsSize);
+                    XS.Add(RSP, xLocalsSize);
                 }
             }
 
@@ -373,28 +375,28 @@ namespace Cosmos.IL2CPU
             {
                 // if debugstub is active, emit a stack corruption detection. at this point EBP and ESP should have the same value.
                 // if not, we should somehow break here.
-                XS.Set(EAX, ESP);
-                XS.Set(EBX, EBP);
-                XS.Compare(EAX, EBX);
+                XS.Set(RAX, RSP);
+                XS.Set(RBX, RBP);
+                XS.Compare(RAX, RBX);
                 XS.Jump(ConditionalTestEnum.Equal, xLabelExc + "__2");
                 XS.ClearInterruptFlag();
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".MethodFooterStackCorruptionCheck_Break_on_location");
                 XS.Label(xLabelExc + ".MethodFooterStackCorruptionCheck_Break_on_location");
                 XS.Exchange(BX, BX);
-                XS.Pop(ECX);
-                XS.Push(EAX);
-                XS.Push(EBX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], ECX, destinationIsIndirect: true);
+                XS.Pop(RCX);
+                XS.Push(RAX);
+                XS.Push(RBX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], RCX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackCorruptedEvent]);
                 XS.Halt();
             }
             XS.Label(xLabelExc + "__2");
-            XS.Pop(EBP);
+            XS.Pop(RBP);
             var xRetSize = xTotalArgsSize - (int)xReturnSize;
             if (xRetSize < 0)
             {
@@ -675,7 +677,7 @@ namespace Cosmos.IL2CPU
             }
             if (xSize > 0)
             {
-                XS.Sub(ESP, xSize);
+                XS.Sub(RSP, xSize);
             }
             XS.Call(ILOp.GetLabel(aTargetMethod));
             var xMethodInfo = aMethod.MethodBase as MethodInfo;
@@ -696,7 +698,7 @@ namespace Cosmos.IL2CPU
                     }
                     for (int i = 0; i < xResultSize / 4; i++)
                     {
-                        XS.Add(ESP, 4);
+                        XS.Add(RSP, 4);
                     }
                 }, aNextLabel);
         }
@@ -733,8 +735,8 @@ namespace Cosmos.IL2CPU
         {
             XS.Comment("---------------------------------------------------------");
             XS.Label(InitVMTCodeLabel);
-            XS.Push(EBP);
-            XS.Set(EBP, ESP);
+            XS.Push(RBP);
+            XS.Set(RBP, RSP);
 
             var xTypesFieldRef = VTablesImplRefs.VTablesImplDef.GetField("mTypes", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
             string xTheName = LabelName.GetStaticFieldName(xTypesFieldRef);
@@ -776,11 +778,13 @@ namespace Cosmos.IL2CPU
             byte[] xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(VTableType), xArrayTypeID);
             XS.DataMemberBytes(xTheName + "_Contents", xData);
             XS.DataMember(xTheName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
-            XS.Set(xTheName, xTheName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+            XS.Set(R10, xTheName + "_Contents", sourceIsIndirect: true);
+            XS.Set(xTheName, R10, destinationIsIndirect: true, destinationDisplacement: 4);
             xData = AllocateEmptyArray(aTypesSet.Count, (int)ILOp.SizeOfType(GCTableType), xArrayTypeID);
             XS.DataMemberBytes(xGCArrayName + "_Contents", xData);
             XS.DataMember(xGCArrayName, 1, "db", "0, 0, 0, 0, 0, 0, 0, 0");
-            XS.Set(xGCArrayName, xGCArrayName + "_Contents", destinationIsIndirect: true, destinationDisplacement: 4);
+            XS.Set(R10, xGCArrayName + "_Contents", sourceIsIndirect: true);
+            XS.Set(xGCArrayName, R10, destinationIsIndirect: true, destinationDisplacement: 4);
 #if VMT_DEBUG
             using (var xVmtDebugOutput = XmlWriter.Create(
                 File.Create(Path.Combine(mLogDir, @"vmt_debug.xml")), new XmlWriterSettings() { Indent = true }))
@@ -833,7 +837,7 @@ namespace Cosmos.IL2CPU
                 // Type ID
                 string xDataName = $"VMT__TYPE_ID_HOLDER__{xTypeName}";
                 XS.Comment(xType.FullName);
-                XS.Set(xDataName, (uint)xTypeID, destinationIsIndirect: true, size: RegisterSize.Int32);
+                XS.Set(xDataName, (uint)xTypeID, destinationIsIndirect: true, size: RegisterSize.Long64);
                 XS.DataMember(xDataName, xTypeID);
                 XS.Push(xTypeID);
 
@@ -1021,7 +1025,7 @@ namespace Cosmos.IL2CPU
 #endif
 
             XS.Label("_END_OF_" + InitVMTCodeLabel);
-            XS.Pop(EBP);
+            XS.Pop(RBP);
             XS.Return();
         }
 
@@ -1219,7 +1223,7 @@ namespace Cosmos.IL2CPU
                         if (xObjectPointerAccessAttrib != null)
                         {
                             XS.Comment("Skipping the reference to the next object reference.");
-                            XS.Add(ESP, 4);
+                            XS.Add(RSP, 4);
                             xExtraSpaceToSkipDueToObjectPointerAccess += 4;
                         }
                         else
@@ -1259,7 +1263,7 @@ namespace Cosmos.IL2CPU
                     {
                         xOriginalParamsIdx++;
                         Ldarg(aFrom, xCurParamIdx + xCurParamOffset);
-                        XS.Add(ESP, 4);
+                        XS.Add(RSP, 4);
                         xExtraSpaceToSkipDueToObjectPointerAccess += 4;
                         xCurParamIdx++;
                     }
@@ -1303,11 +1307,12 @@ namespace Cosmos.IL2CPU
             // at the time the datamembers for literal strings are created, the type id for string is not yet determined.
             // for now, we fix this at runtime.
             XS.Label(InitStringIDsLabel);
-            XS.Push(EBP);
-            XS.Set(EBP, ESP);
-            XS.Set(EAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
+            XS.Push(RBP);
+            XS.Set(RBP, RSP);
+            XS.Set(RAX, ILOp.GetTypeIDLabel(typeof(string)), sourceIsIndirect: true);
+            XS.Set(R10, LdStr.GetContentsArrayName(Assembler, ""));
             XS.Set(LabelName.GetStaticFieldName(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public)),
-                LdStr.GetContentsArrayName(Assembler, ""), destinationDisplacement: 4);
+                R10, destinationDisplacement: 4);
 
             var xMemberId = 0;
 
@@ -1329,12 +1334,12 @@ namespace Cosmos.IL2CPU
                 new Mov { DestinationRef = ElementReference.New(xDataMember.Name), DestinationIsIndirect = true, SourceReg = RegistersEnum.EAX };
             }
             Assembler.WriteDebugVideo("Done");
-            XS.Pop(EBP);
+            XS.Pop(RBP);
             XS.Return();
 
             XS.Label(CosmosAssembler.EntryPointName);
-            XS.Push(EBP);
-            XS.Set(EBP, ESP);
+            XS.Push(RBP);
+            XS.Set(RBP, RSP);
             Assembler.WriteDebugVideo("Initializing VMT.");
             XS.Call(InitVMTCodeLabel);
             Assembler.WriteDebugVideo("Initializing string IDs.");
@@ -1350,7 +1355,7 @@ namespace Cosmos.IL2CPU
             XS.Label(xCurLabel);
             X86.IL.Call.DoExecute(Assembler, null, aEntrypoint.DeclaringType.GetMethod("Start"), null, xCurLabel, CosmosAssembler.EntryPointName + ".AfterStart", DebugEnabled);
             XS.Label(CosmosAssembler.EntryPointName + ".AfterStart");
-            XS.Pop(EBP);
+            XS.Pop(RBP);
             XS.Return();
 
             if (ShouldOptimize)
@@ -1434,18 +1439,18 @@ namespace Cosmos.IL2CPU
 
                 // if debugstub is active, emit a stack corruption detection. at this point EBP and ESP should have the same value.
                 // if not, we should somehow break here.
-                XS.Set(EAX, ESP);
-                XS.Set(EBX, EBP);
+                XS.Set(RAX, RSP);
+                XS.Set(RBX, RBP);
                 if (xStackDifference != 0)
                 {
-                    XS.Add(EAX, xStackDifference.Value);
+                    XS.Add(RAX, xStackDifference.Value);
                 }
-                XS.Compare(EAX, EBX);
+                XS.Compare(RAX, RBX);
                 XS.Jump(ConditionalTestEnum.Equal, xLabel + ".StackCorruptionCheck_End");
-                XS.Push(EAX);
-                XS.Push(EBX);
+                XS.Push(RAX);
+                XS.Push(RBX);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendSimpleNumber]);
 
                 XS.ClearInterruptFlag();
@@ -1453,8 +1458,8 @@ namespace Cosmos.IL2CPU
                 XS.Call(xLabel + ".StackCorruptionCheck_GetAddress");
                 XS.Label(xLabel + ".StackCorruptionCheck_GetAddress");
                 XS.Exchange(BX, BX);
-                XS.Pop(EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
+                XS.Pop(RAX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], RAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendStackCorruptedEvent]);
                 XS.Halt();
                 XS.Label(xLabel + ".StackCorruptionCheck_End");

@@ -122,7 +122,7 @@ namespace Cosmos.IL2CPU
                     break;
                 }
                 var xField = xLocalInfos[i];
-                xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4;
+                xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 8;
             }
             return xOffset;
         }
@@ -133,7 +133,7 @@ namespace Cosmos.IL2CPU
             uint xOffset = GetEBPOffsetForLocal(aMethod, localIndex);
             var xLocalInfos = aMethod.MethodBase.GetLocalVariables();
             var xField = xLocalInfos[localIndex];
-            xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 4 - 4;
+            xOffset += GetStackCountForLocal(aMethod, xField.LocalType) * 8 - 4;
             return xOffset;
         }
 
@@ -395,7 +395,7 @@ namespace Cosmos.IL2CPU
                 XS.Comment("Cleanup return");
 
                 // cleanup result values
-                XS.Add(XSRegisters.ESP, 4 * aReturnSize / 4);
+                XS.Add(XSRegisters.RSP, 4 * aReturnSize / 4);
             }
 
             if (aStackSizeBeforeCall > aTotalArgumentSizeOfMethod)
@@ -406,7 +406,7 @@ namespace Cosmos.IL2CPU
                     XS.Comment("Cleanup extra stack");
 
                     // cleanup result values
-                    XS.Add(XSRegisters.ESP, 4 * xExtraStack / 4);
+                    XS.Add(XSRegisters.RSP, 4 * xExtraStack / 4);
                 }
             }
         }
@@ -462,7 +462,7 @@ namespace Cosmos.IL2CPU
             }
             else
             {
-                XS.Test(ECX, 2);
+                XS.Test(RCX, 2);
 
                 if (aCleanup != null)
                 {
@@ -501,15 +501,15 @@ namespace Cosmos.IL2CPU
             if (debugEnabled)
             {
                 //if (!CompilerEngine.UseGen3Kernel) {
-                XS.Compare(ESP, 0, destinationDisplacement: stackOffsetToCheck);
+                XS.Compare(RSP, 0, destinationDisplacement: stackOffsetToCheck);
                 XS.Jump(CPU.ConditionalTestEnum.NotEqual, ".AfterNullCheck");
                 XS.ClearInterruptFlag();
                 XS.Exchange(BX, BX);
                 // don't remove the call. It seems pointless, but we need it to retrieve the EIP value
                 XS.Call(".NullCheck_GetCurrAddress");
                 XS.Label(".NullCheck_GetCurrAddress");
-                XS.Pop(EAX);
-                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], EAX, destinationIsIndirect: true);
+                XS.Pop(RAX);
+                XS.Set(AsmMarker.Labels[AsmMarker.Type.DebugStub_CallerEIP], RAX, destinationIsIndirect: true);
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_SendNullRefEvent]);
                 //}
                 XS.Halt();

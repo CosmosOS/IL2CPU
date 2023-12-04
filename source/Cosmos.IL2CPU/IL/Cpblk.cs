@@ -14,11 +14,11 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             // destination address
-            XS.Pop(EDI);
+            XS.Pop(RDI);
             // source address
-            XS.Pop(ESI);
+            XS.Pop(RSI);
             // byte count
-            XS.Pop(ECX);
+            XS.Pop(RCX);
 
             new Movs { Prefixes = InstructionPrefixes.Repeat, Size = 8 };
         }

@@ -56,7 +56,7 @@ namespace Cosmos.IL2CPU.X86.IL
             if (xIsReferenceType)
             {
                 var name = ElementReference.New(xDataName).Name;
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
 
                 // GC clean up old object
                 XS.Compare(name, 0, destinationIsIndirect: true, destinationDisplacement: 4);
@@ -65,8 +65,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Call(LabelName.Get(GCImplementationRefs.DecRootCountRef));
                 XS.Label(".AfterGC");
 
-                XS.Pop(EAX);
-                XS.Set(name, EAX, destinationIsIndirect: true, destinationDisplacement: 4);
+                XS.Pop(RAX);
+                XS.Set(name, RAX, destinationIsIndirect: true, destinationDisplacement: 4);
 
                 // Update GC for new object
                 XS.Compare(name, 0, destinationIsIndirect: true, destinationDisplacement: 4);
@@ -91,20 +91,20 @@ namespace Cosmos.IL2CPU.X86.IL
 
             for (int i = 0; i < xSize / 4; i++)
             {
-                XS.Pop(EAX);
+                XS.Pop(RAX);
                 new CPU.Mov { DestinationRef = ElementReference.New(xDataName, i * 4), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.EAX };
             }
             switch (xSize % 4)
             {
                 case 1:
                     {
-                        XS.Pop(EAX);
+                        XS.Pop(RAX);
                         new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)(xSize / 4 * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AL };
                         break;
                     }
                 case 2:
                     {
-                        XS.Pop(EAX);
+                        XS.Pop(RAX);
                         new CPU.Mov { DestinationRef = ElementReference.New(xDataName, (int)(xSize / 4 * 4)), DestinationIsIndirect = true, SourceReg = CPU.RegistersEnum.AX };
                         break;
                     }

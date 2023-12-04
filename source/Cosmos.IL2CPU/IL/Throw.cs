@@ -18,11 +18,11 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             // TODO: Implement exception
             DoNullReferenceCheck(Assembler, DebugEnabled, 4);
-            XS.Add(ESP, 4);
-            XS.Pop(EAX);
-            XS.Set(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), EAX, destinationIsIndirect: true);
+            XS.Add(RSP, 4);
+            XS.Pop(RAX);
+            XS.Set(LabelName.GetStaticFieldName(ExceptionHelperRefs.CurrentExceptionRef), RAX, destinationIsIndirect: true);
             XS.Call("SystemExceptionOccurred");
-            XS.Set(ECX, 3);
+            XS.Set(RCX, 3);
             EmitExceptionLogic(Assembler, aMethod, aOpCode, false, null);
 
             // FIXME: This is only temporary, but this is better to avoid potential CPU faults if the code still gets executed (aka the exception was not handled before)

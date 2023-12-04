@@ -28,14 +28,14 @@ namespace Cosmos.IL2CPU.X86.IL
             var xBaseLabel = GetLabel(aMethod, aOpCode);
             var xNoIndexOutOfRangeExeptionLabel = xBaseLabel + "_NoIndexOutOfRangeException";
             var xIndexOutOfRangeExeptionLabel = xBaseLabel + "_IndexOutOfRangeException";
-            XS.Push(ESP, displacement: 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
+            XS.Push(RSP, displacement: 4 + 4 + (int)xStackSize); // _, array, 0, index, value * n  => _, array, 0, index, value * n, array
             XS.Push(0); // _, array, 0, index, value * n, array => _, array, 0, index, value * n, array, 0
             Ldlen.Assemble(aAssembler, debugEnabled, false); // _, array, 0, index, value * n, array, 0 -> _, array, 0, index, value * n, length
-            XS.Pop(EAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
-            XS.Compare(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
+            XS.Pop(RAX); //Length of array _, array, 0, index, value * n, length -> _, array, 0, index, value * n
+            XS.Compare(RAX, RSP, sourceIsIndirect: true, sourceDisplacement: (int)xStackSize);
             XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
 
-            XS.Compare(EAX, 0);
+            XS.Compare(RAX, 0);
             XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 
             XS.Label(xIndexOutOfRangeExeptionLabel);
@@ -45,48 +45,48 @@ namespace Cosmos.IL2CPU.X86.IL
             XS.Label(xNoIndexOutOfRangeExeptionLabel);
 
             // calculate element offset into array memory (including header)
-            XS.Set(EAX, ESP, sourceDisplacement: (int)xStackSize); // the index
-            XS.Set(EDX, aElementSize);
-            XS.Multiply(EDX);
-            XS.Add(EAX, ObjectUtils.FieldDataOffset + 4);
+            XS.Set(RAX, RSP, sourceDisplacement: (int)xStackSize); // the index
+            XS.Set(RDX, aElementSize);
+            XS.Multiply(RDX);
+            XS.Add(RAX, ObjectUtils.FieldDataOffset + 4);
 
-            XS.Set(EDX, ESP, sourceDisplacement: (int)xStackSize + 8); // the array
-            XS.Add(EDX, EAX);
-            XS.Push(EDX);
+            XS.Set(RDX, RSP, sourceDisplacement: (int)xStackSize + 8); // the array
+            XS.Add(RDX, RAX);
+            XS.Push(RDX);
 
-            XS.Pop(ECX);
+            XS.Pop(RCX);
 
             //get bytes
             var bytes = aElementSize / 4;
             for (uint i = bytes; i > 0; i -= 1)
             {
                 new Comment(aAssembler, "Start 1 dword");
-                XS.Pop(EBX);
-                XS.Set(ECX, EBX, destinationIsIndirect: true);
-                XS.Add(ECX, 4);
+                XS.Pop(RBX);
+                XS.Set(RCX, RBX, destinationIsIndirect: true);
+                XS.Add(RCX, 4);
             }
             switch (aElementSize % 4)
             {
                 case 1:
                     {
                         new Comment(aAssembler, "Start 1 byte");
-                        XS.Pop(EBX);
-                        XS.Set(ECX, BL, destinationIsIndirect: true);
+                        XS.Pop(RBX);
+                        XS.Set(RCX, BL, destinationIsIndirect: true);
                         break;
                     }
                 case 2:
                     {
                         new Comment(aAssembler, "Start 1 word");
-                        XS.Pop(EBX);
-                        XS.Set(ECX, BX, destinationIsIndirect: true);
+                        XS.Pop(RBX);
+                        XS.Set(RCX, BX, destinationIsIndirect: true);
                         break;
                     }
                 case 3:
                     {
                         new Comment(aAssembler, "Start 3 word");
-                        XS.Pop(EBX);
-                        XS.And(EBX, 0xFFFFFF); // Only take the value of the lower three bytes
-                        XS.Set(ECX, EBX, destinationIsIndirect: true);
+                        XS.Pop(RBX);
+                        XS.And(RBX, 0xFFFFFF); // Only take the value of the lower three bytes
+                        XS.Set(RCX, RBX, destinationIsIndirect: true);
                         break;
                     }
                 case 0:
@@ -98,7 +98,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             }
 
-            XS.Add(ESP, 12);
+            XS.Add(RSP, 12);
         }
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {

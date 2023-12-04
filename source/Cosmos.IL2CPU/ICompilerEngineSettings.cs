@@ -31,5 +31,6 @@ namespace Cosmos.IL2CPU
         string VBEResolution { get;  }
 
         bool AllowComments { get; }
+        string TargetArchitecture { get; }
     }
 }

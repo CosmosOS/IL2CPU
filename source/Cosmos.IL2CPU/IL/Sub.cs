@@ -37,36 +37,36 @@ namespace Cosmos.IL2CPU.X86.IL
                 case 4:
                     if (xStackTopIsFloat)
                     {
-                        XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-                        XS.Add(ESP, 4);
-                        XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
+                        XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+                        XS.Add(RSP, 4);
+                        XS.SSE.MoveSS(XMM1, RSP, sourceIsIndirect: true);
                         //XS.LiteralCode("movss XMM1, [ESP + 4]");
                         XS.SSE.SubSS(XMM1, XMM0);
-                        XS.SSE.MoveSS(ESP, XMM1, destinationIsIndirect: true);
+                        XS.SSE.MoveSS(RSP, XMM1, destinationIsIndirect: true);
                     }
                     else
                     {
-                        XS.Pop(XSRegisters.ECX);
-                        XS.Pop(XSRegisters.EAX);
-                        XS.Sub(XSRegisters.EAX, XSRegisters.ECX);
-                        XS.Push(XSRegisters.EAX);
+                        XS.Pop(XSRegisters.RCX);
+                        XS.Pop(XSRegisters.RAX);
+                        XS.Sub(XSRegisters.RAX, XSRegisters.RCX);
+                        XS.Push(XSRegisters.RAX);
                     }
                     break;
                 case 8:
                     if (xStackTopIsFloat)
                     {
-                        XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
-                        XS.Add(ESP, 8);
-                        XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+                        XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
+                        XS.Add(RSP, 8);
+                        XS.SSE2.MoveSD(XMM1, RSP, sourceIsIndirect: true);
                         XS.SSE2.SubSD(XMM1, XMM0);
-                        XS.SSE2.MoveSD(ESP, XMM1, destinationIsIndirect: true);
+                        XS.SSE2.MoveSD(RSP, XMM1, destinationIsIndirect: true);
                     }
                     else
                     {
-                        XS.Pop(EAX);
-                        XS.Pop(EDX);
-                        XS.Sub(ESP, EAX, destinationIsIndirect: true);
-                        XS.SubWithCarry(ESP, EDX, destinationDisplacement: 4);
+                        XS.Pop(RAX);
+                        XS.Pop(RDX);
+                        XS.Sub(RSP, RAX, destinationIsIndirect: true);
+                        XS.SubWithCarry(RSP, RDX, destinationDisplacement: 4);
                     }
                     break;
                 default:
