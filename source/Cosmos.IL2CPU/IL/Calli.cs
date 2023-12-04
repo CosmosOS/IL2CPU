@@ -15,8 +15,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
-            XS.Pop(EAX);
-            XS.Call(EAX);
+            XS.Pop(RAX);
+            XS.Call(RAX);
         }
     }
 }

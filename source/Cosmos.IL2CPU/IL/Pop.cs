@@ -16,7 +16,7 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             // todo: implement exception support.
             var xSize = SizeOfType(aOpCode.StackPopTypes[0]);
-            XS.Add(ESP, Align(xSize, 4));
+            XS.Add(RSP, Align(xSize, 4));
         }
     }
 }

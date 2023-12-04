@@ -83,24 +83,24 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Comment("ArgSize: " + xArgSize);
 
                 // set source of args copy
-                XS.Set(ESI, ESP);
+                XS.Set(RSI, RSP);
 
                 // allocate space for struct
-                XS.Sub(ESP, xStorageSize + 4);
+                XS.Sub(RSP, xStorageSize + 4);
 
                 // set destination and count of args copy
-                XS.Set(EDI, ESP);
-                XS.Set(ECX, xArgSize / 4);
+                XS.Set(RDI, RSP);
+                XS.Set(RCX, xArgSize / 4);
 
                 // move the args to their new location
                 new CPUx86.Movs { Size = 32, Prefixes = CPUx86.InstructionPrefixes.Repeat };
 
                 // set struct ptr
-                XS.Set(EAX, ESP);
-                XS.Add(EAX, xArgSize + 4);
-                XS.Set(ESP, EAX, destinationDisplacement: (int)xArgSize);
+                XS.Set(RAX, RSP);
+                XS.Add(RAX, xArgSize + 4);
+                XS.Set(RSP, RAX, destinationDisplacement: (int)xArgSize);
 
-                XS.Push(EAX);
+                XS.Push(RAX);
 
                 var xOpType = new OpType(xMethod.OpCode, xMethod.Position, xMethod.NextPosition, xMethod.Value.DeclaringType, xMethod.CurrentExceptionRegion);
                 new Initobj(aAssembler).Execute(aMethod, xOpType, true);
@@ -129,11 +129,11 @@ namespace Cosmos.IL2CPU.X86.IL
                     if (xParams.Length == 1 && xParams[0].ParameterType == typeof(char[]))
                     {
                         xHasCalcSize = true;
-                        XS.Set(EAX, ESP, sourceDisplacement: 4, sourceIsIndirect: true); // address
-                        XS.Set(EAX, EAX, sourceDisplacement: 8, sourceIsIndirect: true); // element count
-                        XS.Set(EDX, 2); // element size
-                        XS.Multiply(EDX);
-                        XS.Push(EAX);
+                        XS.Set(RAX, RSP, sourceDisplacement: 4, sourceIsIndirect: true); // address
+                        XS.Set(RAX, RAX, sourceDisplacement: 8, sourceIsIndirect: true); // element count
+                        XS.Set(RDX, 2); // element size
+                        XS.Multiply(RDX);
+                        XS.Push(RAX);
                     }
                     else if (xParams.Length == 3
                              && (xParams[0].ParameterType == typeof(char[]) || xParams[0].ParameterType == typeof(char*))
@@ -141,18 +141,18 @@ namespace Cosmos.IL2CPU.X86.IL
                              && xParams[2].ParameterType == typeof(int))
                     {
                         xHasCalcSize = true;
-                        XS.Set(EAX, ESP, sourceIsIndirect: true);
-                        XS.ShiftLeft(EAX, 1);
-                        XS.Push(EAX);
+                        XS.Set(RAX, RSP, sourceIsIndirect: true);
+                        XS.ShiftLeft(RAX, 1);
+                        XS.Push(RAX);
                     }
                     else if (xParams.Length == 2
                              && xParams[0].ParameterType == typeof(char)
                              && xParams[1].ParameterType == typeof(int))
                     {
                         xHasCalcSize = true;
-                        XS.Set(EAX, ESP, sourceIsIndirect: true);
-                        XS.ShiftLeft(EAX, 1);
-                        XS.Push(EAX);
+                        XS.Set(RAX, RSP, sourceIsIndirect: true);
+                        XS.ShiftLeft(RAX, 1);
+                        XS.Push(RAX);
                     }
                     /*
                      * TODO see if something is needed in stack / register to make them really work
@@ -163,7 +163,7 @@ namespace Cosmos.IL2CPU.X86.IL
                              && xParams[2].ParameterType == typeof(int))
                     {
                         xHasCalcSize = true;
-                        XS.Push(ESP, isIndirect: true);
+                        XS.Push(RSP, isIndirect: true);
                     }
                     else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(sbyte*))
                     {
@@ -171,18 +171,18 @@ namespace Cosmos.IL2CPU.X86.IL
                         /* xParams[0] contains a C / ASCII Z string the following ASM is de facto the C strlen() function */
                         var xSByteCountLabel = currentLabel + ".SByteCount";
 
-                        XS.Set(EAX, ESP, sourceIsIndirect: true);
-                        XS.Or(ECX, 0xFFFFFFFF);
+                        XS.Set(RAX, RSP, sourceIsIndirect: true);
+                        XS.Or(RCX, 0xFFFFFFFF);
 
                         XS.Label(xSByteCountLabel);
 
-                        XS.Increment(EAX);
-                        XS.Increment(ECX);
+                        XS.Increment(RAX);
+                        XS.Increment(RCX);
 
-                        XS.Compare(EAX, 0, destinationIsIndirect: true);
+                        XS.Compare(RAX, 0, destinationIsIndirect: true);
                         XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
 
-                        XS.Push(ECX);
+                        XS.Push(RCX);
                     }
                     else if (xParams.Length == 1 && xParams[0].ParameterType == typeof(char*))
                     {
@@ -191,30 +191,30 @@ namespace Cosmos.IL2CPU.X86.IL
                         // todo: does this actually work for empty strings?
                         var xSByteCountLabel = currentLabel + ".SByteCount";
 
-                        XS.Set(EAX, ESP, sourceIsIndirect: true);
-                        XS.Or(ECX, 0xFFFFFFFF);
+                        XS.Set(RAX, RSP, sourceIsIndirect: true);
+                        XS.Or(RCX, 0xFFFFFFFF);
 
                         XS.Label(xSByteCountLabel);
 
-                        XS.Increment(EAX); // a char is two bytes
-                        XS.Increment(EAX);
-                        XS.Increment(ECX);
-                        XS.Set(EBX, EAX, sourceIsIndirect: true);
-                        XS.And(EBX, 0xFF); // Only compare the char
-                        XS.Compare(EBX, 0);
+                        XS.Increment(RAX); // a char is two bytes
+                        XS.Increment(RAX);
+                        XS.Increment(RCX);
+                        XS.Set(RBX, RAX, sourceIsIndirect: true);
+                        XS.And(RBX, 0xFF); // Only compare the char
+                        XS.Compare(RBX, 0);
                         XS.Jump(CPUx86.ConditionalTestEnum.NotEqual, xSByteCountLabel);
 
-                        XS.ShiftLeft(ECX, 1); // every character needs two bytes
-                        XS.Push(ECX);
+                        XS.ShiftLeft(RCX, 1); // every character needs two bytes
+                        XS.Push(RCX);
                     }
                     else if(xParams.Length == 1 && xParams[0].ParameterType == typeof(ReadOnlySpan<char>))
                     {
                         xHasCalcSize = true;
                         // push the lenght of the span as well
                         // ReadOnlySpan<char> in memory is a Pointer and Length, simply dup the length and multiply by 2 to get the length to allocate
-                        XS.Set(EAX, ESP, sourceIsIndirect: true, sourceDisplacement: 4);
-                        XS.ShiftLeft(EAX, 1);
-                        XS.Push(EAX);
+                        XS.Set(RAX, RSP, sourceIsIndirect: true, sourceDisplacement: 4);
+                        XS.ShiftLeft(RAX, 1);
+                        XS.Push(RAX);
                     }
                     else
                     {
@@ -231,24 +231,24 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Push((uint)(xMemSize + xExtraSize));
                 if (xHasCalcSize)
                 {
-                    XS.Pop(EAX);
-                    XS.Add(ESP, EAX, destinationIsIndirect: true);
+                    XS.Pop(RAX);
+                    XS.Add(RSP, RAX, destinationIsIndirect: true);
                 }
 
                 // todo: probably we want to check for exceptions after calling Alloc
                 XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
                 XS.Label(".AfterAlloc");
-                XS.Push(ESP, isIndirect: true);
-                XS.Push(ESP, isIndirect: true);
+                XS.Push(RSP, isIndirect: true);
+                XS.Push(RSP, isIndirect: true);
                 // it's on the stack now 3 times. Once from the Alloc return value, twice from the pushes
 
                 var strTypeId = GetTypeIDLabel(constructor.DeclaringType);
 
-                XS.Pop(EAX);
-                XS.Set(EBX, strTypeId, sourceIsIndirect: true);
-                XS.Set(EAX, EBX, destinationIsIndirect: true);
-                XS.Set(EAX, (uint)ObjectUtils.InstanceTypeEnum.NormalObject, destinationDisplacement: 4, destinationIsIndirect: true, size: RegisterSize.Int32);
-                XS.Set(EAX, xMemSize, destinationDisplacement: 8, destinationIsIndirect: true, size: RegisterSize.Int32);
+                XS.Pop(RAX);
+                XS.Set(RBX, strTypeId, sourceIsIndirect: true);
+                XS.Set(RAX, RBX, destinationIsIndirect: true);
+                XS.Set(RAX, (uint)ObjectUtils.InstanceTypeEnum.NormalObject, destinationDisplacement: 4, destinationIsIndirect: true, size: RegisterSize.Long64);
+                XS.Set(RAX, xMemSize, destinationDisplacement: 8, destinationIsIndirect: true, size: RegisterSize.Long64);
                 var xSize = (uint)(from item in xParams
                                     let xQSize = Align(SizeOfType(item.ParameterType), 4)
                                     select (int)xQSize).Take(xParams.Length).Sum();
@@ -260,7 +260,7 @@ namespace Cosmos.IL2CPU.X86.IL
                     XS.Comment($"Arg {xParam.Name}: {xParamSize}");
                     for (var i = 0; i < xParamSize; i += 4)
                     {
-                        XS.Push(ESP, isIndirect: true, displacement: (int)(xSize + 8));
+                        XS.Push(RSP, isIndirect: true, displacement: (int)(xSize + 8));
                     }
                 }
 
@@ -269,24 +269,24 @@ namespace Cosmos.IL2CPU.X86.IL
                 if (aMethod != null)
                 {
                     // todo: only happening for real methods now, not for ctor's ?
-                    XS.Test(ECX, 2);
+                    XS.Test(RCX, 2);
                     var xNoErrorLabel = currentLabel + ".NoError" + LabelName.LabelCount.ToString();
                     XS.Jump(CPUx86.ConditionalTestEnum.Equal, xNoErrorLabel);
 
                     PushAlignedParameterSize(constructor);
 
                     // an exception occurred, we need to cleanup the stack, and jump to the exit
-                    XS.Add(ESP, 4);
+                    XS.Add(RSP, 4);
 
                     new Comment(aAssembler, "[ Newobj.Execute cleanup end ]");
                     XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
                     XS.Label(xNoErrorLabel);
                 }
-                XS.Pop(EAX);
+                XS.Pop(RAX);
 
                 PushAlignedParameterSize(constructor);
 
-                XS.Push(EAX);
+                XS.Push(RAX);
                 XS.Push(0);
             }
         }
@@ -300,7 +300,7 @@ namespace Cosmos.IL2CPU.X86.IL
             for (var i = 0; i < xParams.Length; i++)
             {
                 xSize = SizeOfType(xParams[i].ParameterType);
-                XS.Add(ESP, Align(xSize, 4));
+                XS.Add(RSP, Align(xSize, 4));
             }
             XS.Comment("[ Newobj.PushAlignedParameterSize end ]");
         }

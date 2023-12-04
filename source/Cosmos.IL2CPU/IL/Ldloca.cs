@@ -25,9 +25,9 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Comment("Local type = " + xVar.LocalType);
       XS.Comment("Local EBP offset = " + xEBPOffset);
 
-      XS.Set(EAX, EBP);
-      XS.Sub(EAX, xEBPOffset);
-      XS.Push(EAX);
+      XS.Set(RAX, RBP);
+      XS.Sub(RAX, xEBPOffset);
+      XS.Push(RAX);
     }
   }
 }

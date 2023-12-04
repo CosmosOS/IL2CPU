@@ -40,7 +40,7 @@ namespace Cosmos.IL2CPU.X86.IL
             if (!aTypeOnStack.IsPointer && aDeclaringType.IsClass)
             {
                 DoNullReferenceCheck(Assembler, aDebugEnabled, 4);
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
             }
             else
             {
@@ -49,21 +49,21 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (aDerefValue && aField.IsExternalValue)
             {
-                XS.Set(ESP, EAX, destinationIsIndirect: true);
+                XS.Set(RSP, RAX, destinationIsIndirect: true);
             }
             else
             {
-                XS.Pop(EAX);
+                XS.Pop(RAX);
                 if (aDeclaringType.Name == "RawArrayData" && aField.Field.Name == "Data")
                 {
                     // if we accidently load 64bit assemblies, we get an incorrect extra 4 bytes of offset, so we just hardcode the offset
-                    XS.Add(EAX, (uint)(4 + xExtraOffset));
+                    XS.Add(RAX, (uint)(4 + xExtraOffset));
                 }
                 else
                 {
-                    XS.Add(EAX, (uint)(aField.Offset + xExtraOffset));
+                    XS.Add(RAX, (uint)(aField.Offset + xExtraOffset));
                 }
-                XS.Push(EAX);
+                XS.Push(RAX);
             }
         }
     }

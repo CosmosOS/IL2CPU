@@ -12,7 +12,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
-            XS.Set(ECX, 3);
+            XS.Set(RCX, 3);
             EmitExceptionLogic(Assembler, aMethod, aOpCode, false, null);
         }
     }

@@ -14,13 +14,13 @@ namespace Cosmos.IL2CPU.X86.IL
         public override void Execute(Il2cpuMethodInfo aMethod, ILOpCode aOpCode)
         {
             ILOpCodes.OpSwitch OpSw = (ILOpCodes.OpSwitch)aOpCode;
-            XS.Pop(XSRegisters.EAX);
+            XS.Pop(XSRegisters.RAX);
 
             for (int i = 0; i < OpSw.BranchLocations.Length; i++)
             {
                 string xDestLabel = AppAssembler.TmpPosLabel(aMethod, OpSw.BranchLocations[i]);
 
-                XS.Compare(XSRegisters.EAX, (uint)i);
+                XS.Compare(XSRegisters.RAX, (uint)i);
                 XS.Jump(ConditionalTestEnum.Equal, xDestLabel);
             }
         }

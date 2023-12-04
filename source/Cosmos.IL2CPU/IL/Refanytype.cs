@@ -18,10 +18,10 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             // we have object on stack, so type, address and want only the type to remain
             DoNullReferenceCheck(Assembler, DebugEnabled, 0);
-            XS.Pop(EAX);
+            XS.Pop(RAX);
             XS.Exchange(BX, BX); //TODO: Are we sure that we want to push a long? Isnt the type only an int?
-            XS.Push(EAX, isIndirect: true, displacement: 0);
-            XS.Push(EAX, isIndirect: true, displacement: 4);
+            XS.Push(RAX, isIndirect: true, displacement: 0);
+            XS.Push(RAX, isIndirect: true, displacement: 4);
         }
     }
 }

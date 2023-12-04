@@ -75,31 +75,31 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 if (xSize <= 4)
                 {
-                    XS.Pop(EAX);
-                    XS.Compare(EAX, 0);
+                    XS.Pop(RAX);
+                    XS.Compare(RAX, 0);
                     XS.Jump(xOp == ILOpCode.Code.Brtrue ? ConditionalTestEnum.NotEqual : ConditionalTestEnum.Equal, xBranchLabel);
                 }
                 else if (xSize <= 8)
                 {
-                    XS.Pop(EAX);
-                    XS.Pop(EBX);
+                    XS.Pop(RAX);
+                    XS.Pop(RBX);
 
                     if (xOp == ILOpCode.Code.Brtrue)
                     {
-                        XS.Compare(EAX, 0);
+                        XS.Compare(RAX, 0);
                         XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
 
-                        XS.Compare(EBX, 0);
+                        XS.Compare(RBX, 0);
                         XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
                     }
                     else
                     {
                         var xEndLabel = GetLabel(aMethod, aOpCode) + ".End";
 
-                        XS.Compare(EAX, 0);
+                        XS.Compare(RAX, 0);
                         XS.Jump(ConditionalTestEnum.NotEqual, xEndLabel);
 
-                        XS.Compare(EBX, 0);
+                        XS.Compare(RBX, 0);
                         XS.Jump(ConditionalTestEnum.Equal, xBranchLabel);
 
                         XS.Label(xEndLabel);
@@ -124,44 +124,44 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 if (xSize <= 4)
                 {
-                    XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 4);
-                    XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 4);
+                    XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 4);
+                    XS.SSE.MoveSS(XMM1, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 4);
 
                     if (xIsUnordered)
                     {
                         XS.SSE.MoveSS(XMM2, XMM1);
                         XS.SSE.CompareSS(XMM2, XMM0, ComparePseudoOpcodes.Unordered);
-                        XS.MoveD(EAX, XMM2);
-                        XS.Compare(EAX, 0);
+                        XS.MoveD(RAX, XMM2);
+                        XS.Compare(RAX, 0);
                         XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
                     }
 
                     XS.SSE.CompareSS(XMM1, XMM0, xTestOp);
-                    XS.MoveD(EAX, XMM1);
-                    XS.Compare(EAX, 0);
+                    XS.MoveD(RAX, XMM1);
+                    XS.Compare(RAX, 0);
                     XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
                 }
                 else if (xSize <= 8)
                 {
-                    XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 8);
-                    XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 8);
+                    XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 8);
+                    XS.SSE2.MoveSD(XMM1, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 8);
 
                     if (xIsUnordered)
                     {
                         XS.SSE2.MoveSD(XMM2, XMM1);
                         XS.SSE2.CompareSD(XMM2, XMM0, ComparePseudoOpcodes.Unordered);
-                        XS.MoveD(EAX, XMM2);
-                        XS.Compare(EAX, 0);
+                        XS.MoveD(RAX, XMM2);
+                        XS.Compare(RAX, 0);
                         XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
                     }
 
                     XS.SSE2.CompareSD(XMM1, XMM0, xTestOp);
-                    XS.MoveD(EAX, XMM1);
-                    XS.Compare(EAX, 0);
+                    XS.MoveD(RAX, XMM1);
+                    XS.Compare(RAX, 0);
                     XS.Jump(ConditionalTestEnum.NotEqual, xBranchLabel);
                 }
             }
@@ -171,64 +171,64 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 if (xSize <= 4)
                 {
-                    XS.Pop(EAX);
-                    XS.Pop(EBX);
-                    XS.Compare(EBX, EAX);
+                    XS.Pop(RAX);
+                    XS.Pop(RBX);
+                    XS.Compare(RBX, RAX);
                     XS.Jump(xTestOp, xBranchLabel);
                 }
                 else if (xSize <= 8)
                 {
                     var xEndLabel = GetLabel(aMethod, aOpCode) + ".End";
 
-                    XS.Pop(EAX);
-                    XS.Pop(EDX);
+                    XS.Pop(RAX);
+                    XS.Pop(RDX);
 
-                    XS.Pop(EBX);
-                    XS.Pop(ECX);
+                    XS.Pop(RBX);
+                    XS.Pop(RCX);
 
                     switch (xOp)
                     {
                         case ILOpCode.Code.Beq:
                         case ILOpCode.Code.Bne_Un:
-                            XS.Compare(ECX, EDX);
+                            XS.Compare(RCX, RDX);
                             XS.Jump(ConditionalTestEnum.NotEqual, xOp == ILOpCode.Code.Beq ? xEndLabel : xBranchLabel);
-                            XS.Compare(EBX, EAX);
+                            XS.Compare(RBX, RAX);
                             XS.Jump(xTestOp, xBranchLabel);
 
                             break;
                         case ILOpCode.Code.Bge:
                         case ILOpCode.Code.Bgt:
-                            XS.Compare(ECX, EDX);
+                            XS.Compare(RCX, RDX);
                             XS.Jump(ConditionalTestEnum.GreaterThan, xBranchLabel);
                             XS.Jump(ConditionalTestEnum.NotEqual, xEndLabel);
-                            XS.Compare(EBX, EAX);
+                            XS.Compare(RBX, RAX);
                             XS.Jump(xTestOp, xBranchLabel);
 
                             break;
                         case ILOpCode.Code.Ble:
                         case ILOpCode.Code.Blt:
-                            XS.Compare(ECX, EDX);
+                            XS.Compare(RCX, RDX);
                             XS.Jump(ConditionalTestEnum.LessThan, xBranchLabel);
                             XS.Jump(ConditionalTestEnum.NotEqual, xEndLabel);
-                            XS.Compare(EBX, EAX);
+                            XS.Compare(RBX, RAX);
                             XS.Jump(xTestOp, xBranchLabel);
 
                             break;
                         case ILOpCode.Code.Bge_Un:
                         case ILOpCode.Code.Bgt_Un:
-                            XS.Compare(ECX, EDX);
+                            XS.Compare(RCX, RDX);
                             XS.Jump(ConditionalTestEnum.Above, xBranchLabel);
                             XS.Jump(ConditionalTestEnum.NotEqual, xEndLabel);
-                            XS.Compare(EBX, EAX);
+                            XS.Compare(RBX, RAX);
                             XS.Jump(xTestOp, xBranchLabel);
 
                             break;
                         case ILOpCode.Code.Ble_Un:
                         case ILOpCode.Code.Blt_Un:
-                            XS.Compare(ECX, EDX);
+                            XS.Compare(RCX, RDX);
                             XS.Jump(ConditionalTestEnum.Below, xBranchLabel);
                             XS.Jump(ConditionalTestEnum.NotEqual, xEndLabel);
-                            XS.Compare(EBX, EAX);
+                            XS.Compare(RBX, RAX);
                             XS.Jump(xTestOp, xBranchLabel);
 
                             break;

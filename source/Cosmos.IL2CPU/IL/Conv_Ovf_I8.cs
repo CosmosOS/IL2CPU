@@ -31,20 +31,20 @@ namespace Cosmos.IL2CPU.X86.IL
         case 1:
         case 2:
         case 4:
-          XS.Pop(EAX);
-          XS.SignExtendAX(RegisterSize.Int32);
-          XS.Push(EDX);
-          XS.Push(EAX);
+          XS.Pop(RAX);
+          XS.SignExtendAX(RegisterSize.Long64);
+          XS.Push(RDX);
+          XS.Push(RAX);
           break;
         case 8:
           if (SourceIsSigned)
           {
-            XS.Set(EAX, ESP, sourceIsIndirect: true);
-            XS.And(EAX, 0b1000000000000000000000000000);
-            XS.Compare(EAX, 0);
+            XS.Set(RAX, RSP, sourceIsIndirect: true);
+            XS.And(RAX, 0b1000000000000000000000000000);
+            XS.Compare(RAX, 0);
             XS.Jump(XSharp.Assembler.x86.ConditionalTestEnum.Equal, xSuccessLabel);
-            XS.Pop(EAX); // remove long from stack
-            XS.Pop(EAX);
+            XS.Pop(RAX); // remove long from stack
+            XS.Pop(RAX);
             Call.DoExecute(assembler, aMethod, ExceptionHelperRefs.ThrowOverflowExceptionRef, aOpCode, xSuccessLabel, false);
             XS.Label(xSuccessLabel);
           }

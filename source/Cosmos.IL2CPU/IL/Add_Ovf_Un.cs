@@ -38,26 +38,26 @@ namespace Cosmos.IL2CPU.X86.IL
                 var xSuccessLabel = xBaseLabel + "Success";
                 if (xSize > 4) // long
                 {
-                    XS.Pop(EDX); // low part
-                    XS.Pop(EAX); // high part
-                    XS.Add(ESP, EDX, destinationIsIndirect: true);
-                    XS.AddWithCarry(ESP, EAX, destinationDisplacement: 4);
+                    XS.Pop(RDX); // low part
+                    XS.Pop(RAX); // high part
+                    XS.Add(RSP, RDX, destinationIsIndirect: true);
+                    XS.AddWithCarry(RSP, RAX, destinationDisplacement: 4);
                 }
                 else //integer
                 {
-                    XS.Pop(EAX);
-                    XS.Add(ESP, EAX, destinationIsIndirect: true);
+                    XS.Pop(RAX);
+                    XS.Add(RSP, RAX, destinationIsIndirect: true);
                 }
 
                 // Let's check if we add overflow and if so throw OverflowException
                 XS.Jump(ConditionalTestEnum.NotCarry, xSuccessLabel);
                 if (xSize > 4) // Hack to stop stack corruption
                 {
-                  XS.Add(ESP, 8);
+                  XS.Add(RSP, 8);
                 }
                 else
                 {
-                  XS.Add(ESP, 4);
+                  XS.Add(RSP, 4);
                 }
                 Call.DoExecute(Assembler, aMethod, typeof(ExceptionHelper).GetMethod("ThrowOverflow", BindingFlags.Static | BindingFlags.Public), aOpCode, GetLabel(aMethod, aOpCode), xSuccessLabel, DebugEnabled);
                 XS.Label(xSuccessLabel);

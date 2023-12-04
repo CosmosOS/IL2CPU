@@ -23,11 +23,11 @@ namespace Cosmos.IL2CPU.X86.IL
             Type mType = ((ILOpCodes.OpType)aOpCode).Value;
             uint mObjSize = SizeOfType(mType);
 
-            XS.Pop(EAX);
+            XS.Pop(RAX);
 
             for (int i = 0; i < mObjSize / 4; i++)
             {
-                XS.Set(EAX, 0, destinationDisplacement: i * 4, size: RegisterSize.Int32);
+                XS.Set(RAX, 0, destinationDisplacement: i * 4, size: RegisterSize.Long64);
             }
             switch (mObjSize % 4)
             {

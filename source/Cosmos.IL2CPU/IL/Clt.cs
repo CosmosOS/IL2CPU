@@ -48,57 +48,57 @@ namespace Cosmos.IL2CPU.X86.IL
                 if (xStackItemIsFloat)
                 {
                     // Please note that SSE supports double operations only from version 2
-                    XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
+                    XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
                     // Increment ESP to get the value of the next double
-                    XS.Add(ESP, 8);
-                    XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+                    XS.Add(RSP, 8);
+                    XS.SSE2.MoveSD(XMM1, RSP, sourceIsIndirect: true);
                     XS.SSE2.CompareSD(XMM1, XMM0, comparision: LessThan);
-                    XS.MoveD(EBX, XMM1);
-                    XS.And(EBX, 1);
+                    XS.MoveD(RBX, XMM1);
+                    XS.And(RBX, 1);
                     // We need to move the stack pointer of 4 Byte to "eat" the second double that is yet in the stack or we get a corrupted stack!
-                    XS.Add(ESP, 4);
-                    XS.Set(ESP, EBX, destinationIsIndirect: true);
+                    XS.Add(RSP, 4);
+                    XS.Set(RSP, RBX, destinationIsIndirect: true);
                 }
                 else
                 {
-                    XS.Set(ESI, 1);
+                    XS.Set(RSI, 1);
                     // esi = 1
-                    XS.Xor(EDI, EDI);
+                    XS.Xor(RDI, RDI);
                     // edi = 0
-                    XS.Pop(EAX);
-                    XS.Pop(EDX);
+                    XS.Pop(RAX);
+                    XS.Pop(RDX);
                     //value2: EDX:EAX
-                    XS.Pop(EBX);
-                    XS.Pop(ECX);
+                    XS.Pop(RBX);
+                    XS.Pop(RCX);
                     //value1: ECX:EBX
-                    XS.Sub(EBX, EAX);
-                    XS.SubWithCarry(ECX, EDX);
+                    XS.Sub(RBX, RAX);
+                    XS.SubWithCarry(RCX, RDX);
                     //result = value1 - value2
 
-                    new ConditionalMove { Condition = ConditionalTestEnum.LessThan, DestinationReg = EDI, SourceReg = ESI };
-                    XS.Push(EDI);
+                    new ConditionalMove { Condition = ConditionalTestEnum.LessThan, DestinationReg = RDI, SourceReg = RSI };
+                    XS.Push(RDI);
                 }
             }
             else
             {
                 if (xStackItemIsFloat)
                 {
-                    XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-                    XS.Add(ESP, 4);
-                    XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
+                    XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+                    XS.Add(RSP, 4);
+                    XS.SSE.MoveSS(XMM1, RSP, sourceIsIndirect: true);
                     XS.SSE.CompareSS(XMM1, XMM0, comparision: LessThan);
-                    XS.MoveD(EBX, XMM1);
-                    XS.And(EBX, 1);
-                    XS.Set(ESP, EBX, destinationIsIndirect: true);
+                    XS.MoveD(RBX, XMM1);
+                    XS.And(RBX, 1);
+                    XS.Set(RSP, RBX, destinationIsIndirect: true);
                 }
                 else
                 {
-                    XS.Xor(EBX, EBX);
-                    XS.Pop(ECX);
-                    XS.Pop(EAX);
-                    XS.Compare(EAX, ECX);
+                    XS.Xor(RBX, RBX);
+                    XS.Pop(RCX);
+                    XS.Pop(RAX);
+                    XS.Compare(RAX, RCX);
                     XS.SetByteOnCondition(ConditionalTestEnum.LessThan, BL);
-                    XS.Push(EBX);
+                    XS.Push(RBX);
                 }
             }
         }

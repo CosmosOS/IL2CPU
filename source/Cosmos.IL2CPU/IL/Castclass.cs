@@ -28,11 +28,11 @@ namespace Cosmos.IL2CPU.X86.IL
             var xInvalidCastLabel = xCurrentMethodLabel + "_InvalidCast";
             var xNextPositionLabel = GetLabel(aMethod, aOpCode.NextPosition);
 
-            XS.Set(EAX, ESP, sourceDisplacement: 4);
+            XS.Set(RAX, RSP, sourceDisplacement: 4);
 
-            XS.Compare(EAX, 0);
+            XS.Compare(RAX, 0);
             XS.Jump(ConditionalTestEnum.Zero, xNextPositionLabel);
-            XS.Push(EAX, isIndirect: true);
+            XS.Push(RAX, isIndirect: true);
             XS.Push(xTypeID, isIndirect: true);
             XS.Push(Convert.ToUInt32(xType.Value.IsInterface));
 
@@ -42,9 +42,9 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Label(xAfterIsInstanceCallLabel);
 
-            XS.Pop(EAX);
+            XS.Pop(RAX);
 
-            XS.Compare(EAX, 0);
+            XS.Compare(RAX, 0);
             XS.Jump(ConditionalTestEnum.Equal, xInvalidCastLabel);
 
             XS.Jump(xNextPositionLabel);

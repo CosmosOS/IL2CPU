@@ -91,11 +91,11 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = 2,
                 SourceRef = ElementReference.New("_NATIVE_GDT_Contents")
             };
-            XS.Set(EAX, "_NATIVE_GDT_Pointer");
-            XS.LoadGdt(EAX, isIndirect: true);
+            XS.Set(RAX, "_NATIVE_GDT_Pointer");
+            XS.LoadGdt(RAX, isIndirect: true);
 
             XS.Comment("Set data segments");
-            XS.Set(EAX, mGdData);
+            XS.Set(RAX, mGdData);
             XS.Set(DS, AX);
             XS.Set(ES, AX);
             XS.Set(FS, AX);
@@ -115,7 +115,7 @@ namespace Cosmos.IL2CPU
         protected void SetIdtDescriptor(int aNo, string aLabel, bool aDisableInts)
         {
             int xOffset = aNo * 8;
-            XS.Set(EAX, aLabel);
+            XS.Set(RAX, aLabel);
             var xIDT = ElementReference.New("_NATIVE_IDT_Contents");
             new Mov
             {
@@ -131,7 +131,7 @@ namespace Cosmos.IL2CPU
                 DestinationDisplacement = xOffset + 1,
                 SourceReg = RegistersEnum.AH
             };
-            XS.ShiftRight(EAX, 16);
+            XS.ShiftRight(RAX, 16);
             new Mov
             {
                 DestinationRef = xIDT,
@@ -210,20 +210,22 @@ namespace Cosmos.IL2CPU
                                                                   {
                                                                       xIdtSize, 0, 0
                                                                   }));
+
+            XS.Set(R10, "_NATIVE_IDT_Contents", sourceIsIndirect: true);
             new Mov
             {
                 DestinationRef = ElementReference.New("_NATIVE_IDT_Pointer"),
                 DestinationIsIndirect = true,
                 DestinationDisplacement = 2,
-                SourceRef = ElementReference.New("_NATIVE_IDT_Contents")
+                SourceReg = R10
             };
 
-            XS.Set(EAX, "_NATIVE_IDT_Pointer");
+            XS.Set(RAX, "_NATIVE_IDT_Pointer");
 
             if (mComPort > 0)
             {
                 XS.Set(AsmMarker.Labels[AsmMarker.Type.Processor_IntsEnabled], 1, destinationIsIndirect: true, size: RegisterSize.Byte8);
-                XS.LoadIdt(EAX, isIndirect: true);
+                XS.LoadIdt(RAX, isIndirect: true);
             }
             XS.Label("AfterCreateIDT");
             new Comment(this, "END - Create IDT");
@@ -333,7 +335,7 @@ namespace Cosmos.IL2CPU
 
             // This is our first entry point. Multiboot uses this as Cosmos entry point.
             new Label("Kernel_Start", isGlobal: true);
-            XS.Set(ESP, "Kernel_Stack");
+            XS.Set(RSP, "Kernel_Stack");
 
             // Displays "Cosmos" in top left. Used to make sure Cosmos is booted in case of hang.
             // ie bootloader debugging. This must be the FIRST code, even before setup so we know
@@ -368,7 +370,7 @@ namespace Cosmos.IL2CPU
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
             WriteDebugVideo("Creating GDT.");
-            CreateGDT();
+            //CreateGDT(); //limine creates the GDT for us
 
             WriteDebugVideo("Configuring PIC");
             ConfigurePIC();
@@ -492,7 +494,7 @@ namespace Cosmos.IL2CPU
             Action<byte, byte> xOutBytes = (port, value) =>
             {
                 XS.Set(DX, port);
-                XS.Set(EAX, value);
+                XS.Set(RAX, value);
                 XS.WriteToPortDX(AL);
             };
 
@@ -591,16 +593,14 @@ namespace Cosmos.IL2CPU
         protected override void BeforeFlushText(TextWriter aOutput)
         {
             base.BeforeFlushText(aOutput);
-            aOutput.WriteLine("%ifndef ELF_COMPILATION");
-            aOutput.WriteLine("use32");
-            aOutput.WriteLine("org 0x1000000");
-            aOutput.WriteLine("[map all main.map]");
-            aOutput.WriteLine("%endif");
+            aOutput.WriteLine("BITS 64");
+            aOutput.WriteLine("section .data");
         }
 
-        protected override void OnBeforeFlush()
+        protected override void OnBeforeFlush(TextWriter output)
         {
             DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
+            //output.WriteLine("section .text");
         }
 
         protected override void OnFlushTextAfterEmitEverything(TextWriter aOutput)
@@ -609,7 +609,7 @@ namespace Cosmos.IL2CPU
 
             aOutput.WriteLine("SystemExceptionOccurred:");
             aOutput.WriteLine("\tret");
-            aOutput.WriteLine("global Kernel_Start");
+            //aOutput.WriteLine("global Kernel_Start");
             aOutput.WriteLine("_end_code:");
         }
     }

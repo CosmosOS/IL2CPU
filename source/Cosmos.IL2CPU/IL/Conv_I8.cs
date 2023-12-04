@@ -26,12 +26,12 @@ namespace Cosmos.IL2CPU.X86.IL
             if (IsReferenceType(xSource))
             {
                 // todo: Stop GC tracking
-                XS.Add(ESP, SizeOfType(typeof(IntPtr)));
+                XS.Add(RSP, SizeOfType(typeof(IntPtr)));
 
                 // todo: x64
-                XS.Pop(EAX);
+                XS.Pop(RAX);
                 XS.Push(0);
-                XS.Push(EAX);
+                XS.Push(RAX);
             }
             else if (IsByRef(xSource))
             {
@@ -46,16 +46,16 @@ namespace Cosmos.IL2CPU.X86.IL
                      * Sadly for x86 there is no way using SSE to convert a float to an Int64... in x64 we could use ConvertPD2DQAndTruncate with
                      * x64 register as a destination... so this one of the few cases in which we need the legacy FPU!
                      */
-                    XS.FPU.FloatLoad(ESP, destinationIsIndirect: true, size: RegisterSize.Int32);
-                    XS.Sub(ESP, 4);
-                    XS.FPU.IntStoreWithTruncate(ESP, isIndirect: true, size: RegisterSize.Long64);
+                    XS.FPU.FloatLoad(RSP, destinationIsIndirect: true, size: RegisterSize.Long64);
+                    XS.Sub(RSP, 4);
+                    XS.FPU.IntStoreWithTruncate(RSP, isIndirect: true, size: RegisterSize.Long64);
                 }
                 else
                 {
-                    XS.Pop(EAX);
-                    XS.SignExtendAX(RegisterSize.Int32);
-                    XS.Push(EDX);
-                    XS.Push(EAX);
+                    XS.Pop(RAX);
+                    XS.SignExtendAX(RegisterSize.Long64);
+                    XS.Push(RDX);
+                    XS.Push(RAX);
                 }
             }
             else if (xSourceSize <= 8)
@@ -66,8 +66,8 @@ namespace Cosmos.IL2CPU.X86.IL
                      * Sadly for x86 there is no way using SSE to convert a double to an Int64... in x64 we could use ConvertPD2DQAndTruncate with
                      * x64 register as a destination... so only in this case we need the legacy FPU!
                      */
-                    XS.FPU.FloatLoad(ESP, destinationIsIndirect: true, size: RegisterSize.Long64);
-                    XS.FPU.IntStoreWithTruncate(ESP, isIndirect: true, size: RegisterSize.Long64);
+                    XS.FPU.FloatLoad(RSP, destinationIsIndirect: true, size: RegisterSize.Long64);
+                    XS.FPU.IntStoreWithTruncate(RSP, isIndirect: true, size: RegisterSize.Long64);
                 }
             }
             else

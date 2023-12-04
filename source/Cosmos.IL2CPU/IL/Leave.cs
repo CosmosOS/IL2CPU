@@ -23,7 +23,8 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         string destination = $"{aMethod.MethodBase.GetFullName()}_LeaveAddress_{aOpCode.CurrentExceptionRegion.HandlerOffset:X2}";
         string source = AppAssembler.TmpBranchLabel(aMethod, aOpCode);
-        XS.Set(destination, source, destinationIsIndirect: true, size: RegisterSize.Int32);
+        XS.Set(R10, source); //R10 contains source
+        XS.Set(destination, R10, destinationIsIndirect: true, size: RegisterSize.Long64);
         XS.Jump(AppAssembler.TmpPosLabel(aMethod, aOpCode.CurrentExceptionRegion.HandlerOffset));
       }
       else

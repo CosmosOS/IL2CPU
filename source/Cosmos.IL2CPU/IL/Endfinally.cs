@@ -17,8 +17,8 @@ namespace Cosmos.IL2CPU.X86.IL
         {
             string leaveAddressVariableName = $"{aMethod.MethodBase.GetFullName()}_LeaveAddress_{aOpCode.CurrentExceptionRegion.HandlerOffset:X2}";
             XS.DataMember(leaveAddressVariableName, 0);
-            XS.Set(EAX, leaveAddressVariableName);
-            new CPUx86.Jump { DestinationReg = EAX, DestinationIsIndirect = true };
+            XS.Set(RAX, leaveAddressVariableName);
+            new CPUx86.Jump { DestinationReg = RAX, DestinationIsIndirect = true };
         }
     }
 }

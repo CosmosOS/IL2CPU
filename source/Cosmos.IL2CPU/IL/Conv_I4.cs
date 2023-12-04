@@ -34,9 +34,9 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         if (aIsFloat)
         {
-          XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-          XS.SSE.ConvertSS2SIAndTruncate(EAX, XMM0);
-          XS.Set(ESP, EAX, destinationIsIndirect: true);
+          XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+          XS.SSE.ConvertSS2SIAndTruncate(RAX, XMM0);
+          XS.Set(RSP, RAX, destinationIsIndirect: true);
         }
         else
         {
@@ -50,10 +50,10 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         if (aIsFloat)
         {
-          XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
-          XS.Add(ESP, 4);
-          XS.SSE2.ConvertSD2SIAndTruncate(EAX, XMM0);
-          XS.Set(ESP, EAX, destinationIsIndirect: true);
+          XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
+          XS.Add(RSP, 4);
+          XS.SSE2.ConvertSD2SIAndTruncate(RAX, XMM0);
+          XS.Set(RSP, RAX, destinationIsIndirect: true);
         }
         else
         {
@@ -61,9 +61,9 @@ namespace Cosmos.IL2CPU.X86.IL
           {
             ConvOverflowChecks.CheckOverflowForLong(4, xSourceIsSigned, true, assembler, aMethod, aOpCode, xSuccessLabel, xOverflowLabel, xPositiveLabel, xNegativeLabel);
           }
-          XS.Pop(EAX);
-          XS.Add(ESP, 4);
-          XS.Push(EAX);
+          XS.Pop(RAX);
+          XS.Add(RSP, 4);
+          XS.Push(RAX);
         }
       }
       else

@@ -28,17 +28,17 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Push(ObjectUtils.FieldDataOffset + xSize);
             XS.Call(LabelName.Get(GCImplementationRefs.AllocNewObjectRef));
-            XS.Pop(ESI);
-            XS.Set(EBX, xTypeID, sourceIsIndirect: true);
-            XS.Set(ESI, EBX, destinationIsIndirect: true);
-            XS.Set(ESI, (uint)ObjectUtils.InstanceTypeEnum.BoxedValueType, destinationDisplacement: 4, size: RegisterSize.Int32);
+            XS.Pop(RSI);
+            XS.Set(RBX, xTypeID, sourceIsIndirect: true);
+            XS.Set(RSI, RBX, destinationIsIndirect: true);
+            XS.Set(RSI, (uint)ObjectUtils.InstanceTypeEnum.BoxedValueType, destinationDisplacement: 4, size: RegisterSize.Long64);
             new Comment(Assembler, "xSize is " + xSize);
             for (int i = 0; i < xSize / 4; i++)
             {
-                XS.Pop(EDX);
-                XS.Set(ESI, EDX, destinationDisplacement: ObjectUtils.FieldDataOffset + i * 4, size: RegisterSize.Int32);
+                XS.Pop(RDX);
+                XS.Set(RSI, RDX, destinationDisplacement: ObjectUtils.FieldDataOffset + i * 4, size: RegisterSize.Long64);
             }
-            XS.Push(ESI);
+            XS.Push(RSI);
             XS.Push(0);
         }
     }

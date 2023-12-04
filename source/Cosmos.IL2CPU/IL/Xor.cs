@@ -20,15 +20,15 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (xSize <= 4)
             {
-                XS.Pop(EAX);
-                XS.Xor(ESP, EAX, destinationIsIndirect: true);
+                XS.Pop(RAX);
+                XS.Xor(RSP, RAX, destinationIsIndirect: true);
             }
             else if (xSize <= 8)
             {
-                XS.Pop(EAX);
-                XS.Pop(EDX);
-                XS.Xor(ESP, EAX, destinationIsIndirect: true);
-                XS.Xor(ESP, EDX, destinationDisplacement: 4);
+                XS.Pop(RAX);
+                XS.Pop(RDX);
+                XS.Xor(RSP, RAX, destinationIsIndirect: true);
+                XS.Xor(RSP, RDX, destinationDisplacement: 4);
             }
             else
             {

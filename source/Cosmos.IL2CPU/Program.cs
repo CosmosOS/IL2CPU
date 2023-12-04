@@ -19,7 +19,7 @@ namespace Cosmos.IL2CPU
 
                 while (!Debugger.IsAttached)
                 {
-                    Debugger.Break();
+                    //Debugger.Break();
                 }
             }
 

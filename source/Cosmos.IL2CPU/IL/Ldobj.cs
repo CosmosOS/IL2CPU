@@ -29,20 +29,20 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         throw new ArgumentNullException(nameof(type));
       }
-      XS.Pop(EAX);
+      XS.Pop(RAX);
       var xObjSize = SizeOfType(type);
 
       if (xObjSize < 4 && TypeIsSigned(type))
       {
         if (xObjSize == 1)
         {
-          XS.MoveSignExtend(EBX, EAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
+          XS.MoveSignExtend(RBX, RAX, sourceIsIndirect: true, size: RegisterSize.Byte8);
         }
         else if (xObjSize == 2)
         {
-          XS.MoveSignExtend(EBX, EAX, sourceIsIndirect: true, size: RegisterSize.Short16);
+          XS.MoveSignExtend(RBX, RAX, sourceIsIndirect: true, size: RegisterSize.Short16);
         }
-        XS.Push(EBX);
+        XS.Push(RBX);
         return;
       }
 
@@ -50,25 +50,25 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         case 1:
           {
-            XS.Xor(EBX, EBX);
-            XS.Set(BL, EAX, sourceDisplacement: (int)(xObjSize - 1));
+            XS.Xor(RBX, RBX);
+            XS.Set(BL, RAX, sourceDisplacement: (int)(xObjSize - 1));
             //XS.ShiftLeft(XSRegisters.EBX, 24);
-            XS.Push(EBX);
+            XS.Push(RBX);
             break;
           }
         case 2:
           {
-            XS.Xor(EBX, EBX);
-            XS.Set(BX, EAX, sourceDisplacement: (int)(xObjSize - 2));
+            XS.Xor(RBX, RBX);
+            XS.Set(BX, RAX, sourceDisplacement: (int)(xObjSize - 2));
             //XS.ShiftLeft(XSRegisters.EBX, 16);
-            XS.Push(EBX);
+            XS.Push(RBX);
             break;
           }
         case 3:
           {
-            XS.Set(EBX, EAX, sourceDisplacement: (int)(xObjSize - 3));
-            XS.And(EBX, 0xFFFFFF);
-            XS.Push(EBX);
+            XS.Set(RBX, RAX, sourceDisplacement: (int)(xObjSize - 3));
+            XS.And(RBX, 0xFFFFFF);
+            XS.Push(RBX);
             break;
           }
         case 0:
@@ -83,7 +83,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
       for (int i = 1; i <= xObjSize / 4; i++)
       {
-        XS.Push(EAX, displacement: (int)(xObjSize - i * 4));
+        XS.Push(RAX, displacement: (int)(xObjSize - i * 4));
       }
     }
   }

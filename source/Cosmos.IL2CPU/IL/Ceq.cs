@@ -35,22 +35,22 @@ namespace Cosmos.IL2CPU.X86.IL
       {
         if (xStackItemIsFloat) // float
         {
-          XS.SSE.MoveSS(XMM0, ESP, sourceIsIndirect: true);
-          XS.Add(ESP, 4);
-          XS.SSE.MoveSS(XMM1, ESP, sourceIsIndirect: true);
+          XS.SSE.MoveSS(XMM0, RSP, sourceIsIndirect: true);
+          XS.Add(RSP, 4);
+          XS.SSE.MoveSS(XMM1, RSP, sourceIsIndirect: true);
           XS.SSE.CompareSS(XMM1, XMM0, comparision: Equal);
-          XS.MoveD(EBX, XMM1);
-          XS.And(EBX, 1);
-          XS.Set(ESP, EBX, destinationIsIndirect: true);
+          XS.MoveD(RBX, XMM1);
+          XS.And(RBX, 1);
+          XS.Set(RSP, RBX, destinationIsIndirect: true);
         }
         else
         {
-          XS.Xor(EBX, EBX);
-          XS.Pop(ECX);
-          XS.Pop(EAX);
-          XS.Compare(EAX, ECX);
+          XS.Xor(RBX, RBX);
+          XS.Pop(RCX);
+          XS.Pop(RAX);
+          XS.Compare(RAX, RCX);
           XS.SetByteOnCondition(ConditionalTestEnum.Equal, BL);
-          XS.Push(EBX);
+          XS.Push(RBX);
         }
       }
       else if (xSize > 4)
@@ -58,30 +58,30 @@ namespace Cosmos.IL2CPU.X86.IL
         if (xStackItemIsFloat)
         {
           // Please note that SSE supports double operations only from version 2
-          XS.SSE2.MoveSD(XMM0, ESP, sourceIsIndirect: true);
+          XS.SSE2.MoveSD(XMM0, RSP, sourceIsIndirect: true);
           // Increment ESP to get the value of the next double
-          XS.Add(ESP, 8);
-          XS.SSE2.MoveSD(XMM1, ESP, sourceIsIndirect: true);
+          XS.Add(RSP, 8);
+          XS.SSE2.MoveSD(XMM1, RSP, sourceIsIndirect: true);
           XS.SSE2.CompareSD(XMM1, XMM0, comparision: Equal);
-          XS.MoveD(EBX, XMM1);
-          XS.And(EBX, 1);
+          XS.MoveD(RBX, XMM1);
+          XS.And(RBX, 1);
           // We need to move the stack pointer of 4 Byte to "eat" the second double that is yet in the stack or we get a corrupted stack!
-          XS.Add(ESP, 4);
-          XS.Set(ESP, EBX, destinationIsIndirect: true);
+          XS.Add(RSP, 4);
+          XS.Set(RSP, RBX, destinationIsIndirect: true);
         }
         else
         {
           if (IsReferenceType(xStackItem) && IsReferenceType(xStackItem2))
           {
             XS.Comment(xStackItem.Name);
-            XS.Add(ESP, 4);
-            XS.Pop(EAX);
+            XS.Add(RSP, 4);
+            XS.Pop(RAX);
 
             XS.Comment(xStackItem2.Name);
-            XS.Add(ESP, 4);
-            XS.Pop(EBX);
+            XS.Add(RSP, 4);
+            XS.Pop(RBX);
 
-            XS.Compare(EAX, EBX);
+            XS.Compare(RAX, RBX);
             XS.Jump(ConditionalTestEnum.NotEqual, Label.LastFullLabel + ".False");
 
             // equal
@@ -94,20 +94,20 @@ namespace Cosmos.IL2CPU.X86.IL
           }
           else
           {
-            XS.Pop(EAX);
-            XS.Compare(EAX, ESP, sourceDisplacement: 4);
-            XS.Pop(EAX);
+            XS.Pop(RAX);
+            XS.Compare(RAX, RSP, sourceDisplacement: 4);
+            XS.Pop(RAX);
             XS.Jump(ConditionalTestEnum.NotEqual, Label.LastFullLabel + ".False");
-            XS.Xor(EAX, ESP, sourceDisplacement: 4);
+            XS.Xor(RAX, RSP, sourceDisplacement: 4);
             XS.Jump(ConditionalTestEnum.NotZero, Label.LastFullLabel + ".False");
 
             //they are equal
-            XS.Add(ESP, 8);
+            XS.Add(RSP, 8);
             XS.Push(1);
             XS.Jump(xNextLabel);
             XS.Label(Label.LastFullLabel + ".False");
             //not equal
-            XS.Add(ESP, 8);
+            XS.Add(RSP, 8);
             XS.Push(0);
             XS.Jump(xNextLabel);
 

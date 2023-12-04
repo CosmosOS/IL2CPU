@@ -122,7 +122,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             if (xExtraStackSize > 0)
             {
-                XS.Sub(XSRegisters.ESP, xExtraStackSize);
+                XS.Sub(XSRegisters.RSP, xExtraStackSize);
             }
             XS.Call(xNormalAddress);
 

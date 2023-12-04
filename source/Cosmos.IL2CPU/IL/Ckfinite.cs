@@ -26,22 +26,22 @@ namespace Cosmos.IL2CPU.X86.IL
             switch (SizeOfType(xStackType))
             {
                 case 4:
-                    XS.Pop(EAX);
-                    XS.And(EAX, 0x7FFFFFFF);
+                    XS.Pop(RAX);
+                    XS.And(RAX, 0x7FFFFFFF);
 
-                    XS.Compare(EAX, 0x7F800000);
+                    XS.Compare(RAX, 0x7F800000);
                     XS.Jump(ConditionalTestEnum.Below, xNoThrowLabel);
 
-                    XS.SSE2.ConvertSS2SD(XMM0, EAX);
-                    XS.Sub(ESP, 8);
-                    XS.SSE2.MoveSD(ESP, XMM0, true);
+                    XS.SSE2.ConvertSS2SD(XMM0, RAX);
+                    XS.Sub(RSP, 8);
+                    XS.SSE2.MoveSD(RSP, XMM0, true);
 
                     break;
                 case 8:
-                    XS.Set(EAX, ESP, sourceDisplacement: 4);
+                    XS.Set(RAX, RSP, sourceDisplacement: 4);
 
-                    XS.And(EAX, 0x7FFFFFFF);
-                    XS.Compare(EAX, 0x7F800000);
+                    XS.And(RAX, 0x7FFFFFFF);
+                    XS.Compare(RAX, 0x7F800000);
                     XS.Jump(ConditionalTestEnum.Below, xNoThrowLabel);
 
                     break;

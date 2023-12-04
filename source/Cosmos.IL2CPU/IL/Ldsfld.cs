@@ -67,16 +67,16 @@ namespace Cosmos.IL2CPU.X86.IL
         {
           case 1:
             {
-              XS.Set(XSRegisters.EAX, 0);
+              XS.Set(XSRegisters.RAX, 0);
               XS.Set(XSRegisters.AL, xDataName, sourceIsIndirect: true);
-              XS.Push(XSRegisters.EAX);
+              XS.Push(XSRegisters.RAX);
               break;
             }
           case 2:
             {
-              XS.Set(XSRegisters.EAX, 0);
+              XS.Set(XSRegisters.RAX, 0);
               XS.Set(XSRegisters.AX, xDataName, sourceIsIndirect: true);
-              XS.Push(XSRegisters.EAX);
+              XS.Push(XSRegisters.RAX);
               break;
             }
           case 0:
@@ -95,16 +95,16 @@ namespace Cosmos.IL2CPU.X86.IL
         {
           case 1:
             {
-              XS.Set(XSRegisters.EAX, 0);
+              XS.Set(XSRegisters.RAX, 0);
               XS.Set(XSRegisters.AL, xDataName, sourceIsIndirect: true);
-              XS.Push(XSRegisters.EAX);
+              XS.Push(XSRegisters.RAX);
               break;
             }
           case 2:
             {
-              XS.Set(XSRegisters.EAX, 0);
+              XS.Set(XSRegisters.RAX, 0);
               XS.Set(XSRegisters.AX, xDataName, sourceIsIndirect: true);
-              XS.Push(XSRegisters.EAX);
+              XS.Push(XSRegisters.RAX);
               break;
             }
           case 0:

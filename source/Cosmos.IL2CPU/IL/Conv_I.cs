@@ -21,7 +21,7 @@ namespace Cosmos.IL2CPU.X86.IL
             if (IsReferenceType(xSource))
             {
                 // todo: Stop GC tracking
-                XS.Add(ESP, SizeOfType(typeof(IntPtr)));
+                XS.Add(RSP, SizeOfType(typeof(IntPtr)));
             }
             else if (IsPointer(xSource))
             {

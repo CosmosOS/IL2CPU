@@ -65,7 +65,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 var xFieldSize = xFieldInfo.Size;
                 var xStackOffset = (int)(-xDeclaringTypeStackSize + xOffset + xFieldSize - 4);
 
-                XS.Add(ESP, xDeclaringTypeStackSize);
+                XS.Add(RSP, xDeclaringTypeStackSize);
 
                 if ((xFieldInfo.Size < 4 && IsIntegerBasedType(xFieldType))
                     || xFieldType == typeof(bool)
@@ -73,13 +73,13 @@ namespace Cosmos.IL2CPU.X86.IL
                 {
                     if (TypeIsSigned(xFieldType))
                     {
-                        XS.MoveSignExtend(EAX, ESP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
-                        XS.Push(EAX);
+                        XS.MoveSignExtend(RAX, RSP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
+                        XS.Push(RAX);
                     }
                     else
                     {
-                        XS.MoveZeroExtend(EAX, ESP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
-                        XS.Push(EAX);
+                        XS.MoveZeroExtend(RAX, RSP, sourceDisplacement: xStackOffset + (4 - (int)xFieldSize), size: (RegisterSize)(8 * xFieldSize));
+                        XS.Push(RAX);
                     }
 
                     return;
@@ -87,7 +87,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
                 for (int i = 0; i < xFieldSize / 4; i++)
                 {
-                    XS.Push(ESP, displacement: xStackOffset);
+                    XS.Push(RSP, displacement: xStackOffset);
                 }
 
                 switch (xFieldSize % 4)
@@ -95,21 +95,21 @@ namespace Cosmos.IL2CPU.X86.IL
                     case 0:
                         break;
                     case 1:
-                        XS.Xor(EAX, EAX);
-                        XS.Set(AL, ESP, sourceDisplacement: xStackOffset + 3);
-                        XS.Push(EAX);
+                        XS.Xor(RAX, RAX);
+                        XS.Set(AL, RSP, sourceDisplacement: xStackOffset + 3);
+                        XS.Push(RAX);
                         break;
                     case 2:
-                        XS.Xor(EAX, EAX);
-                        XS.Set(AX, ESP, sourceDisplacement: xStackOffset + 2);
-                        XS.Push(EAX);
+                        XS.Xor(RAX, RAX);
+                        XS.Set(AX, RSP, sourceDisplacement: xStackOffset + 2);
+                        XS.Push(RAX);
                         break;
                     case 3:
-                        XS.Xor(EAX, EAX);
-                        XS.Set(AX, ESP, sourceDisplacement: xStackOffset + 2);
-                        XS.ShiftLeft(EAX, 4);
-                        XS.Set(AL, ESP, sourceDisplacement: xStackOffset + 1);
-                        XS.Push(EAX);
+                        XS.Xor(RAX, RAX);
+                        XS.Set(AX, RSP, sourceDisplacement: xStackOffset + 2);
+                        XS.ShiftLeft(RAX, 4);
+                        XS.Set(AL, RSP, sourceDisplacement: xStackOffset + 1);
+                        XS.Push(RAX);
                         break;
                     default:
                         throw new NotImplementedException();
@@ -123,48 +123,48 @@ namespace Cosmos.IL2CPU.X86.IL
             if (IsReferenceType(xStackType))
             {
                 DoNullReferenceCheck(Assembler, DebugEnabled, 4);
-                XS.Add(ESP, 4);
+                XS.Add(RSP, 4);
             }
             else
             {
                 DoNullReferenceCheck(Assembler, DebugEnabled, 0);
             }
-            XS.Pop(ECX);
+            XS.Pop(RCX);
 
-            XS.Add(ECX, (uint)xOffset);
+            XS.Add(RCX, (uint)xOffset);
 
             if (xFieldInfo.IsExternalValue)
             {
-                XS.Set(ECX, ECX, sourceIsIndirect: true);
+                XS.Set(RCX, RCX, sourceIsIndirect: true);
             }
 
             for (int i = 1; i <= xSize / 4; i++)
             {
-                XS.Set(EAX, ECX, sourceDisplacement: (int)(xSize - i * 4));
-                XS.Push(EAX);
+                XS.Set(RAX, RCX, sourceDisplacement: (int)(xSize - i * 4));
+                XS.Push(RAX);
             }
 
             if(xSize % 4 != 0)
             {
-                XS.Set(EAX, 0);
+                XS.Set(RAX, 0);
             }
 
             switch (xSize % 4)
             {
                 case 1:
-                    XS.Set(AL, ECX, sourceIsIndirect: true);
-                    XS.Push(EAX);
+                    XS.Set(AL, RCX, sourceIsIndirect: true);
+                    XS.Push(RAX);
                     break;
 
                 case 2:
-                    XS.Set(AX, ECX, sourceIsIndirect: true);
-                    XS.Push(EAX);
+                    XS.Set(AX, RCX, sourceIsIndirect: true);
+                    XS.Push(RAX);
                     break;
 
                 case 3: //For Release
-                    XS.Set(EAX, ECX, sourceIsIndirect: true);
-                    XS.ShiftRight(EAX, 8);
-                    XS.Push(EAX);
+                    XS.Set(RAX, RCX, sourceIsIndirect: true);
+                    XS.ShiftRight(RAX, 8);
+                    XS.Push(RAX);
                     break;
 
                 case 0:

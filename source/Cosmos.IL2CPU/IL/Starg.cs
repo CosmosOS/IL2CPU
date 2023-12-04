@@ -51,8 +51,8 @@ namespace Cosmos.IL2CPU.X86.IL
 
       for (int i = (int)(xArgSize / 4) - 1; i >= 0; i--)
       {
-        XS.Pop(EAX);
-        XS.Set(EBP, EAX, destinationIsIndirect: true, destinationDisplacement: xDisplacement - i * 4);
+        XS.Pop(RAX);
+        XS.Set(RBP, RAX, destinationIsIndirect: true, destinationDisplacement: xDisplacement - i * 4);
       }
     }
   }
