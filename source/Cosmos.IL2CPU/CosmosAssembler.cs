@@ -335,7 +335,7 @@ namespace Cosmos.IL2CPU
 
             // This is our first entry point. Multiboot uses this as Cosmos entry point.
             new Label("Kernel_Start", isGlobal: true);
-            XS.Set(RSP, "Kernel_Stack");
+            //XS.Set(RSP, "Kernel_Stack"); // limine protocol already sets up stack (64KB)
 
             // Displays "Cosmos" in top left. Used to make sure Cosmos is booted in case of hang.
             // ie bootloader debugging. This must be the FIRST code, even before setup so we know
@@ -344,7 +344,7 @@ namespace Cosmos.IL2CPU
             WriteDebugVideo("Cosmos pre boot");
 
             // For when using Bochs, causes a break ASAP on entry after initial Cosmos display.
-            //new LiteralAssemblerCode("xchg bx, bx");
+            new LiteralAssemblerCode("xchg bx, bx");
 
             // CLI ASAP
             WriteDebugVideo("Clearing interrupts.");
@@ -365,16 +365,16 @@ namespace Cosmos.IL2CPU
                 SourceReg = RegistersEnum.EBX
             };
 
-            XS.Call(LabelName.Get(CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.Multiboot.Multiboot2, Cosmos.Core", true).GetMethod("Init")));
+            //XS.Call(LabelName.Get(CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.Multiboot.Multiboot2, Cosmos.Core", true).GetMethod("Init")));
 
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
             WriteDebugVideo("Creating GDT.");
             //CreateGDT(); //limine creates the GDT for us
-
+            new LiteralAssemblerCode("xchg bx, bx");
             WriteDebugVideo("Configuring PIC");
             ConfigurePIC();
-
+            new LiteralAssemblerCode("xchg bx, bx");
             WriteDebugVideo("Creating IDT.");
             CreateIDT();
 
@@ -402,7 +402,7 @@ namespace Cosmos.IL2CPU
                 WriteDebugVideo("Initializing DebugStub.");
                 XS.Call(AsmMarker.Labels[AsmMarker.Type.DebugStub_Init]);
             }
-
+            new LiteralAssemblerCode("xchg bx, bx");
             //Initiate Memory
             WriteDebugVideo("Initiating Memory");
             XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
@@ -599,7 +599,7 @@ namespace Cosmos.IL2CPU
 
         protected override void OnBeforeFlush(TextWriter output)
         {
-            DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
+           // DataMembers.AddRange(new DataMember[] { new DataMember("_end_data", Array.Empty<byte>()) });
             //output.WriteLine("section .text");
         }
 
