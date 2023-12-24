@@ -101,18 +101,12 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
+                    XS.Xor(EBX, EBX);
+                    XS.Pop(ECX);
                     XS.Pop(EAX);
-                    XS.Compare(EAX, ESP, sourceIsIndirect: true);
-
-                    XS.Jump(ConditionalTestEnum.Below, LabelTrue);
-                    XS.Jump(LabelFalse);
-                    XS.Label(LabelTrue );
-                    XS.Add(ESP, 4);
-                    XS.Push(1);
-                    new Jump { DestinationLabel = GetLabel(aMethod, aOpCode.NextPosition) };
-                    XS.Label(LabelFalse );
-                    XS.Add(ESP, 4);
-                    XS.Push(0);
+                    XS.Compare(EAX, ECX);
+                    XS.SetByteOnCondition(ConditionalTestEnum.Above, BL);
+                    XS.Push(EBX);
                 }
             }
         }

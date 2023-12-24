@@ -45,18 +45,12 @@ namespace Cosmos.IL2CPU.X86.IL
         }
         else
         {
+          XS.Xor(EBX, EBX);
+          XS.Pop(ECX);
           XS.Pop(EAX);
-          XS.Compare(EAX, ESP, sourceIsIndirect: true);
-          XS.Jump(ConditionalTestEnum.Equal, Label.LastFullLabel + ".True");
-          XS.Jump(Label.LastFullLabel + ".False");
-          XS.Label(".True");
-          XS.Add(ESP, 4);
-          XS.Push(1);
-          XS.Jump(xNextLabel);
-          XS.Label(".False");
-          XS.Add(ESP, 4);
-          XS.Push(0);
-          XS.Jump(xNextLabel);
+          XS.Compare(EAX, ECX);
+          XS.SetByteOnCondition(ConditionalTestEnum.Equal, BL);
+          XS.Push(EBX);
         }
       }
       else if (xSize > 4)

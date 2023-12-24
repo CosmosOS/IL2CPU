@@ -256,7 +256,7 @@ namespace Cosmos.IL2CPU
                     });
 
                     return xResult;
-                }   
+                }
             }
             #endregion
 
@@ -326,14 +326,14 @@ namespace Cosmos.IL2CPU
                 {
                     if (xHandler.TryOffset >= 0)
                     {
-                        if (xHandler.TryOffset <= xPos && (xHandler.TryLength + xHandler.TryOffset) > xPos)
+                        if (xHandler.TryOffset <= xPos && xHandler.TryLength + xHandler.TryOffset > xPos)
                         {
                             if (xCurrentExceptionRegion == null)
                             {
                                 xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && (xHandler.TryLength + xHandler.TryOffset) < (xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset))
+                            else if (xHandler.TryOffset > xCurrentExceptionRegion.TryOffset && xHandler.TryLength + xHandler.TryOffset < xCurrentExceptionRegion.TryLength + xCurrentExceptionRegion.TryOffset)
                             {
                                 // only replace if the current found handler is narrower
                                 xCurrentExceptionRegion = xHandler;
@@ -344,14 +344,14 @@ namespace Cosmos.IL2CPU
                     // todo: handler offset can be 0 like try offset?
                     if (xHandler.HandlerOffset > 0)
                     {
-                        if (xHandler.HandlerOffset <= xPos && (xHandler.HandlerOffset + xHandler.HandlerLength) > xPos)
+                        if (xHandler.HandlerOffset <= xPos && xHandler.HandlerOffset + xHandler.HandlerLength > xPos)
                         {
                             if (xCurrentExceptionRegion == null)
                             {
                                 xCurrentExceptionRegion = xHandler;
                                 continue;
                             }
-                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && (xHandler.HandlerOffset + xHandler.HandlerLength) < (xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength))
+                            else if (xHandler.HandlerOffset > xCurrentExceptionRegion.HandlerOffset && xHandler.HandlerOffset + xHandler.HandlerLength < xCurrentExceptionRegion.HandlerOffset + xCurrentExceptionRegion.HandlerLength)
                             {
                                 // only replace if the current found handler is narrower
                                 xCurrentExceptionRegion = xHandler;
@@ -556,10 +556,10 @@ namespace Cosmos.IL2CPU
                         switch (xOpCodeVal)
                         {
                             case ILOpCode.Code.Ldc_I4_S:
-                                xILOpCode = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, xOpPos, xPos + 1, ((sbyte)xIL[xPos]), xCurrentExceptionRegion);
+                                xILOpCode = new ILOpCodes.OpInt(ILOpCode.Code.Ldc_I4, xOpPos, xPos + 1, (sbyte)xIL[xPos], xCurrentExceptionRegion);
                                 break;
                             default:
-                                xILOpCode = new ILOpCodes.OpInt(xOpCodeVal, xOpPos, xPos + 1, ((sbyte)xIL[xPos]), xCurrentExceptionRegion);
+                                xILOpCode = new ILOpCodes.OpInt(xOpCodeVal, xOpPos, xPos + 1, (sbyte)xIL[xPos], xCurrentExceptionRegion);
                                 break;
                         }
                         xPos = xPos + 1;

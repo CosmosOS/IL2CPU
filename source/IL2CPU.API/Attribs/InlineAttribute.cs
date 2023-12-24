@@ -13,16 +13,5 @@ namespace IL2CPU.API
         public TargetPlatform TargetPlatform = TargetPlatform.x86;
     }
 
-    /// <summary>
-    /// This enum contains the possible target platforms,
-    /// to eventually allow for selective inclusion of plugs,
-    /// depending on the target platform.
-    /// </summary>
-    public enum TargetPlatform
-    {
-        x86,
-        x64,
-        IA64,
-        ARM
-    }
+
 }

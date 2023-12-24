@@ -6,7 +6,6 @@ using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 
 using Cosmos.IL2CPU.Extensions;
-using Cosmos.IL2CPU.X86.IL;
 
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
@@ -44,9 +43,9 @@ namespace Cosmos.IL2CPU
         public static uint Align(uint aSize, uint aAlign)
         {
             uint xSize = aSize;
-            if ((xSize % aAlign) != 0)
+            if (xSize % aAlign != 0)
             {
-                xSize += aAlign - (xSize % aAlign);
+                xSize += aAlign - xSize % aAlign;
             }
             return xSize;
         }
@@ -54,9 +53,9 @@ namespace Cosmos.IL2CPU
         public static int SignedAlign(int aSize, int aAlign)
         {
             int xSize = aSize;
-            if ((xSize % aAlign) != 0)
+            if (xSize % aAlign != 0)
             {
-                xSize += aAlign - (xSize % aAlign);
+                xSize += aAlign - xSize % aAlign;
             }
             return xSize;
         }
@@ -88,12 +87,6 @@ namespace Cosmos.IL2CPU
         public override string ToString()
         {
             return GetType().Name;
-        }
-
-        protected static void Jump_Exception(Il2cpuMethodInfo aMethod)
-        {
-            // todo: port to numeric labels
-            XS.Jump(GetLabel(aMethod) + AppAssembler.EndOfMethodLabelNameException);
         }
 
         protected static void Jump_End(Il2cpuMethodInfo aMethod)
@@ -405,7 +398,7 @@ namespace Cosmos.IL2CPU
                 XS.Add(XSRegisters.ESP, 4 * aReturnSize / 4);
             }
 
-            if (aStackSizeBeforeCall > (aTotalArgumentSizeOfMethod))
+            if (aStackSizeBeforeCall > aTotalArgumentSizeOfMethod)
             {
                 if (aTotalArgumentSizeOfMethod > 0)
                 {
@@ -586,7 +579,7 @@ namespace Cosmos.IL2CPU
         public static bool IsSameValueType(Type aType, Type bType)
         {
             return (IsIntegerBasedType(aType) && IsIntegerBasedType(bType)) || (IsLongBasedType(aType) && IsLongBasedType(bType))
-                || (IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float))));
+                                                                            || IsPointer(aType) && IsPointer(bType) || (aType == bType && (aType == typeof(double) || aType == typeof(float)));
         }
 
         /// <summary>

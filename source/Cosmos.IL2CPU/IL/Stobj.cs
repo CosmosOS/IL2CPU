@@ -22,7 +22,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Set(ECX, ESP, sourceDisplacement: checked((int)xRoundedSize));
 
-            for (int i = 0; i < (xFieldSize / 4); i++)
+            for (int i = 0; i < xFieldSize / 4; i++)
             {
                 XS.Pop(EAX);
                 XS.Set(ECX, EAX, destinationDisplacement: i * 4);
@@ -47,7 +47,7 @@ namespace Cosmos.IL2CPU.X86.IL
                         break;
                     }
                 default:
-                    throw new Exception("Remainder size " + (xFieldSize % 4) + " not supported!");
+                    throw new Exception("Remainder size " + xFieldSize % 4 + " not supported!");
             }
 
             XS.Add(ESP, 4);

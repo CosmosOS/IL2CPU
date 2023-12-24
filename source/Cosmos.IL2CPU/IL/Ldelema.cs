@@ -35,6 +35,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Compare(EAX, EBX);
       XS.Jump(CPUx86.ConditionalTestEnum.LessThanOrEqualTo, xIndexOutOfRangeExeptionLabel);
 
+      // Check if EBX is negative
       XS.Compare(EBX, 0);
       XS.Jump(CPUx86.ConditionalTestEnum.GreaterThanOrEqualTo, xNoIndexOutOfRangeExeptionLabel);
 

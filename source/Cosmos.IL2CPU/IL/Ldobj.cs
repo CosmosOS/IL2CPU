@@ -79,11 +79,11 @@ namespace Cosmos.IL2CPU.X86.IL
           throw new Exception("Remainder not supported!");
       }
 
-      xObjSize -= (xObjSize % 4);
+      xObjSize -= xObjSize % 4;
 
-      for (int i = 1; i <= (xObjSize / 4); i++)
+      for (int i = 1; i <= xObjSize / 4; i++)
       {
-        XS.Push(EAX, displacement: (int)(xObjSize - (i * 4)));
+        XS.Push(EAX, displacement: (int)(xObjSize - i * 4));
       }
     }
   }

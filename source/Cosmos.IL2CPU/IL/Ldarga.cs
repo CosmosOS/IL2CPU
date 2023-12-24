@@ -59,7 +59,7 @@ namespace Cosmos.IL2CPU.X86.IL
       XS.Comment("Real displacement " + xDisplacement);
 
       XS.Set(EAX, EBP);
-      XS.Set(EBX, (uint)(xDisplacement));
+      XS.Set(EBX, (uint)xDisplacement);
       XS.Add(EAX, EBX);
       XS.Push(EAX);
     }

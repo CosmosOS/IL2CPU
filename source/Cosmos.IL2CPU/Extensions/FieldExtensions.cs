@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using IL2CPU.API;
 
 namespace Cosmos.IL2CPU.Extensions
 {
@@ -6,7 +7,7 @@ namespace Cosmos.IL2CPU.Extensions
     {
         public static string GetFullName(this FieldInfo aField)
         {
-            return aField.FieldType.GetFullName() + " " + aField.DeclaringType.GetFullName() + "." + aField.Name;
+            return LabelName.GetFullName(aField);
         }
     }
 }

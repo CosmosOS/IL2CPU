@@ -21,7 +21,7 @@
         </PackageReference>
         <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.linux" Version="1.1.14" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-        <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
         <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
         <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
     </ItemGroup>

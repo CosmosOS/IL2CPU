@@ -8,38 +8,6 @@ namespace IL2CPU.Debug.Symbols
 {
     public class ObjDump
     {
-        [Obsolete("We're not using ELF Format anymore")]
-        public static SortedList<uint, string> GetLabelByAddressMapping(string aKernel, string aObjDumpExe)
-        {
-            string[] xSymbolsContents;
-            #region Run ObjDump
-            string xTempFile = Path.GetTempFileName();
-            var xRandom = new Random(78367);
-            string xBatFile = String.Empty;
-            do
-            {
-                xBatFile = Path.GetTempPath();
-                xBatFile = Path.Combine(xBatFile, BitConverter.GetBytes(xRandom.NextDouble()).Aggregate<byte, string>("", (r, b) => r += b.ToString("X2").ToUpper()) + ".bat");
-            } while (File.Exists(xBatFile));
-            string xObjDumpFile = aObjDumpExe;
-            File.WriteAllText(xBatFile, String.Format("@ECHO OFF\r\n\"{0}\" --syms --wide \"{1}\" > \"{2}\"", xObjDumpFile, aKernel, xTempFile));
-            using (var xProcess = Process.Start(xBatFile))
-            {
-                xProcess.WaitForExit();
-            }
-            xSymbolsContents = File.ReadAllLines(xTempFile);
-            File.Delete(xTempFile);
-            File.Delete(xBatFile);
-            #endregion
-
-            var xResult = new SortedList<uint, string>();
-            foreach (var xLabel in ExtractMapSymbolsForElfFile(xSymbolsContents))
-            {
-                xResult.Add((uint)xLabel.Address, xLabel.Name);
-            }
-            return xResult;
-        }
-
         /// <summary>
         /// Sequentially parse symbols from the lines sequence.
         /// </summary>
@@ -50,7 +18,7 @@ namespace IL2CPU.Debug.Symbols
             bool xListStarted = false;
             foreach (var xLine in lines)
             {
-                if (String.IsNullOrEmpty(xLine))
+                if (string.IsNullOrEmpty(xLine))
                 {
                     continue;
                 }
@@ -67,7 +35,7 @@ namespace IL2CPU.Debug.Symbols
                 uint xAddress;
                 try
                 {
-                    xAddress = UInt32.Parse(xLine.Substring(0, 8), System.Globalization.NumberStyles.HexNumber);
+                    xAddress = uint.Parse(xLine.Substring(0, 8), System.Globalization.NumberStyles.HexNumber);
                 }
                 catch (Exception ex)
                 {
@@ -116,7 +84,6 @@ namespace IL2CPU.Debug.Symbols
             DebugInfo.SetRange(DebugInfo.ElfFileMapExtractionRange);
             using (var xDebugInfo = new DebugInfo(debugFile))
             {
-                var connection = xDebugInfo.GetNewConnection();
                 // In future instead of loading all labels, save indexes to major labels but not IL.ASM labels.
                 // Then code can find major lables, and use position markers into the map file to parse in between
                 // as needed.
@@ -125,12 +92,11 @@ namespace IL2CPU.Debug.Symbols
                 foreach (var xLabel in ExtractMapSymbolsForElfFile(xFileLines))
                 {
                     xLabels.Add(xLabel);
-                    xDebugInfo.AddLabels(connection, xLabels);
+                    xDebugInfo.AddLabels(xLabels);
                 }
 
-                xDebugInfo.AddLabels(connection, xLabels, true);
-                xDebugInfo.CreateIndexes(connection);
-                connection.Close();
+                xDebugInfo.AddLabels(xLabels, true);
+                xDebugInfo.CreateIndexes();
             }
         }
     }

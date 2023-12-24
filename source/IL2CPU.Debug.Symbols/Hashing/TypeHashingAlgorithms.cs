@@ -43,7 +43,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
                 for (int i = startIndex; i < src.Length; i += 2)
                 {
                     _hash1 = (_hash1 + _rotl(_hash1, 5)) ^ src[i];
-                    if ((i + 1) < src.Length)
+                    if (i + 1 < src.Length)
                         _hash2 = (_hash2 + _rotl(_hash2, 5)) ^ src[i + 1];
                 }
 
@@ -76,7 +76,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
             for (int i = 0; i < src.Length; i += 2)
             {
                 hash1 = (hash1 + _rotl(hash1, 5)) ^ src[i];
-                if ((i + 1) < src.Length)
+                if (i + 1 < src.Length)
                     hash2 = (hash2 + _rotl(hash2, 5)) ^ src[i + 1];
             }
 
@@ -97,7 +97,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
                 int b1 = data[i];
                 asciiMask |= b1;
                 hash1 = (hash1 + _rotl(hash1, 5)) ^ b1;
-                if ((i + 1) < length)
+                if (i + 1 < length)
                 {
                     int b2 = data[i];
                     asciiMask |= b2;
@@ -113,7 +113,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
             return hash1 ^ hash2;
         }
 
-        // This function may be needed in a portion of the codebase which is too low level to use 
+        // This function may be needed in a portion of the codebase which is too low level to use
         // globalization, ergo, we cannot call ToString on the integer.
         private static string IntToString(int arg)
         {
@@ -122,7 +122,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
 
             while (arg != 0)
             {
-                sb.Append((char)('0' + (arg % 10)));
+                sb.Append((char)('0' + arg % 10));
                 arg = arg / 10;
             }
 
@@ -142,7 +142,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
 
         public static int ComputeArrayTypeHashCode(int elementTypeHashCode, int rank)
         {
-            // Arrays are treated as generic types in some parts of our system. The array hashcodes are 
+            // Arrays are treated as generic types in some parts of our system. The array hashcodes are
             // carefully crafted to be the same as the hashcodes of their implementation generic types.
 
             int hashCode;
@@ -156,7 +156,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
             }
 
             hashCode = (hashCode + _rotl(hashCode, 13)) ^ elementTypeHashCode;
-            return (hashCode + _rotl(hashCode, 15));
+            return hashCode + _rotl(hashCode, 15);
         }
 
         public static int ComputeArrayTypeHashCode<T>(T elementType, int rank)
@@ -201,7 +201,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
                 int argumentHashCode = genericTypeArguments[i].GetHashCode();
                 hashcode = (hashcode + _rotl(hashcode, 13)) ^ argumentHashCode;
             }
-            return (hashcode + _rotl(hashcode, 15));
+            return hashcode + _rotl(hashcode, 15);
         }
 
         public static int ComputeMethodSignatureHashCode<ARG>(int returnTypeHashCode, ARG[] parameters)
@@ -215,7 +215,7 @@ namespace IL2CPU.Debug.Symbols.Hashing
                 int parameterHashCode = parameters[i].GetHashCode();
                 hashcode = (hashcode + _rotl(hashcode, 13)) ^ parameterHashCode;
             }
-            return (hashcode + _rotl(hashcode, 15));
+            return hashcode + _rotl(hashcode, 15);
         }
 
         /// <summary>

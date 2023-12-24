@@ -37,7 +37,7 @@ namespace Cosmos.IL2CPU.X86.IL
                 xExtraOffset = 12;
             }
 
-            if ((!aTypeOnStack.IsPointer) && (aDeclaringType.IsClass))
+            if (!aTypeOnStack.IsPointer && aDeclaringType.IsClass)
             {
                 DoNullReferenceCheck(Assembler, aDebugEnabled, 4);
                 XS.Add(ESP, 4);

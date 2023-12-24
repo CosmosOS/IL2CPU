@@ -75,7 +75,8 @@ namespace Cosmos.IL2CPU.X86.IL
                 // - if (obj == null) value = default(T)
                 // - else value = obj data
 
-                throw new NotImplementedException();
+                throw new NotSupportedException($"OpCode data: xType={xType}, xOpLabel={xOpLabel}, xIsNullable=true");
+
             }
 
             // the result is a managed pointer, it should be tracked by GC

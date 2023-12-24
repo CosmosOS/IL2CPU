@@ -29,9 +29,6 @@ namespace Cosmos.IL2CPU.X86.IL
             {
                 throw new NotImplementedException("Cosmos.IL2CPU.x86->IL->Clt_Un.cs->Error: StackSizes > 8 not supported");
             }
-            string BaseLabel = GetLabel( aMethod, aOpCode ) + ".";
-            string LabelTrue = BaseLabel + "True";
-            string LabelFalse = BaseLabel + "False";
             if (xStackItemSize > 4)
             {
                 // Using SSE registers (that do NOT branch!) This is needed only for long now
@@ -89,19 +86,12 @@ namespace Cosmos.IL2CPU.X86.IL
                 }
                 else
                 {
+                    XS.Xor(EBX, EBX);
                     XS.Pop(ECX);
-                    XS.Pop(XSRegisters.EAX);
-                    XS.Push(XSRegisters.ECX);
-                    XS.Compare(EAX, ESP, sourceIsIndirect: true);
-                    XS.Jump(ConditionalTestEnum.Below, LabelTrue);
-                    XS.Jump(LabelFalse);
-                    XS.Label(LabelTrue);
-                    XS.Add(XSRegisters.ESP, 4);
-                    XS.Push(1);
-                    new Jump { DestinationLabel = GetLabel(aMethod, aOpCode.NextPosition) };
-                    XS.Label(LabelFalse);
-                    XS.Add(XSRegisters.ESP, 4);
-                    XS.Push(0);
+                    XS.Pop(EAX);
+                    XS.Compare(EAX, ECX);
+                    XS.SetByteOnCondition(ConditionalTestEnum.Below, BL);
+                    XS.Push(EBX);
                 }
             }
         }

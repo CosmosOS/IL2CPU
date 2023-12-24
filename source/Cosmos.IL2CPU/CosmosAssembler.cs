@@ -1,6 +1,5 @@
 using Cosmos.Build.Common;
 using Cosmos.Core.DebugStub;
-using Cosmos.Debug.Kernel;
 using IL2CPU.API;
 using IL2CPU.API.Attribs;
 using System;
@@ -43,9 +42,10 @@ namespace Cosmos.IL2CPU
             var xPreBootLogging = RemoveBootDebugOutput;
             if (xPreBootLogging)
             {
-                new Comment("DebugVideo '" + aText + "'");
+                _ = new Comment("DebugVideo '" + aText + "'");
                 uint xVideo = 0xB8000;
-                for (uint i = xVideo; i < xVideo + 80 * 2; i = i + 2)
+
+                for (uint i = xVideo; i < xVideo + 80 * 2; i += 2)
                 {
                     new LiteralAssemblerCode("mov byte [0x" + i.ToString("X") + "], 0");
                     new LiteralAssemblerCode("mov byte [0x" + (i + 1).ToString("X") + "], 0x02");
@@ -54,7 +54,7 @@ namespace Cosmos.IL2CPU
                 foreach (var xChar in aText)
                 {
                     new LiteralAssemblerCode("mov byte [0x" + xVideo.ToString("X") + "], " + (byte)xChar);
-                    xVideo = xVideo + 2;
+                    xVideo += 2;
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace Cosmos.IL2CPU
         public void CreateGDT()
         {
             new Comment(this, "BEGIN - Create GDT");
-            var xGDT = new List<byte>();
+            List<byte> xGDT = new();
 
             // Null Segment - Selector 0x00
             // Not used, but required by many emulators.
@@ -348,7 +348,7 @@ namespace Cosmos.IL2CPU
                 SourceReg = RegistersEnum.EBX
             };
 
-            XS.Call("SystemVoidCosmosCoreMultiboot2Init");
+            XS.Call(LabelName.Get(CompilerEngine.TypeResolver.ResolveType("Cosmos.Core.Multiboot.Multiboot2, Cosmos.Core", true).GetMethod("Init")));
 
             new Comment(this, "END - Multiboot Info");
             new LiteralAssemblerCode("%endif");
@@ -455,9 +455,9 @@ namespace Cosmos.IL2CPU
             const byte PIC1 = 0x20; /* IO base address for master PIC */
             const byte PIC2 = 0xA0; /* IO base address for slave PIC */
             const byte PIC1_COMMAND = PIC1;
-            const byte PIC1_DATA = (PIC1 + 1);
+            const byte PIC1_DATA = PIC1 + 1;
             const byte PIC2_COMMAND = PIC2;
-            const byte PIC2_DATA = (PIC2 + 1);
+            const byte PIC2_DATA = PIC2 + 1;
 
             const byte ICW1_ICW4 = 0x01; /* ICW4 (not) needed */
             const byte ICW1_SINGLE = 0x02; /* Single (cascade) mode */
@@ -524,7 +524,7 @@ namespace Cosmos.IL2CPU
             var xResult = new byte[8];
 
             // Check the limit to make sure that it can be encoded
-            if ((aSize > 65536) && (aSize & 0x0FFF) != 0x0FFF)
+            if (aSize > 65536 && (aSize & 0x0FFF) != 0x0FFF)
             {
                 // If larger than 16 bit, must be an even page (4kb) size
                 throw new Exception("Invalid size in GDT descriptor.");

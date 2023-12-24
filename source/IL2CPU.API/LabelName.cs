@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
+using IL2CPU.API.Attribs;
 
 namespace IL2CPU.API
 {
@@ -12,7 +14,9 @@ namespace IL2CPU.API
         /// <summary>
         /// Cache for label names.
         /// </summary>
-        private static Dictionary<MethodBase, string> labelNamesCache = new Dictionary<MethodBase, string>();
+        private static Dictionary<MethodBase, string> LabelNamesCache = new Dictionary<MethodBase, string>();
+
+        private static Dictionary<Assembly, int> AssemblyIds = new Dictionary<Assembly, int>();
 
         // All label naming code should be changed to use this class.
 
@@ -36,13 +40,13 @@ namespace IL2CPU.API
 
         public static string Get(MethodBase aMethod)
         {
-            if (labelNamesCache.TryGetValue(aMethod, out var result))
+            if (LabelNamesCache.TryGetValue(aMethod, out var result))
             {
                 return result;
             }
 
             result = Final(GetFullName(aMethod));
-            labelNamesCache.Add(aMethod, result);
+            LabelNamesCache.Add(aMethod, result);
             return result;
         }
 
@@ -52,6 +56,8 @@ namespace IL2CPU.API
         }
 
         private const string IllegalIdentifierChars = "&.,+$<>{}-`\'/\\ ()[]*!=";
+        // no array bracket, they need to replace, for unique names for used types in methods
+        private static readonly Regex IllegalCharsReplace = new Regex(@"[&.,+$<>{}\-\`\\'/\\ \(\)\*!=]", RegexOptions.Compiled);
 
         public static string FilterStringForIncorrectChars(string aName)
         {
@@ -62,9 +68,6 @@ namespace IL2CPU.API
             }
             return xTempResult;
         }
-
-        // no array bracket, they need to replace, for unique names for used types in methods
-        private static readonly System.Text.RegularExpressions.Regex IllegalCharsReplace = new System.Text.RegularExpressions.Regex(@"[&.,+$<>{}\-\`\\'/\\ \(\)\*!=]", System.Text.RegularExpressions.RegexOptions.Compiled);
 
         public static string Final(string xName)
         {
@@ -77,7 +80,7 @@ namespace IL2CPU.API
             /*const string xIllegalChars = "&.,+$<>{}-`\'/\\ ()[]*!=_";
             foreach (char c in xIllegalChars) {
               xSB.Replace(c.ToString(), "");
-            }*/ 
+            }*/
             xName = xName.Replace("[]", "array");
             xName = xName.Replace("<>", "compilergenerated");
             xName = xName.Replace("[,]", "array");
@@ -106,79 +109,93 @@ namespace IL2CPU.API
             return xName;
         }
 
-        public static string GetFullName(Type aType)
+        /// <summary>
+        /// Get internal name for the type
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <param name="aAssemblyIncluded">If true, the assembly id is included</param>
+        /// <returns></returns>
+        public static string GetFullName(Type aType, bool aAssemblyIncluded = true)
         {
             if (aType.IsGenericParameter)
             {
                 return aType.FullName;
             }
-            var xSB = new StringBuilder(256);
+            StringBuilder stringBuilder = new StringBuilder(256);
+
+            if (aAssemblyIncluded)
+            {
+                // Start the string with the id of the assembly
+                Assembly assembly = aType.Assembly;
+                if (!AssemblyIds.ContainsKey(assembly))
+                {
+                    AssemblyIds.Add(assembly, AssemblyIds.Count);
+                }
+                stringBuilder.Append("A" + AssemblyIds[assembly]);
+            }
+
             if (aType.IsArray)
             {
-                xSB.Append(GetFullName(aType.GetElementType()));
-                xSB.Append("[");
+                stringBuilder.Append(GetFullName(aType.GetElementType(), aAssemblyIncluded));
+                stringBuilder.Append("[");
                 int xRank = aType.GetArrayRank();
                 while (xRank > 1)
                 {
-                    xSB.Append(",");
+                    stringBuilder.Append(",");
                     xRank--;
                 }
-                xSB.Append("]");
-                return xSB.ToString();
+                stringBuilder.Append("]");
+                return stringBuilder.ToString();
             }
             if (aType.IsByRef && aType.HasElementType)
             {
-                return "&" + GetFullName(aType.GetElementType());
+                return "&" + GetFullName(aType.GetElementType(), aAssemblyIncluded);
             }
             if (aType.IsGenericType && !aType.IsGenericTypeDefinition)
             {
-                xSB.Append(GetFullName(aType.GetGenericTypeDefinition()));
+                stringBuilder.Append(GetFullName(aType.GetGenericTypeDefinition(), aAssemblyIncluded));
 
-                xSB.Append("<");
+                stringBuilder.Append("<");
                 var xArgs = aType.GetGenericArguments();
                 for (int i = 0; i < xArgs.Length - 1; i++)
                 {
-                    xSB.Append(GetFullName(xArgs[i]));
-                    xSB.Append(", ");
+                    stringBuilder.Append(GetFullName(xArgs[i], aAssemblyIncluded));
+                    stringBuilder.Append(", ");
                 }
-                xSB.Append(GetFullName(xArgs.Last()));
-                xSB.Append(">");
+                stringBuilder.Append(GetFullName(xArgs.Last(), aAssemblyIncluded));
+                stringBuilder.Append(">");
             }
             else
             {
-                xSB.Append(aType.FullName);
+                stringBuilder.Append(aType.FullName);
             }
 
-            if(aType.Name == "SR" || aType.Name == "PathInternal" || aType.Name.Contains("PrivateImplementationDetails")) //TODO:  we need to deal with this more generally
-            {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
-            }
-
-            if (aType.Name == "Error" || aType.Name == "GetEndOfFile")
-            {
-                return aType.Assembly.FullName.Split(',')[0].Replace(".", "") + xSB.ToString();
-            }
-
-            return xSB.ToString();
+            return stringBuilder.ToString();
         }
 
-        public static string GetFullName(MethodBase aMethod)
+        /// <summary>
+        /// Get the full name for the method
+        /// </summary>
+        /// <param name="aMethod"></param>
+        /// <param name="aAssemblyIncluded">If true, id of assembly is included</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static string GetFullName(MethodBase aMethod, bool aAssemblyIncluded = true)
         {
             if (aMethod == null)
             {
                 throw new ArgumentNullException(nameof(aMethod));
             }
-            var xBuilder = new StringBuilder(256);
-            var xParts = aMethod.ToString().Split(' ');
-            var xParts2 = xParts.Skip(1).ToArray();
-            var xMethodInfo = aMethod as System.Reflection.MethodInfo;
+            StringBuilder xBuilder = new StringBuilder(256);
+            string[] xParts = aMethod.ToString().Split(' ');
+            MethodInfo xMethodInfo = aMethod as MethodInfo;
             if (xMethodInfo != null)
             {
-                xBuilder.Append(GetFullName(xMethodInfo.ReturnType));
+                xBuilder.Append(GetFullName(xMethodInfo.ReturnType, aAssemblyIncluded));
             }
             else
             {
-                var xCtor = aMethod as ConstructorInfo;
+                ConstructorInfo xCtor = aMethod as ConstructorInfo;
                 if (xCtor != null)
                 {
                     xBuilder.Append(typeof(void).FullName);
@@ -191,7 +208,7 @@ namespace IL2CPU.API
             xBuilder.Append("  ");
             if (aMethod.DeclaringType != null)
             {
-                xBuilder.Append(GetFullName(aMethod.DeclaringType));
+                xBuilder.Append(GetFullName(aMethod.DeclaringType, aAssemblyIncluded));
             }
             else
             {
@@ -208,10 +225,10 @@ namespace IL2CPU.API
                     xBuilder.Append("<");
                     for (int i = 0; i < xGenArgs.Length - 1; i++)
                     {
-                        xBuilder.Append(GetFullName(xGenArgs[i]));
+                        xBuilder.Append(GetFullName(xGenArgs[i], aAssemblyIncluded));
                         xBuilder.Append(", ");
                     }
-                    xBuilder.Append(GetFullName(xGenArgs.Last()));
+                    xBuilder.Append(GetFullName(xGenArgs.Last(), aAssemblyIncluded));
                     xBuilder.Append(">");
                 }
             }
@@ -227,8 +244,8 @@ namespace IL2CPU.API
                 {
                     continue;
                 }
-                xBuilder.Append(GetFullName(xParams[i].ParameterType));
-                if (i < (xParams.Length - 1))
+                xBuilder.Append(GetFullName(xParams[i].ParameterType, aAssemblyIncluded));
+                if (i < xParams.Length - 1)
                 {
                     xBuilder.Append(", ");
                 }
@@ -239,13 +256,74 @@ namespace IL2CPU.API
 
         public static string GetFullName(FieldInfo aField)
         {
-            return GetFullName(aField.FieldType) + " " + GetFullName(aField.DeclaringType) + "." + aField.Name;
+            return GetFullName(aField.FieldType, false) + " " + GetFullName(aField.DeclaringType, false) + "." + aField.Name;
         }
 
+        /// <summary>
+        /// Gets a label for the given static field
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">throws if its not static</exception>
+        public static string GetStaticFieldName(Type aType, string aField)
+        {
+            return GetStaticFieldName(aType.GetField(aField));
+        }
+
+        /// <summary>
+        /// Gets a label for the given static field
+        /// </summary>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">throws if its not static</exception>
         public static string GetStaticFieldName(FieldInfo aField)
         {
+            if (!aField.IsStatic)
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static");
+            }
+
             return FilterStringForIncorrectChars(
                 "static_field__" + GetFullName(aField.DeclaringType) + "." + aField.Name);
         }
+
+        /// <summary>
+        /// Gets a label for the given Manifest Resource Stream
+        /// </summary>
+        /// <param name="aType"></param>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"> throws if does not have <see cref="T:ManifestResourceStreamAttribute"/> or is its not static or is not a <see cref="T:byte[]"/> </exception>
+        public static string GetManifestResourceStreamName(Type aType, string aField)
+        {
+            return GetManifestResourceStreamName(aType.GetField(aField));
+        }
+
+        /// <summary>
+        /// Gets a label for the given Manifest Resource Stream
+        /// </summary>
+        /// <param name="aField"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"> throws if does not have <see cref="T:ManifestResourceStreamAttribute"/> or is its not static or is not a <see cref="T:byte[]"/> </exception>
+        public static string GetManifestResourceStreamName(FieldInfo aField)
+        {
+            if (
+                    !aField.GetCustomAttributes<ManifestResourceStreamAttribute>(false).Any()
+                )
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static or not a byte array");
+            }
+
+            if (!aField.IsStatic || aField.FieldType != typeof(byte[]))
+            {
+                throw new NotSupportedException($"{aField.Name}: is not static or not a byte array");
+            }
+
+            return $"{GetStaticFieldName(aField)}__Contents";
+        }
+
+        public static string GetRandomLabel() => $"random_label__{Guid.NewGuid()}";
+
     }
 }
