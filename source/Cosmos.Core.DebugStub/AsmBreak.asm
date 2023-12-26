@@ -12,7 +12,7 @@ Call DebugStub_ClearAsmBreak
 Call DebugStub_Break
 
 DebugStub_DoAsmBreak_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_DoAsmBreak_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_DoAsmBreak_Exit
 Ret
 
 
@@ -27,7 +27,7 @@ mov byte AL, 0xCC
 mov byte [EDI], AL
 
 DebugStub_SetAsmBreak_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetAsmBreak_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetAsmBreak_Exit
 Ret
 
 
@@ -40,7 +40,7 @@ mov byte [EDI], AL
 mov dword [DebugStub_AsmBreakEIP], 0x0
 
 DebugStub_ClearAsmBreak_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ClearAsmBreak_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ClearAsmBreak_Exit
 Ret
 
 
@@ -56,7 +56,7 @@ pop dword EAX
 pop dword EBP
 
 DebugStub_SetINT1_TrapFLAG_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetINT1_TrapFLAG_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetINT1_TrapFLAG_Exit
 Ret
 
 
@@ -72,6 +72,6 @@ pop dword EAX
 pop dword EBP
 
 DebugStub_ResetINT1_TrapFLAG_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ResetINT1_TrapFLAG_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ResetINT1_TrapFLAG_Exit
 Ret
 

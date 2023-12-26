@@ -21,7 +21,7 @@
 		DebugStub_Cls_Block1_End:
 
 		DebugStub_Cls_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Cls_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Cls_Exit
 			Ret
 
 
@@ -42,7 +42,7 @@
 		DebugStub_DisplayWaitMsg_Block1_End:
 
 		DebugStub_DisplayWaitMsg_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_DisplayWaitMsg_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_DisplayWaitMsg_Exit
 			Ret
 
 			%endif

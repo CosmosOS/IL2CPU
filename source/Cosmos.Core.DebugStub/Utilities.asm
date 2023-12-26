@@ -18,6 +18,6 @@ Jmp DebugStub_CheckStack_halt
 DebugStub_CheckStack_Block1_End:
 
 DebugStub_CheckStack_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_CheckStack_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_CheckStack_Exit
 Ret
 
