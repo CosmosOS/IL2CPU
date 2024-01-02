@@ -93,6 +93,11 @@ namespace IL2CPU.Debug.Symbols
             initConnection = new SqliteConnection(mConnStr);
             initConnection.Open();
 
+            using (var command = initConnection.CreateCommand()) {
+                command.CommandText = "PRAGMA synchronous=OFF;";
+                command.ExecuteNonQuery();
+            }
+
             InitializeCache();
 
             DapperExtensions.DapperExtensions.DefaultMapper = typeof(PluralizedAutoClassMapper<>);
