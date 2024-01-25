@@ -17,6 +17,8 @@ namespace IL2CPU.Debug.Symbols
 
     public sealed class DebugInfo : IDisposable
     {
+        public const int FLUSH_SIZE_LARGE_TABLES = 750;
+        public const int FLUSH_SIZE_SMALL_TABLES = 50;
         /// <summary>
         /// Current id of the generation.
         /// </summary>
@@ -352,7 +354,7 @@ namespace IL2CPU.Debug.Symbols
 
             if (initConnection != null)
             {
-                BulkInsert("FIELD_INFOS", itemsToAdd, 2500, true);
+                BulkInsert("FIELD_INFOS", itemsToAdd, FLUSH_SIZE_LARGE_TABLES, true);
             }
         }
 
@@ -398,7 +400,7 @@ namespace IL2CPU.Debug.Symbols
 
             if (initConnection != null)
             {
-                BulkInsert("Methods", mMethods, 2500, aFlush);
+                BulkInsert("Methods", mMethods, FLUSH_SIZE_SMALL_TABLES, aFlush);
             }
         }
 
@@ -427,7 +429,7 @@ namespace IL2CPU.Debug.Symbols
 
             if (initConnection != null)
             {
-                BulkInsert("AssemblyFiles", xAssemblies, 2500, aFlush);
+                BulkInsert("AssemblyFiles", xAssemblies, FLUSH_SIZE_SMALL_TABLES, aFlush);
             }
         }
 
@@ -454,7 +456,7 @@ namespace IL2CPU.Debug.Symbols
 
                     if (initConnection != null)
                     {
-                        BulkInsert("Documents", xDocuments, 2500, aFlush);
+                        BulkInsert("Documents", xDocuments, FLUSH_SIZE_LARGE_TABLES, aFlush);
                     }
                 }
             }
@@ -462,7 +464,7 @@ namespace IL2CPU.Debug.Symbols
             {
                 if (initConnection != null)
                 {
-                    BulkInsert("Documents", xDocuments, 2500, aFlush);
+                    BulkInsert("Documents", xDocuments, FLUSH_SIZE_LARGE_TABLES, aFlush);
                 }
             }
         }
@@ -476,7 +478,7 @@ namespace IL2CPU.Debug.Symbols
             }
             if (initConnection != null)
             {
-                BulkInsert("MethodIlOps", aSymbols, 2500, aFlush);
+                BulkInsert("MethodIlOps", aSymbols, FLUSH_SIZE_LARGE_TABLES, aFlush);
             }
         }
 
@@ -526,12 +528,12 @@ namespace IL2CPU.Debug.Symbols
         public void AddLabels(IList<Label> aLabels, bool aFlush = false)
         {
             // GUIDs inserted by caller
-            BulkInsert("Labels", aLabels, 2500, aFlush);
+            BulkInsert("Labels", aLabels, FLUSH_SIZE_LARGE_TABLES, aFlush);
         }
 
         public void AddINT3Labels(IList<INT3Label> aLabels, bool aFlush = false)
         {
-            BulkInsert("INT3Labels", aLabels, 2500, aFlush);
+            BulkInsert("INT3Labels", aLabels, FLUSH_SIZE_LARGE_TABLES, aFlush);
         }
 
         public void Dispose()
