@@ -15,7 +15,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendRegisters_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendRegisters_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendRegisters_Exit
 			Ret
 
 
@@ -30,7 +30,7 @@
 			Call DebugStub_ComWriteX
 
 		DebugStub_SendFrame_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendFrame_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendFrame_Exit
 			Ret
 
 
@@ -57,7 +57,7 @@
 		DebugStub_SendCommandOnChannel_Block1_End:
 
 		DebugStub_SendCommandOnChannel_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendCommandOnChannel_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendCommandOnChannel_Exit
 			Ret
 
 
@@ -79,7 +79,7 @@
 		DebugStub_SendStack_Block1_End:
 
 		DebugStub_SendStack_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStack_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStack_Exit
 			Ret
 
 
@@ -104,7 +104,7 @@
 
 		DebugStub_SendMethodContext_Exit:
 			Popad
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMethodContext_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMethodContext_Exit
 			Ret
 
 
@@ -128,7 +128,7 @@
 
 		DebugStub_SendMemory_Exit:
 			Popad
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMemory_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMemory_Exit
 			Ret
 
 
@@ -144,7 +144,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendTrace_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendTrace_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendTrace_Exit
 			Ret
 
 
@@ -173,7 +173,7 @@
 			pop dword EBP
 
 		DebugStub_SendText_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendText_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendText_Exit
 			Ret
 
 
@@ -189,7 +189,7 @@
 			pop dword EBP
 
 		DebugStub_SendSimpleNumber_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendSimpleNumber_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendSimpleNumber_Exit
 			Ret
 
 
@@ -206,7 +206,7 @@
 			pop dword EBP
 
 		DebugStub_SendKernelPanic_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendKernelPanic_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendKernelPanic_Exit
 			Ret
 
 
@@ -224,7 +224,7 @@
 			pop dword EBP
 
 		DebugStub_SendSimpleLongNumber_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendSimpleLongNumber_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendSimpleLongNumber_Exit
 			Ret
 
 
@@ -240,7 +240,7 @@
 			pop dword EBP
 
 		DebugStub_SendComplexNumber_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendComplexNumber_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendComplexNumber_Exit
 			Ret
 
 
@@ -258,7 +258,7 @@
 			pop dword EBP
 
 		DebugStub_SendComplexLongNumber_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendComplexLongNumber_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendComplexLongNumber_Exit
 			Ret
 
 
@@ -269,7 +269,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendPtr_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendPtr_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendPtr_Exit
 			Ret
 
 
@@ -280,7 +280,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendStackCorruptionOccurred_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStackCorruptionOccurred_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStackCorruptionOccurred_Exit
 			Ret
 
 
@@ -291,7 +291,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendStackOverflowOccurred_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStackOverflowOccurred_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendStackOverflowOccurred_Exit
 			Ret
 
 
@@ -303,7 +303,7 @@
 			Call DebugStub_ComWriteEAX
 
 		DebugStub_SendInterruptOccurred_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendInterruptOccurred_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendInterruptOccurred_Exit
 			Ret
 
 
@@ -314,7 +314,7 @@
 			Call DebugStub_ComWrite32
 
 		DebugStub_SendNullReferenceOccurred_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendNullReferenceOccurred_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendNullReferenceOccurred_Exit
 			Ret
 
 
@@ -336,7 +336,7 @@
 			Jmp DebugStub_SendMessageBox_WriteChar
 
 		DebugStub_SendMessageBox_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMessageBox_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendMessageBox_Exit
 			Ret
 
 
@@ -380,7 +380,7 @@
 		DebugStub_SendCoreDump_Block2_End:
 
 		DebugStub_SendCoreDump_Exit:
-			mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendCoreDump_Exit
+			mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SendCoreDump_Exit
 			Ret
 
 

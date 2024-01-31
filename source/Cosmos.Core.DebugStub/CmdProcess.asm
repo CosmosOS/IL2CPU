@@ -98,7 +98,7 @@ DebugStub_ProcessCommand_Block12_End:
 
 DebugStub_ProcessCommand_Exit:
 pop dword EAX
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ProcessCommand_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ProcessCommand_Exit
 Ret
 
 
@@ -109,7 +109,7 @@ mov dword EAX, [DebugStub_CommandID]
 Call DebugStub_ComWriteAL
 
 DebugStub_AckCommand_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_AckCommand_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_AckCommand_Exit
 Ret
 
 
@@ -122,6 +122,6 @@ JNE near DebugStub_ProcessCommandBatch_Begin
 Call DebugStub_AckCommand
 
 DebugStub_ProcessCommandBatch_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ProcessCommandBatch_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ProcessCommandBatch_Exit
 Ret
 

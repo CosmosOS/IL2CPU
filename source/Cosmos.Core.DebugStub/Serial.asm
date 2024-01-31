@@ -27,7 +27,7 @@ mov byte AL, 0x3
 Call DebugStub_WriteRegister
 
 DebugStub_InitSerial_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_InitSerial_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_InitSerial_Exit
 Ret
 
 
@@ -42,7 +42,7 @@ mov word DX, 0x0
 Call DebugStub_ReadRegister
 
 DebugStub_ComReadAL_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComReadAL_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComReadAL_Exit
 Ret
 
 
@@ -59,7 +59,7 @@ Call DebugStub_WriteRegister
 inc dword ESI
 
 DebugStub_ComWrite8_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite8_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite8_Exit
 Ret
 
 %endif

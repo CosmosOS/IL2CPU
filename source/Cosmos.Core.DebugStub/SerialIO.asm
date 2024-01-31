@@ -11,7 +11,7 @@ out DX, AL
 pop dword EDX
 
 DebugStub_WriteRegister_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_WriteRegister_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_WriteRegister_Exit
 Ret
 
 
@@ -22,7 +22,7 @@ in byte AL, DX
 pop dword EDX
 
 DebugStub_ReadRegister_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ReadRegister_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ReadRegister_Exit
 Ret
 
 %endif

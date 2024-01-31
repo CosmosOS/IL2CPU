@@ -13,7 +13,7 @@ Call DebugStub_ComReadAL
 ror dword EAX, 0x8
 
 DebugStub_ComReadEAX_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComReadEAX_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComReadEAX_Exit
 Ret
 
 
@@ -23,7 +23,7 @@ mov byte [EDI], AL
 add dword EDI, 0x1
 
 DebugStub_ComRead8_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead8_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead8_Exit
 Ret
 
 
@@ -32,7 +32,7 @@ Call DebugStub_ComRead8
 Call DebugStub_ComRead8
 
 DebugStub_ComRead16_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead16_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead16_Exit
 Ret
 
 
@@ -43,7 +43,7 @@ Call DebugStub_ComRead8
 Call DebugStub_ComRead8
 
 DebugStub_ComRead32_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead32_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComRead32_Exit
 Ret
 
 
@@ -56,7 +56,7 @@ pop dword EAX
 pop dword ESI
 
 DebugStub_ComWriteAL_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteAL_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteAL_Exit
 Ret
 
 
@@ -67,7 +67,7 @@ Call DebugStub_ComWrite16
 pop dword EAX
 
 DebugStub_ComWriteAX_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteAX_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteAX_Exit
 Ret
 
 
@@ -78,7 +78,7 @@ Call DebugStub_ComWrite32
 pop dword EAX
 
 DebugStub_ComWriteEAX_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteEAX_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteEAX_Exit
 Ret
 
 
@@ -87,7 +87,7 @@ Call DebugStub_ComWrite8
 Call DebugStub_ComWrite8
 
 DebugStub_ComWrite16_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite16_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite16_Exit
 Ret
 
 
@@ -98,7 +98,7 @@ Call DebugStub_ComWrite8
 Call DebugStub_ComWrite8
 
 DebugStub_ComWrite32_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite32_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWrite32_Exit
 Ret
 
 
@@ -110,6 +110,6 @@ dec dword ECX
 JNE near DebugStub_ComWriteX_More
 
 DebugStub_ComWriteX_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteX_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ComWriteX_Exit
 Ret
 

@@ -66,7 +66,7 @@ DebugStub_BreakOnAddress_Continue:
 
 DebugStub_BreakOnAddress_Exit:
 Popad
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_BreakOnAddress_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_BreakOnAddress_Exit
 Ret
 
 
@@ -79,7 +79,7 @@ mov byte [EDI], AL
 
 DebugStub_SetINT3_Exit:
 Popad
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetINT3_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_SetINT3_Exit
 Ret
 
 
@@ -92,7 +92,7 @@ mov byte [EDI], AL
 
 DebugStub_ClearINT3_Exit:
 Popad
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ClearINT3_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_ClearINT3_Exit
 Ret
 
 
@@ -178,7 +178,7 @@ Jmp DebugStub_Executing_CheckForCmd
 DebugStub_Executing_Block11_End:
 
 DebugStub_Executing_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Executing_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Executing_Exit
 Ret
 
 
@@ -235,6 +235,6 @@ Call DebugStub_AckCommand
 mov dword [DebugStub_DebugStatus], DebugStub_Const_Status_Run
 
 DebugStub_Break_Exit:
-mov dword [static_field__Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Break_Exit
+mov dword [static_field__A1Cosmos_Core_INTs_mLastKnownAddress], DebugStub_Break_Exit
 Ret
 
