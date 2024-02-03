@@ -97,7 +97,7 @@ namespace Cosmos.IL2CPU
                             {
                                 if (!xAttrib.IsOptional)
                                 {
-                                    throw new Exception("Error", ex);
+                                    throw new Exception($@"Error [{xAttrib.TargetName}]", ex);
                                 }
                                 continue;
                             }
