@@ -9,6 +9,7 @@ using System.Text;
 
 using Cosmos.Build.Common;
 using IL2CPU.Debug.Symbols;
+using Microsoft.Data.Sqlite;
 
 namespace Cosmos.IL2CPU
 {
@@ -142,7 +143,7 @@ namespace Cosmos.IL2CPU
                 {
                     var xOutputFilenameWithoutExtension = Path.ChangeExtension(mSettings.OutputFilename, null);
 
-                    using DebugInfo xDebugInfo = new(xOutputFilenameWithoutExtension + ".cdb", true, false);
+                    using DebugInfo xDebugInfo = new(":memory:", true, false);
                     xAsm.DebugInfo = xDebugInfo;
                     xAsm.DebugEnabled = mSettings.EnableDebug;
                     xAsm.StackCorruptionDetection = mSettings.EnableStackCorruptionDetection;
@@ -218,6 +219,12 @@ namespace Cosmos.IL2CPU
                     //LogMessage(string.Format("DebugInfo flatening {0} seconds, persistance : {1} seconds",
                     //    (int)xDebugInfo.FlateningDuration.TotalSeconds,
                     //    (int)xDebugInfo.PersistanceDuration.TotalSeconds));
+
+                    using (var destFileDb = new SqliteConnection("DataSource=" + xOutputFilenameWithoutExtension + ".cdb")) {
+                        destFileDb.Open();
+
+                        xDebugInfo.initConnection.BackupDatabase(destFileDb);
+                    }
                 }
                 LogTime("Engine execute finished");
                 return true;

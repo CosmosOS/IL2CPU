@@ -46,7 +46,7 @@ namespace Cosmos.IL2CPU.X86.IL
 
             XS.Comment("After Nullref check");
 
-            // Determine field in obejct position
+            // Determine field in object position
             if (aNeedsGC)
             {
                 XS.Set(ECX, ESP, sourceDisplacement: (int)xRoundedSize + 4);
