@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <PackageDescription>IL2CPU debug symbols APIs.</PackageDescription>
         <IsPackable>True</IsPackable>
         <Configurations>Debug;Release;TEST</Configurations>
         <EnableDefaultItems>false</EnableDefaultItems>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
