@@ -647,7 +647,12 @@ namespace Cosmos.IL2CPU
             if (aType.IsGenericType && new string[] { "IList", "ICollection", "IEnumerable", "IReadOnlyList", "IReadOnlyCollection" }
                         .Any(i => aType.Name.Contains(i)))
             {
-                Queue(aType.GenericTypeArguments[0].MakeArrayType(), aType, "CallVirt of Generic Interface for Array");
+                // i dont know if i should throw or skip
+                // if (aType.GenericTypeArguments.Length == 0) throw new Exception($@"{aType}: aType.GenericTypeArguments.Length == 0", new IndexOutOfRangeException());
+                if (aType.GenericTypeArguments.Length == 1)
+                {
+                    Queue(aType.GenericTypeArguments[0].MakeArrayType(), aType, "CallVirt of Generic Interface for Array");
+                }
             }
 
             // Add immediate ancestor type

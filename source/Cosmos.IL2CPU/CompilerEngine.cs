@@ -28,7 +28,7 @@ namespace Cosmos.IL2CPU
         public static TypeResolver TypeResolver { get; private set; }
 
         public static string KernelPkg { get; set; }
-        
+
         private ICompilerEngineSettings mSettings;
 
         private AssemblyLoadContext _assemblyLoadContext;
@@ -67,14 +67,14 @@ namespace Cosmos.IL2CPU
 
             if (!File.Exists(mSettings.TargetAssembly))
             {
-                throw new FileNotFoundException("The target assembly path is invalid!", mSettings.TargetAssembly);
+                throw new FileNotFoundException($@"The target assembly path is invalid! {mSettings.TargetAssembly}", mSettings.TargetAssembly);
             }
 
             foreach (var xReference in mSettings.References)
             {
                 if (!File.Exists(xReference))
                 {
-                    throw new FileNotFoundException("A reference assembly path is invalid!", xReference);
+                    throw new FileNotFoundException($@"A reference assembly path is invalid! {xReference}", xReference);
                 }
             }
 
@@ -82,7 +82,7 @@ namespace Cosmos.IL2CPU
             {
                 if (!File.Exists(xPlugsReference))
                 {
-                    throw new FileNotFoundException("A plugs reference assembly path is invalid!", xPlugsReference);
+                    throw new FileNotFoundException($@"A plugs reference assembly path is invalid! {xPlugsReference}", xPlugsReference);
                 }
             }
 
