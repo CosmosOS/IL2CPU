@@ -1192,7 +1192,17 @@ namespace Cosmos.IL2CPU
         /// <param name="aTo">The plug</param>
         internal void GenerateMethodForward(Il2cpuMethodInfo aFrom, Il2cpuMethodInfo aTo)
         {
-            var xMethodLabel = ILOp.GetLabel(aFrom);
+            string xMethodLabel;
+
+            try 
+            {
+                xMethodLabel = ILOp.GetLabel(aFrom);
+            }
+            catch
+            {
+                throw new Exception("Unable to generate method forwarding stub for method: " + aFrom.MethodLabel + ", to " + aTo.MethodLabel);
+            }
+            
             var xEndOfMethodLabel = xMethodLabel + EndOfMethodLabelNameNormal;
 
             // todo: completely get rid of this kind of trampoline code

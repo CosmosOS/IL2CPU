@@ -856,11 +856,11 @@ namespace Cosmos.IL2CPU.ILOpCodes
           {
             return;
           }
-          if (!StackPopTypes[0].IsByRef && !StackPopTypes[0].IsPointer)
+          if (!StackPopTypes[0].IsByRef && !StackPopTypes[0].IsPointer && StackPopTypes[0] != typeof(IntPtr))
           {
             throw new Exception("Invalid ref type: " + StackPopTypes[0].FullName);
           }
-          if (StackPopTypes[0].IsPointer)
+          if (StackPopTypes[0].IsPointer || StackPopTypes[0] == typeof(IntPtr))
           {
             StackPushTypes[0] = typeof(object);
           }
