@@ -542,7 +542,7 @@ namespace Cosmos.IL2CPU
                             }
                             if (xAttrib?.Signature != null)
                             {
-                                var xName = DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod));
+                                var xName = DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod, false));
                                 if (String.Equals(xName.Replace("_", ""), xAttrib.Signature.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
                                 {
                                     xResult = xSigMethod;
@@ -578,7 +578,7 @@ namespace Cosmos.IL2CPU
                         if (xResPara[correctIndex].ParameterType != xAMethodPara[i].ParameterType && xResPara[correctIndex].ParameterType.Name != "Object") // to cheat if we cant access the actual type
                         {
                             // Allow explicit overwriting of types by signature in case we have to hide internal enum behind uint etc
-                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod)).Replace("_", ""))
+                            if(xResult.GetCustomAttribute<PlugMethod>()?.Signature.Replace("_","") == DataMember.FilterStringForIncorrectChars(LabelName.GetFullName(aMethod, false)).Replace("_", ""))
                             {
 
                             }
@@ -647,7 +647,7 @@ namespace Cosmos.IL2CPU
 
         public MethodBase ResolvePlug(MethodBase aMethod, Type[] aParamTypes)
         {
-            var xMethodKey = LabelName.GetFullName(aMethod);
+            var xMethodKey = LabelName.GetFullName(aMethod, false);
             if (ResolvedPlugs.TryGetValue(xMethodKey, out var xResult))
             {
                 return xResult;

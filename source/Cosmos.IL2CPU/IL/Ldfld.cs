@@ -37,8 +37,7 @@ namespace Cosmos.IL2CPU.X86.IL
     [OpCode(ILOpCode.Code.Ldfld)]
     public class Ldfld : ILOp
     {
-        public Ldfld(Assembler aAsmblr)
-            : base(aAsmblr)
+        public Ldfld(Assembler aAsmblr) : base(aAsmblr)
         {
         }
 
@@ -138,31 +137,27 @@ namespace Cosmos.IL2CPU.X86.IL
                 XS.Set(ECX, ECX, sourceIsIndirect: true);
             }
 
-            for (int i = 1; i <= xSize / 4; i++)
-            {
-                XS.Set(EAX, ECX, sourceDisplacement: (int)(xSize - i * 4));
-                XS.Push(EAX);
-            }
-
             if(xSize % 4 != 0)
             {
                 XS.Set(EAX, 0);
             }
 
+            // We need to load the remainder first, since we push the front at the end
+
             switch (xSize % 4)
             {
                 case 1:
-                    XS.Set(AL, ECX, sourceIsIndirect: true);
+                    XS.Set(AL, ECX, sourceDisplacement: (int)xSize - 1);
                     XS.Push(EAX);
                     break;
 
                 case 2:
-                    XS.Set(AX, ECX, sourceIsIndirect: true);
+                    XS.Set(AX, ECX, sourceDisplacement: (int)xSize - 2);
                     XS.Push(EAX);
                     break;
 
                 case 3: //For Release
-                    XS.Set(EAX, ECX, sourceIsIndirect: true);
+                    XS.Set(EAX, ECX, sourceDisplacement: (int)xSize - 3);
                     XS.ShiftRight(EAX, 8);
                     XS.Push(EAX);
                     break;
@@ -171,9 +166,18 @@ namespace Cosmos.IL2CPU.X86.IL
                     {
                         break;
                     }
+
                 default:
                     throw new Exception(string.Format("Remainder size {0} {1:D} not supported!", xFieldInfo.FieldType.ToString(), xSize));
             }
+
+            uint remainingSize = xSize - xSize % 4;
+            for (int i = 1; i <= remainingSize / 4; i++)
+            {
+                XS.Set(EAX, ECX, sourceDisplacement: (int)(remainingSize - i * 4));
+                XS.Push(EAX);
+            }
+
         }
 
         public static int GetFieldOffset(Type aDeclaringType, string aFieldId)

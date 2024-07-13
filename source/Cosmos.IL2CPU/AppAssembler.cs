@@ -450,7 +450,7 @@ namespace Cosmos.IL2CPU
                     throw new Exception("Too many methods.");
                 }
 
-                if (aPlugManager.DirectPlugMapping.ContainsKey(LabelName.GetFullName(aMethod.MethodBase)))
+                if (aPlugManager.DirectPlugMapping.ContainsKey(LabelName.GetFullName(aMethod.MethodBase, false)))
                 {
                     // we dont need the trampoline since we can always call the plug directly
                     return;
@@ -960,7 +960,7 @@ namespace Cosmos.IL2CPU
                     var xMethod = xEmittedMethods[j];
                     var xMethodUID = aGetMethodUID(xMethod);
                     var xAddress = ILOp.GetLabel(xMethod);
-                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod), out MethodBase plug))
+                    if (aPlugManager.DirectPlugMapping.TryGetValue(LabelName.GetFullName(xMethod, false), out MethodBase plug))
                     {
                         xAddress = ILOp.GetLabel(plug);
                     }

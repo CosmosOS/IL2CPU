@@ -24,6 +24,8 @@ namespace Cosmos.IL2CPU
         internal static PlugManager PlugManager;
         protected readonly Assembler Assembler;
 
+        static Dictionary<Type, uint> storageSizeCache = new Dictionary<Type, uint>();
+
         protected ILOp(Assembler aAsmblr)
         {
             Assembler = aAsmblr;
@@ -347,6 +349,10 @@ namespace Cosmos.IL2CPU
 
         protected static uint GetStorageSize(Type aType)
         {
+            if(storageSizeCache.TryGetValue(aType, out uint value)) {
+                return value;
+            }
+
             if (aType.IsValueType)
             {
                 var structLayoutAttribute = aType.StructLayoutAttribute;
@@ -363,20 +369,29 @@ namespace Cosmos.IL2CPU
                 {
                     var typeAlignment = (uint)Math.Min(fieldsInfo.Max(f => f.Size), pack);
 
-                    return (uint)Math.Max(
+                    var result2 = (uint)Math.Max(
                         structLayoutAttribute.Size,
                         Align(fieldsInfo.Max(f => f.Offset + f.Size), typeAlignment));
+                    storageSizeCache[aType] = result2;
+
+                    return result2;
                 }
                 else
                 {
-                    return (uint)Math.Max(structLayoutAttribute.Size, 0);
+                    var result2 = (uint)Math.Max(structLayoutAttribute.Size, 0);
+                    storageSizeCache[aType] = result2;
+
+                    return result2;
                 }
             }
 
-            return (from item in GetFieldsInfo(aType, false)
-                    where !item.IsStatic
-                    orderby item.Offset descending
-                    select item.Offset + item.Size).FirstOrDefault();
+            var result = (from item in GetFieldsInfo(aType, false)
+                          where !item.IsStatic
+                          orderby item.Offset descending
+                          select item.Offset + item.Size).FirstOrDefault();
+            storageSizeCache[aType] = result;
+
+            return result;
         }
 
         /// <summary>
