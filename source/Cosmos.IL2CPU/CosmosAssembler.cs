@@ -398,7 +398,7 @@ namespace Cosmos.IL2CPU
             XS.Call(LabelName.Get(GCImplementationRefs.InitRef));
 
             WriteDebugVideo("Configuring Paging");
-            XS.Call("SystemVoidCosmosCorePagingInit");
+            XS.Call("A0SystemVoidA1CosmosCorePagingInit");
 
             // Jump to Kernel entry point
             WriteDebugVideo("Jumping to kernel.");
