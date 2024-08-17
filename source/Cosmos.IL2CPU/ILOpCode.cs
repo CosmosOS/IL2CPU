@@ -345,8 +345,14 @@ namespace Cosmos.IL2CPU
 
             foreach (var xPushItem in StackPushTypes)
             {
-                aStack.Push(xPushItem);
-                aStackOffset += ILOp.Align(ILOp.SizeOfType(xPushItem), 4);
+                if (xPushItem != null)
+                {
+                    aStack.Push(xPushItem);
+                    aStackOffset += ILOp.Align(ILOp.SizeOfType(xPushItem), 4);
+                }
+                else {
+                    throw new Exception("Tried pushing null item to stack while processing " + OpCode + " opcode.");
+                }
             }
         }
 

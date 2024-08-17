@@ -87,6 +87,9 @@ namespace Cosmos.IL2CPU.ILOpCodes
         case Code.Ldftn:
           StackPushTypes[0] = typeof(IntPtr);
           return;
+       case Code.Ldvirtftn:
+          StackPushTypes[0] = typeof(IntPtr);
+          return;
 
         default:
           break;

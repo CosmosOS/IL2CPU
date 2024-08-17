@@ -935,7 +935,15 @@ namespace Cosmos.IL2CPU
                 XS.Push((uint)(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0));
 
                 LdStr.PushString(Assembler, xType.Name);
-                LdStr.PushString(Assembler, xType.AssemblyQualifiedName);
+
+                if (xType.AssemblyQualifiedName != null)
+                {
+                    LdStr.PushString(Assembler, xType.AssemblyQualifiedName);
+                }
+                else {
+                    // AssemblyQualifiedName is null for generic types
+                    LdStr.PushString(Assembler, "");
+                }
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 
@@ -1192,7 +1200,17 @@ namespace Cosmos.IL2CPU
         /// <param name="aTo">The plug</param>
         internal void GenerateMethodForward(Il2cpuMethodInfo aFrom, Il2cpuMethodInfo aTo)
         {
-            var xMethodLabel = ILOp.GetLabel(aFrom);
+            string xMethodLabel;
+
+            try 
+            {
+                xMethodLabel = ILOp.GetLabel(aFrom);
+            }
+            catch
+            {
+                throw new Exception("Unable to generate method forwarding stub for method: " + aFrom.MethodLabel + ", to " + aTo.MethodLabel);
+            }
+            
             var xEndOfMethodLabel = xMethodLabel + EndOfMethodLabelNameNormal;
 
             // todo: completely get rid of this kind of trampoline code
