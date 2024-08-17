@@ -935,7 +935,15 @@ namespace Cosmos.IL2CPU
                 XS.Push((uint)(xType.IsValueType && !xType.IsByRef && !xType.IsPointer && !xType.IsPrimitive ? 1 : 0));
 
                 LdStr.PushString(Assembler, xType.Name);
-                LdStr.PushString(Assembler, xType.AssemblyQualifiedName);
+
+                if (xType.AssemblyQualifiedName != null)
+                {
+                    LdStr.PushString(Assembler, xType.AssemblyQualifiedName);
+                }
+                else {
+                    // AssemblyQualifiedName is null for generic types
+                    LdStr.PushString(Assembler, "");
+                }
 
                 Call(VTablesImplRefs.SetTypeInfoRef);
 
