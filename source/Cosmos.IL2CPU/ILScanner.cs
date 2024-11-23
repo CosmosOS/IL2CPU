@@ -229,49 +229,65 @@ namespace Cosmos.IL2CPU
 
             ILOp.PlugManager = mPlugManager;
 
-            // Pull in extra implementations, GC etc.
-            Queue(VTablesImplRefs.IsInstanceRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetTypeInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.SetInterfaceMethodInfoRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.GetMethodAddressForTypeRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.GetMethodAddressForInterfaceTypeRef, null, "Explicit Entry");
-            Queue(VTablesImplRefs.GetDeclaringTypeOfMethodForTypeRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.InitRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRootCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.IncRootCountsInStructRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRootCountRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.DecRootCountsInStructRef, null, "Explicit Entry");
-            Queue(GCImplementationRefs.AllocNewObjectRef, null, "Explicit Entry");
-            // for now, to ease runtime exception throwing
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowNotImplemented", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowOverflow", Type.EmptyTypes, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowInvalidOperation", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-            Queue(typeof(ExceptionHelper).GetMethod("ThrowArgumentOutOfRange", new Type[] { typeof(string) }, null), null, "Explicit Entry");
-
             // register system types:
             Queue(typeof(Array), null, "Explicit Entry");
             Queue(typeof(Array).Assembly.GetType("System.SZArrayHelper"), null, "Explicit Entry");
             Queue(typeof(Array).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).First(), null, "Explicit Entry");
 
             Queue(typeof(MulticastDelegate).GetMethod("GetInvocationList"), null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.CurrentExceptionRef, null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.ThrowInvalidCastExceptionRef, null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.ThrowNotFiniteNumberExceptionRef, null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.ThrowDivideByZeroExceptionRef, null, "Explicit Entry");
-            Queue(ExceptionHelperRefs.ThrowIndexOutOfRangeException, null, "Explicit Entry");
-
+            
             mAsmblr.ProcessField(typeof(string).GetField("Empty", BindingFlags.Static | BindingFlags.Public));
 
             // Start from entry point of this program
             Queue(aStartMethod, null, "Entry Point");
 
             ScanQueue();
+            ScanForceInclude();
             UpdateAssemblies();
+
             Assemble();
 
             mAsmblr.EmitEntrypoint(aStartMethod);
+        }
+
+        /// <summary>
+        /// Method used to scan the used assemblies for objets with <see cref="ForceIncludeAttribute"/>.
+        /// 
+        /// The used assemblies are a result of the <seealso cref="ScanQueue"/> method.
+        /// </summary>
+        private void ScanForceInclude()
+        {
+            foreach(var assembly in mUsedAssemblies)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    // Check if the type has the 'ForceIncludeAttribute' attribute
+                    if (Attribute.IsDefined(type, typeof(ForceIncludeAttribute)))
+                    {
+                        ScanType(type);
+
+                        // Ensure all public members are queued
+                        foreach(var member in type.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public))
+                        {
+                            Queue(member, type, "Force Included");
+                        }
+                    }
+                    else
+                    {
+                        // Check each method of the type for the 'ForceIncludeAttribute' attribute
+                        foreach (var method in type.GetRuntimeMethods())
+                        {
+                            if (Attribute.IsDefined(method, typeof(ForceIncludeAttribute)))
+                            {
+                                Queue(method, method.DeclaringType, "Force Included");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Execute Scan
+            ScanQueue();
         }
 
         public void QueueMethod(MethodBase method)

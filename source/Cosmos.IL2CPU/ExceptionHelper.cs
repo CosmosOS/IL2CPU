@@ -47,7 +47,6 @@ namespace Cosmos.IL2CPU
         public static void ThrowInvalidCastException() => throw new InvalidCastException();
     }
 
-    [ForceInclude]
     public static class ExceptionHelperRefs
     {
         public static readonly FieldInfo CurrentExceptionRef = typeof(ExceptionHelper).GetField("CurrentException");
